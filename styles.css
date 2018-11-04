@@ -1,0 +1,425 @@
+
+
+body {
+    height: 540px;
+    min-width: 880px;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    font-family: 'Open Sans', sans-serif;
+    overflow: hidden;
+    font-size: 12px;
+}
+
+hr.border {
+    z-index: 10;
+    width: 100%;
+    height: 1px;
+    position: absolute;
+    left: 0px;
+    margin: 0;
+}
+
+hr.border#top {
+    top: 0px;
+}
+
+hr.border#bottom {
+    bottom: 0px;
+}
+
+
+div.nav {
+    display: inline;
+    float: left;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    width: 130px;
+    background-color: #f1f1f1;
+    z-index: 1;
+    position: relative;
+}
+
+div.main {
+    width: calc(100% - 130px);
+    padding: 0px;
+    height: 100%;
+    display: inline;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 0;
+    position: absolute;
+    right: 0;
+}
+
+ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
+ul.nav li a {
+    display: block;
+    color: black;
+    text-align: center;
+    padding: 8px 8px;
+    text-decoration: none;
+    font-size: 110%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+ul.nav li a:hover {
+	background-color: #999;
+    color: white;
+}
+
+ul.nav li a.drag {
+    background-color: #999;
+    color: white;
+}
+
+ul.nav li a.selected {
+	background-color: #777;
+	color: white;
+}
+
+ul.blockset, ul.general {
+    padding: 10px;
+}
+
+ul.blockset li, ul.general li {
+	padding: 8px 0px;
+	font-size: 100%;
+}
+
+li.siteAdder, li.siteList{
+    display: inline;
+}
+
+div.siteAdder {
+    background-color: #f1f1f1;
+    padding: 5px;
+    padding-bottom: 0px;
+}
+
+
+button {
+    text-align: center;
+    cursor: pointer;
+}
+
+button:disabled {
+    cursor:default;
+}
+
+div.topInputs {
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+div.topInputs > * {
+    margin: 0;
+}
+
+div.topInputs > input[type=text] {
+    flex: 1;
+}
+
+
+button.siteRemove {
+    text-align: center;
+    float: right;
+    min-height: 0px;
+    min-width: 0px;
+    height: 20px !important;
+    width: 62px !important;
+    padding: 0 4px !important;
+    margin: 0 !important;
+    position: relative;
+    bottom: 2px;
+}
+
+
+
+button.big {
+    width: 74px;
+    font-size: 100%;
+    padding: 0;
+}
+
+ul.siteItems {
+    padding: 5px 0px;
+}
+
+li.siteItem {
+    position: relative;
+    background-color: #fff;
+    display: block;
+    padding: 5px !important;
+}
+
+li.siteItem:nth-child(even) {
+    background-color: #f1f1f1;
+}
+
+span.filter {
+    position: relative;
+}
+
+span.site {
+    position: absolute;
+    left: 97px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: calc(100% - 168px);
+}
+
+#blacklistInput, #whitelistInput {
+    width: calc(100% - 147px);
+}
+
+textarea {
+	width: 100%;
+	height: 80px;
+	resize: vertical;
+}
+
+input.timepicker {
+    text-align: center;
+    width: 68px;
+    cursor: text;
+}
+
+input {
+    cursor: pointer;
+}
+
+select {
+    cursor: pointer;
+}
+
+select:disabled {
+    cursor: default;
+}
+
+input[type="text"] {
+    cursor: text;
+}
+
+input:disabled {
+    cursor: default;
+}
+
+input[type="checkbox"]{
+    margin: 0px 2px 4px 2px;
+}
+
+
+input[type="radio"] {
+    margin: 0px 2px 4px 20px;
+}
+
+#chooseFileHidden {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+
+input.blocksetRename {
+    font-size: 200%;
+    margin: 3px;
+}
+
+h3 {
+    margin: 0 0 10px 0;
+    display: inline-block;
+    font-weight: 400;
+}
+
+h3.noMargin {
+    margin: 0 !important;
+}
+
+
+h1 {
+    font-size: 200%;
+    font-weight: 400;
+    margin-top: 4px;
+    margin-bottom: 12px;
+}
+
+li.aDay label{
+    margin-left: 5px;
+}
+
+button.help {
+    min-height: 0;
+    min-width: 0;
+    width: 16px;
+    height: 16px;
+    -webkit-padding-end: 0px !important;
+    -webkit-padding-start: 0px !important;
+    padding: 0 !important;
+    position: relative;
+    font-weight: 700;
+    display: inline-block;
+    top: 0px;
+    line-height: 10px;
+    opacity: 0.8;
+    margin-left: 4px;
+}
+
+div.dialog {
+    z-index: 3;
+    width: 380px;
+    min-height: 10px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -170px;
+    background-color: white;
+    border: 1px solid #777;
+    border-radius: 3px;
+}
+
+div.topBar {
+    width: 100%;
+    height: 28px;
+    background-color: #f1f1f1;
+    border-radius: 3px 3px 0 0;
+}
+
+button.close {
+    min-height: 0px;
+    min-width: 0px;
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    -webkit-padding-end: 0px !important;
+    -webkit-padding-start: 0px !important;
+    padding: 0 !important;
+}
+
+div.topBar span {
+    position: absolute;
+    top: 6px;
+    left: 5px;
+    font-weight: 500;
+    cursor: default;
+}
+
+button.close img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    opacity: 0.5;
+    width: 10px;
+    height: 10px;
+    margin-top: -5px;
+    margin-left: -5px;
+}
+
+button.close:disabled img {
+   opacity: 0.2;
+}
+
+label:disabled {
+    color: grey;
+}
+
+div.text {
+    min-height: 40px;
+    padding: 10px;
+}
+
+hr {
+    background-color: #999;
+    height: 1px;
+    border: none;
+}
+
+div.dialog hr {
+    width: calc(100% - 12px);
+    margin: 0px 6px;
+}
+
+div.botBar {
+    height: 34px;
+    width: 100%;
+}
+
+div.botBar button {
+    float: right;
+    margin: 0px 5px;
+    height: 24px;
+    margin-top: 5px;
+}
+
+ul.text {
+    list-style: disc;
+    margin-left: 15px;
+}
+
+ul.text > li {
+    margin: 4px;
+}
+
+ul.text > li {
+    margin: 4px;
+}
+
+ul.text > li.subList {
+    list-style: none;
+}
+
+ul.text > li > ul.text {
+    list-style: circle;
+    margin-left: 22px;
+    font-size: 90%;
+}
+
+ul.text > li > ul.text > li{
+    margin: 1px;
+}
+
+td {
+   vertical-align: top; 
+}
+
+a {
+    color: grey;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+    color: black;
+}
+
+#PP {
+    filter:grayscale(100%);
+}
+
+div.donate {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center
+}
+
+label.disabled {
+    color: grey;
+}

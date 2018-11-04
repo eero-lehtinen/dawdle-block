@@ -1,0 +1,41 @@
+{
+  "manifest_version": 2,
+  "name": "Dawdle block",
+  "short_name": "Dawdle block",
+  "description": "Put time limits on unproductive sites.",
+  "version": "1.0.6",
+
+  "options_ui": {
+    "page": "options.html",
+    "chrome_style": true
+  },
+
+  "browser_action": {
+    "default_icon": "Images/icon.png",
+    "default_popup": "popup.html",
+    "default_title": "Dawdle block"
+  },
+
+  "icons": {
+    "128": "Images/icon.png"
+  },
+
+  "permissions": [
+    "https://www.googleapis.com/youtube/v3/",
+    "https://fonts.googleapis.com/",
+    "storage",
+    "tabs"
+  ],
+
+  "background": {
+    "scripts": [ "bg.js" ]
+  },
+
+  "applications": {
+    "gecko": {
+      "id": "{1b0d5b8a-351b-430d-b4b0-fd3fa1203d4b}",
+      "strict_min_version": "42.0"
+    }
+  }
+}
+

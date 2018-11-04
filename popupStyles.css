@@ -1,0 +1,160 @@
+﻿body {
+    width: 280px;
+    height: auto;
+    font-size: 14px;
+    margin: 2px 8px 8px 8px;
+    font-family: 'Open Sans', sans-serif;
+}
+
+div.blocksets {
+    height: auto;
+    max-height: 250px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    vertical-align: top;
+    border-top: 1px solid #aaa;
+    border-bottom: 1px solid #aaa;
+    margin: 2px -8px;
+    padding: 0px 8px;
+}
+
+div.controls {
+    height: auto;
+    max-height: 250px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    vertical-align: top;
+    padding-top: 6px;
+}
+
+ul.blocksets {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+ul.blocksets li {
+    background-color: #fff;
+    display: block;
+    height: 27px;
+}
+
+ul.blocksets li {
+    background-color: #fff;
+    vertical-align: central;
+    display: block;
+    height: 32px;
+    border-bottom: 1px solid lightgrey;
+    position: relative;
+    line-height: 32px;
+}
+
+ul.blocksets li:last-child {
+    border-bottom: 0px;
+}
+
+ul .blocksets li.selected a{
+    text-decoration: underline;
+}
+
+a {
+    text-decoration: none;
+    color: grey;
+    margin: 2px;
+}
+
+a:hover {
+    text-decoration: underline;
+    color: black;
+}
+
+div.controls a.disabled {
+    pointer-events: none;
+    color: lightgrey;
+}
+
+a.blocksiteName {
+    width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 1.1em;
+    position: absolute;
+    bottom: 0px;
+    left: 1px;
+    margin: 0;
+}
+
+span.blocksiteTime {
+    width: auto;
+    float: right;
+    text-align: center;
+    font-weight: 500;
+    font-size: 16px;
+    color: black;
+    position: absolute;
+    bottom: 0px;
+    right: 1px;
+    font-family: 'PT Mono', monospace;
+}
+
+span.blocksiteTime[state=disabled] {
+    color: grey;
+}
+
+p {
+    margin: 4px 0px;
+}
+
+p.url {
+    padding: 2px;
+    color: grey;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+    font-size: 12px;
+    line-height: 130%;
+    cursor: text;
+    border: 1px solid lightgrey;
+    border-radius: 3px;
+    margin-bottom: 4px;
+    font-family: 'PT Mono', monospace;
+}
+
+p.header {
+    font-size: 0.8em;
+    text-align: center;
+    height: 14px;
+    color: grey;
+}
+
+h1 {
+    margin: 5px 0px 5px 0px;
+    font-weight: 600;
+    font-size: 1.1em;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+a#options {
+    float: right;
+    margin-bottom: 6px;
+}
+
+hr {
+    height: 1px;
+    margin: 6px -8px 1px -8px;
+    border: none;
+    background-color: #aaa;
+}
+
+
+span#addIndicator {
+    padding: 0;
+    margin: 0;
+    font-size: 12px;
+    float: left;
+}
+
