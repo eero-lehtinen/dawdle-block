@@ -37,13 +37,16 @@
           </li>  
           <li>
               <h3 class="noMargin"><label>Display help buttons <input id="displayHelp" type="checkbox"></label></h3>
+          </li>
+          <li>
+            <h3 class="noMargin"><label>Enable dark theme <input id="darkTheme" type="checkbox"></label></h3>
           </li>  
           <li>
               <h3>Export/Import all settings and blocksets</h3> <button class="help" id="help_export_import">?</button><br>
               <button class="big" id="export">Export</button> <button class="big" id="import" disabled>Import</button> <button class="big" id="chooseFile">Choose file</button> <span id="chooseFileLabel">No file chosen</span> <br />
               <span id="fileIndicator" hidden></span>
               <input id="chooseFileHidden" type="file" name="file" accept=".json"/>
-          </li>  
+          </li> 
       </ul>
       <ul class="blockset" hidden>
         <li> <h1 id="name">Block set name</h1> <input type="text" class="blocksetRename" maxlength="60" hidden></li>

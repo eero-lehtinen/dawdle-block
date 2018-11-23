@@ -48,11 +48,13 @@ var wlYT = [];
 
 var listeners = [];
 
-var updateInterval;
+var updateInterval = 1000;
 
 var initDone = false;
 
 var currentWeekDay;
+
+var darkTheme = false;
 
 function defaultBlockset(id) {
     return {
@@ -75,9 +77,11 @@ function init() {
     //chrome.storage.sync.clear();
 
     chrome.storage.sync.get({
-        blocksetIds: [0]
+        blocksetIds: [0],
+        darkTheme: false
     }, function (items) {
         blocksetIds = items.blocksetIds;
+        darkTheme = items.darkTheme;
 
         if (blocksetIds.length === 0) {
             initDone = true;
@@ -87,7 +91,7 @@ function init() {
         }
     });
 
-    setInterval(update, 1000);
+    setInterval(update, updateInterval);
     var nextMidnight = new Date().setHours(24, 0, 0, 0);
     setTimeout(midnightUpdate, nextMidnight - new Date().getTime() + 1000);
     currentWeekDay = new Date().getDay();
@@ -118,12 +122,18 @@ function loadBlocksets() {
     }
 }
 
-function addAbsentItems(list, defaultList) {
-    var defKeys = Object.keys(defaultList);
-    var keys = Object.keys(list);
+/**
+ * Add items with default values to this object, if default object has them
+ * Always do this before loading anything to account for updates, wich add new data to saves
+ * @param {Object} object - object to check and modify
+ * @param {Object} defaultObject - default
+ */
+function addAbsentItems(object, defaultObject) {
+    var defKeys = Object.keys(defaultObject);
+    var keys = Object.keys(object);
     for (defKey of defKeys) {
         if (!keys.includes(defKey)) {
-            list[defKey] = defaultList[defKey];
+            object[defKey] = defaultObject[defKey];
         }
     }
 }
@@ -335,7 +345,7 @@ function update() {
             if (tabEvaluations[tabId] != undefined && tabEvaluations[tabId] != "safe") {
                 for (bsId of tabEvaluations[tabId]) {
                     if (blocksetDatas[bsId].timeAllowed > blocksetDatas[bsId].timeElapsed) {
-                        blocksetDatas[bsId].timeElapsed += 1000;
+                        blocksetDatas[bsId].timeElapsed += updateInterval;
                         setBadge(tabId);
                     }
                     else {
@@ -345,13 +355,15 @@ function update() {
             }
         }
 
-        saveTimer++;
+        saveTimer += updateInterval;
 
-        if (saveTimer === 10) { // save every 10 seconds
+        if (saveTimer >= 10000) { // save every 10 seconds
             saveTimer = 0;
             saveAll();
         }
+        
 
+        // Update popup and options page if they have registered callback
         for (var callback of callbacks) {
             try {
                 callback();
@@ -706,7 +718,7 @@ function saveAll() {
     }
     chrome.storage.sync.set(saveItems);
 
-    console.log("save");
+    //console.log("save");
 }
 
 

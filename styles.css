@@ -1,4 +1,28 @@
 
+:root {
+    /*
+    names are based on light theme
+    => may not make sense for dark theme
+    */
+
+    --bg-color: hsl(0, 0%, 100%);
+    --dialog-color: hsl(0, 0%, 93%);
+    --light-grey: hsl(0, 0%, 90%);
+    --dark-grey: hsl(0, 0%, 60%);
+    --darker-grey: hsl(0, 0%, 50%);
+    --primary-text-color: hsl(0, 0%, 0%);
+    --secondary-text-color: hsl(0, 0%, 30%);
+}
+
+html.dark {
+    --bg-color: hsl(0, 0%, 19%);
+    --dialog-color: hsl(0, 0%, 26%);
+    --light-grey: hsl(0, 0%, 24%);
+    --dark-grey: hsl(0, 0%, 50%);
+    --darker-grey: hsl(0, 0%, 60%);
+    --primary-text-color: hsl(0, 0%, 100%);
+    --secondary-text-color: hsl(0, 0%, 70%);
+}
 
 body {
     height: 540px;
@@ -9,6 +33,8 @@ body {
     font-family: 'Open Sans', sans-serif;
     overflow: hidden;
     font-size: 12px;
+    background-color: var(--bg-color);
+    color: var(--secondary-text-color);
 }
 
 hr.border {
@@ -28,6 +54,10 @@ hr.border#bottom {
     bottom: 0px;
 }
 
+h1,h2,h3 {
+    color: var(--primary-text-color);
+}
+
 
 div.nav {
     display: inline;
@@ -36,7 +66,7 @@ div.nav {
     overflow-x: hidden;
     overflow-y: auto;
     width: 130px;
-    background-color: #f1f1f1;
+    background-color: var(--light-grey);
     z-index: 1;
     position: relative;
 }
@@ -61,7 +91,7 @@ ul {
 
 ul.nav li a {
     display: block;
-    color: black;
+    color: var(--primary-text-color);
     text-align: center;
     padding: 8px 8px;
     text-decoration: none;
@@ -72,18 +102,18 @@ ul.nav li a {
 }
 
 ul.nav li a:hover {
-	background-color: #999;
-    color: white;
+	background-color: var(--darker-grey);
+    color: var(--primary-text-color);
 }
 
 ul.nav li a.drag {
-    background-color: #999;
-    color: white;
+    background-color: var(--darker-grey);
+    color: var(--primary-text-color);
 }
 
 ul.nav li a.selected {
-	background-color: #777;
-	color: white;
+	background-color: var(--dark-grey);
+	color: var(--primary-text-color);
 }
 
 ul.blockset, ul.general {
@@ -100,7 +130,7 @@ li.siteAdder, li.siteList{
 }
 
 div.siteAdder {
-    background-color: #f1f1f1;
+    background-color: var(--light-grey);
     padding: 5px;
     padding-bottom: 0px;
 }
@@ -109,6 +139,10 @@ div.siteAdder {
 button {
     text-align: center;
     cursor: pointer;
+}
+
+html.dark button {
+    filter: invert(90%);
 }
 
 button:disabled {
@@ -157,13 +191,13 @@ ul.siteItems {
 
 li.siteItem {
     position: relative;
-    background-color: #fff;
+    background-color: var(--bg-color);
     display: block;
     padding: 5px !important;
 }
 
 li.siteItem:nth-child(even) {
-    background-color: #f1f1f1;
+    background-color: var(--light-grey);
 }
 
 span.filter {
@@ -199,8 +233,16 @@ input {
     cursor: pointer;
 }
 
+html.dark input {
+    filter: invert(90%);
+}
+
 select {
     cursor: pointer;
+}
+
+html.dark select {
+    filter: invert(90%);
 }
 
 select:disabled {
@@ -285,15 +327,15 @@ div.dialog {
     top: 50%;
     left: 50%;
     margin-left: -170px;
-    background-color: white;
-    border: 1px solid #777;
+    background-color: var(--dialog-color);
+    border: 1px solid var(--darker-grey);
     border-radius: 3px;
 }
 
 div.topBar {
     width: 100%;
     height: 28px;
-    background-color: #f1f1f1;
+    background-color: var(--light-grey);
     border-radius: 3px 3px 0 0;
 }
 
@@ -334,7 +376,7 @@ button.close:disabled img {
 }
 
 label:disabled {
-    color: grey;
+    color: var(--dark-grey);
 }
 
 div.text {
@@ -343,7 +385,7 @@ div.text {
 }
 
 hr {
-    background-color: #999;
+    background-color: var(--dark-grey);
     height: 1px;
     border: none;
 }
@@ -397,14 +439,14 @@ td {
 }
 
 a {
-    color: grey;
+    color: var(--dark-grey);
     cursor: pointer;
-    text-decoration: none;
+    text-decoration: underline;
 }
 
 a:hover {
     text-decoration: underline;
-    color: black;
+    color: var(--secondary-text-color);
 }
 
 #PP {
@@ -421,5 +463,5 @@ div.donate {
 }
 
 label.disabled {
-    color: grey;
+    color: var(--dark-grey);
 }

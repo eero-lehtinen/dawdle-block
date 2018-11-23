@@ -23,6 +23,8 @@ chrome.runtime.getBackgroundPage(function (bg) {
 });
 
 function start() {
+    setDarkTheme(bgPage.darkTheme);
+
     loadAllBlocksets();
     bgPage.callbacks[1] = update;
 
@@ -243,6 +245,13 @@ function saveCurrentBlockset() {
         type: "blocksetChanged",
         id: currentId
     }, function (response) { });
+}
+
+function setDarkTheme(bool) {
+    if (bool === true)
+        $("html").attr({class: "dark"});
+    else
+        $("html").removeAttr("class");
 }
 
 $("#options").on("click", function () {

@@ -1,9 +1,33 @@
-﻿body {
+﻿:root {
+    --bg-color: rgb(255, 255, 255);
+    --light-grey: rgb(241, 241, 241);
+    --dark-grey: rgb(153, 153, 153);
+    --darker-grey: rgb(119, 119, 119);
+    --text-color: rgb(51, 51, 51);
+    --header: rgb(0, 0, 0);
+    --pure-white: rgb(255, 255, 255);
+    --pure-black: rgb(0, 0, 0);
+}
+
+html.dark {
+    --bg-color: rgb(45, 45, 45);
+    --light-grey: rgb(60, 60, 60);
+    --dark-grey: rgb(150, 150, 150);
+    --darker-grey: rgb(190, 190, 190);
+    --text-color: rgb(204, 204, 204);
+    --header: rgb(240, 240, 240);
+    --pure-white: rgb(0, 0, 0);
+    --pure-black: rgb(255, 255, 255);
+}
+
+body {
     width: 280px;
     height: auto;
     font-size: 14px;
     margin: 2px 8px 8px 8px;
     font-family: 'Open Sans', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
 }
 
 div.blocksets {
@@ -12,8 +36,8 @@ div.blocksets {
     overflow-y: auto;
     overflow-x: hidden;
     vertical-align: top;
-    border-top: 1px solid #aaa;
-    border-bottom: 1px solid #aaa;
+    border-top: 1px solid var(--light-grey);
+    border-bottom: 1px solid var(--light-grey);
     margin: 2px -8px;
     padding: 0px 8px;
 }
@@ -34,17 +58,17 @@ ul.blocksets {
 }
 
 ul.blocksets li {
-    background-color: #fff;
+    background-color: var(--bg-color);
     display: block;
     height: 27px;
 }
 
 ul.blocksets li {
-    background-color: #fff;
+    background-color: var(--bg-color);
     vertical-align: central;
     display: block;
     height: 32px;
-    border-bottom: 1px solid lightgrey;
+    border-bottom: 1px solid var(--light-grey);
     position: relative;
     line-height: 32px;
 }
@@ -59,18 +83,18 @@ ul .blocksets li.selected a{
 
 a {
     text-decoration: none;
-    color: grey;
+    color: var(--dark-grey);
     margin: 2px;
 }
 
 a:hover {
     text-decoration: underline;
-    color: black;
+    color: var(--pure-black);
 }
 
 div.controls a.disabled {
     pointer-events: none;
-    color: lightgrey;
+    color: var(--light-grey);
 }
 
 a.blocksiteName {
@@ -91,7 +115,7 @@ span.blocksiteTime {
     text-align: center;
     font-weight: 500;
     font-size: 16px;
-    color: black;
+    color: var(--pure-black);
     position: absolute;
     bottom: 0px;
     right: 1px;
@@ -99,7 +123,7 @@ span.blocksiteTime {
 }
 
 span.blocksiteTime[state=disabled] {
-    color: grey;
+    color: var(--dark-grey);
 }
 
 p {
@@ -108,7 +132,7 @@ p {
 
 p.url {
     padding: 2px;
-    color: grey;
+    color: var(--dark-grey);
     overflow-wrap: break-word;
     word-wrap: break-word;
     hyphens: auto;
@@ -125,7 +149,7 @@ p.header {
     font-size: 0.8em;
     text-align: center;
     height: 14px;
-    color: grey;
+    color: var(--dark-grey);
 }
 
 h1 {
@@ -147,7 +171,7 @@ hr {
     height: 1px;
     margin: 6px -8px 1px -8px;
     border: none;
-    background-color: #aaa;
+    background-color: var(--light-grey);
 }
 
 

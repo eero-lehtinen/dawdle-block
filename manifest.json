@@ -24,7 +24,8 @@
     "https://www.googleapis.com/youtube/v3/",
     "https://fonts.googleapis.com/",
     "storage",
-    "tabs"
+    "tabs",
+    "notifications"
   ],
 
   "background": {

@@ -30,6 +30,7 @@ function init() {
         addAbsentItems(generalOptions, defaultGeneralOptions);
         loadTimePickers();
         displayHelp(generalOptions.displayHelp);
+        setDarkTheme(bgPage.darkTheme);
         displayPage(-1);
     });
 
@@ -282,6 +283,7 @@ function displayPage(id) {
 
         $("input[type=radio][name=clockType][value=" + generalOptions.clockType + "]").prop("checked", true);
         $("#displayHelp").prop("checked", generalOptions.displayHelp);
+        $("#darkTheme").prop("checked", bgPage.darkTheme);
     }
     else if (id === -2) {
         $(".donate").show();
@@ -483,7 +485,8 @@ function dateToMs(time) {
 
 function saveGeneralOptions() {
     chrome.storage.sync.set({
-        generalOptions: generalOptions
+        generalOptions: generalOptions,
+        darkTheme: bgPage.darkTheme
     }, function () {});
 }
 
@@ -563,6 +566,14 @@ function displayHelp(bool) {
         $("button[id^=help_]").show();
     else
         $("button[id^=help_]").hide();
+}
+
+function setDarkTheme(bool) {
+    bgPage.darkTheme = bool;
+    if (bool === true)
+        $("html").attr({class: "dark"});
+    else
+        $("html").removeAttr("class");
 }
 
 function diskDownloadData() {
@@ -731,6 +742,12 @@ $("input[type=radio][name=clockType]").on("change", function () {
 $("#displayHelp").on("change", function () {
     generalOptions.displayHelp = $(this).prop("checked");
     displayHelp(generalOptions.displayHelp);
+    saveGeneralOptions();
+});
+
+$("#darkTheme").on("change", function () {
+    bgPage.darkTheme = $(this).prop("checked");
+    setDarkTheme(bgPage.darkTheme);
     saveGeneralOptions();
 });
 
