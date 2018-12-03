@@ -59,6 +59,7 @@ var darkTheme = false;
 function defaultBlockset(id) {
     return {
         name: "Block set " + id,
+        annoyMode: false,
         timeAllowed: 600000, // milliseconds
         timeElapsed: 0, // milliseconds
         resetTime: 0, // milliseconds from midnight
@@ -73,7 +74,7 @@ function defaultBlockset(id) {
 init();
 
 function init() {
-    chrome.storage.local.clear();
+    //chrome.storage.local.clear();
     //chrome.storage.sync.clear();
 
     chrome.storage.sync.get({
@@ -335,21 +336,54 @@ function convertToRegEx(fromList, toList, extraYT) {
 var saveTimer = 0;
 var callbacks = [];
 
+var currentNotificationId = "";
+
+var defaultNotificationOptions = {
+    type: "basic",
+    iconUrl: "images/icon.png",
+    title: "OVERTIME",
+    message: "",
+    priority: 2
+}
+
 function update() {
     if (windowIds.length != 0) {
+
+        // Prevents icrementing multiple times in a single update
+        var incrementedBlocksetIds = [];
+
         for (windowId of windowIds) {
             if (minimizedWindows.includes(windowId))
                 continue;
 
             var tabId = openTabs[windowId];
+
             if (tabEvaluations[tabId] != undefined && tabEvaluations[tabId] != "safe") {
-                for (bsId of tabEvaluations[tabId]) {
-                    if (blocksetDatas[bsId].timeAllowed > blocksetDatas[bsId].timeElapsed) {
-                        blocksetDatas[bsId].timeElapsed += updateInterval;
-                        setBadge(tabId);
+                for (var bsId of tabEvaluations[tabId]) {
+
+                    if (blocksetDatas[bsId].timeElapsed >= blocksetDatas[bsId].timeAllowed) { // Don't have time left
+                        if (blocksetDatas[bsId].annoyMode == false) {
+                            block(tabId);
+                        }
+                        else {
+                            if (!incrementedBlocksetIds.includes(bsId)) {
+                                incrementedBlocksetIds.push(bsId);
+                                blocksetDatas[bsId].timeElapsed += updateInterval;
+                            }
+
+                            // TODO: Annoy logic
+                            var notifOpts = defaultNotificationOptions;
+                            notifOpts.message = "You are " + msToTimeDisplay(blocksetDatas[bsId].timeElapsed - blocksetDatas[bsId].timeAllowed) + " over the time limit";
+                            chrome.notifications.create(notifOpts);
+
+                            console.log("annoy");
+                        }
                     }
-                    else {
-                        block(tabId);
+                    else { // Have time left
+                        if (!incrementedBlocksetIds.includes(bsId)) {
+                            incrementedBlocksetIds.push(bsId);
+                            blocksetDatas[bsId].timeElapsed += updateInterval;
+                        }
                     }
                 }
             }
@@ -483,21 +517,31 @@ function evaluateTab(tab) {
 
 var orange = [215, 134, 29, 255];
 var red = [215, 41, 29, 255];
+var grey = [123, 123, 123, 255];
 
 function setBadge(tabId) {
-    var time = msToDate(getLowestTimeLeft(tabEvaluations[tabId]));
+    var time = getLowestTimeLeft(tabEvaluations[tabId]);
 
-    var color = orange;
+    var seconds = parseInt((time / 1000) % 60);
+    var minutes = parseInt((time / (1000 * 60)) % 60);
+    var hours = parseInt((time / (1000 * 60 * 60)) % 24);
+
+    var color;
     var text = " ";
-    if (time.getHours() > 0) {
-
+    if (time > 1000 * 60 * 60) { // time is more than one hour -> don't display time
+        color = grey;
     }
-    else if (time.getMinutes() > 0) {
-        text = (time.getMinutes()).toString();
+    else if (time > 1000 * 60) { // time is more than one minute -> display time in minutes
+        color = orange;
+        text = (Math.floor(time / (1000 * 60))).toString();
     }
-    else if (time.getSeconds() >= 0) {
+    else if (time >= 0) { // time is positive -> display time left in seconds
         color = red;
-        text = (time.getSeconds()).toString();
+        text = (Math.floor(time / 1000)).toString();
+    }
+    else if (time < 0) {// annoy-mode is on
+        color = red;
+        text = "!";
     }
 
     chrome.browserAction.setBadgeText({ text: text, tabId: tabId });
@@ -677,7 +721,7 @@ function testRegEx(regExList, text) {
     return false;
 }
 
-function block(tabId, blocksetId) {
+function block(tabId) {
     chrome.tabs.update(tabId, {
         url: "blockPage.html"
     });

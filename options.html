@@ -46,12 +46,21 @@
               <button class="big" id="export">Export</button> <button class="big" id="import" disabled>Import</button> <button class="big" id="chooseFile">Choose file</button> <span id="chooseFileLabel">No file chosen</span> <br />
               <span id="fileIndicator" hidden></span>
               <input id="chooseFileHidden" type="file" name="file" accept=".json"/>
-          </li> 
+          </li>
       </ul>
       <ul class="blockset" hidden>
-        <li> <h1 id="name">Block set name</h1> <input type="text" class="blocksetRename" maxlength="60" hidden></li>
-        <li><h3>Time allowed</h3> <input class="timepicker" id="timeAllowed"> Time left today: <span id="timeLeft"></span> <button class="help" id="help_timeAllowed">?</button></li>
-        <li><h3>Daily reset time</h3> <input class="timepicker" id="resetTime"> <button class="help" id="help_resetTime">?</button></li> 
+        <li>
+            <h1 id="name">Block set name</h1> <input type="text" class="blocksetRename" maxlength="60" hidden>
+        </li>
+        <li>
+            <h3 class="noMargin"><label>Annoy only <input id="annoyMode" type="checkbox"></label></h3>
+        </li>
+        <li>
+            <h3>Time allowed</h3> <input class="timepicker" id="timeAllowed"> Time left today: <span id="timeLeft"></span> <button class="help" id="help_timeAllowed">?</button>
+        </li>
+        <li>
+            <h3>Daily reset time</h3> <input class="timepicker" id="resetTime"> <button class="help" id="help_resetTime">?</button>
+        </li> 
         <li class="aDay"><h3 class="noMargin">Active days</h3>
             <label><input id="aDay1" type="checkbox">Mon</label>
             <label><input id="aDay2" type="checkbox">Tue</label>
@@ -61,54 +70,58 @@
             <label><input id="aDay6" type="checkbox">Sat</label>
             <label><input id="aDay0" type="checkbox">Sun</label> <button class="help" id="help_activeDays">?</button>
         </li> 
-        <li><h3>Active time </h3> from <input class="timepicker" id="activeFrom"> to <input class="timepicker" id="activeTo"> <button class="help" id="help_activeTime">?</button></li> 
-        <li><h3>Blacklist</h3> <button class="help" id="help_bl">?</button>
-        <div class="siteAdder">
-            <ul>
-                <li class="siteAdder">
-                    <div class="topInputs">
-                        <select id="blacklistSelect">
-                            <option value="urlPrefix">url prefix</option>
-                            <option value="urlSuffix">url suffix</option>
-                            <option value="urlEquals">url equals</option>  
-                            <option value="urlContains">url contains</option>    
-                            <option value="ytChannel">yt channel</option>
-                            <option value="ytCategory">yt category</option>
-                        </select>
-                        <input id="blacklistInput" type="text" placeholder="e.g. www.youtube.com" maxlength="500">
-                        <button id="blacklistAdd">Add</button>
-                    </div>
-                </li>
-                <li class="siteAdder"> 
-                    <ul class="siteItems" id="blSiteItems"></ul>
-                </li>
-            </ul>
-        </div>
-    </li>
-        <li><h3>Whitelist</h3> <button class="help" id="help_wl">?</button>
-          <div class="siteAdder">
-            <ul>
-                <li class="siteAdder">
-                    <div class="topInputs">
-                        <select id="whitelistSelect">
-                            <option value="urlPrefix">url prefix</option>
-                            <option value="urlSuffix">url suffix</option>
-                            <option value="urlEquals">url equals</option>  
-                            <option value="urlContains">url contains</option>
-                            <option value="ytChannel">yt channel</option>
-                            <option value="ytCategory">yt category</option>
-                        </select>
-                        <input id="whitelistInput" type="text" placeholder="e.g. www.youtube.com/watch?v=useful_video" maxlength="500">
-                        <button id="whitelistAdd">Add</button>
-                    </div>
-                </li>
-                <li class="siteAdder">
-                    <ul class="siteItems" id="wlSiteItems">
+        <li>
+            <h3>Active time </h3> from <input class="timepicker" id="activeFrom"> to <input class="timepicker" id="activeTo"> <button class="help" id="help_activeTime">?</button>
+        </li> 
+        <li>
+            <h3>Blacklist</h3> <button class="help" id="help_bl">?</button>
+            <div class="siteAdder">
+                <ul>
+                    <li class="siteAdder">
+                        <div class="topInputs">
+                            <select id="blacklistSelect">
+                                <option value="urlPrefix">url prefix</option>
+                                <option value="urlSuffix">url suffix</option>
+                                <option value="urlEquals">url equals</option>  
+                                <option value="urlContains">url contains</option>    
+                                <option value="ytChannel">yt channel</option>
+                                <option value="ytCategory">yt category</option>
+                            </select>
+                            <input id="blacklistInput" type="text" placeholder="e.g. www.youtube.com" maxlength="500">
+                            <button id="blacklistAdd">Add</button>
+                        </div>
+                    </li>
+                    <li class="siteAdder"> 
+                        <ul class="siteItems" id="blSiteItems"></ul>
+                    </li>
+                </ul>
+            </div>
+        </li>
+        <li>
+            <h3>Whitelist</h3> <button class="help" id="help_wl">?</button>
+            <div class="siteAdder">
+                <ul>
+                    <li class="siteAdder">
+                        <div class="topInputs">
+                            <select id="whitelistSelect">
+                                <option value="urlPrefix">url prefix</option>
+                                <option value="urlSuffix">url suffix</option>
+                                <option value="urlEquals">url equals</option>  
+                                <option value="urlContains">url contains</option>
+                                <option value="ytChannel">yt channel</option>
+                                <option value="ytCategory">yt category</option>
+                            </select>
+                            <input id="whitelistInput" type="text" placeholder="e.g. www.youtube.com/watch?v=useful_video" maxlength="500">
+                            <button id="whitelistAdd">Add</button>
+                        </div>
+                    </li>
+                    <li class="siteAdder">
+                        <ul class="siteItems" id="wlSiteItems">
 
-                    </ul>
-                </li>
-            </ul>
-          </div>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
         </li>
         <li class="blocksetActions" style="padding-top:0"><hr><button class="big" id="duplicate">Duplicate</button> <button class="big" id="rename">Rename</button> <button class="big" id="delete">Delete</button> <span id="saveIndicator" hidden> Saved</span></li>
       </ul>

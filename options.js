@@ -123,7 +123,7 @@ function update() {
     }
 }
 
-function loadTimePickers() {
+function loadTimePickers() {         
     if ($('.timepicker#resetTime').timepicker != undefined) {
         $('.timepicker#resetTime').timepicker("destroy");
     }
@@ -188,6 +188,7 @@ function setupJQueryUI() {
                 });
             });
         },
+
         start: function (event, ui) {
             if (ui.item.find("a").attr("class") != "selected")
                 ui.item.find("a").attr("class", "drag");
@@ -254,6 +255,7 @@ function displayPage(id) {
 
         $("#name").html(blocksetDatas[id].name);
 
+        $("#annoyMode").prop("checked", blocksetDatas[id].annoyMode);
         $(".timepicker#resetTime").timepicker("setTime", msToDate(blocksetDatas[id].resetTime));
         $(".timepicker#timeAllowed").timepicker("setTime", msToDate(blocksetDatas[id].timeAllowed));
         oldTime = -1;
@@ -728,6 +730,11 @@ $("input[id^=aDay]").on("change", function () {
     for (var i = 0; i < 7; i++) {
         blocksetDatas[currentPageId].activeDays[i] = $("#aDay" + i).prop("checked");
     }
+    saveCurrentBlockset();
+});
+
+$("#annoyMode").on("change", function () {
+    blocksetDatas[currentPageId].annoyMode = $(this).prop("checked");
     saveCurrentBlockset();
 });
 
