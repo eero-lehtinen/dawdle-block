@@ -1,0 +1,94 @@
+﻿:root {
+    /*
+    names are based on light theme
+    => may not make sense for dark theme
+    */
+
+    --bg-color: hsl(0, 0%, 93%);
+    --dialog-color: hsl(0, 0%, 93%);
+    --light-grey: hsl(0, 0%, 90%);
+    --dark-grey: hsl(0, 0%, 60%);
+    --darker-grey: hsl(0, 0%, 50%);
+    --primary-text-color: hsl(0, 0%, 0%);
+    --secondary-text-color: hsl(0, 0%, 30%);
+    --red: rgb(192, 31, 31);
+}
+
+html.dark {
+    --bg-color: hsl(0, 0%, 19%);
+    --dialog-color: hsl(0, 0%, 26%);
+    --light-grey: hsl(0, 0%, 24%);
+    --dark-grey: hsl(0, 0%, 50%);
+    --darker-grey: hsl(0, 0%, 60%);
+    --primary-text-color: hsl(0, 0%, 100%);
+    --secondary-text-color: hsl(0, 0%, 70%);
+}
+
+body {
+    height: 100vh;
+    text-align: center;
+    position: relative;
+    margin: 0;
+    background-color: var(--bg-color);
+    font-family: 'Open Sans', sans-serif;
+}
+
+div.center {
+    width: 800px;
+    height: 162px;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+
+    margin: -140px 0 0 -400px; 
+}
+
+div.bottom {
+    width: 400px;
+    height: 70px;
+    position: absolute;
+    left: 50%;
+    bottom: 0px;
+    margin: 0 0 0 -200px;
+}
+
+div.top {
+    width: 600px;
+    height: 70px;
+    position: absolute;
+    left: 50%;
+    top: 0px;
+    margin: 20px 0 0 -300px;
+    font-size: 300%;
+    color: var(--secondary-text-color);
+}
+
+p#enough {
+    font-weight: 700; 
+    margin: 0;
+    font-size: 1000%;
+    color: var(--primary-text-color);
+}
+
+img {
+    filter: grayscale(100%);
+}
+
+img {
+    filter: grayscale(100%);
+}
+
+html.dark img {
+    filter: invert(100%) grayscale(100%);
+}
+
+a {
+    color: var(--secondary-text-color);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--primary-text-color);
+    text-decoration: underline;
+}

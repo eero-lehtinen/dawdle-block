@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8"> 
   <title>AntiProcrastinator Extension Options</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="Libraries/jquery-ui/jquery-ui.min.css">
-  <link rel="stylesheet" href="Libraries/jquery-ui/jquery-ui.theme.min.css">
+  <link rel="stylesheet" href="styles/styles.css">
+  <link rel="stylesheet" href="libraries/jquery-ui/jquery-ui.min.css">
+  <link rel="stylesheet" href="libraries/jquery-ui/jquery-ui.theme.min.css">
   <link href="https://fonts.googleapis.com/css?family=Open+Sans|PT+Mono&amp;subset=latin-ext" rel="stylesheet">
 </head>
 
@@ -26,7 +26,7 @@
     <div class="main">
       <div class="donate" hidden>
         <h1>Thanks for all donations!</h1><br>
-        <button id="donate"><img id="PP" src="Images/PP_logo.png"><br>Go to donation page</button> 
+        <button id="donate"><img id="PP" src="images/PP_logo.png"><br>Go to donation page</button>
       </div>
       <ul class="general" hidden>
           <li> <h1>General options</h1> </li>
@@ -39,13 +39,16 @@
               <h3 class="noMargin"><label>Display help buttons <input id="displayHelp" type="checkbox"></label></h3>
           </li>
           <li>
-            <h3 class="noMargin"><label>Enable dark theme <input id="darkTheme" type="checkbox"></label></h3>
+            <h3 class="noMargin"><label>Dark theme <input id="darkTheme" type="checkbox"></label></h3>
           </li>  
           <li>
               <h3>Export/Import all settings and blocksets</h3> <button class="help" id="help_export_import">?</button><br>
               <button class="big" id="export">Export</button> <button class="big" id="import" disabled>Import</button> <button class="big" id="chooseFile">Choose file</button> <span id="chooseFileLabel">No file chosen</span> <br />
               <span id="fileIndicator" hidden></span>
               <input id="chooseFileHidden" type="file" name="file" accept=".json"/>
+          </li>
+          <li>
+            <span id="generalSaveIndicator" hidden>Saved</span>
           </li>
       </ul>
       <ul class="blockset" hidden>
@@ -56,7 +59,7 @@
             <h3 class="noMargin"><label>Annoy only <input id="annoyMode" type="checkbox"></label></h3>
         </li>
         <li>
-            <h3>Time allowed</h3> <input class="timepicker" id="timeAllowed"> Time left today: <span id="timeLeft"></span> <button class="help" id="help_timeAllowed">?</button>
+            <h3>Time allowed</h3> <input class="timepicker" id="timeAllowed"> Time left today: <span id="timeLeft"></span> <span id="timeLeftSuffix"></span> <button class="help" id="help_timeAllowed">?</button>
         </li>
         <li>
             <h3>Daily reset time</h3> <input class="timepicker" id="resetTime"> <button class="help" id="help_resetTime">?</button>
@@ -225,11 +228,11 @@
         </ul>
     </div>
 
-    <script type="text/javascript" src="Libraries/jquery-3.2.1.min.js"></script>
-    <script type="text/javascript" src="Libraries/jquery.timepicker.min.js"></script>
-    <script type="text/javascript" src="Libraries/jquery-ui/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="Libraries/FileSaver.min.js"></script>
-    <script type="text/javascript" src="options.js"></script>
+    <script type="text/javascript" src="libraries/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="libraries/jquery.timepicker.min.js"></script>
+    <script type="text/javascript" src="libraries/jquery-ui/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="libraries/FileSaver.min.js"></script>
+    <script type="text/javascript" src="js/options.js"></script>
 </body>
 
 </html>

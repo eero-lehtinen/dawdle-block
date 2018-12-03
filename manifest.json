@@ -3,7 +3,7 @@
   "name": "Dawdle block",
   "short_name": "Dawdle block",
   "description": "Put time limits on unproductive sites.",
-  "version": "1.0.6",
+  "version": "1.1.0",
 
   "options_ui": {
     "page": "options.html",
@@ -11,13 +11,13 @@
   },
 
   "browser_action": {
-    "default_icon": "Images/icon.png",
+    "default_icon": "images/icon.png",
     "default_popup": "popup.html",
     "default_title": "Dawdle block"
   },
 
   "icons": {
-    "128": "Images/icon.png"
+    "128": "images/icon.png"
   },
 
   "permissions": [
@@ -29,14 +29,9 @@
   ],
 
   "background": {
-    "scripts": [ "bg.js" ]
+    "scripts": [ "js/bg.js" ]
   },
 
-  "applications": {
-    "gecko": {
-      "id": "{1b0d5b8a-351b-430d-b4b0-fd3fa1203d4b}",
-      "strict_min_version": "42.0"
-    }
-  }
+  "offline_enabled": true
 }
 
