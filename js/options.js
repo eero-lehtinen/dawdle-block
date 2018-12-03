@@ -100,7 +100,7 @@ function update() {
             restrictInputs(true);
         }
         if (inputsRestricted)
-            $("#timeLeftSuffix").text("(some inputs restricted)");
+            $("#timeLeftSuffix").text(" (some inputs restricted)");
         else 
             $("#timeLeftSuffix").text("");
     }
@@ -257,7 +257,7 @@ function displayPage(id) {
 
         if (blocksetDatas[id].timeElapsed >= blocksetDatas[id].timeAllowed && blocksetDatas[id].timeAllowed != 0 && !blocksetDatas[id].annoyMode) {
             restrictInputs(true);
-            $("#timeLeftSuffix").text("(some inputs restricted)");
+            $("#timeLeftSuffix").text(" (some inputs restricted)");
         }
         else {
             restrictInputs(false);

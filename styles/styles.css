@@ -65,8 +65,7 @@ h1,h2,h3 {
 
 
 div.nav {
-    display: inline;
-    float: left;
+    display: inline-block;
     height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
@@ -80,7 +79,7 @@ div.main {
     width: calc(100% - 130px);
     padding: 0px;
     height: 100%;
-    display: inline;
+    display: inline-block;
     overflow-y: auto;
     overflow-x: hidden;
     z-index: 0;

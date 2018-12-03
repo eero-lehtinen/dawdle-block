@@ -56,10 +56,10 @@
             <h1 id="name">Block set name</h1> <input type="text" class="blocksetRename" maxlength="60" hidden>
         </li>
         <li>
-            <h3 class="noMargin"><label>Annoy only <input id="annoyMode" type="checkbox"></label></h3>
+            <h3 class="noMargin"><label>Annoy only <input id="annoyMode" type="checkbox"></label></h3> <span id="annoyModeInfo"></span> <button class="help" id="help_annoyMode">?</button>
         </li>
         <li>
-            <h3>Time allowed</h3> <input class="timepicker" id="timeAllowed"> Time left today: <span id="timeLeft"></span> <span id="timeLeftSuffix"></span> <button class="help" id="help_timeAllowed">?</button>
+            <h3>Time allowed</h3> <input class="timepicker" id="timeAllowed"> Time left today: <span id="timeLeft"></span><span id="timeLeftSuffix"></span> <button class="help" id="help_timeAllowed">?</button>
         </li>
         <li>
             <h3>Daily reset time</h3> <input class="timepicker" id="resetTime"> <button class="help" id="help_resetTime">?</button>
@@ -128,6 +128,14 @@
         </li>
         <li class="blocksetActions" style="padding-top:0"><hr><button class="big" id="duplicate">Duplicate</button> <button class="big" id="rename">Rename</button> <button class="big" id="delete">Delete</button> <span id="saveIndicator" hidden> Saved</span></li>
       </ul>
+    </div>
+
+    <div id="help_annoyMode_text" header="Annoy mode" hidden>
+        <ul class="text">
+            <li>Prevent blocking when timer hits zero</li>
+            <li>Show continous notifications concerning your time spending instead</li>
+            <li>Enables you to dwell on your time wasting less intrusively</li>
+        </ul>
     </div>
 
     <div id="help_timeAllowed_text" header="Time allowed" hidden>
