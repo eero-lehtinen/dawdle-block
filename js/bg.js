@@ -56,9 +56,9 @@ var currentWeekDay;
 
 var generalOptions = {};
 
-function defaultBlockset(id) {
+function defaultBlockset() {
     return {
-        name: "Block set " + id,
+        name: "Block set 0",
         annoyMode: false,
         timeAllowed: 600000, // milliseconds
         timeElapsed: 0, // milliseconds
@@ -260,6 +260,10 @@ function msToDate(time) {
 }
 
 function msToTimeDisplay(duration) {
+    var isNegative = (duration < 0);
+
+    duration = Math.abs(duration);
+        
     var seconds = parseInt((duration / 1000) % 60);
     var minutes = parseInt((duration / (1000 * 60)) % 60);
     var hours = parseInt((duration / (1000 * 60 * 60)) % 24);
@@ -268,7 +272,7 @@ function msToTimeDisplay(duration) {
     minutes = (minutes < 10) ? "0" + minutes : minutes;
     seconds = (seconds < 10) ? "0" + seconds : seconds;
 
-    return hours + ":" + minutes + ":" + seconds;
+    return (isNegative ? "-": "") + hours + ":" + minutes + ":" + seconds;
 }
 
 function timeToMsSinceMidnight(time) {
@@ -358,20 +362,22 @@ var defaultNotificationOptions = {
 
 }
 
-// When user tries to close notification, set this
+// When user tries to close notification, set this, tabId as key
 var notifCloseTimer = 0;
 
 // Enable alternating notification icon
 var notifIconId = 0;
 
-// Tab associated with notification
-var notifTabId = -1;
+// Tabs associated with notification
+var notifTabIds = [];
 
 function update() {
     if (windowIds.length != 0) {
 
         // Prevents icrementing multiple times in a single update
         var incrementedBlocksetIds = [];
+        
+        var annoyBSIds = [];
 
         for (windowId of windowIds) {
             if (minimizedWindows.includes(windowId))
@@ -381,17 +387,26 @@ function update() {
 
             if (tabEvaluations[tabId] != undefined && tabEvaluations[tabId] != "safe") {
                 var doAnnoy = false;
-                var annoyBSIds = [];
                 var doBlock = false;
 
                 for (var bsId of tabEvaluations[tabId]) {
+                    if (blocksetDatas[bsId] == undefined)
+                        continue;
+
                     if (blocksetDatas[bsId].timeElapsed >= blocksetDatas[bsId].timeAllowed) { // Don't have time left
                         if (!blocksetDatas[bsId].annoyMode) {
                             doBlock = true;
                         }
                         else {
                             doAnnoy = true;
-                            annoyBSIds.push(bsId);
+                            if (!annoyBSIds.includes(bsId))
+                                annoyBSIds.push(bsId);
+
+                            // Increment for annoy too
+                            if (!incrementedBlocksetIds.includes(bsId)) {
+                                incrementedBlocksetIds.push(bsId);
+                                blocksetDatas[bsId].timeElapsed += updateInterval;
+                            }
                         }
                     }
                     else { // Have time left
@@ -406,45 +421,14 @@ function update() {
                     block(tabId);
                 }
                 else if (doAnnoy) {
-                    var lowestTime = getLowestTimeLeft(annoyBSIds); // Annoy blocksets have negative time left, so this means highest overtime
-
-                    // Increment for annoy too
-                    for (bsId in annoyBSIds) {
-                        if (!incrementedBlocksetIds.includes(bsId)) {
-                            incrementedBlocksetIds.push(bsId);
-                            blocksetDatas[bsId].timeElapsed += updateInterval;
-                        }
-                    }
-
-                    // Annoy logic
-                    notifTabId = tabId;
-
-                    var notifOpts = JSON.parse(JSON.stringify(defaultNotificationOptions)); // create deep copy
-                    notifOpts.message = "You are " + msToTimeDisplay(-lowestTime) + " over the time limit";
-                    if (notifCloseTimer > 0) {
-                        notifCloseTimer -= updateInterval;
-                        notifOpts.title = "YOUR CLICKS ARE FUTILE";
-                    }
-                    if (notifIconId == 1) {
-                        notifIconId = 0;
-                        notifOpts.iconUrl = "images/orange.png";
-                    }
-                    else {
-                        notifIconId = 1;
-                    }
-
-                    chrome.notifications.getAll(notifications => {
-                        currentNotificationId = Object.keys(notifications)[0];
-                        if (currentNotificationId == undefined) {
-                            chrome.notifications.create(notifOpts);
-                        }
-                        else {
-                            chrome.notifications.update(currentNotificationId, notifOpts);
-                        }
-                    })
+                    if (!notifTabIds.includes(tabId))
+                        notifTabIds.push(tabId);
                 }
-
             }
+        }
+
+        if (annoyBSIds.length > 0) {
+            annoy(annoyBSIds);
         }
 
         saveTimer += updateInterval;
@@ -466,7 +450,7 @@ function update() {
 }
 
 chrome.notifications.onClosed.addListener((notifId, byUser) => {
-    if (Object.values(openTabs).includes(notifTabId))
+    if (Object.values(openTabs).some(item => notifTabIds.includes(item))) // If any open tabs are included in notificationTabIds
         notifCloseTimer = 5000; // makes extra message show on next notification
 });
 
@@ -787,6 +771,36 @@ function testRegEx(regExList, text) {
 function block(tabId) {
     chrome.tabs.update(tabId, {
         url: "blockPage.html"
+    });
+}
+
+function annoy(bsIds) {
+    var notifOpts = JSON.parse(JSON.stringify(defaultNotificationOptions)); // create deep copy
+    for (var bsId of bsIds) {
+        notifOpts.message += `${msToTimeDisplay(blocksetDatas[bsId].timeElapsed - blocksetDatas[bsId].timeAllowed)}  - ${blocksetDatas[bsId].name}\n`;
+    }
+    notifOpts.message = notifOpts.message.slice(0, -2);;
+
+    if (notifCloseTimer > 0) {
+        notifCloseTimer -= updateInterval;
+        notifOpts.title = "YOUR CLICKS ARE FUTILE";
+    }
+    if (notifIconId == 1) {
+        notifIconId = 0;
+        notifOpts.iconUrl = "images/orange.png";
+    }
+    else {
+        notifIconId = 1;
+    }
+
+    chrome.notifications.getAll(notifications => {
+        currentNotificationId = Object.keys(notifications)[0];
+        if (currentNotificationId == undefined) {
+            chrome.notifications.create(notifOpts);
+        }
+        else {
+            chrome.notifications.update(currentNotificationId, notifOpts);
+        }
     });
 }
 

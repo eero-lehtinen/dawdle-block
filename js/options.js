@@ -361,10 +361,12 @@ function addBlockset(newData) {
     
     if (newData != undefined) {
         blocksetDatas[newBlocksetId] = newData;
-        addAbsentItems(blocksetDatas[newBlocksetId], bgPage.defaultBlockset(newBlocksetId));
+        addAbsentItems(blocksetDatas[newBlocksetId], bgPage.defaultBlockset());
     }
-    else
-        blocksetDatas[newBlocksetId] = bgPage.defaultBlockset(newBlocksetId);
+    else {
+        blocksetDatas[newBlocksetId] = bgPage.defaultBlockset();
+        blocksetDatas[newBlocksetId].name = getNewBlocksetName();
+    }
 
     chrome.storage.sync.set({
         [newBlocksetId]: blocksetDatas[newBlocksetId]
@@ -382,6 +384,59 @@ function addBlockset(newData) {
     }, function (response) { });
 
     return newBlocksetId;
+}
+
+
+function getNewBlocksetName(copyName) {
+    var newName = "Block set 0";
+
+    if (copyName != undefined)
+        newName = copyName + "(0)";
+    
+    var currentNum = 0;
+
+    var duplicate = true; // Assume to be duplicate until proven otherwise
+
+    while (duplicate) {
+        duplicate = hasDuplicateBSName(newName);
+        if (duplicate) {
+            currentNum++;
+
+            if (copyName != undefined) {
+                newName = copyName + "(" + currentNum + ")";
+            }
+            else {
+                newName = "Block set " + currentNum;
+            }
+        }
+    }
+
+    return newName;
+}
+
+function hasDuplicateBSName(name) {
+    for (var bsId of blocksetIds) {
+        if (name == blocksetDatas[bsId].name) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Add items with default values to this object, if default object has them
+ * Always do this before loading anything to account for updates, wich add new data to saves
+ * @param {Object} object - object to check and modify
+ * @param {Object} defaultObject - default
+ */
+function addAbsentItems(object, defaultObject) {
+    var defKeys = Object.keys(defaultObject);
+    var keys = Object.keys(object);
+    for (defKey of defKeys) {
+        if (!keys.includes(defKey)) {
+            object[defKey] = defaultObject[defKey];
+        }
+    }
 }
 
 function deleteBlockset(id) {
@@ -609,6 +664,7 @@ function diskLoadData(file) {
             feedback += " (no general options found)";
         }
         displayBlocksetNavs();
+        displayPage(currentPageId);
         $("#fileIndicator").text(feedback).show().fadeOut(3000);
     };
 
@@ -676,10 +732,10 @@ $("#delete").on("click", function () {
 });
 
 $("#duplicate").on("click", function () {
-    var newData = JSON.parse(JSON.stringify(blocksetDatas[currentPageId]));
-    newData.name += "(copy)"
-    var newId = addBlockset(newData);
-    displayPage(newId);
+    var newData = JSON.parse(JSON.stringify(blocksetDatas[currentPageId])); // deep copy
+    newData.name = getNewBlocksetName(newData.name);
+    addBlockset(newData);
+    displayPage(currentPageId);
 });
 
 $("#rename").on("click", function () {
