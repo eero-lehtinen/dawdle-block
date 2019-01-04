@@ -35,7 +35,9 @@ var ytCategoryNamesById = {
 
 var version = chrome.runtime.getManifest().version;
 
-var APIkey = "AIzaSyBOOn9y-bxB8LHk-5Q6NDtqcy9_FHj5RH4";
+const API_KEY = "AIzaSyBOOn9y-bxB8LHk-5Q6NDtqcy9_FHj5RH4";
+
+const UPDATE_INTERVAL = 1000;
 
 var blocksetIds = [];
 
@@ -47,8 +49,6 @@ var blYT = [];
 var wlYT = [];
 
 var listeners = [];
-
-var updateInterval = 1000;
 
 var initDone = false;
 
@@ -100,7 +100,7 @@ function init() {
         }
     });
 
-    setInterval(update, updateInterval);
+    setInterval(update, UPDATE_INTERVAL);
     var nextMidnight = new Date().setHours(24, 0, 0, 0);
     setTimeout(midnightUpdate, nextMidnight - new Date().getTime() + 1000);
     currentWeekDay = new Date().getDay();
@@ -287,6 +287,11 @@ function resetElapsedTime(id) {
     timerResets[id] = setTimeout(resetElapsedTime, 86400000, id); // 86 400 000 ms is 1 day
 }
 
+/** 
+ * Updates current weekday
+ * Rechecks all tabs
+ * Schedules next midnightupdate
+ */
 function midnightUpdate() {
     currentWeekDay = new Date().getDay();
     evaluateAllTabs();
@@ -351,8 +356,6 @@ function convertToRegEx(fromList, toList, extraYT) {
 var saveTimer = 0;
 var callbacks = [];
 
-var currentNotificationId = "";
-
 var defaultNotificationOptions = {
     type: "basic",
     iconUrl: "images/red.png",
@@ -405,33 +408,40 @@ function update() {
                             // Increment for annoy too
                             if (!incrementedBlocksetIds.includes(bsId)) {
                                 incrementedBlocksetIds.push(bsId);
-                                blocksetDatas[bsId].timeElapsed += updateInterval;
+                                blocksetDatas[bsId].timeElapsed += UPDATE_INTERVAL;
                             }
                         }
                     }
                     else { // Have time left
                         if (!incrementedBlocksetIds.includes(bsId)) {
                             incrementedBlocksetIds.push(bsId);
-                            blocksetDatas[bsId].timeElapsed += updateInterval;
+                            blocksetDatas[bsId].timeElapsed += UPDATE_INTERVAL;
                         }
                     }
                 }
 
+                // One of more block sets want to block this tab
                 if (doBlock) {
                     block(tabId);
                 }
+                // No block sets want to block this tab
+                // and one or more block sets want to annoy this tab
                 else if (doAnnoy) {
                     if (!notifTabIds.includes(tabId))
                         notifTabIds.push(tabId);
                 }
+
+                setBadge(tabId);
             }
         }
 
+
+        // Push annoy notification only once per update
         if (annoyBSIds.length > 0) {
             annoy(annoyBSIds);
         }
 
-        saveTimer += updateInterval;
+        saveTimer += UPDATE_INTERVAL;
 
         if (saveTimer >= 10000) { // save every 10 seconds
             saveTimer = 0;
@@ -653,7 +663,7 @@ function blockedBy(tab, callback) {
     if (url.startsWith("www.youtube.com/watch") && !areYTListsEmpty()) {
         var videoId = getStringBetween(url, "v=", "&");
 
-        httpGetAsync("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + "&fields=items(snippet(categoryId%2CchannelId))&key=" + APIkey, function (response) {
+        httpGetAsync("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + "&fields=items(snippet(categoryId%2CchannelId))&key=" + API_KEY, function (response) {
             var object = JSON.parse(response);
             if (object.items.length != 0) {
                 var channelId = object.items[0].snippet.channelId;
@@ -694,7 +704,7 @@ function blockedBy(tab, callback) {
         var list = url.split("/");
         var userName = list[2];
 
-        httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&forUsername=" + userName + "&fields=items%2Fid&key=" + APIkey, function (response) {
+        httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&forUsername=" + userName + "&fields=items%2Fid&key=" + API_KEY, function (response) {
             var object = JSON.parse(response);
 
             if (object.items.length != 0) {
@@ -708,7 +718,7 @@ function blockedBy(tab, callback) {
     else if (url.startsWith("www.youtube.com/playlist") && !areYTListsEmpty()) {
         var playlistId = getStringBetween(url, "list=", "&");
 
-        httpGetAsync("https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=" + playlistId + "&fields=items%2Fsnippet%2FchannelId&key=" + APIkey, function (response) {
+        httpGetAsync("https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=" + playlistId + "&fields=items%2Fsnippet%2FchannelId&key=" + API_KEY, function (response) {
             var object = JSON.parse(response);
             if (object.items.length != 0) {
                 var channelId = object.items[0].snippet.channelId;
@@ -779,10 +789,10 @@ function annoy(bsIds) {
     for (var bsId of bsIds) {
         notifOpts.message += `${msToTimeDisplay(blocksetDatas[bsId].timeElapsed - blocksetDatas[bsId].timeAllowed)}  - ${blocksetDatas[bsId].name}\n`;
     }
-    notifOpts.message = notifOpts.message.slice(0, -2);;
+    notifOpts.message = notifOpts.message.slice(0, -1); // removes last endline char
 
     if (notifCloseTimer > 0) {
-        notifCloseTimer -= updateInterval;
+        notifCloseTimer -= UPDATE_INTERVAL;
         notifOpts.title = "YOUR CLICKS ARE FUTILE";
     }
     if (notifIconId == 1) {
@@ -794,12 +804,10 @@ function annoy(bsIds) {
     }
 
     chrome.notifications.getAll(notifications => {
-        currentNotificationId = Object.keys(notifications)[0];
-        if (currentNotificationId == undefined) {
+        if (notifications.length == 0) {
             chrome.notifications.create(notifOpts);
-        }
-        else {
-            chrome.notifications.update(currentNotificationId, notifOpts);
+        } else {
+            chrome.notifications.update(Object.keys(notifications)[0], notifOpts);
         }
     });
 }
