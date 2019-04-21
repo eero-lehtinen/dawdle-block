@@ -356,11 +356,14 @@ function removeSite(type, button) {
 function addBlockset(newData) {
     var newBlocksetId = findNewBlocksetId();
     blocksetIds[blocksetIds.length] = newBlocksetId;
+    blocksetTimesElapsed[newBlocksetId] = 0;
 
     chrome.storage.sync.set({
-        blocksetIds: blocksetIds
+        blocksetIds: blocksetIds,
+        blocksetTimesElapsed: blocksetTimesElapsed
     });
     
+
     if (newData != undefined) {
         blocksetDatas[newBlocksetId] = newData;
         addAbsentItems(blocksetDatas[newBlocksetId], bgPage.defaultBlockset());
@@ -450,9 +453,11 @@ function deleteBlockset(id) {
     chrome.storage.sync.remove(id.toString());
 
     blocksetIds.splice(blocksetIds.indexOf(parseInt(id, 10)), 1);
+    delete blocksetTimesElapsed[id];
 
     chrome.storage.sync.set({
-        blocksetIds: blocksetIds
+        blocksetIds: blocksetIds,
+        blocksetTimesElapsed: blocksetTimesElapsed
     });
 
     displayBlocksetNavs();
