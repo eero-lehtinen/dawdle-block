@@ -1,0 +1,9 @@
+Version 1.1.0
+- Annoy mode
+   * shows overtime in a banner instead of blocking
+   * less intrusive way to discourage website usage
+- Dark theme
+- Small stuff
+   * periodic saving made more bandwith efficient
+   * corrected typos
+   * fixed issue, where in rare cases time elapsed at double rate
