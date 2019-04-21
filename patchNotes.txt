@@ -1,5 +1,5 @@
 Version 1.1.1
-- Annoy mode banner font made more reliably pretty
+- Annoy mode banner font more reliably pretty
 - Firefox specific css optimization
 
 Version 1.1.0
