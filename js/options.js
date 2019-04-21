@@ -72,9 +72,6 @@ function init() {
             }
         }
     });
-
-    if (navigator.userAgent.toLowerCase().indexOf('firefox') === -1)
-        $("hr.border").hide();
 }
 
 var oldTime = -1;

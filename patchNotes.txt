@@ -1,8 +1,13 @@
+Version 1.1.1
+- Annoy mode banner font made more reliably pretty
+- Firefox specific css optimization
+
 Version 1.1.0
 - Annoy mode
    * shows overtime in a banner instead of blocking
    * less intrusive way to discourage website usage
 - Dark theme
+- Slight visual update
 - Small stuff
    * periodic saving made more bandwith efficient
    * corrected typos

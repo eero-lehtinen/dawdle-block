@@ -159,6 +159,7 @@ div.siteAdder {
 .siteAdder input[type="text"] {
     border-radius: 0 !important;
     margin: 0;
+    padding: 3px 3px 4px;
 }
 
 .siteAdder button[id$="Add"] {
@@ -244,8 +245,9 @@ textarea {
 }
 
 input.timepicker {
-    text-align: center;
+    text-align: center !important;
     width: 68px;
+    min-height: 2em;
 }
 
 
@@ -276,6 +278,9 @@ button, button:hover, select, select:hover {
     background-color: var(--grey);
     color: var(--primary-text-color) !important;
     border-radius: 3px;
+    min-height: 2em;
+    min-width: 4em;
+    -moz-appearance: none;
 }
 
 .dark select, .dark select:hover {
@@ -287,6 +292,8 @@ select, select:hover {
     background-image: url("../images/ic_arrow_drop_down_black.png") !important;
     background-size: 24px, 24px;
     background-position: right center;
+    background-repeat: no-repeat;
+    padding-inline-end: 20px;
 }
 
 select:disabled {
