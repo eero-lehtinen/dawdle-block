@@ -1,4 +1,8 @@
 
+* {
+    box-sizing: border-box;
+}
+
 :root {
     /*
     names are based on light theme
@@ -8,6 +12,7 @@
     --bg-color: hsl(0, 0%, 100%);
     --dialog-color: hsl(0, 0%, 93%);
     --light-grey: hsl(0, 0%, 90%);
+    --grey: hsl(0, 0%, 80%);
     --dark-grey: hsl(0, 0%, 60%);
     --darker-grey: hsl(0, 0%, 50%);
     --primary-text-color: hsl(0, 0%, 0%);
@@ -17,8 +22,9 @@
 
 html.dark {
     --bg-color: hsl(0, 0%, 19%);
-    --dialog-color: hsl(0, 0%, 26%);
+    --dialog-color: hsl(0, 0%, 25%);
     --light-grey: hsl(0, 0%, 24%);
+    --grey: hsl(0, 0%, 30%);
     --dark-grey: hsl(0, 0%, 50%);
     --darker-grey: hsl(0, 0%, 60%);
     --primary-text-color: hsl(0, 0%, 100%);
@@ -26,17 +32,29 @@ html.dark {
 }
 
 body {
-    height: 540px;
+    height: 600px;
     min-width: 880px;
     width: 100%;
     padding: 0;
     margin: 0;
-    font-family: 'Open Sans', sans-serif;
+    font-family: "Tahoma", "Roboto", "Helvetica Neue", "Helvetica", sans-serif;
     overflow: hidden;
     font-size: 12px;
     background-color: var(--bg-color);
     color: var(--secondary-text-color);
 }
+
+#saveIndicator.show, #generalSaveIndicator.show {
+    transition: opacity 0s;
+    opacity: 1;
+}
+
+#saveIndicator, #generalSaveIndicator {
+    transition: opacity 1.8s linear;
+    opacity: 0;
+}
+
+
 
 .red {
     color: red !important;
@@ -134,23 +152,25 @@ li.siteAdder, li.siteList{
 }
 
 div.siteAdder {
-    background-color: var(--light-grey);
     padding: 5px;
     padding-bottom: 0px;
 }
 
-
-button {
-    text-align: center;
-    cursor: pointer;
+.siteAdder input[type="text"] {
+    border-radius: 0 !important;
+    margin: 0;
 }
 
-html.dark button {
-    filter: invert(90%);
+.siteAdder button[id$="Add"] {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    margin: 0;
 }
 
-button:disabled {
-    cursor:default;
+.siteAdder select[id$="listSelect"] {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    margin: 0;
 }
 
 div.topInputs {
@@ -182,7 +202,6 @@ button.siteRemove {
 }
 
 
-
 button.big {
     width: 74px;
     font-size: 100%;
@@ -195,13 +214,10 @@ ul.siteItems {
 
 li.siteItem {
     position: relative;
-    background-color: var(--bg-color);
     display: block;
     padding: 5px !important;
-}
-
-li.siteItem:nth-child(even) {
-    background-color: var(--light-grey);
+    border-bottom: solid var(--light-grey) 1px;
+    margin: 1px;
 }
 
 span.filter {
@@ -230,44 +246,116 @@ textarea {
 input.timepicker {
     text-align: center;
     width: 68px;
+}
+
+
+#timeLeft {
+    font-family: 'PT Mono', monospace;
+    font-size: 16px;
+}
+
+
+input[type="text"], input[type="text"]:hover, input.timepicker, input.timepicker:hover{
     cursor: text;
+    border: solid var(--grey) 1px !important;
+    color: var(--primary-text-color);
 }
 
-input {
+input[type="text"]:focus, input.timepicker:focus{
+    cursor: text;
+    border: solid var(--primary-text-color) 1px !important;
+}
+
+button, button:hover, select, select:hover {
+    text-align: center;
     cursor: pointer;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    border: none !important;
+    background-image: none !important;
+    background-color: var(--grey);
+    color: var(--primary-text-color) !important;
+    border-radius: 3px;
 }
 
-html.dark input {
-    filter: invert(90%);
+.dark select, .dark select:hover {
+    background-image: url("../images/ic_arrow_drop_down_white.png") !important;
 }
 
-select {
+select, select:hover {
     cursor: pointer;
-}
-
-html.dark select {
-    filter: invert(90%);
+    background-image: url("../images/ic_arrow_drop_down_black.png") !important;
+    background-size: 24px, 24px;
+    background-position: right center;
 }
 
 select:disabled {
     cursor: default;
+    color: var(--dark-grey) !important;
+    background-image: url("../images/ic_arrow_drop_down_grey.png") !important;
 }
 
-input[type="text"] {
-    cursor: text;
+button:active {
+    cursor: pointer;
+    background-color: var(--dark-grey);
 }
 
-input:disabled {
+button:disabled {
     cursor: default;
+    color: var(--dark-grey) !important;
+    background-color: var(--grey) !important
 }
 
-input[type="checkbox"]{
-    margin: 0px 2px 4px 2px;
+input, input:hover {
+    cursor: pointer;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    border: solid var(--secondary-text-color) 1px !important;
+    background-image: none !important;
+    background-color: var(--bg-color);
+    border-radius: 3px !important;
+}
+
+input[type="checkbox"] {
+    margin-bottom: 4px;
+}
+
+input[type="checkbox"]:checked {
+    background-color: var(--secondary-text-color);
+}
+
+input[type="checkbox"]:checked::before {
+    background-image: url("../images/ic_check.png");
+    filter: none;
+    transform: scale(1.2);
+}
+
+.dark input[type="checkbox"]:checked::before {
+    filter: brightness(0.19);
+}
+
+input[type="radio"]:checked::before {
+    background-color: var(--secondary-text-color);
 }
 
 
 input[type="radio"] {
+    border-radius: 100% !important;
     margin: 0px 2px 4px 20px;
+}
+
+input[type="checkbox"]:disabled {
+    cursor: default;
+    border-color: var(--dark-grey) !important;
+}
+input[type="checkbox"]:checked:disabled {
+    background-color: var(--dark-grey);
+}
+
+input:disabled, input:disabled:hover {
+    border-color: var(--dark-grey);
+    cursor: default;
+    color: var(--dark-grey);
 }
 
 #chooseFileHidden {
@@ -281,11 +369,11 @@ input[type="radio"] {
 
 input.blocksetRename {
     font-size: 200%;
-    margin: 3px;
+    width: 100%;
 }
 
 h3 {
-    margin: 0 0 10px 0;
+    margin: 0 0 5px 0;
     display: inline-block;
     font-weight: 400;
 }
@@ -332,16 +420,16 @@ div.dialog {
     left: 50%;
     margin-left: -170px;
     background-color: var(--dialog-color);
-    border: 1px solid var(--darker-grey);
     border-radius: 3px;
 }
 
 div.topBar {
     width: 100%;
-    height: 28px;
-    background-color: var(--light-grey);
+    background-color: var(--darker-grey);
+    color: var(--bg-color);
     border-radius: 3px 3px 0 0;
-    border-bottom: 1px solid var(--dark-grey)
+    padding: 10px;
+    cursor: move;
 }
 
 button.close {
@@ -350,7 +438,7 @@ button.close {
     width: 18px;
     height: 18px;
     position: absolute;
-    top: 5px;
+    top: 3px;
     right: 5px;
     -webkit-padding-end: 0px !important;
     -webkit-padding-start: 0px !important;
@@ -358,22 +446,21 @@ button.close {
 }
 
 div.topBar span {
-    position: absolute;
-    top: 6px;
-    left: 5px;
-    font-weight: 500;
-    cursor: default;
+    font-weight: bold;
 }
 
 button.close img {
     position: absolute;
     top: 50%;
     left: 50%;
-    opacity: 0.5;
     width: 10px;
     height: 10px;
     margin-top: -5px;
     margin-left: -5px;
+}
+
+.dark button.close img {
+    filter: invert(1);
 }
 
 button.close:disabled img {
@@ -387,17 +474,6 @@ label:disabled {
 div.text {
     min-height: 40px;
     padding: 10px;
-}
-
-hr {
-    background-color: var(--dark-grey);
-    height: 1px;
-    border: none;
-}
-
-div.dialog hr {
-    width: calc(100% - 12px);
-    margin: 0px 6px;
 }
 
 div.botBar {

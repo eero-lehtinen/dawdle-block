@@ -381,7 +381,7 @@ function addBlockset(newData) {
     chrome.runtime.sendMessage({
         type: "blocksetChanged",
         id: newBlocksetId
-    }, function (response) { });
+    });
 
     return newBlocksetId;
 }
@@ -463,7 +463,7 @@ function deleteBlockset(id) {
     chrome.runtime.sendMessage({
         type: "blocksetDeleted",
         id: id
-    }, function (response) { });
+    });
 
 }
 
@@ -483,8 +483,8 @@ function saveCurrentBlockset() {
           [currentPageId]: blocksetDatas[currentPageId]
     }, function () {
         if (chrome.runtime.lastError == null) {
-            $("#saveIndicator").show();
-            $("#saveIndicator").fadeOut(1500);
+            $("#saveIndicator").addClass("show");
+            setTimeout(() => {$("#saveIndicator").removeClass("show")}, 100);
         }
         else {
             console.log(chrome.runtime.lastError);
@@ -494,7 +494,7 @@ function saveCurrentBlockset() {
     chrome.runtime.sendMessage({
         type: "blocksetChanged",
         id: currentPageId
-    }, function (response) { });
+    });
 }
 
 function msToTimeDisplay(duration) {
@@ -546,21 +546,14 @@ function dialog(title, text, acceptText, onAccept, declineText, onDecline) {
     var dWindow = $("<div>", { class: "dialog" }).appendTo($("body"));
     var topBar = $("<div>", { class: "topBar" }).appendTo(dWindow);
     var title = $("<span>").html(title).appendTo(topBar);
-    var close = $("<button>", { class: "close" }).html("<img src='images/cancel.png'>").appendTo(topBar);
     
     var textBox = $("<div>", { class: "text" }).html(text).appendTo(dWindow);
-    dWindow.append("<hr>");
     var botBar = $("<div>", { class: "botBar" }).appendTo(dWindow);
     var decline;
     if (declineText != undefined)
         decline = $("<button>").html(declineText).appendTo(botBar);
     var accept = $("<button>").html(acceptText).appendTo(botBar);
-    
-    close.on("click", function () {
-        if (onDecline != undefined)
-            onDecline();
-        dWindow.remove();
-    });
+
     if (declineText != undefined) {
         decline.on("click", function () {
             if (onDecline != undefined)
@@ -680,7 +673,7 @@ function saveAllBlocksets() {
         chrome.runtime.sendMessage({
             type: "blocksetChanged",
             id: id
-        }, function (response) { });
+        });
     }
 }
 
@@ -689,8 +682,8 @@ function saveGeneralOptions() {
         generalOptions: generalOptions
     }, function () {
         if (chrome.runtime.lastError == null) {
-            $("#generalSaveIndicator").show();
-            $("#generalSaveIndicator").fadeOut(1500);
+            $("#generalSaveIndicator").addClass("show");
+            setTimeout(() => { $("#generalSaveIndicator").removeClass("show") }, 100);
         }
         else {
             console.log(chrome.runtime.lastError);
@@ -699,8 +692,9 @@ function saveGeneralOptions() {
 
     chrome.runtime.sendMessage({
         type: "generalOptionsChanged"
-    }, function (response) { });
+    });
 }
+
 
 $("button#donate").click(function () {
     chrome.runtime.sendMessage({
@@ -800,8 +794,40 @@ $("input[id^=aDay]").on("change", function () {
 });
 
 $("#annoyMode").on("change", function () {
-    blocksetDatas[currentPageId].annoyMode = $(this).prop("checked");
-    saveCurrentBlockset();
+    var checkBox = $(this);
+    if (checkBox.prop("checked")) {
+        chrome.permissions.contains({
+            origins: ["<all_urls>"]
+        }, (res) =>  {
+            if (res) {
+                blocksetDatas[currentPageId].annoyMode = true;
+                saveCurrentBlockset();
+            }
+            else {
+                var textObj = $("#help_annoyMode_permission_text");
+                dialog(textObj.attr("header"), textObj.html(), "Continue", () => {
+                    // On continue
+                    chrome.permissions.request({
+                        origins: ["<all_urls>"]
+                    }, (granted) => {
+                        if (granted) {
+                            blocksetDatas[currentPageId].annoyMode = true;
+                            saveCurrentBlockset();
+                        } else {
+                            checkBox.prop("checked", false);
+                        }
+                    });
+                }, "Cancel", () => {
+                    // On cancel
+                    checkBox.prop("checked", false);
+                });
+            }
+        });
+    }
+    else {
+        blocksetDatas[currentPageId].annoyMode = false;
+        saveCurrentBlockset();
+    }
 });
 
 //---General options---

@@ -35,9 +35,9 @@ var ytCategoryNamesById = {
 
 var version = chrome.runtime.getManifest().version;
 
-const API_KEY = "AIzaSyBOOn9y-bxB8LHk-5Q6NDtqcy9_FHj5RH4";
+var API_KEY = "AIzaSyBOOn9y-bxB8LHk-5Q6NDtqcy9_FHj5RH4";
 
-const UPDATE_INTERVAL = 1000;
+var UPDATE_INTERVAL = 1000;
 
 var blocksetIds = [];
 
@@ -356,23 +356,8 @@ function convertToRegEx(fromList, toList, extraYT) {
 var saveTimer = 0;
 var callbacks = [];
 
-var defaultNotificationOptions = {
-    type: "basic",
-    iconUrl: "images/red.png",
-    title: "OVERTIME",
-    message: "",
-    priority: 2
-
-}
-
-// When user tries to close notification, set this, tabId as key
-var notifCloseTimer = 0;
-
-// Enable alternating notification icon
-var notifIconId = 0;
-
-// Tabs associated with notification
-var notifTabIds = [];
+// Tabs associated with page notification
+var annoyTabIds = [];
 
 function update() {
     if (windowIds.length != 0) {
@@ -427,14 +412,13 @@ function update() {
                 // No block sets want to block this tab
                 // and one or more block sets want to annoy this tab
                 else if (doAnnoy) {
-                    if (!notifTabIds.includes(tabId))
-                        notifTabIds.push(tabId);
+                    if (!annoyTabIds.includes(tabId))
+                        annoyTabIds.push(tabId);
                 }
 
                 setBadge(tabId);
             }
         }
-
 
         // Push annoy notification only once per update
         if (annoyBSIds.length > 0) {
@@ -458,11 +442,6 @@ function update() {
         }
     }
 }
-
-chrome.notifications.onClosed.addListener((notifId, byUser) => {
-    if (Object.values(openTabs).some(item => notifTabIds.includes(item))) // If any open tabs are included in notificationTabIds
-        notifCloseTimer = 5000; // makes extra message show on next notification
-});
 
 
 // Tab and window listeners
@@ -785,29 +764,37 @@ function block(tabId) {
 }
 
 function annoy(bsIds) {
-    var notifOpts = JSON.parse(JSON.stringify(defaultNotificationOptions)); // create deep copy
-    for (var bsId of bsIds) {
-        notifOpts.message += `${msToTimeDisplay(blocksetDatas[bsId].timeElapsed - blocksetDatas[bsId].timeAllowed)}  - ${blocksetDatas[bsId].name}\n`;
-    }
-    notifOpts.message = notifOpts.message.slice(0, -1); // removes last endline char
-
-    if (notifCloseTimer > 0) {
-        notifCloseTimer -= UPDATE_INTERVAL;
-        notifOpts.title = "YOUR CLICKS ARE FUTILE";
-    }
-    if (notifIconId == 1) {
-        notifIconId = 0;
-        notifOpts.iconUrl = "images/orange.png";
-    }
-    else {
-        notifIconId = 1;
-    }
-
-    chrome.notifications.getAll(notifications => {
-        if (notifications.length == 0) {
-            chrome.notifications.create(notifOpts);
-        } else {
-            chrome.notifications.update(Object.keys(notifications)[0], notifOpts);
+    chrome.tabs.executeScript({
+        code: "typeof db_contentScriptCreated != 'undefined'"
+    }, (created) => {
+        if (chrome.runtime.lastError != undefined) {
+            console.log(chrome.runtime.lastError.message);
+            return;
+        }
+        
+        var largestOverTime = 0;
+        for (id of bsIds) {
+            var t = blocksetDatas[id].timeElapsed - blocksetDatas[id].timeAllowed;
+            if (t > largestOverTime) {
+                largestOverTime = t;
+            }
+        }
+        
+        if (created[0]) {
+            chrome.tabs.executeScript({ code: `db_showTime("${msToTimeDisplay(largestOverTime)}");` });
+        }
+        else {
+            chrome.tabs.executeScript({
+                file: "libraries/jquery-3.2.1.min.js"
+            }, () => {
+                chrome.tabs.executeScript({
+                    file: "js/contentScript.js"
+                }, () => {
+                        chrome.tabs.insertCSS({ file: "styles/annoy.css" });
+                        var time = msToTimeDisplay(blocksetDatas[bsIds[0]].timeAllowed - blocksetDatas[bsIds[0]].timeElapsed);
+                        chrome.tabs.executeScript({ code: `db_showTime("${msToTimeDisplay(largestOverTime)}");` });
+                });
+            });
         }
     });
 }

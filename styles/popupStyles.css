@@ -29,7 +29,7 @@ body {
     height: auto;
     font-size: 14px;
     margin: 2px 8px 8px 8px;
-    font-family: 'Open Sans', sans-serif;
+    font-family: "Tahoma", "Roboto", "Helvetica Neue", "Helvetica", sans-serif;
     background-color: var(--bg-color);
     color: var(--secondary-text-color);
 }
@@ -144,7 +144,7 @@ p.url {
     cursor: text;
     border: 1px solid var(--dark-grey);
     border-radius: 3px;
-    margin-bottom: 4px;
+    margin-bottom: 10px;
     font-family: 'PT Mono', monospace;
 }
 
@@ -186,7 +186,23 @@ span#addIndicator {
 }
 
 
+span#addIndicator.show {
+    transition: opacity 0s;
+    opacity: 1;
+}
+
+span#addIndicator {
+    transition: opacity 1.8s linear;
+    opacity: 0;
+    margin: 4px;
+}
+
+
 
 .red {
     color: rgb(216, 45, 45) !important;
+}
+
+#bsName {
+    margin-bottom: 12px;
 }

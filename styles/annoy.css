@@ -1,0 +1,25 @@
+#dawdle_block_annoy {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100000;
+    background-color: red;
+    opacity: 0.6;
+    pointer-events: none;
+    font-size: 76px;
+    font-weight: bold;
+    color: black;
+    text-align: center;
+    font-family: monospace;
+}
+
+#dawdle_block_annoy::before {
+    content: "OVERTIME ";
+}
+
+@media only screen and (max-width: 1100px)  {
+    #dawdle_block_annoy::before {
+        content: "";
+    }
+}

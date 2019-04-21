@@ -173,7 +173,9 @@ function addDomain(domain, toList) {
         saveCurrentBlockset();
     }
     else {
-        $("#addIndicator").text("Already exists").show().fadeOut(1500);
+        $("#addIndicator").text("Already exists");
+        $("#addIndicator").addClass("show");
+        setTimeout(() => { $("#addIndicator").removeClass("show") }, 100);
     }
 }
 
@@ -183,7 +185,9 @@ function addUrl(url, toList) {
         saveCurrentBlockset();
     }
     else {
-        $("#addIndicator").text("Already exists").show().fadeOut(1500);
+        $("#addIndicator").text("Already exists");
+        $("#addIndicator").addClass("show");
+        setTimeout(() => { $("#addIndicator").removeClass("show") }, 100);
     }
 }
 
@@ -193,7 +197,9 @@ function addChannel(channelId, channelTitle, toList) {
         saveCurrentBlockset();
     }
     else {
-        $("#addIndicator").text("Already exists").show().fadeOut(1500);
+        $("#addIndicator").text("Already exists");
+        $("#addIndicator").addClass("show");
+        setTimeout(() => { $("#addIndicator").removeClass("show") }, 100);
     }
 }
 
@@ -203,7 +209,9 @@ function addCategory(categoryId, categoryName, toList) {
         saveCurrentBlockset();
     }
     else {
-        $("#addIndicator").text("Already exists").show().fadeOut(1500);
+        $("#addIndicator").text("Already exists");
+        $("#addIndicator").addClass("show");
+        setTimeout(() => { $("#addIndicator").removeClass("show") }, 100);
     }
 }
 
@@ -211,7 +219,7 @@ function getYTData(_url, callback) {
     if (blocksetDatas[currentId] != undefined) {
         if (_url.startsWith("www.youtube.com/watch")) {
             var videoId = _url.split("v=")[1].substring(0, 11);
-            bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + "&fields=items(snippet(categoryId%2CchannelId%2CchannelTitle))&key=" + bgPage.APIkey, function (response) {
+            bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + "&fields=items(snippet(categoryId%2CchannelId%2CchannelTitle))&key=" + bgPage.API_KEY, function (response) {
                 var object = JSON.parse(response);
 
                 callback({
@@ -225,7 +233,7 @@ function getYTData(_url, callback) {
             var list = _url.split("/");
             var channelId = list[2];
 
-            bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&id=" + channelId + "&fields=items(snippet%2Ftitle)&key=" + bgPage.APIkey, function (response) {
+            bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&id=" + channelId + "&fields=items(snippet%2Ftitle)&key=" + bgPage.API_KEY, function (response) {
                 var object = JSON.parse(response);
 
                 callback({
@@ -238,7 +246,7 @@ function getYTData(_url, callback) {
             var list = _url.split("/");
             var channelUserName = list[2];
 
-            bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&forUsername=" + channelUserName + "&fields=items(id%2Csnippet%2Ftitle)&key=" + bgPage.APIkey, function (response) {
+            bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&forUsername=" + channelUserName + "&fields=items(id%2Csnippet%2Ftitle)&key=" + bgPage.API_KEY, function (response) {
                 var object = JSON.parse(response);   
 
                 callback({
@@ -255,7 +263,9 @@ function saveCurrentBlockset() {
           [currentId]: blocksetDatas[currentId]
     }, function () {
         if (chrome.runtime.lastError == null) {
-            $("#addIndicator").text("Added").show().fadeOut(1500);
+            $("#addIndicator").text("Added");
+            $("#addIndicator").addClass("show");
+            setTimeout(() => { $("#addIndicator").removeClass("show") }, 100);
         }
         else {
             console.log(chrome.runtime.lastError);
@@ -265,7 +275,7 @@ function saveCurrentBlockset() {
     chrome.runtime.sendMessage({
         type: "blocksetChanged",
         id: currentId
-    }, function (response) { });
+    });
 }
 
 function setDarkTheme(bool) {
@@ -283,7 +293,9 @@ $("#bl_domain").on("click", function () {
     if (blocksetDatas[currentId] != undefined && (new URL(urlWithProtocol).hostname) != "")
         addDomain(new URL(urlWithProtocol).hostname, blocksetDatas[currentId].blacklist);
     else {
-        $("#addIndicator").text("Domain undefined").show().fadeOut(1500);
+        $("#addIndicator").text("Domain undefined");
+        $("#addIndicator").addClass("show");
+        setTimeout(() => { $("#addIndicator").removeClass("show") }, 100);
     }
 });
 

@@ -30,7 +30,7 @@ body {
     position: relative;
     margin: 0;
     background-color: var(--bg-color);
-    font-family: 'Open Sans', sans-serif;
+    font-family: "Tahoma", "Roboto", "Helvetica Neue", "Helvetica", sans-serif;
 }
 
 div.center {

@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="styles/styles.css">
   <link rel="stylesheet" href="libraries/jquery-ui/jquery-ui.min.css">
   <link rel="stylesheet" href="libraries/jquery-ui/jquery-ui.theme.min.css">
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans|PT+Mono&amp;subset=latin-ext" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=PT+Mono" rel="stylesheet">
 </head>
 
 <body>
@@ -36,10 +36,10 @@
               <label><input type="radio" name="clockType" value="12">12-hour clock</label>
           </li>  
           <li>
-              <h3 class="noMargin"><label>Display help buttons <input id="displayHelp" type="checkbox"></label></h3>
+              <h3 class="noMargin"><label><input id="displayHelp" type="checkbox"> Display help buttons</label></h3>
           </li>
           <li>
-            <h3 class="noMargin"><label>Dark theme <input id="darkTheme" type="checkbox"></label></h3>
+            <h3 class="noMargin"><label><input id="darkTheme" type="checkbox"> Dark theme</label></h3>
           </li>  
           <li>
               <h3>Export/Import all settings and blocksets</h3> <button class="help" id="help_export_import">?</button><br>
@@ -48,15 +48,15 @@
               <input id="chooseFileHidden" type="file" name="file" accept=".json"/>
           </li>
           <li>
-            <span id="generalSaveIndicator" hidden>Saved</span>
+            <span id="generalSaveIndicator">Saved</span>
           </li>
       </ul>
       <ul class="blockset" hidden>
         <li>
-            <h1 id="name">Block set name</h1> <input type="text" class="blocksetRename" maxlength="60" hidden>
+            <h1 id="name">Block set name</h1> <input type="text" class="blocksetRename" maxlength="30" hidden>
         </li>
         <li>
-            <h3 class="noMargin"><label>Annoy only <input id="annoyMode" type="checkbox"></label></h3> <span id="annoyModeInfo"></span> <button class="help" id="help_annoyMode">?</button>
+            <h3 class="noMargin"><label><input id="annoyMode" type="checkbox"> Annoy only</label></h3> <span id="annoyModeInfo"></span> <button class="help" id="help_annoyMode">?</button>
         </li>
         <li>
             <h3>Time allowed</h3> <input class="timepicker" id="timeAllowed"> Time left today: <span id="timeLeft"></span><span id="timeLeftSuffix"></span> <button class="help" id="help_timeAllowed">?</button>
@@ -126,14 +126,30 @@
                 </ul>
             </div>
         </li>
-        <li class="blocksetActions" style="padding-top:0"><hr><button class="big" id="duplicate">Duplicate</button> <button class="big" id="rename">Rename</button> <button class="big" id="delete">Delete</button> <span id="saveIndicator" hidden> Saved</span></li>
+        <li class="blocksetActions"><button class="big" id="duplicate">Duplicate</button> <button class="big" id="rename">Rename</button> <button class="big" id="delete">Delete</button></li>
+        <li>
+            <span id="saveIndicator">Saved</span>
+        </li>
       </ul>
+    </div>
+
+    <div id="help_annoyMode_permission_text" header="Annoy mode required permissions" hidden>
+        <ul class="text">
+            <li>This feature needs access to the html of every website, because it insterts a banner into the html document when going overtime</li>
+        </ul>
     </div>
 
     <div id="help_annoyMode_text" header="Annoy mode" hidden>
         <ul class="text">
-            <li>Prevent blocking when timer hits zero</li>
-            <li>Show continous notifications concerning your time spending instead</li>
+            <li>Disables blocking when timer hits zero, instead shows banner in the bottom of the browser window about overtime</li>
+            <li>Enables you to dwell on your time wasting less intrusively</li>
+        </ul>
+    </div>
+
+    <div id="help_annoyMode_text" header="Annoy mode" hidden>
+        <ul class="text">
+            <li>Disables blocking when timer hits zero</li>
+            <li>Instead shows banner in the bottom of the browser window about overtime</li>
             <li>Enables you to dwell on your time wasting less intrusively</li>
         </ul>
     </div>
