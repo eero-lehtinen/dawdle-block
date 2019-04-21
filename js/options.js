@@ -10,6 +10,7 @@ var filterLookUp = {
 var bgPage;
 var blocksetIds;
 var blocksetDatas;
+var blocksetTimesElapsed;
 
 var generalOptions;
 
@@ -18,6 +19,7 @@ chrome.runtime.getBackgroundPage(function (bg) {
     bgPage = bg;
     blocksetIds = bgPage.blocksetIds;
     blocksetDatas = bgPage.blocksetDatas;
+    blocksetTimesElapsed = bgPage.blocksetTimesElapsed;
     generalOptions = bgPage.generalOptions;
     init();
 });
@@ -79,7 +81,7 @@ var oldTime = -1;
 
 function setTimeAllowed(value, pageId) {
     blocksetDatas[pageId].timeAllowed = value;
-    $("#timeLeft").text(msToTimeDisplay(blocksetDatas[pageId].timeAllowed - blocksetDatas[pageId].timeElapsed));
+    $("#timeLeft").text(msToTimeDisplay(blocksetDatas[pageId].timeAllowed - blocksetTimesElapsed[pageId]));
     saveCurrentBlockset();
 }
 
@@ -94,8 +96,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
 function update() {
     if (currentPageId >= 0) {
-        setTimeDisplay($("#timeLeft"), blocksetDatas[currentPageId].timeAllowed - blocksetDatas[currentPageId].timeElapsed);
-        if (!inputsRestricted && blocksetDatas[currentPageId].timeElapsed >= blocksetDatas[currentPageId].timeAllowed 
+        setTimeDisplay($("#timeLeft"), blocksetDatas[currentPageId].timeAllowed - blocksetTimesElapsed[currentPageId]);
+        if (!inputsRestricted && blocksetTimesElapsed[currentPageId] >= blocksetDatas[currentPageId].timeAllowed 
             && blocksetDatas[currentPageId].timeAllowed != 0 && !blocksetDatas[currentPageId].annoyMode) {
             restrictInputs(true);
         }
@@ -244,7 +246,7 @@ function displayPage(id) {
         oldTime = -1;
         $(".timepicker#activeFrom").timepicker("setTime", msToDate(blocksetDatas[id].activeTime.from));
         $(".timepicker#activeTo").timepicker("setTime", msToDate(blocksetDatas[id].activeTime.to));
-        setTimeDisplay($("#timeLeft"), blocksetDatas[id].timeAllowed - blocksetDatas[id].timeElapsed);
+        setTimeDisplay($("#timeLeft"), blocksetDatas[id].timeAllowed - blocksetTimesElapsed[id]);
         for (var i = 0; i < 7; i++) {
             $("#aDay" + i).prop("checked", blocksetDatas[id].activeDays[i]);
         }
@@ -255,7 +257,7 @@ function displayPage(id) {
         displaySites(blocksetDatas[id].blacklist, "bl");
         displaySites(blocksetDatas[id].whitelist, "wl");
 
-        if (blocksetDatas[id].timeElapsed >= blocksetDatas[id].timeAllowed && blocksetDatas[id].timeAllowed != 0 && !blocksetDatas[id].annoyMode) {
+        if (blocksetTimesElapsed[id] >= blocksetDatas[id].timeAllowed && blocksetDatas[id].timeAllowed != 0 && !blocksetDatas[id].annoyMode) {
             restrictInputs(true);
             $("#timeLeftSuffix").text(" (some inputs restricted)");
         }

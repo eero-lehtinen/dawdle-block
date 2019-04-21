@@ -43,6 +43,8 @@ var blocksetIds = [];
 
 var blocksetDatas = {};
 
+var blocksetTimesElapsed = {};
+
 var blRegEx = [];
 var wlRegEx = [];
 var blYT = [];
@@ -61,7 +63,6 @@ function defaultBlockset() {
         name: "Block set 0",
         annoyMode: false,
         timeAllowed: 600000, // milliseconds
-        timeElapsed: 0, // milliseconds
         resetTime: 0, // milliseconds from midnight
         lastReset: (new Date()).getTime(), // millisecods from 1970
         activeDays: [true, true, true, true, true, true, true],
@@ -71,17 +72,38 @@ function defaultBlockset() {
     };
 }
 
+function defaultTimesElapsed() {
+    var res = {};
+    for (var blocksetId of blocksetIds) {
+        res[blocksetId] = 0;
+    }
+    return res;
+}
+
 var defaultGeneralOptions = {
     clockType: 24,
     displayHelp: true,
     darkTheme: false
 }
 
+var isUpdated = false;
+var previousVersion = "";
+
+chrome.runtime.onInstalled.addListener(function (details) {
+    if (details.reason == "update") {
+        isUpdated = true;
+        previousVersion = details.previousVersion;
+    }
+});
+
+
 init();
 
 function init() {
     //chrome.storage.local.clear();
     //chrome.storage.sync.clear();
+    
+    
 
     chrome.storage.sync.get({
         blocksetIds: [0],
@@ -109,26 +131,42 @@ function init() {
 function loadBlocksets() {
     var k = 0;
 
-    for (var id of blocksetIds) {
-        chrome.storage.sync.get({
-          [id]: defaultBlockset(id)
-        },
-        function (data) {
-            var blocksetId = Object.keys(data)[0];
-            blocksetDatas[blocksetId] = data[blocksetId];
-            addAbsentItems(blocksetDatas[blocksetId], defaultBlockset(blocksetId));
-            generateLookUp(blocksetId);
+    chrome.storage.sync.get({
+        blocksetTimesElapsed: defaultTimesElapsed()
+    }, (items) => {
+        blocksetTimesElapsed = items.blocksetTimesElapsed;
 
-            k++;
+        for (var blocksetId of blocksetIds) {
+            chrome.storage.sync.get({
+                [blocksetId]: defaultBlockset(blocksetId)
+            }, (data) => {
+                blocksetDatas[blocksetId] = data[blocksetId];
+                addAbsentItems(blocksetDatas[blocksetId], defaultBlockset(blocksetId));
+                generateLookUp(blocksetId);
 
-            if (k === blocksetIds.length) {
-                initDone = true;
-                setupTimerReset();
-                setupActiveTimeUpdates();
-                evaluateAllTabs();
-            }
-        });
-    }
+                // time elapsed saving changed in 1.1.0
+                if (isUpdated && previousVersion.includes("1.0.")) {
+                    blocksetTimesElapsed[blocksetId] = blocksetDatas[blocksetId].timeElapsed;
+                    delete blocksetDatas[blocksetId].timeElapsed;
+                }
+
+                k++;
+
+                if (k === blocksetIds.length) {
+                    initDone = true;
+                    setupTimerReset();
+                    setupActiveTimeUpdates();
+                    evaluateAllTabs();
+
+                    if (isUpdated && previousVersion.includes("1.0.")) {
+                        saveElapsedTimes();
+                    }
+                }
+            });
+        }
+
+    });
+    
 }
 
 /**
@@ -282,9 +320,10 @@ function timeToMsSinceMidnight(time) {
 var timerResets = {};
 
 function resetElapsedTime(id) {
-    blocksetDatas[id].timeElapsed = 0;
+    blocksetTimesElapsed[id] = 0;
     blocksetDatas[id].lastReset = (new Date()).getTime();
     timerResets[id] = setTimeout(resetElapsedTime, 86400000, id); // 86 400 000 ms is 1 day
+    saveElapsedTimes();
 }
 
 /** 
@@ -356,16 +395,11 @@ function convertToRegEx(fromList, toList, extraYT) {
 var saveTimer = 0;
 var callbacks = [];
 
-// Tabs associated with page notification
-var annoyTabIds = [];
-
 function update() {
     if (windowIds.length != 0) {
 
         // Prevents icrementing multiple times in a single update
         var incrementedBlocksetIds = [];
-        
-        var annoyBSIds = [];
 
         for (windowId of windowIds) {
             if (minimizedWindows.includes(windowId))
@@ -374,33 +408,33 @@ function update() {
             var tabId = openTabs[windowId];
 
             if (tabEvaluations[tabId] != undefined && tabEvaluations[tabId] != "safe") {
-                var doAnnoy = false;
                 var doBlock = false;
+
+                var annoyBSIds = [];
 
                 for (var bsId of tabEvaluations[tabId]) {
                     if (blocksetDatas[bsId] == undefined)
                         continue;
 
-                    if (blocksetDatas[bsId].timeElapsed >= blocksetDatas[bsId].timeAllowed) { // Don't have time left
+                    if (blocksetTimesElapsed[bsId] >= blocksetDatas[bsId].timeAllowed) { // Don't have time left
                         if (!blocksetDatas[bsId].annoyMode) {
                             doBlock = true;
                         }
                         else {
-                            doAnnoy = true;
                             if (!annoyBSIds.includes(bsId))
                                 annoyBSIds.push(bsId);
 
                             // Increment for annoy too
                             if (!incrementedBlocksetIds.includes(bsId)) {
                                 incrementedBlocksetIds.push(bsId);
-                                blocksetDatas[bsId].timeElapsed += UPDATE_INTERVAL;
+                                blocksetTimesElapsed[bsId] += UPDATE_INTERVAL;
                             }
                         }
                     }
                     else { // Have time left
                         if (!incrementedBlocksetIds.includes(bsId)) {
                             incrementedBlocksetIds.push(bsId);
-                            blocksetDatas[bsId].timeElapsed += UPDATE_INTERVAL;
+                            blocksetTimesElapsed[bsId] += UPDATE_INTERVAL;
                         }
                     }
                 }
@@ -409,27 +443,21 @@ function update() {
                 if (doBlock) {
                     block(tabId);
                 }
-                // No block sets want to block this tab
-                // and one or more block sets want to annoy this tab
-                else if (doAnnoy) {
-                    if (!annoyTabIds.includes(tabId))
-                        annoyTabIds.push(tabId);
+
+                // Push annoy notification only once per update for each tab
+                if (annoyBSIds.length > 0) {
+                    annoy(tabId, annoyBSIds);
                 }
 
                 setBadge(tabId);
             }
         }
 
-        // Push annoy notification only once per update
-        if (annoyBSIds.length > 0) {
-            annoy(annoyBSIds);
-        }
-
         saveTimer += UPDATE_INTERVAL;
 
         if (saveTimer >= 10000) { // save every 10 seconds
             saveTimer = 0;
-            saveAll();
+            saveElapsedTimes();
         }
         
 
@@ -587,8 +615,8 @@ function setBadge(tabId) {
 function getLowestTimeLeft(blocksetIds) {
     var lowest = Infinity;
     for(id of blocksetIds) {
-        if ((blocksetDatas[id].timeAllowed - blocksetDatas[id].timeElapsed) < lowest)
-            lowest = (blocksetDatas[id].timeAllowed - blocksetDatas[id].timeElapsed);
+        if ((blocksetDatas[id].timeAllowed - blocksetTimesElapsed[id]) < lowest)
+            lowest = (blocksetDatas[id].timeAllowed - blocksetTimesElapsed[id]);
     }
     return lowest;
 }
@@ -763,8 +791,8 @@ function block(tabId) {
     });
 }
 
-function annoy(bsIds) {
-    chrome.tabs.executeScript({
+function annoy(tabId, bsIds) {
+    chrome.tabs.executeScript(tabId, {
         code: "typeof db_contentScriptCreated != 'undefined'"
     }, (created) => {
         if (chrome.runtime.lastError != undefined) {
@@ -774,25 +802,25 @@ function annoy(bsIds) {
         
         var largestOverTime = 0;
         for (id of bsIds) {
-            var t = blocksetDatas[id].timeElapsed - blocksetDatas[id].timeAllowed;
+            var t = blocksetTimesElapsed[id] - blocksetDatas[id].timeAllowed;
             if (t > largestOverTime) {
                 largestOverTime = t;
             }
         }
         
         if (created[0]) {
-            chrome.tabs.executeScript({ code: `db_showTime("${msToTimeDisplay(largestOverTime)}");` });
+            chrome.tabs.executeScript(tabId, { code: `db_showTime("${msToTimeDisplay(largestOverTime)}");` });
         }
         else {
-            chrome.tabs.executeScript({
+            chrome.tabs.executeScript(tabId, {
                 file: "libraries/jquery-3.2.1.min.js"
             }, () => {
-                chrome.tabs.executeScript({
+                chrome.tabs.executeScript(tabId, {
                     file: "js/contentScript.js"
                 }, () => {
-                        chrome.tabs.insertCSS({ file: "styles/annoy.css" });
-                        var time = msToTimeDisplay(blocksetDatas[bsIds[0]].timeAllowed - blocksetDatas[bsIds[0]].timeElapsed);
-                        chrome.tabs.executeScript({ code: `db_showTime("${msToTimeDisplay(largestOverTime)}");` });
+                    chrome.tabs.insertCSS(tabId, { file: "styles/annoy.css" });
+                    var time = msToTimeDisplay(blocksetDatas[bsIds[0]].timeAllowed - blocksetTimesElapsed[bsIds[0]]);
+                    chrome.tabs.executeScript(tabId, { code: `db_showTime("${msToTimeDisplay(largestOverTime)}");` });
                 });
             });
         }
@@ -837,6 +865,11 @@ function saveAll() {
     //console.log("save");
 }
 
+function saveElapsedTimes() {
+    chrome.storage.sync.set({
+        blocksetTimesElapsed: blocksetTimesElapsed
+    });
+}
 
 
 // HTTP get

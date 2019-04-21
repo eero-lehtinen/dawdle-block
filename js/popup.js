@@ -1,6 +1,7 @@
 var bgPage;
 var blocksetIds;
 var blocksetDatas;
+var blocksetTimesElapsed;
 
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     if (tabId === currentTabId && changeInfo.status === "complete") {
@@ -19,6 +20,7 @@ chrome.runtime.getBackgroundPage(function (bg) {
     bgPage = bg;
     blocksetIds = bgPage.blocksetIds;
     blocksetDatas = bgPage.blocksetDatas;
+    blocksetTimesElapsed = bgPage.blocksetTimesElapsed;
     start();
 });
 
@@ -59,7 +61,7 @@ function loadAllBlocksets() {
         });
         
         var time = $("<span>", { class: "blocksiteTime"});
-        setTimeDisplay(time, blocksetDatas[id].timeAllowed - blocksetDatas[id].timeElapsed);
+        setTimeDisplay(time, blocksetDatas[id].timeAllowed - blocksetTimesElapsed[id]);
 
         blocksetTimes[id] = time;
         name.appendTo(listItem);
@@ -79,7 +81,7 @@ function loadAllBlocksets() {
 function update() {
     for(id of blocksetIds) {
         if (blocksetTimes[id] != undefined) {
-            setTimeDisplay(blocksetTimes[id], blocksetDatas[id].timeAllowed - blocksetDatas[id].timeElapsed);
+            setTimeDisplay(blocksetTimes[id], blocksetDatas[id].timeAllowed - blocksetTimesElapsed[id]);
         } 
     }
 }
@@ -137,7 +139,7 @@ function selectSet(id) {
                 $("p.yt").first().show();
             }
 
-            if (blocksetDatas[id].timeElapsed >= blocksetDatas[id].timeAllowed) {
+            if (blocksetTimesElapsed[id] >= blocksetDatas[id].timeAllowed) {
                 $("a[id^='wl']").attr("class", "disabled");
             }
             else {
