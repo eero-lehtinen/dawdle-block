@@ -140,14 +140,15 @@ function loadBlocksets() {
             chrome.storage.sync.get({
                 [blocksetId]: defaultBlockset(blocksetId)
             }, (data) => {
-                blocksetDatas[blocksetId] = data[blocksetId];
-                addAbsentItems(blocksetDatas[blocksetId], defaultBlockset(blocksetId));
-                generateLookUp(blocksetId);
+                var bsId = Object.keys(data)[0];
+                blocksetDatas[bsId] = data[bsId];
+                addAbsentItems(blocksetDatas[bsId], defaultBlockset(bsId));
+                generateLookUp(bsId);
 
                 // time elapsed saving changed in 1.1.0
                 if (isUpdated && previousVersion.includes("1.0.")) {
-                    blocksetTimesElapsed[blocksetId] = blocksetDatas[blocksetId].timeElapsed;
-                    delete blocksetDatas[blocksetId].timeElapsed;
+                    blocksetTimesElapsed[bsId] = blocksetDatas[bsId].timeElapsed;
+                    delete blocksetDatas[bsId].timeElapsed;
                 }
 
                 k++;
