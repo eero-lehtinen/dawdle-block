@@ -139,7 +139,7 @@ function selectSet(id) {
                 $("p.yt").first().show();
             }
 
-            if (blocksetTimesElapsed[id] >= blocksetDatas[id].timeAllowed) {
+            if (blocksetTimesElapsed[id] >= blocksetDatas[id].timeAllowed && blocksetDatas[id].timeAllowed != 0 && !blocksetDatas[id].annoyMode) {
                 $("a[id^='wl']").attr("class", "disabled");
             }
             else {

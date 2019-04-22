@@ -1,3 +1,6 @@
+Version 1.1.2
+- Popup buttons are now not disabled when annoy mode is on (same behaviour as options page)
+
 Version 1.1.1
 - Annoy mode banner font more reliably pretty
 - Firefox specific css optimization
