@@ -128,6 +128,18 @@ function init() {
     currentWeekDay = new Date().getDay();
 }
 
+
+
+var saveInNextUpdate = [];
+
+/**
+ * For some reason, saves done close to startup don't go through, this is to help that
+ *  */
+function saveBlocksetInNextUpdate(blocksetId) {
+    if (!saveInNextUpdate.includes(blocksetId))
+        saveInNextUpdate.push(blocksetId);
+}
+
 function loadBlocksets() {
     var k = 0;
 
@@ -148,20 +160,16 @@ function loadBlocksets() {
                 // time elapsed saving changed in 1.1.0
                 if (isUpdated && previousVersion.includes("1.0.")) {
                     blocksetTimesElapsed[bsId] = blocksetDatas[bsId].timeElapsed;
-                    delete blocksetDatas[bsId].timeElapsed;
                 }
 
                 k++;
 
                 if (k === blocksetIds.length) {
-                    initDone = true;
                     setupTimerReset();
                     setupActiveTimeUpdates();
                     evaluateAllTabs();
 
-                    if (isUpdated && previousVersion.includes("1.0.")) {
-                        saveElapsedTimes();
-                    }
+                    initDone = true;
                 }
             });
         }
@@ -325,6 +333,10 @@ function resetElapsedTime(id) {
     blocksetDatas[id].lastReset = (new Date()).getTime();
     timerResets[id] = setTimeout(resetElapsedTime, 86400000, id); // 86 400 000 ms is 1 day
     saveElapsedTimes();
+    
+    saveBlockset(id);
+    saveBlocksetInNextUpdate(id); // resetting can happen close to startup, so use this also
+    console.log("elapsed time reset");
 }
 
 /** 
@@ -459,6 +471,11 @@ function update() {
         if (saveTimer >= 10000) { // save every 10 seconds
             saveTimer = 0;
             saveElapsedTimes();
+
+            for (bsId of saveInNextUpdate) {
+                saveBlockset(bsId);
+            }
+            saveInNextUpdate = [];
         }
         
 
@@ -850,25 +867,39 @@ function bsItem(type, value) {
 }
 
 // Saving
-function save(blocksetId) {
+function saveBlockset(blocksetId) {
     chrome.storage.sync.set({
           [blocksetId]: blocksetDatas[blocksetId]
+    }, () => {
+        if (chrome.runtime.lastError) {
+            console.log("Could not save blockset with id: " + blocksetId);
+            console.warn(chrome.runtime.lastError);
+        }
     });
 }
 
-function saveAll() {
+function saveAllBlocksets() {
     var saveItems = {};
     for (id of blocksetIds) {
         saveItems[id] = blocksetDatas[id];
     }
-    chrome.storage.sync.set(saveItems);
-
-    //console.log("save");
+    chrome.storage.sync.set(saveItems, () => {
+        if (chrome.runtime.lastError != null) {
+            console.log("Could not save all blocksets");
+            console.warn(chrome.runtime.lastError);
+        }
+    });
 }
 
 function saveElapsedTimes() {
+    console.log("elapsed times saved");
     chrome.storage.sync.set({
         blocksetTimesElapsed: blocksetTimesElapsed
+    }, () => {
+        if (chrome.runtime.lastError != null) {
+            console.log("Could not save elapsed times");
+            console.warn(chrome.runtime.lastError);
+        }
     });
 }
 
