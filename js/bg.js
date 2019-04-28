@@ -336,7 +336,6 @@ function resetElapsedTime(id) {
     
     saveBlockset(id);
     saveBlocksetInNextUpdate(id); // resetting can happen close to startup, so use this also
-    console.log("elapsed time reset");
 }
 
 /** 
@@ -873,7 +872,7 @@ function saveBlockset(blocksetId) {
     }, () => {
         if (chrome.runtime.lastError) {
             console.log("Could not save blockset with id: " + blocksetId);
-            console.warn(chrome.runtime.lastError);
+            console.log(chrome.runtime.lastError);
         }
     });
 }
@@ -886,19 +885,18 @@ function saveAllBlocksets() {
     chrome.storage.sync.set(saveItems, () => {
         if (chrome.runtime.lastError != null) {
             console.log("Could not save all blocksets");
-            console.warn(chrome.runtime.lastError);
+            console.log(chrome.runtime.lastError);
         }
     });
 }
 
 function saveElapsedTimes() {
-    console.log("elapsed times saved");
     chrome.storage.sync.set({
         blocksetTimesElapsed: blocksetTimesElapsed
     }, () => {
         if (chrome.runtime.lastError != null) {
             console.log("Could not save elapsed times");
-            console.warn(chrome.runtime.lastError);
+            console.log(chrome.runtime.lastError);
         }
     });
 }
