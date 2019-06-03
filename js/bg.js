@@ -688,7 +688,11 @@ function blockedBy(tab, callback) {
         var videoId = getStringBetween(url, "v=", "&");
 
         httpGetAsync("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + "&fields=items(snippet(categoryId%2CchannelId))&key=" + API_KEY, function (response) {
-            var object = JSON.parse(response);
+            if (response.error != undefined) {
+                console.error(`Could not check video with id ${videoId}, error: ${response.error}`);
+                return;
+            }   
+            var object = JSON.parse(response.message);
             if (object.items.length != 0) {
                 var channelId = object.items[0].snippet.channelId;
                 var categoryId = object.items[0].snippet.categoryId;
@@ -729,7 +733,11 @@ function blockedBy(tab, callback) {
         var userName = list[2];
 
         httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&forUsername=" + userName + "&fields=items%2Fid&key=" + API_KEY, function (response) {
-            var object = JSON.parse(response);
+            if (response.error != undefined) {
+                console.error(`Could not check channel with username ${userName}, error: ${response.error}`);
+                return;
+            }
+            var object = JSON.parse(response.message);
 
             if (object.items.length != 0) {
                 var channelId = object.items[0].id;
@@ -743,7 +751,11 @@ function blockedBy(tab, callback) {
         var playlistId = getStringBetween(url, "list=", "&");
 
         httpGetAsync("https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=" + playlistId + "&fields=items%2Fsnippet%2FchannelId&key=" + API_KEY, function (response) {
-            var object = JSON.parse(response);
+            if (response.error != undefined) {
+                console.error(`Could not check playlist with id ${playlistId}, error: ${response.error}`);
+                return;
+            }
+            var object = JSON.parse(response.message);
             if (object.items.length != 0) {
                 var channelId = object.items[0].snippet.channelId;
                 evalChannelId(channelId, blocksetIdList);
@@ -905,10 +917,19 @@ function saveElapsedTimes() {
 // HTTP get
 function httpGetAsync(theUrl, callback) {
     var xmlHttp = new XMLHttpRequest();
+    xmlHttp.timeout = 1500;
+    xmlHttp.ontimeout = function (e) {
+        callback({error: "timed out"});
+    };
     xmlHttp.onreadystatechange = function () {      
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-            callback(xmlHttp.responseText);
-        }  
+        if (xmlHttp.readyState == 4) {
+            if (xmlHttp.status == 200) {
+                callback({message: xmlHttp.responseText});
+            }
+            else if (xmlHttp.status == 400) {
+                callback({error: "bad request"});
+            }
+        }
     }
     xmlHttp.open("GET", theUrl, true);
     xmlHttp.send(null);

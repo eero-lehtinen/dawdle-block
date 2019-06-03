@@ -222,7 +222,13 @@ function getYTData(_url, callback) {
         if (_url.startsWith("www.youtube.com/watch")) {
             var videoId = _url.split("v=")[1].substring(0, 11);
             bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + "&fields=items(snippet(categoryId%2CchannelId%2CchannelTitle))&key=" + bgPage.API_KEY, function (response) {
-                var object = JSON.parse(response);
+
+                if (response.error != undefined) {
+                    console.error(`Could not get video info with id ${videoId}, error: ${response.error}`);
+                    return;
+                }
+
+                var object = JSON.parse(response.message);
 
                 callback({
                     channelId: object.items[0].snippet.channelId,
@@ -236,7 +242,13 @@ function getYTData(_url, callback) {
             var channelId = list[2];
 
             bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&id=" + channelId + "&fields=items(snippet%2Ftitle)&key=" + bgPage.API_KEY, function (response) {
-                var object = JSON.parse(response);
+                
+                if (response.error != undefined) {
+                    console.error(`Could not get channel info with id ${channelId}, error: ${response.error}`);
+                    return;
+                }
+
+                var object = JSON.parse(response.message);
 
                 callback({
                     channelId: channelId,
@@ -249,7 +261,13 @@ function getYTData(_url, callback) {
             var channelUserName = list[2];
 
             bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&forUsername=" + channelUserName + "&fields=items(id%2Csnippet%2Ftitle)&key=" + bgPage.API_KEY, function (response) {
-                var object = JSON.parse(response);   
+                
+                if (response.error != undefined) {
+                    console.error(`Could not get channel info with username ${channelUserName}, error: ${response.error}`);
+                    return;
+                }
+            
+                var object = JSON.parse(response.message);
 
                 callback({
                     channelId: object.items[0].id,

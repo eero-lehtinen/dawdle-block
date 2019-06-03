@@ -316,8 +316,13 @@ function displaySites(list, type) {
 
 function addSite(toList, select, input, callback) {
     if (select.val() === "ytChannel") {
-        bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&id=" + input.val() + "&fields=items(id%2Csnippet%2Ftitle)&key=" + bgPage.APIkey, function (response) {
-            var object = JSON.parse(response);
+        bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&id=" + input.val() + "&fields=items(id%2Csnippet%2Ftitle)&key=" + bgPage.API_KEY, function (response) {
+            if (response.error != undefined) {
+                console.error(`Could not check channel with id ${input.val()}, error: ${response.error}`);
+                dialog("Error", "Could not communicate with youtube api.<br>Reason: " + response.error, "OK");
+                return;
+            }
+            var object = JSON.parse(response.message);
             if (object.items.length != 0) {
                 toList[toList.length] = bgPage.bsItem(select.val(), [object.items[0].snippet.title, object.items[0].id]);
                 callback();
