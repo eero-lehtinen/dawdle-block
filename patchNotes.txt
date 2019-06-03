@@ -1,4 +1,4 @@
-Version 1.1.5
+Version 1.1.6
 - Fixed a bug where users could not add YouTube channels from the options page
 
 Version 1.1.3
