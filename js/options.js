@@ -94,18 +94,19 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 function update() {
     if (currentPageId >= 0) {
         setTimeDisplay($("#timeLeft"), blocksetDatas[currentPageId].timeAllowed - blocksetTimesElapsed[currentPageId]);
-        if (!inputsRestricted && blocksetTimesElapsed[currentPageId] >= blocksetDatas[currentPageId].timeAllowed 
+        if (!inputsRestricted && blocksetTimesElapsed[currentPageId] >= blocksetDatas[currentPageId].timeAllowed
             && blocksetDatas[currentPageId].timeAllowed != 0 && !blocksetDatas[currentPageId].annoyMode) {
             restrictInputs(true);
-        }
-        if (inputsRestricted)
             $("#timeLeftSuffix").text(" (some inputs restricted)");
-        else 
+        }
+        else if (inputsRestricted) {
+            restrictInputs(false);
             $("#timeLeftSuffix").text("");
+        }
     }
 }
 
-function loadTimePickers() {         
+function loadTimePickers() {
     if ($('.timepicker#resetTime').timepicker != undefined) {
         $('.timepicker#resetTime').timepicker("destroy");
     }
@@ -184,13 +185,13 @@ function setupJQueryUI() {
                 displayPage(ui.item.find("a").attr("id"));
             }
         }
-        
+
     });
 }
 
 function displayBlocksetNavs() {
     $("li.blocksetNav").remove();
-    
+
     for (var i = 0; i < blocksetIds.length; i++) {
 
         blocksetLink = displayBlocksetNav(blocksetIds[i])
@@ -212,7 +213,7 @@ function displayBlocksetNavs() {
 }
 
 function displayBlocksetNav(id) {
-    var listItem = $("<li>", { class: "blocksetNav", list: "blocksets"}).appendTo("ul.nav");
+    var listItem = $("<li>", { class: "blocksetNav", list: "blocksets" }).appendTo("ul.nav");
     var blocksetLink = $("<a>", { href: "#", id: id }).append(blocksetDatas[id].name);
     blocksetLink.appendTo(listItem);
     return blocksetLink;
@@ -247,7 +248,7 @@ function displayPage(id) {
         for (var i = 0; i < 7; i++) {
             $("#aDay" + i).prop("checked", blocksetDatas[id].activeDays[i]);
         }
-        
+
         $("#blSiteItems").empty();
         $("#wlSiteItems").empty();
 
@@ -305,7 +306,7 @@ function displaySites(list, type) {
         var siteItem = $("<li>", { class: "siteItem", id: type + "Item" + i }).prependTo("#" + type + "SiteItems");
         $("<span>", { class: "filter" }).html(filterLookUp[list[i].type] + ":").appendTo(siteItem);
         $("<span>", { class: "site" }).html(siteValue).appendTo(siteItem);
-        var button = $("<button>", { class: "close" , name: "deleteSite"}).html("<img src='images/cancel.png'>").appendTo(siteItem);
+        var button = $("<button>", { class: "close", name: "deleteSite" }).html("<img src='images/cancel.png'>").appendTo(siteItem);
         if (type === "bl" && inputsRestricted)
             button.prop("disabled", true);
         button.on("click", function () {
@@ -364,7 +365,7 @@ function addBlockset(newData) {
         blocksetIds: blocksetIds,
         blocksetTimesElapsed: blocksetTimesElapsed
     });
-    
+
 
     if (newData != undefined) {
         blocksetDatas[newBlocksetId] = newData;
@@ -399,7 +400,7 @@ function getNewBlocksetName(copyName) {
 
     if (copyName != undefined)
         newName = copyName + "(0)";
-    
+
     var currentNum = 0;
 
     var duplicate = true; // Assume to be duplicate until proven otherwise
@@ -466,9 +467,9 @@ function deleteBlockset(id) {
 
     if (blocksetIds.length === 0)
         displayPage(-1);
-    else 
+    else
         displayPage(blocksetIds[blocksetIds.length - 1]);
-    
+
     chrome.runtime.sendMessage({
         type: "blocksetDeleted",
         id: id
@@ -489,11 +490,11 @@ function findNewBlocksetId() {
 
 function saveCurrentBlockset() {
     chrome.storage.sync.set({
-          [currentPageId]: blocksetDatas[currentPageId]
+        [currentPageId]: blocksetDatas[currentPageId]
     }, function () {
         if (chrome.runtime.lastError == null) {
             $("#saveIndicator").addClass("show");
-            setTimeout(() => {$("#saveIndicator").removeClass("show")}, 100);
+            setTimeout(() => { $("#saveIndicator").removeClass("show") }, 100);
         }
         else {
             console.log(chrome.runtime.lastError);
@@ -510,7 +511,7 @@ function msToTimeDisplay(duration) {
     var isNegative = (duration < 0);
 
     duration = Math.abs(duration);
-        
+
     var seconds = parseInt((duration / 1000) % 60);
     var minutes = parseInt((duration / (1000 * 60)) % 60);
     var hours = parseInt((duration / (1000 * 60 * 60)) % 24);
@@ -519,7 +520,7 @@ function msToTimeDisplay(duration) {
     minutes = (minutes < 10) ? "0" + minutes : minutes;
     seconds = (seconds < 10) ? "0" + seconds : seconds;
 
-    return (isNegative ? "-": "") + hours + ":" + minutes + ":" + seconds;
+    return (isNegative ? "-" : "") + hours + ":" + minutes + ":" + seconds;
 }
 
 function msToDate(ms) {
@@ -540,12 +541,12 @@ function setTimeDisplay(element, time) {
     element.text(msToTimeDisplay(time));
 
     if (time < 0) {
-        if (!element.hasClass("red")){
+        if (!element.hasClass("red")) {
             element.addClass("red");
         }
     }
     else {
-        if (element.hasClass("red")){
+        if (element.hasClass("red")) {
             element.removeClass("red");
         }
     }
@@ -555,7 +556,7 @@ function dialog(title, text, acceptText, onAccept, declineText, onDecline) {
     var dWindow = $("<div>", { class: "dialog" }).appendTo($("body"));
     var topBar = $("<div>", { class: "topBar" }).appendTo(dWindow);
     var title = $("<span>").html(title).appendTo(topBar);
-    
+
     var textBox = $("<div>", { class: "text" }).html(text).appendTo(dWindow);
     var botBar = $("<div>", { class: "botBar" }).appendTo(dWindow);
     var decline;
@@ -611,7 +612,7 @@ function listAllCategories() {
         var toList = (i < halfLength) ? leftList : rightList;
         $("<li>").text(keys[i] + ": " + bgPage.ytCategoryNamesById[keys[i]]).appendTo(toList);
     }
-    
+
     dialog("Categories by id", textBox.html(), "OK");
 }
 
@@ -625,7 +626,7 @@ function displayHelp(bool) {
 function setDarkTheme(bool) {
     generalOptions.darkTheme = bool;
     if (bool === true)
-        $("html").attr({class: "dark"});
+        $("html").attr({ class: "dark" });
     else
         $("html").removeAttr("class");
 }
@@ -648,7 +649,7 @@ function diskLoadData(file) {
         var feedback = "Save file loaded";
         if (saves.blocksetDatas != undefined) {
             keys = Object.keys(saves.blocksetDatas);
-            for(key of keys) {
+            for (key of keys) {
                 if (blocksetIds.length < 50) {
                     addBlockset(saves.blocksetDatas[key]);
                 }
@@ -676,7 +677,7 @@ function diskLoadData(file) {
 function saveAllBlocksets() {
     for (id of blocksetIds) {
         chrome.storage.sync.set({
-          [id]: blocksetDatas[id]
+            [id]: blocksetDatas[id]
         });
 
         chrome.runtime.sendMessage({
@@ -807,7 +808,7 @@ $("#annoyMode").on("change", function () {
     if (checkBox.prop("checked")) {
         chrome.permissions.contains({
             origins: ["<all_urls>"]
-        }, (res) =>  {
+        }, (res) => {
             if (res) {
                 blocksetDatas[currentPageId].annoyMode = true;
                 saveCurrentBlockset();
@@ -900,7 +901,7 @@ $("input#chooseFileHidden").on("change", function () {
     if ($(this).prop("files")[0] === undefined) {
         $("button#import").prop("disabled", true);
         $("span#chooseFileLabel").text("No file chosen");
-    }       
+    }
     else {
         $("button#import").prop("disabled", false);
         $("span#chooseFileLabel").text($(this).prop("files")[0].name);
