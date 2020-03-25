@@ -1,5 +1,5 @@
 Version 1.2.0
-- Now uses much more reliable alarms api for resetting timers
+- Now uses a much more reliable alarms api for resetting timers
 - UI improvements on Firefox
 - Cursor now clearly shows when an option is disabled
 
