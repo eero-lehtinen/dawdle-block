@@ -1,3 +1,6 @@
+Verison 1.2.1
+- Active dates now applied more reliably
+
 Version 1.2.0
 - Now uses a much more reliable alarms api for resetting timers
 - UI improvements on Firefox
