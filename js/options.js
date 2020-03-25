@@ -92,16 +92,20 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 });
 
 function update() {
+
     if (currentPageId >= 0) {
+
         setTimeDisplay($("#timeLeft"), blocksetDatas[currentPageId].timeAllowed - blocksetTimesElapsed[currentPageId]);
-        if (!inputsRestricted && blocksetTimesElapsed[currentPageId] >= blocksetDatas[currentPageId].timeAllowed
-            && blocksetDatas[currentPageId].timeAllowed != 0 && !blocksetDatas[currentPageId].annoyMode) {
-            restrictInputs(true);
-            $("#timeLeftSuffix").text(" (some inputs restricted)");
+
+        if (blocksetTimesElapsed[currentPageId] >= blocksetDatas[currentPageId].timeAllowed &&
+            blocksetDatas[currentPageId].timeAllowed != 0 && !blocksetDatas[currentPageId].annoyMode) {
+            if (!inputsRestricted)
+                restrictInputs(true);
+
         }
-        else if (inputsRestricted) {
-            restrictInputs(false);
-            $("#timeLeftSuffix").text("");
+        else {
+            if (inputsRestricted)
+                restrictInputs(false);
         }
     }
 }
@@ -196,7 +200,7 @@ function displayBlocksetNavs() {
 
         blocksetLink = displayBlocksetNav(blocksetIds[i])
         blocksetLink.click(function () {
-            displayPage($(this).attr("id"))
+            displayPage(parseInt($(this).attr("id")))
         });
     }
 
@@ -255,13 +259,12 @@ function displayPage(id) {
         displaySites(blocksetDatas[id].blacklist, "bl");
         displaySites(blocksetDatas[id].whitelist, "wl");
 
-        if (blocksetTimesElapsed[id] >= blocksetDatas[id].timeAllowed && blocksetDatas[id].timeAllowed != 0 && !blocksetDatas[id].annoyMode) {
+        if (blocksetTimesElapsed[id] >= blocksetDatas[id].timeAllowed &&
+            blocksetDatas[id].timeAllowed != 0 && !blocksetDatas[id].annoyMode) {
             restrictInputs(true);
-            $("#timeLeftSuffix").text(" (some inputs restricted)");
         }
         else {
             restrictInputs(false);
-            $("#timeLeftSuffix").text("");
         }
     }
     else if (id === -1) {
@@ -289,6 +292,13 @@ function restrictInputs(toState) {
         else
             $(this).parent().removeAttr("class");
     });
+
+    if (toState === true) {
+        $("#timeLeftSuffix").text(" (some inputs restricted)");
+    }
+    else {
+        $("#timeLeftSuffix").text("");
+    }
 }
 
 function displaySites(list, type) {

@@ -66,7 +66,7 @@ function defaultBlockset() {
         resetTime: 0, // milliseconds from midnight
         lastReset: (new Date()).getTime(), // millisecods from 1970
         activeDays: [true, true, true, true, true, true, true],
-        activeTime: {from: 0, to: 0}, // milliseconds from midnight
+        activeTime: { from: 0, to: 0 }, // milliseconds from midnight
         blacklist: [],
         whitelist: []
     };
@@ -102,8 +102,8 @@ init();
 function init() {
     //chrome.storage.local.clear();
     //chrome.storage.sync.clear();
-    
-    
+
+
 
     chrome.storage.sync.get({
         blocksetIds: [0],
@@ -124,7 +124,8 @@ function init() {
 
     setInterval(update, UPDATE_INTERVAL);
     var nextMidnight = new Date().setHours(24, 0, 0, 0);
-    setTimeout(midnightUpdate, nextMidnight - new Date().getTime() + 1000);
+    chrome.alarms.create("midnightUpdate", { when: nextMidnight, periodInMinutes: 24 * 60 });
+    //setTimeout(midnightUpdate, nextMidnight - new Date().getTime() + 1000);
     currentWeekDay = new Date().getDay();
 }
 
@@ -175,7 +176,7 @@ function loadBlocksets() {
         }
 
     });
-    
+
 }
 
 /**
@@ -195,6 +196,8 @@ function addAbsentItems(object, defaultObject) {
 }
 
 
+
+
 // Listen for updates in settings
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     if (message.type === "blocksetChanged") {
@@ -205,13 +208,20 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     }
     else if (message.type === "blocksetDeleted") {
         deleteLookUp(message.id);
-        if (timerResets[message.id] != undefined) {
-            clearTimeout(timerResets[message.id]);
-        }
-        if (activeTimes[message.id] != undefined) {
-            clearTimeout(activeTimes[message.id].from);
-            clearTimeout(activeTimes[message.id].to); 
-        }
+
+        // Deletes elapsed timer reset alarm
+        chrome.alarms.clear("timerReset_" + id);
+        chrome.alarms.clear("activeTimeUpdateFrom_" + id);
+        chrome.alarms.clear("activeTimeUpdateTo_" + id);
+
+        // if (timerResets[message.id] != undefined) {
+        //     clearTimeout(timerResets[message.id]);
+        // }
+
+        // if (activeTimes[message.id] != undefined) {
+        //     clearTimeout(activeTimes[message.id].from);
+        //     clearTimeout(activeTimes[message.id].to);
+        // }
     }
     else if (message.type === "generalOptionsChanged") {
         // Not really used yet
@@ -221,83 +231,121 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     }
 });
 
+chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name.startsWith("timerReset")) {
+        resetElapsedTime(parseInt(alarm.name.split("_")[1]));
+    }
+    else if (alarm.name.startsWith("activeTimeUpdate")) { // both from and to
+        activeTimeUpdate()
+    }
+});
+
+
 // Timers to update tabs when needed
 function setupTimerReset(blocksetId) {
-    var now = new Date();
+    const now = new Date();
     var resetTime = new Date();
 
     resetTime.setSeconds(0, 0);
 
-    var list;
-    if (blocksetId === undefined) {
+    var list = [];
+    if (blocksetId === undefined) { // If undefined, setup for all blocksets
         list = blocksetIds;
     }
     else {
         list = [blocksetId];
     }
 
-    for (id of list) {
+    for (id_forward of list) {
 
-        if (timerResets[id] != undefined) {
-            clearTimeout(timerResets[id]);
-        }
+        (function (id) {
+            // Remove old alarm if it exists
+            chrome.alarms.clear("timerReset_" + id, (removed) => {
 
-        var time = msToDate(blocksetDatas[id].resetTime);
+                var time = msToDate(blocksetDatas[id].resetTime);
 
-        resetTime.setHours(time.getHours(), time.getMinutes());
+                resetTime.setHours(time.getHours(), time.getMinutes());
 
-        var lastReset = new Date(blocksetDatas[id].lastReset);
+                var lastReset = new Date(blocksetDatas[id].lastReset);
 
-        if (now.getTime() >= resetTime.getTime() && lastReset.getTime() < resetTime.getTime()) {
-            resetElapsedTime(id);
-        }
-        else if (now.getTime() >= resetTime.getTime() && lastReset.getTime() >= resetTime.getTime()) {
-            // already done for today, set timeout for tomorrow's reset
-            timerResets[id] = setTimeout(resetElapsedTime, resetTime.getTime() - now.getTime() + 86400000, id);
-        }
-        else if (now.getTime() < resetTime.getTime()) {
-            // set timeout for later today
-            timerResets[id] = setTimeout(resetElapsedTime, resetTime.getTime() - now.getTime(), id);
-        }
+                if (now.getTime() >= resetTime.getTime() && lastReset.getTime() < resetTime.getTime()) {
+                    resetElapsedTime(id);
+                }
+
+                if (now.getTime() >= resetTime.getTime()) {
+                    // already done for today, set timeout for tomorrow's reset
+                    //timerResets[id] = setTimeout(resetElapsedTime, resetTime.getTime() - now.getTime() + 86400000, id);
+                    chrome.alarms.create("timerReset_" + id, { when: resetTime.getTime() + 86400000, periodInMinutes: 24 * 60 });
+                }
+                else if (now.getTime() < resetTime.getTime()) {
+                    // set timeout for later today
+                    //timerResets[id] = setTimeout(resetElapsedTime, resetTime.getTime() - now.getTime(), id);
+                    chrome.alarms.create("timerReset_" + id, { when: resetTime.getTime(), periodInMinutes: 24 * 60 });
+                }
+            });
+        })(id_forward);
     }
+
+
+    // if (timerResets[id] != undefined) {
+    //     clearTimeout(timerResets[id]);
+    // }
 }
 
 function setupActiveTimeUpdates(blocksetId) {
-    var now = timeToMsSinceMidnight(new Date());
+    const nowSinceMidnight = timeToMsSinceMidnight(new Date());
+
+    const todayZeroTime = new Date().setHours(0, 0, 0, 0);
 
     var list;
-    if (blocksetId === undefined) {
+    if (blocksetId === undefined) { // If undefined, setup for all blocksets
         list = blocksetIds;
     }
     else {
         list = [blocksetId];
     }
 
-    for (id of list) {
-        if (activeTimes[id] != undefined) {
-            clearTimeout(activeTimes[id]);
-        }
+    for (id_forward of list) {
 
-        var activeTimeFrom = blocksetDatas[id].activeTime.from;
-        var activeTimeTo = blocksetDatas[id].activeTime.to;
+        (function (id) {
+            // Remove old alarm if it exists
+            chrome.alarms.clear("activeTimeUpdateFrom_" + id, () => {
+                chrome.alarms.clear("activeTimeUpdateTo_" + id, () => {
 
-        if (activeTimeFrom != activeTimeTo) {
-            activeTimes[id] = {};
-            if (activeTimeFrom >= now) {
-                activeTimes[id].from = setTimeout(activeTimeUpdate, activeTimeFrom - now + 1000, id, "from"); // add one second of padding so eval functions are surely correct
-            }
-            else if (activeTimeFrom < now) {
-                activeTimes[id].from = setTimeout(activeTimeUpdate, activeTimeFrom - now + 86400000 + 1000, id, "from"); // timefrom gone for today, set timer for tomorrow
-            }
-            if (activeTimeTo >= now) {
-                activeTimes[id].to = setTimeout(activeTimeUpdate, activeTimeTo - now + 1000, id, "to");
-            }
-            else if (activeTimeTo < now) {
-                activeTimes[id].to = setTimeout(activeTimeUpdate, activeTimeTo - now + 86400000 + 1000, id, "to"); 
-            }
-        }
+                    var activeTimeFrom = blocksetDatas[id].activeTime.from; // MS from midnight
+                    var activeTimeTo = blocksetDatas[id].activeTime.to; // MS from midnight
+
+                    if (activeTimeFrom != activeTimeTo) { // If from and to are same, blocksets are just always active, so dont do anything
+                        //activeTimes[id] = {};
+
+                        if (activeTimeFrom >= nowSinceMidnight) {
+                            //activeTimes[id].from = setTimeout(activeTimeUpdate, activeTimeFrom - now + 1000, id, "from"); // add one second of padding so eval functions are surely correct
+                            chrome.alarms.create("activeTimeUpdateFrom_" + id,
+                                { when: todayZeroTime + activeTimeFrom + 1000, periodInMinutes: 24 * 60 });
+                        }
+                        else if (activeTimeFrom < nowSinceMidnight) {
+                            //activeTimes[id].from = setTimeout(activeTimeUpdate, activeTimeFrom - nowSinceMidnight + 86400000 + 1000, id, "from"); // timefrom gone for today, set timer for tomorrow
+                            chrome.alarms.create("activeTimeUpdateFrom_" + id,
+                                { when: todayZeroTime + activeTimeFrom + 86400000 + 1000, periodInMinutes: 24 * 60 });
+                        }
+
+                        if (activeTimeTo >= nowSinceMidnight) {
+                            //activeTimes[id].to = setTimeout(activeTimeUpdate, activeTimeTo - nowSinceMidnight + 1000, id, "to");
+                            chrome.alarms.create("activeTimeUpdateTo_" + id,
+                                { when: todayZeroTime + activeTimeTo + 1000, periodInMinutes: 24 * 60 });
+                        }
+                        else if (activeTimeTo < nowSinceMidnight) {
+                            //activeTimes[id].to = setTimeout(activeTimeUpdate, activeTimeTo - nowSinceMidnight + 86400000 + 1000, id, "to");
+                            chrome.alarms.create("activeTimeUpdateTo_" + id,
+                                { when: todayZeroTime + activeTimeTo + 86400000 + 1000, periodInMinutes: 24 * 60 });
+                        }
+                    }
+                });
+            });
+        })(id_forward);
     }
 }
+
 
 function msToDate(time) {
     var h = parseInt((time / (1000 * 60 * 60)) % 24);
@@ -310,7 +358,7 @@ function msToTimeDisplay(duration) {
     var isNegative = (duration < 0);
 
     duration = Math.abs(duration);
-        
+
     var seconds = parseInt((duration / 1000) % 60);
     var minutes = parseInt((duration / (1000 * 60)) % 60);
     var hours = parseInt((duration / (1000 * 60 * 60)) % 24);
@@ -319,21 +367,22 @@ function msToTimeDisplay(duration) {
     minutes = (minutes < 10) ? "0" + minutes : minutes;
     seconds = (seconds < 10) ? "0" + seconds : seconds;
 
-    return (isNegative ? "-": "") + hours + ":" + minutes + ":" + seconds;
+    return (isNegative ? "-" : "") + hours + ":" + minutes + ":" + seconds;
 }
 
 function timeToMsSinceMidnight(time) {
     return (time.getSeconds() * 1000) + (time.getMinutes() * 60000) + (time.getHours() * 3600000);
 }
 
-var timerResets = {};
+//var timerResets = {};
 
 function resetElapsedTime(id) {
     blocksetTimesElapsed[id] = 0;
     blocksetDatas[id].lastReset = (new Date()).getTime();
-    timerResets[id] = setTimeout(resetElapsedTime, 86400000, id); // 86 400 000 ms is 1 day
+    //timerResets[id] = setTimeout(resetElapsedTime, 86400000, id); // 86 400 000 ms is 1 day
+
     saveElapsedTimes();
-    
+
     saveBlockset(id);
     saveBlocksetInNextUpdate(id); // resetting can happen close to startup, so use this also
 }
@@ -341,7 +390,6 @@ function resetElapsedTime(id) {
 /** 
  * Updates current weekday
  * Rechecks all tabs
- * Schedules next midnightupdate
  */
 function midnightUpdate() {
     currentWeekDay = new Date().getDay();
@@ -350,11 +398,11 @@ function midnightUpdate() {
     setTimeout(midnightUpdate, nextMidnight - new Date().getTime() + 1000);
 }
 
-var activeTimes = {};
+//var activeTimes = {};
 
-function activeTimeUpdate(id, type) {
+// Just update all tabs because it may not be active time anymore
+function activeTimeUpdate() {
     evaluateAllTabs();
-    activeTimes[id][type] = setTimeout(activeTimeUpdate, 86400000, id, type);
 }
 
 function evaluateAllTabs() {
@@ -375,8 +423,8 @@ function generateLookUp(blocksetId) {
 function deleteLookUp(blocksetId) {
     blRegEx[blocksetId] = [];
     wlRegEx[blocksetId] = [];
-    blYT[blocksetId] = {channels: [], categories: []};
-    wlYT[blocksetId] = {channels: [], categories: []};
+    blYT[blocksetId] = { channels: [], categories: [] };
+    wlYT[blocksetId] = { channels: [], categories: [] };
 }
 
 function convertToRegEx(fromList, toList, extraYT) {
@@ -476,14 +524,14 @@ function update() {
             }
             saveInNextUpdate = [];
         }
-        
+
 
         // Update popup and options page if they have registered their callbacks
         for (var callback of callbacks) {
             try {
                 callback();
             }
-            catch (e){}
+            catch (e) { }
         }
     }
 }
@@ -555,7 +603,7 @@ chrome.windows.onFocusChanged.addListener(function (windowId) {
                 if (windowItem.state === "minimized" && index === -1) {
                     minimizedWindows.push(windowItem.id);
                 }
-                else if (index != -1){
+                else if (index != -1) {
                     minimizedWindows.splice(index, 1);
                 }
             }
@@ -603,10 +651,6 @@ var grey = [123, 123, 123, 255];
 function setBadge(tabId) {
     var time = getLowestTimeLeft(tabEvaluations[tabId]);
 
-    var seconds = parseInt((time / 1000) % 60);
-    var minutes = parseInt((time / (1000 * 60)) % 60);
-    var hours = parseInt((time / (1000 * 60 * 60)) % 24);
-
     var color;
     var text = " ";
     if (time > 1000 * 60 * 60) { // time is more than one hour -> don't display time
@@ -631,7 +675,7 @@ function setBadge(tabId) {
 
 function getLowestTimeLeft(blocksetIds) {
     var lowest = Infinity;
-    for(id of blocksetIds) {
+    for (id of blocksetIds) {
         if ((blocksetDatas[id].timeAllowed - blocksetTimesElapsed[id]) < lowest)
             lowest = (blocksetDatas[id].timeAllowed - blocksetTimesElapsed[id]);
     }
@@ -675,7 +719,7 @@ function blockedBy(tab, callback) {
     for (var id of blocksetIds) {
 
         if (!blocksetDatas[id].activeDays[currentWeekDay] || !isInActiveTime(now, id)) // if today is not an active day | or not in active hours
-            continue;    
+            continue;
 
         if (!testRegEx(wlRegEx[id], url)) { // if not in whitelist
             if (testRegEx(blRegEx[id], url)) { // check blacklist
@@ -691,7 +735,7 @@ function blockedBy(tab, callback) {
             if (response.error != undefined) {
                 console.error(`Could not check video with id ${videoId}, error: ${response.error}`);
                 return;
-            }   
+            }
             var object = JSON.parse(response.message);
             if (object.items.length != 0) {
                 var channelId = object.items[0].snippet.channelId;
@@ -828,7 +872,7 @@ function annoy(tabId, bsIds) {
             console.log(chrome.runtime.lastError.message);
             return;
         }
-        
+
         var largestOverTime = 0;
         for (id of bsIds) {
             var t = blocksetTimesElapsed[id] - blocksetDatas[id].timeAllowed;
@@ -836,7 +880,7 @@ function annoy(tabId, bsIds) {
                 largestOverTime = t;
             }
         }
-        
+
         if (created[0]) {
             chrome.tabs.executeScript(tabId, { code: `db_showTime("${msToTimeDisplay(largestOverTime)}");` });
         }
@@ -870,7 +914,7 @@ function bsItem(type, value) {
             "type": type,
             "value": {
                 "name": value[0],
-                "id" : value[1]
+                "id": value[1]
             }
         }
     }
@@ -880,7 +924,7 @@ function bsItem(type, value) {
 // Saving
 function saveBlockset(blocksetId) {
     chrome.storage.sync.set({
-          [blocksetId]: blocksetDatas[blocksetId]
+        [blocksetId]: blocksetDatas[blocksetId]
     }, () => {
         if (chrome.runtime.lastError) {
             console.log("Could not save blockset with id: " + blocksetId);
@@ -919,15 +963,15 @@ function httpGetAsync(theUrl, callback) {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.timeout = 1500;
     xmlHttp.ontimeout = function (e) {
-        callback({error: "timed out"});
+        callback({ error: "timed out" });
     };
-    xmlHttp.onreadystatechange = function () {      
+    xmlHttp.onreadystatechange = function () {
         if (xmlHttp.readyState == 4) {
             if (xmlHttp.status == 200) {
-                callback({message: xmlHttp.responseText});
+                callback({ message: xmlHttp.responseText });
             }
             else if (xmlHttp.status == 400) {
-                callback({error: "bad request"});
+                callback({ error: "bad request" });
             }
         }
     }

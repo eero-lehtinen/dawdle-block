@@ -1,3 +1,8 @@
+Version 1.2.0
+- Now uses much more reliable alarms api for resetting timers
+- UI improvements on Firefox
+- Cursor now clearly shows when an option is disabled
+
 Version 1.1.6
 - Fixed a bug where users could not add YouTube channels from the options page
 
