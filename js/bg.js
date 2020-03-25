@@ -123,8 +123,8 @@ function init() {
     });
 
     setInterval(update, UPDATE_INTERVAL);
-    var nextMidnight = new Date().setHours(24, 0, 0, 0);
-    chrome.alarms.create("midnightUpdate", { when: nextMidnight, periodInMinutes: 24 * 60 });
+    var nextMidnight = new Date().setHours(24, 0, 0, 0); // setHours actually returns ms since epoch
+    chrome.alarms.create("midnightUpdate", { when: nextMidnight + 1000, periodInMinutes: 24 * 60 });
     //setTimeout(midnightUpdate, nextMidnight - new Date().getTime() + 1000);
     currentWeekDay = new Date().getDay();
 }
@@ -237,6 +237,9 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     }
     else if (alarm.name.startsWith("activeTimeUpdate")) { // both from and to
         activeTimeUpdate()
+    }
+    else if (alarm.name.startsWith("midnightUpdate")) {
+        midnightUpdate();
     }
 });
 
@@ -394,8 +397,6 @@ function resetElapsedTime(id) {
 function midnightUpdate() {
     currentWeekDay = new Date().getDay();
     evaluateAllTabs();
-    var nextMidnight = new Date(new Date().setHours(24, 0, 0, 0));
-    setTimeout(midnightUpdate, nextMidnight - new Date().getTime() + 1000);
 }
 
 //var activeTimes = {};
