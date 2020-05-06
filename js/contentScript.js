@@ -33,6 +33,10 @@ function dawdle_block_showTime(timeString) {
 }
 
 function dawdle_block_hideTime() {
+    if (document.hasFocus() == false) {
+        timeoutHandle = setTimeout(dawdle_block_hideTime, 5000)
+        return;
+    }
     mainDiv = document.getElementById("dawdle_block_annoy")
     if (mainDiv != null) {
         mainDiv.className = "hidden";
