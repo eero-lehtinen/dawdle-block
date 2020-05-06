@@ -14,7 +14,7 @@
     text-align: center;
     font-family: "PT Mono", monospace;
     line-height: 1;
-    padding: 5px;
+    padding: 6px;
     height: initial;
 }
 
@@ -25,5 +25,19 @@
 @media only screen and (max-width: 800px)  {
     #dawdle_block_annoy::before {
         content: "";
+    }
+}
+
+/* 1440p screens */
+@media only screen and (min-height: 1100px)  {
+    #dawdle_block_annoy {
+        font-size: 80px;
+    }
+}
+
+/* 2160p screens */
+@media only screen and (min-height: 1500px)  { 
+    #dawdle_block_annoy {
+        font-size: 100px;
     }
 }
