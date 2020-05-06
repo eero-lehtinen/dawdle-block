@@ -18,6 +18,10 @@
     height: initial;
 }
 
+#dawdle_block_annoy.hidden {
+    opacity: 0;
+}
+
 #dawdle_block_annoy::before {
     content: "OVERTIME ";
 }

@@ -874,19 +874,14 @@ function annoy(tabId, bsIds) {
         }
 
         if (created[0]) {
-            chrome.tabs.executeScript(tabId, { code: `db_showTime("${msToTimeDisplay(largestOverTime)}");` });
+            chrome.tabs.executeScript(tabId, { code: `dawdle_block_showTime("${msToTimeDisplay(largestOverTime)}");` });
         }
         else {
             chrome.tabs.executeScript(tabId, {
-                file: "libraries/jquery-3.2.1.min.js"
+                file: "js/contentScript.js"
             }, () => {
-                chrome.tabs.executeScript(tabId, {
-                    file: "js/contentScript.js"
-                }, () => {
-                    chrome.tabs.insertCSS(tabId, { file: "styles/annoy.css" });
-                    var time = msToTimeDisplay(blocksetDatas[bsIds[0]].timeAllowed - blocksetTimesElapsed[bsIds[0]]);
-                    chrome.tabs.executeScript(tabId, { code: `db_showTime("${msToTimeDisplay(largestOverTime)}");` });
-                });
+                chrome.tabs.insertCSS(tabId, { file: "styles/annoy.css" });
+                chrome.tabs.executeScript(tabId, { code: `dawdle_block_showTime("${msToTimeDisplay(largestOverTime)}");` });
             });
         }
     });
