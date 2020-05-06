@@ -3,6 +3,7 @@ var filterLookUp = {
     "urlContains": "url contains",
     "urlPrefix": "url prefix",
     "urlSuffix": "url suffix",
+    "urlRegexp": "url reg exp",
     "ytChannel": "yt channel",
     "ytCategory": "yt category"
 }
@@ -84,9 +85,10 @@ function setTimeAllowed(value, pageId) {
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     if (message.type === "blocksetChanged") {
-        if (currentPageId === message.id) {
-            displaySites(blocksetDatas[message.id].blacklist, "bl");
-            displaySites(blocksetDatas[message.id].whitelist, "wl");
+        if (currentPageId === parseInt(message.id)) {
+            console.log("Blockset changed2")
+            displaySites(blocksetDatas[currentPageId].blacklist, "bl");
+            displaySites(blocksetDatas[currentPageId].whitelist, "wl");
         }
     }
 });
@@ -350,6 +352,15 @@ function addSite(toList, select, input, callback) {
         }
         else {
             dialog("Error", "This category id doesn't exist, faulty id: " + input.val() + "<br> <a href='#' name='allCategories'>list of all categories by their ids</a>", "OK");
+        }
+    }
+    else if (select.val() === "urlRegexp") {
+        try {
+            new RegExp(input.val());
+            toList[toList.length] = bgPage.bsItem(select.val(), input.val());
+        }
+        catch (e) {
+            dialog("Error", e.message + ".", "OK");
         }
     }
     else {

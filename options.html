@@ -1,145 +1,165 @@
 ﻿<!DOCTYPE html>
 <html>
+
 <head>
-  <meta charset="UTF-8"> 
-  <title>AntiProcrastinator Extension Options</title>
-  <link rel="stylesheet" href="styles/styles.css">
-  <link rel="stylesheet" href="libraries/jquery-ui/jquery-ui.min.css">
-  <link rel="stylesheet" href="libraries/jquery-ui/jquery-ui.theme.min.css">
-  <link href="https://fonts.googleapis.com/css?family=PT+Mono" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>AntiProcrastinator Extension Options</title>
+    <link rel="stylesheet" href="styles/styles.css">
+    <link rel="stylesheet" href="libraries/jquery-ui/jquery-ui.min.css">
+    <link rel="stylesheet" href="libraries/jquery-ui/jquery-ui.theme.min.css">
+    <link href="https://fonts.googleapis.com/css?family=PT+Mono" rel="stylesheet">
 </head>
 
 <body>
     <div class="nav">
         <ul class="nav">
-          <li>
-            <a href="#" id="-2">Donate</a>
-          </li>
-          <li>
-            <a href="#" id="-1">General</a>
-          </li>
+            <li>
+                <a href="#" id="-2">Donate</a>
+            </li>
+            <li>
+                <a href="#" id="-1">General</a>
+            </li>
         </ul>
     </div>
 
     <div class="main">
-      <div class="donate" hidden>
-        <h1>Thanks for all donations!</h1><br>
-        <button id="donate"><img id="PP" src="images/PP_logo.png"><br>Go to donation page</button>
-      </div>
-      <ul class="general" hidden>
-          <li> <h1>General options</h1> </li>
-          <li>
-              <h3>Time convention</h3> <br>
-              <label><input type="radio" name="clockType" value="24" >24-hour clock</label> <br>
-              <label><input type="radio" name="clockType" value="12">12-hour clock</label>
-          </li>  
-          <li>
-              <h3 class="noMargin"><label><input id="displayHelp" type="checkbox"> Display help buttons</label></h3>
-          </li>
-          <li>
-            <h3 class="noMargin"><label><input id="darkTheme" type="checkbox"> Dark theme</label></h3>
-          </li>  
-          <li>
-              <h3>Export/Import all settings and blocksets</h3> <button class="help" id="help_export_import">?</button><br>
-              <button class="big" id="export">Export</button> <button class="big" id="import" disabled>Import</button> <button class="big" id="chooseFile">Choose file</button> <span id="chooseFileLabel">No file chosen</span> <br />
-              <span id="fileIndicator" hidden></span>
-              <input id="chooseFileHidden" type="file" name="file" accept=".json"/>
-          </li>
-          <li>
-            <span id="generalSaveIndicator">Saved</span>
-          </li>
-      </ul>
-      <ul class="blockset" hidden>
-        <li>
-            <h1 id="name">Block set name</h1> <input type="text" class="blocksetRename" maxlength="30" hidden>
-        </li>
-        <li>
-            <h3 class="noMargin"><label><input id="annoyMode" type="checkbox"> Annoy only</label></h3> <span id="annoyModeInfo"></span> <button class="help" id="help_annoyMode">?</button>
-        </li>
-        <li>
-            <h3>Time allowed</h3> <input class="timepicker" id="timeAllowed"> Time left today: <span id="timeLeft"></span><span id="timeLeftSuffix"></span> <button class="help" id="help_timeAllowed">?</button>
-        </li>
-        <li>
-            <h3>Daily reset time</h3> <input class="timepicker" id="resetTime"> <button class="help" id="help_resetTime">?</button>
-        </li> 
-        <li class="aDay"><h3 class="noMargin">Active days</h3>
-            <label><input id="aDay1" type="checkbox">Mon</label>
-            <label><input id="aDay2" type="checkbox">Tue</label>
-            <label><input id="aDay3" type="checkbox">Wed</label>
-            <label><input id="aDay4" type="checkbox">Thu</label>
-            <label><input id="aDay5" type="checkbox">Fri</label>
-            <label><input id="aDay6" type="checkbox">Sat</label>
-            <label><input id="aDay0" type="checkbox">Sun</label> <button class="help" id="help_activeDays">?</button>
-        </li> 
-        <li>
-            <h3>Active time </h3> from <input class="timepicker" id="activeFrom"> to <input class="timepicker" id="activeTo"> <button class="help" id="help_activeTime">?</button>
-        </li> 
-        <li>
-            <h3>Blacklist</h3> <button class="help" id="help_bl">?</button>
-            <div class="siteAdder">
-                <ul>
-                    <li class="siteAdder">
-                        <div class="topInputs">
-                            <select id="blacklistSelect">
-                                <option value="urlPrefix">url prefix</option>
-                                <option value="urlSuffix">url suffix</option>
-                                <option value="urlEquals">url equals</option>  
-                                <option value="urlContains">url contains</option>    
-                                <option value="ytChannel">yt channel</option>
-                                <option value="ytCategory">yt category</option>
-                            </select>
-                            <input id="blacklistInput" type="text" placeholder="e.g. www.youtube.com" maxlength="500">
-                            <button id="blacklistAdd">Add</button>
-                        </div>
-                    </li>
-                    <li class="siteAdder"> 
-                        <ul class="siteItems" id="blSiteItems"></ul>
-                    </li>
-                </ul>
-            </div>
-        </li>
-        <li>
-            <h3>Whitelist</h3> <button class="help" id="help_wl">?</button>
-            <div class="siteAdder">
-                <ul>
-                    <li class="siteAdder">
-                        <div class="topInputs">
-                            <select id="whitelistSelect">
-                                <option value="urlPrefix">url prefix</option>
-                                <option value="urlSuffix">url suffix</option>
-                                <option value="urlEquals">url equals</option>  
-                                <option value="urlContains">url contains</option>
-                                <option value="ytChannel">yt channel</option>
-                                <option value="ytCategory">yt category</option>
-                            </select>
-                            <input id="whitelistInput" type="text" placeholder="e.g. www.youtube.com/watch?v=useful_video" maxlength="500">
-                            <button id="whitelistAdd">Add</button>
-                        </div>
-                    </li>
-                    <li class="siteAdder">
-                        <ul class="siteItems" id="wlSiteItems">
+        <div class="donate" hidden>
+            <h1>Thanks for all donations!</h1><br>
+            <button id="donate"><img id="PP" src="images/PP_logo.png"><br>Go to donation page</button>
+        </div>
+        <ul class="general" hidden>
+            <li>
+                <h1>General options</h1>
+            </li>
+            <li>
+                <h3>Time convention</h3> <br>
+                <label><input type="radio" name="clockType" value="24">24-hour clock</label> <br>
+                <label><input type="radio" name="clockType" value="12">12-hour clock</label>
+            </li>
+            <li>
+                <h3 class="noMargin"><label><input id="displayHelp" type="checkbox"> Display help buttons</label></h3>
+            </li>
+            <li>
+                <h3 class="noMargin"><label><input id="darkTheme" type="checkbox"> Dark theme</label></h3>
+            </li>
+            <li>
+                <h3>Export/Import all settings and blocksets</h3> <button class="help"
+                    id="help_export_import">?</button><br>
+                <button class="big" id="export">Export</button> <button class="big" id="import" disabled>Import</button>
+                <button class="big" id="chooseFile">Choose file</button> <span id="chooseFileLabel">No file
+                    chosen</span> <br />
+                <span id="fileIndicator" hidden></span>
+                <input id="chooseFileHidden" type="file" name="file" accept=".json" />
+            </li>
+            <li>
+                <span id="generalSaveIndicator">Saved</span>
+            </li>
+        </ul>
+        <ul class="blockset" hidden>
+            <li>
+                <h1 id="name">Block set name</h1> <input type="text" class="blocksetRename" maxlength="30" hidden>
+            </li>
+            <li>
+                <h3 class="noMargin"><label><input id="annoyMode" type="checkbox"> Annoy only</label></h3> <span
+                    id="annoyModeInfo"></span> <button class="help" id="help_annoyMode">?</button>
+            </li>
+            <li>
+                <h3>Time allowed</h3> <input class="timepicker" id="timeAllowed"> Time left today: <span
+                    id="timeLeft"></span><span id="timeLeftSuffix"></span> <button class="help"
+                    id="help_timeAllowed">?</button>
+            </li>
+            <li>
+                <h3>Daily reset time</h3> <input class="timepicker" id="resetTime"> <button class="help"
+                    id="help_resetTime">?</button>
+            </li>
+            <li class="aDay">
+                <h3 class="noMargin">Active days</h3>
+                <label><input id="aDay1" type="checkbox">Mon</label>
+                <label><input id="aDay2" type="checkbox">Tue</label>
+                <label><input id="aDay3" type="checkbox">Wed</label>
+                <label><input id="aDay4" type="checkbox">Thu</label>
+                <label><input id="aDay5" type="checkbox">Fri</label>
+                <label><input id="aDay6" type="checkbox">Sat</label>
+                <label><input id="aDay0" type="checkbox">Sun</label> <button class="help"
+                    id="help_activeDays">?</button>
+            </li>
+            <li>
+                <h3>Active time </h3> from <input class="timepicker" id="activeFrom"> to <input class="timepicker"
+                    id="activeTo"> <button class="help" id="help_activeTime">?</button>
+            </li>
+            <li>
+                <h3>Blacklist</h3> <button class="help" id="help_bl">?</button>
+                <div class="siteAdder">
+                    <ul>
+                        <li class="siteAdder">
+                            <div class="topInputs">
+                                <select id="blacklistSelect">
+                                    <option value="urlPrefix">url prefix</option>
+                                    <option value="urlSuffix">url suffix</option>
+                                    <option value="urlEquals">url equals</option>
+                                    <option value="urlContains">url contains</option>
+                                    <option value="urlRegexp">url reg exp</option>
+                                    <option value="ytChannel">yt channel</option>
+                                    <option value="ytCategory">yt category</option>
+                                </select>
+                                <input id="blacklistInput" type="text" placeholder="e.g. www.youtube.com"
+                                    maxlength="500">
+                                <button id="blacklistAdd">Add</button>
+                            </div>
+                        </li>
+                        <li class="siteAdder">
+                            <ul class="siteItems" id="blSiteItems"></ul>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            <li>
+                <h3>Whitelist</h3> <button class="help" id="help_wl">?</button>
+                <div class="siteAdder">
+                    <ul>
+                        <li class="siteAdder">
+                            <div class="topInputs">
+                                <select id="whitelistSelect">
+                                    <option value="urlPrefix">url prefix</option>
+                                    <option value="urlSuffix">url suffix</option>
+                                    <option value="urlEquals">url equals</option>
+                                    <option value="urlContains">url contains</option>
+                                    <option value="urlRegexp">url reg exp</option>
+                                    <option value="ytChannel">yt channel</option>
+                                    <option value="ytCategory">yt category</option>
+                                </select>
+                                <input id="whitelistInput" type="text"
+                                    placeholder="e.g. www.youtube.com/watch?v=useful_video" maxlength="500">
+                                <button id="whitelistAdd">Add</button>
+                            </div>
+                        </li>
+                        <li class="siteAdder">
+                            <ul class="siteItems" id="wlSiteItems">
 
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </li>
-        <li class="blocksetActions"><button class="big" id="duplicate">Duplicate</button> <button class="big" id="rename">Rename</button> <button class="big" id="delete">Delete</button></li>
-        <li>
-            <span id="saveIndicator">Saved</span>
-        </li>
-      </ul>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            <li class="blocksetActions"><button class="big" id="duplicate">Duplicate</button> <button class="big"
+                    id="rename">Rename</button> <button class="big" id="delete">Delete</button></li>
+            <li>
+                <span id="saveIndicator">Saved</span>
+            </li>
+        </ul>
     </div>
 
     <div id="help_annoyMode_permission_text" header="Annoy mode required permissions" hidden>
         <ul class="text">
-            <li>This feature needs access to the html of every website, because it insterts a banner into the html document when going overtime</li>
+            <li>This feature needs access to the html of every website, because it insterts a banner into the html
+                document when going overtime</li>
         </ul>
     </div>
 
     <div id="help_annoyMode_text" header="Annoy mode" hidden>
         <ul class="text">
-            <li>Disables blocking when timer hits zero, instead shows banner in the bottom of the browser window about overtime</li>
+            <li>Disables blocking when timer hits zero, instead shows banner in the bottom of the browser window about
+                overtime</li>
             <li>Enables you to dwell on your time wasting less intrusively</li>
         </ul>
     </div>
@@ -186,14 +206,17 @@
     <div id="help_bl_text" header="Blacklist" hidden>
         <ul class="text">
             <li>Visiting sites that match the rules of this blacklist use up the time left</li>
-            <li>To easily add rules, YouTube channels and categories, use the popup (press Dawdle block icon on top-right)</li>
-            <li>Or in options select your rule type from the drop down menu and write the desired text in the text field</li>
+            <li>To easily add rules, YouTube channels and categories, use the popup (press Dawdle block icon on
+                top-right)</li>
+            <li>Or in options select your rule type from the drop down menu and write the desired text in the text field
+            </li>
             <li class="subList">
                 <ul class="text">
                     <li>url prefix: matches all urls that start with the specified text</li>
                     <li>url suffix: matches all urls that end with the specified text</li>
                     <li>url equals: matches all urls that are exactly the specified text</li>
-                    <li>url contains: matches all urls that contain the specified text</li>    
+                    <li>url contains: matches all urls that contain the specified text</li>
+                    <li>url reg exp: matches all urls that match the specified regular expression exactly</li>
                 </ul>
             </li>
             <li><a href="#" name="ytAdding">How to add Youtube channels/categories by hand</a></li>
@@ -208,14 +231,17 @@
     <div id="help_wl_text" header="Whitelist" hidden>
         <ul class="text">
             <li>Whitelist overrides blacklist (if a site matches both whitelist and blacklist, it's allowed)</li>
-            <li>To easily add rules, YouTube channels and categories, use popup (press Dawdle block icon on top-right)</li>
-            <li>Or in options select your rule type from the drop down menu and write the desired text in the text field</li>
+            <li>To easily add rules, YouTube channels and categories, use popup (press Dawdle block icon on top-right)
+            </li>
+            <li>Or in options select your rule type from the drop down menu and write the desired text in the text field
+            </li>
             <li class="subList">
                 <ul class="text">
                     <li>url prefix: matches all urls that start with the specified text</li>
                     <li>url suffix: matches all urls that end with the specified text</li>
                     <li>url equals: matches all urls that are exactly the specified text</li>
                     <li>url contains: matches all urls that contain the specified text</li>
+                    <li>url reg exp: matches all urls that match the specified regular expression exactly</li>
                 </ul>
             </li>
             <li><a href="#" name="ytAdding">How to add Youtube channels/categories by hand</a></li>
@@ -244,8 +270,10 @@
 
     <div id="help_ytAdding" hidden>
         <ul class="text">
-            <li>To add YouTube channels use their ids<br>(find them by going to a video, click their channel name under the video, id is found in the url after "www.youtube.com/channel/" )</li>
-            <li>To add YouTube categories use their ids <br><a href="#" name="allCategories">list of all categories by their ids</a></li>
+            <li>To add YouTube channels use their ids<br>(find them by going to a video, click their channel name under
+                the video, id is found in the url after "www.youtube.com/channel/" )</li>
+            <li>To add YouTube categories use their ids <br><a href="#" name="allCategories">list of all categories by
+                    their ids</a></li>
             <li>Or just use the popup</li>
         </ul>
     </div>

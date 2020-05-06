@@ -200,19 +200,20 @@ function addAbsentItems(object, defaultObject) {
 
 // Listen for updates in settings
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+    bsId = parseInt(message.id);
     if (message.type === "blocksetChanged") {
-        generateLookUp(message.id);
-        setupTimerReset(message.id);
-        setupActiveTimeUpdates(message.id);
+        generateLookUp(bsId);
+        setupTimerReset(bsId);
+        setupActiveTimeUpdates(bsId);
         evaluateAllTabs();
     }
     else if (message.type === "blocksetDeleted") {
-        deleteLookUp(message.id);
+        deleteLookUp(bsId);
 
         // Deletes elapsed timer reset alarm
-        chrome.alarms.clear("timerReset_" + id);
-        chrome.alarms.clear("activeTimeUpdateFrom_" + id);
-        chrome.alarms.clear("activeTimeUpdateTo_" + id);
+        chrome.alarms.clear("timerReset_" + bsId);
+        chrome.alarms.clear("activeTimeUpdateFrom_" + bsId);
+        chrome.alarms.clear("activeTimeUpdateTo_" + bsId);
 
         // if (timerResets[message.id] != undefined) {
         //     clearTimeout(timerResets[message.id]);
@@ -382,7 +383,6 @@ function timeToMsSinceMidnight(time) {
 function resetElapsedTime(id) {
     blocksetTimesElapsed[id] = 0;
     blocksetDatas[id].lastReset = (new Date()).getTime();
-    //timerResets[id] = setTimeout(resetElapsedTime, 86400000, id); // 86 400 000 ms is 1 day
 
     saveElapsedTimes();
 
@@ -432,24 +432,34 @@ function convertToRegEx(fromList, toList, extraYT) {
     for (var i = 0; i < fromList.length; i++) {
         var type = fromList[i].type;
         if (type === "urlContains") {
-            toList[toList.length] = new RegExp(fromList[i].value);
+            toList[toList.length] = new RegExp(escapeRegExp(fromList[i].value));
         }
         else if (type === "urlEquals") {
-            toList[toList.length] = new RegExp("^" + fromList[i].value + "$");
+            toList[toList.length] = new RegExp("^" + escapeRegExp(fromList[i].value) + "$");
         }
         else if (type === "urlPrefix") {
-            toList[toList.length] = new RegExp("^" + fromList[i].value);
+            toList[toList.length] = new RegExp("^" + escapeRegExp(fromList[i].value));
         }
         else if (type === "urlSuffix") {
-            toList[toList.length] = new RegExp(fromList[i].value + "$");
+            toList[toList.length] = new RegExp(escapeRegExp(fromList[i].value) + "$");
+        }
+        else if (type === "urlRegexp") {
+            toList[toList.length] = new RegExp(fromList[i].value);
         }
         else if (type === "ytChannel") {
             extraYT.channels[extraYT.channels.length] = fromList[i].value;
         }
-        else if (type = "ytCategory") {
+        else if (type === "ytCategory") {
             extraYT.categories[extraYT.categories.length] = fromList[i].value.id;
         }
+        else {
+            console.warn("Unknown blockset match type: " + type);
+        }
     }
+}
+
+function escapeRegExp(string) {
+    return string.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 
 // Update loop
@@ -544,9 +554,9 @@ var windowIds = [];
 
 var minimizedWindows = [];
 
-var openTabs = {}; //windowId as key, tabid array as value
+var openTabs = []; //windowId as key, tabid as value
 
-var tabEvaluations = {}; // tabId as key
+var tabEvaluations = []; // tabId as key
 
 var allTabs = [];
 
@@ -622,7 +632,7 @@ chrome.windows.onFocusChanged.addListener(function (windowId) {
 // Tab blocking evaluation
 function evaluateTab(tab) {
     blockedBy(tab, function (blocksetIdList) {
-        var url = tab.url.replace(/(^\w+:|^)\/\//, ''); //remove protocol
+        //var url = tab.url.replace(/(^\w+:|^)\/\//, ''); //remove protocol
         if (blocksetIdList.length != 0) {
             //console.log("block: " + url + " id: " + blocksetIdList);
             tabEvaluations[tab.id] = blocksetIdList;
@@ -704,6 +714,9 @@ function getStringBetween(source, a, b) {
     return source.substring(iA + a.length, iB);
 }
 
+
+YT_BASE_URL_LEN = "www.youtube.com/".length
+
 function blockedBy(tab, callback) {
 
     var blocksetIdList = [];
@@ -718,109 +731,96 @@ function blockedBy(tab, callback) {
     var now = timeToMsSinceMidnight(new Date());
 
     for (var id of blocksetIds) {
-
         if (!blocksetDatas[id].activeDays[currentWeekDay] || !isInActiveTime(now, id)) // if today is not an active day | or not in active hours
             continue;
 
-        if (!testRegEx(wlRegEx[id], url)) { // if not in whitelist
-            if (testRegEx(blRegEx[id], url)) { // check blacklist
+        if (!wlRegEx[id].some((regEx) => regEx.test(url) === true)) { // if not in whitelist
+            if (blRegEx[id].some((regEx) => regEx.test(url) === true)) { // if is in blacklist
                 blocksetIdList[blocksetIdList.length] = id;
             }
         }
     }
 
-    if (url.startsWith("www.youtube.com/watch") && !areYTListsEmpty()) {
-        var videoId = getStringBetween(url, "v=", "&");
+    if (!areYTListsEmpty() && url.startsWith("www.youtube.com/")) {
+        if (url.startsWith("watch/", YT_BASE_URL_LEN)) {
+            var videoId = getStringBetween(url, "v=", "&");
 
-        httpGetAsync("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + "&fields=items(snippet(categoryId%2CchannelId))&key=" + API_KEY, function (response) {
-            if (response.error != undefined) {
-                console.error(`Could not check video with id ${videoId}, error: ${response.error}`);
-                return;
-            }
-            var object = JSON.parse(response.message);
-            if (object.items.length != 0) {
-                var channelId = object.items[0].snippet.channelId;
-                var categoryId = object.items[0].snippet.categoryId;
-
-                for (var id of blocksetIds) {
-                    if (!blocksetDatas[id].activeDays[currentWeekDay] || !isInActiveTime(now, id)) // if today is not an active day | or not in active hours
-                        continue;
-
-                    if (!wlYT[id].categories.includes(categoryId) && !wlYT[id].channels.some(c => c.id === channelId)) {
-                        if (blYT[id].categories.includes(categoryId) || blYT[id].channels.some(c => c.id === channelId)) {
-                            if (!blocksetIdList.includes(id)) {
-                                blocksetIdList[blocksetIdList.length] = id;
-                            }
-                        }
-                    }
-                    else {
-                        var index = blocksetIdList.indexOf(id);
-                        if (index != -1) {
-                            blocksetIdList.splice(index, 1);
-                        }
-                    }
+            httpGetAsync("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + "&fields=items(snippet(categoryId%2CchannelId))&key=" + API_KEY, function (response) {
+                if (response.error != undefined) {
+                    console.error(`Could not check video with id ${videoId}, error: ${response.error}`);
+                    return;
                 }
-            }
+                var object = JSON.parse(response.message);
+                if (object.items.length != 0) {
+                    var channelId = object.items[0].snippet.channelId;
+                    var categoryId = object.items[0].snippet.categoryId;
+
+                    evalChannelId(channelId, blocksetIdList, categoryId);
+                }
+
+                callback(blocksetIdList);
+            });
+        }
+        else if (url.startsWith("channel/", YT_BASE_URL_LEN)) {
+            var list = url.split("/");
+            var channelId = list[2];
+
+            evalChannelId(channelId, blocksetIdList);
 
             callback(blocksetIdList);
-        });
-    }
-    else if (url.startsWith("www.youtube.com/channel/") && !areYTListsEmpty()) {
-        var list = url.split("/");
-        var channelId = list[2];
+        }
+        else if (url.startsWith("user/", YT_BASE_URL_LEN)) {
+            var list = url.split("/");
+            var userName = list[2];
 
-        evalChannelId(channelId, blocksetIdList);
+            httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&forUsername=" + userName + "&fields=items%2Fid&key=" + API_KEY, function (response) {
+                if (response.error != undefined) {
+                    console.error(`Could not check channel with username ${userName}, error: ${response.error}`);
+                    return;
+                }
+                var object = JSON.parse(response.message);
 
-        callback(blocksetIdList);
-    }
-    else if (url.startsWith("www.youtube.com/user/") && !areYTListsEmpty()) {
-        var list = url.split("/");
-        var userName = list[2];
+                if (object.items.length != 0) {
+                    var channelId = object.items[0].id;
+                    evalChannelId(channelId, blocksetIdList);
+                }
 
-        httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&forUsername=" + userName + "&fields=items%2Fid&key=" + API_KEY, function (response) {
-            if (response.error != undefined) {
-                console.error(`Could not check channel with username ${userName}, error: ${response.error}`);
-                return;
-            }
-            var object = JSON.parse(response.message);
+                callback(blocksetIdList);
+            });
+        }
+        else if (url.startsWith("playlist/", YT_BASE_URL_LEN)) {
+            var playlistId = getStringBetween(url, "list=", "&");
 
-            if (object.items.length != 0) {
-                var channelId = object.items[0].id;
-                evalChannelId(channelId, blocksetIdList);
-            }
-
+            httpGetAsync("https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=" + playlistId + "&fields=items%2Fsnippet%2FchannelId&key=" + API_KEY, function (response) {
+                if (response.error != undefined) {
+                    console.error(`Could not check playlist with id ${playlistId}, error: ${response.error}`);
+                    return;
+                }
+                var object = JSON.parse(response.message);
+                if (object.items.length != 0) {
+                    var channelId = object.items[0].snippet.channelId;
+                    evalChannelId(channelId, blocksetIdList);
+                }
+                callback(blocksetIdList);
+            });
+        }
+        else { // We have async functions that call callback, so have to do multiple else blocks that just call callback
             callback(blocksetIdList);
-        });
-    }
-    else if (url.startsWith("www.youtube.com/playlist") && !areYTListsEmpty()) {
-        var playlistId = getStringBetween(url, "list=", "&");
-
-        httpGetAsync("https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=" + playlistId + "&fields=items%2Fsnippet%2FchannelId&key=" + API_KEY, function (response) {
-            if (response.error != undefined) {
-                console.error(`Could not check playlist with id ${playlistId}, error: ${response.error}`);
-                return;
-            }
-            var object = JSON.parse(response.message);
-            if (object.items.length != 0) {
-                var channelId = object.items[0].snippet.channelId;
-                evalChannelId(channelId, blocksetIdList);
-            }
-            callback(blocksetIdList);
-        });
+        }
     }
     else {
         callback(blocksetIdList);
     }
 }
 
-function evalChannelId(channelId, blocksetIdList) {
+function evalChannelId(channelId, blocksetIdList, categoryId = undefined) {
     var now = timeToMsSinceMidnight(new Date());
     for (var id of blocksetIds) {
         if (!blocksetDatas[id].activeDays[currentWeekDay] || !isInActiveTime(now, id)) // if today is not an active day | or not in active hours
             continue;
 
-        if (!wlYT[id].channels.some(c => c.id === channelId)) {
-            if (blYT[id].channels.some(c => c.id === channelId)) {
+        if ((categoryId === undefined || !wlYT[id].categories.includes(categoryId)) && !wlYT[id].channels.some(c => c.id === channelId)) {
+            if ((categoryId != undefined && blYT[id].categories.includes(categoryId)) || blYT[id].channels.some(c => c.id === channelId)) {
                 if (!blocksetIdList.includes(id)) {
                     blocksetIdList[blocksetIdList.length] = id;
                 }
@@ -848,15 +848,6 @@ function isInActiveTime(timeNow, blocksetId) {
     else if (from > to) {
         return (timeNow > from || timeNow < to);
     }
-}
-
-function testRegEx(regExList, text) {
-    for (var regEx of regExList) {
-        if (regEx.test(text)) {
-            return true;
-        }
-    }
-    return false;
 }
 
 function block(tabId) {

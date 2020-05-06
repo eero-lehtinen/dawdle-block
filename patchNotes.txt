@@ -1,4 +1,9 @@
-Verison 1.2.1
+Version 1.3.0
+- fixed unintended regex matching
+- added intentional regex matching
+- general bug fixes
+
+Version 1.2.1
 - Active dates now applied more reliably
 
 Version 1.2.0

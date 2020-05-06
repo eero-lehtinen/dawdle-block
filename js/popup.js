@@ -53,14 +53,14 @@ function loadAllBlocksets() {
     blocksetTimes = [];
 
     for (id of blocksetIds) {
-        var listItem = $("<li>", {id: id});
+        var listItem = $("<li>", { id: id });
         var name = $("<a>", { class: "blocksiteName", href: "#" }).text(blocksetDatas[id].name);
         name.on("click", function (e) {
             var blocksetId = $(this).parent().attr("id");
             selectSet(blocksetId);
         });
-        
-        var time = $("<span>", { class: "blocksiteTime"});
+
+        var time = $("<span>", { class: "blocksiteTime" });
         setTimeDisplay(time, blocksetDatas[id].timeAllowed - blocksetTimesElapsed[id]);
 
         blocksetTimes[id] = time;
@@ -79,10 +79,10 @@ function loadAllBlocksets() {
 }
 
 function update() {
-    for(id of blocksetIds) {
+    for (id of blocksetIds) {
         if (blocksetTimes[id] != undefined) {
             setTimeDisplay(blocksetTimes[id], blocksetDatas[id].timeAllowed - blocksetTimesElapsed[id]);
-        } 
+        }
     }
 }
 
@@ -91,12 +91,12 @@ function setTimeDisplay(element, time) {
     element.text(msToTimeDisplay(time));
 
     if (time < 0) {
-        if (!element.hasClass("red")){
+        if (!element.hasClass("red")) {
             element.addClass("red");
         }
     }
     else {
-        if (element.hasClass("red")){
+        if (element.hasClass("red")) {
             element.removeClass("red");
         }
     }
@@ -110,7 +110,7 @@ var currentTabId;
 function selectSet(id) {
     if (currentId != -1)
         $("#" + currentId).removeAttr("class");
-    
+
     $("#" + id).attr("class", "selected");
     currentId = id;
 
@@ -120,7 +120,7 @@ function selectSet(id) {
         chrome.tabs.get(tabId, function (tab) {
             url = tab.url.replace(/(^\w+:|^)\/\//, '');
             urlWithProtocol = tab.url;
-            
+
             if (url.startsWith("chrome-extension:") && url.endsWith("blockPage.html")) {
                 $("#info").hide();
                 return;
@@ -157,7 +157,7 @@ function msToTimeDisplay(duration) {
     var isNegative = (duration < 0);
 
     duration = Math.abs(duration);
-        
+
     var seconds = parseInt((duration / 1000) % 60);
     var minutes = parseInt((duration / (1000 * 60)) % 60);
     var hours = parseInt((duration / (1000 * 60 * 60)) % 24);
@@ -166,7 +166,7 @@ function msToTimeDisplay(duration) {
     minutes = (minutes < 10) ? "0" + minutes : minutes;
     seconds = (seconds < 10) ? "0" + seconds : seconds;
 
-    return (isNegative ? "-": "") + hours + ":" + minutes + ":" + seconds;
+    return (isNegative ? "-" : "") + hours + ":" + minutes + ":" + seconds;
 }
 
 function addDomain(domain, toList) {
@@ -242,7 +242,7 @@ function getYTData(_url, callback) {
             var channelId = list[2];
 
             bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&id=" + channelId + "&fields=items(snippet%2Ftitle)&key=" + bgPage.API_KEY, function (response) {
-                
+
                 if (response.error != undefined) {
                     console.error(`Could not get channel info with id ${channelId}, error: ${response.error}`);
                     return;
@@ -261,12 +261,12 @@ function getYTData(_url, callback) {
             var channelUserName = list[2];
 
             bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&forUsername=" + channelUserName + "&fields=items(id%2Csnippet%2Ftitle)&key=" + bgPage.API_KEY, function (response) {
-                
+
                 if (response.error != undefined) {
                     console.error(`Could not get channel info with username ${channelUserName}, error: ${response.error}`);
                     return;
                 }
-            
+
                 var object = JSON.parse(response.message);
 
                 callback({
@@ -280,7 +280,7 @@ function getYTData(_url, callback) {
 
 function saveCurrentBlockset() {
     chrome.storage.sync.set({
-          [currentId]: blocksetDatas[currentId]
+        [currentId]: blocksetDatas[currentId]
     }, function () {
         if (chrome.runtime.lastError == null) {
             $("#addIndicator").text("Added");
@@ -300,7 +300,7 @@ function saveCurrentBlockset() {
 
 function setDarkTheme(bool) {
     if (bool === true)
-        $("html").attr({class: "dark"});
+        $("html").attr({ class: "dark" });
     else
         $("html").removeAttr("class");
 }
