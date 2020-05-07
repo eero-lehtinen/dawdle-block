@@ -1,8 +1,8 @@
 Version 1.3.0
 - removed unintended regex matching
 - added intentional regex matching
-- Added ability to choose if unfocused tabs deplete timer
-- small tweaks
+- Added ability to choose if unfocused tabs deplete time
+- Small tweaks
 
 Version 1.2.1
 - Active dates now applied more reliably
