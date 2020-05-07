@@ -115,7 +115,7 @@ function selectSet(id) {
     currentId = id;
 
     chrome.windows.getCurrent(function (w) {
-        var tabId = bgPage.openTabs[w.id];
+        var tabId = bgPage.openTabIds[w.id];
         currentTabId = tabId;
         chrome.tabs.get(tabId, function (tab) {
             url = tab.url.replace(/(^\w+:|^)\/\//, '');

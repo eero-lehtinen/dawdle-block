@@ -60,17 +60,13 @@
                 <h1 id="name">Block set name</h1> <input type="text" class="blocksetRename" maxlength="30" hidden>
             </li>
             <li>
-                <h3 class="noMargin"><label><input id="annoyMode" type="checkbox"> Annoy only</label></h3> <span
-                    id="annoyModeInfo"></span> <button class="help" id="help_annoyMode">?</button>
+                <h3>Time allowed</h3> <input class="timepicker" id="timeAllowed"> Time left today:
+                <span id="timeLeft"></span><span id="timeLeftSuffix"></span>
+                <button class="help" id="help_timeAllowed">?</button>
             </li>
             <li>
-                <h3>Time allowed</h3> <input class="timepicker" id="timeAllowed"> Time left today: <span
-                    id="timeLeft"></span><span id="timeLeftSuffix"></span> <button class="help"
-                    id="help_timeAllowed">?</button>
-            </li>
-            <li>
-                <h3>Daily reset time</h3> <input class="timepicker" id="resetTime"> <button class="help"
-                    id="help_resetTime">?</button>
+                <h3>Daily reset time</h3> <input class="timepicker" id="resetTime">
+                <button class="help" id="help_resetTime">?</button>
             </li>
             <li class="aDay">
                 <h3 class="noMargin">Active days</h3>
@@ -84,8 +80,8 @@
                     id="help_activeDays">?</button>
             </li>
             <li>
-                <h3>Active time </h3> from <input class="timepicker" id="activeFrom"> to <input class="timepicker"
-                    id="activeTo"> <button class="help" id="help_activeTime">?</button>
+                <h3>Active time </h3> from <input class="timepicker" id="activeFrom"> to
+                <input class="timepicker" id="activeTo"> <button class="help" id="help_activeTime">?</button>
             </li>
             <li>
                 <h3>Blacklist</h3> <button class="help" id="help_bl">?</button>
@@ -141,10 +137,30 @@
                     </ul>
                 </div>
             </li>
-            <li class="blocksetActions"><button class="big" id="duplicate">Duplicate</button> <button class="big"
-                    id="rename">Rename</button> <button class="big" id="delete">Delete</button></li>
             <li>
+                <h3 class="noMargin"><label><input id="requireActive" type="checkbox"> Require active</label></h3>
+                <span id="requireActiveInfo"></span>
+                <button class="help" id="help_requireActive">?</button>
+            </li>
+            <li>
+                <h3 class="noMargin"><label><input id="annoyMode" type="checkbox"> Annoy only</label></h3>
+                <span id="annoyModeInfo"></span>
+                <button class="help" id="help_annoyMode">?</button>
+            </li>
+            <li class="blocksetActions"><button class="big" id="duplicate">Duplicate</button>
+                <button class="big" id="rename">Rename</button> <button class="big" id="delete">Delete</button>
                 <span id="saveIndicator">Saved</span>
+            </li>
+        </ul>
+    </div>
+
+    <div id="help_requireActive_text" header="Require Active" hidden>
+        <ul class="text">
+            <li>When not checked, timer goes down if a blacklisted site is open in any tab anywhere.
+                (focused, unfocused, minimized)</li>
+            <li>When checked, timer goes down only if a blacklisted site is open in the currently active tab.</li>
+            <li>
+                Recommended: unchecked
             </li>
         </ul>
     </div>
@@ -152,7 +168,8 @@
     <div id="help_annoyMode_permission_text" header="Annoy mode required permissions" hidden>
         <ul class="text">
             <li>This feature needs access to the html of every website, because it insterts a banner into the html
-                document when going overtime</li>
+                document when going overtime
+            </li>
         </ul>
     </div>
 
@@ -161,6 +178,9 @@
             <li>Disables blocking when timer hits zero, instead shows banner in the bottom of the browser window about
                 overtime</li>
             <li>Enables you to dwell on your time wasting less intrusively</li>
+            <li>
+                Recommended: unchecked
+            </li>
         </ul>
     </div>
 

@@ -60,7 +60,8 @@ var generalOptions = {};
 
 function defaultBlockset() {
     return {
-        name: "Block set 0",
+        name: "Block set 1",
+        requireActive: false,
         annoyMode: false,
         timeAllowed: 600000, // milliseconds
         resetTime: 0, // milliseconds from midnight
@@ -74,13 +75,14 @@ function defaultBlockset() {
 
 function defaultTimesElapsed() {
     var res = {};
-    for (var blocksetId of blocksetIds) {
+    for (let blocksetId of blocksetIds) {
         res[blocksetId] = 0;
     }
     return res;
 }
 
-var defaultGeneralOptions = {
+
+const DEFAULT_GENERAL_OPTIONS = {
     clockType: 24,
     displayHelp: true,
     darkTheme: false
@@ -110,7 +112,7 @@ function init() {
         generalOptions: {}
     }, function (items) {
         generalOptions = items.generalOptions;
-        addAbsentItems(generalOptions, defaultGeneralOptions);
+        addAbsentItems(generalOptions, DEFAULT_GENERAL_OPTIONS);
 
         blocksetIds = items.blocksetIds;
 
@@ -149,12 +151,13 @@ function loadBlocksets() {
     }, (items) => {
         blocksetTimesElapsed = items.blocksetTimesElapsed;
 
-        for (var blocksetId of blocksetIds) {
+        for (let blocksetId of blocksetIds) {
             chrome.storage.sync.get({
-                [blocksetId]: defaultBlockset(blocksetId)
+                [blocksetId]: {}
             }, (data) => {
-                var bsId = Object.keys(data)[0];
+                let bsId = Object.keys(data)[0];
                 blocksetDatas[bsId] = data[bsId];
+
                 addAbsentItems(blocksetDatas[bsId], defaultBlockset(bsId));
                 generateLookUp(bsId);
 
@@ -181,16 +184,30 @@ function loadBlocksets() {
 
 /**
  * Add items with default values to this object, if default object has them
- * Always do this before loading anything to account for updates, wich add new data to saves
+ * Always do this before loading anything to account for updates, which add new data to saves
  * @param {Object} object - object to check and modify
  * @param {Object} defaultObject - default
  */
 function addAbsentItems(object, defaultObject) {
     var defKeys = Object.keys(defaultObject);
     var keys = Object.keys(object);
-    for (defKey of defKeys) {
-        if (!keys.includes(defKey)) {
+
+    if (keys.length == 0) { // This is for completely new objects
+        for (let defKey of defKeys) {
             object[defKey] = defaultObject[defKey];
+        }
+    }
+    else { // This is for backwards compatability
+        for (let defKey of defKeys) {
+            if (!keys.includes(defKey)) {
+
+                if (defKey == "requireActive") { // Set this to true on old saves, in new blocksets it is false
+                    object[defKey] = true;
+                    continue;
+                }
+
+                object[defKey] = defaultObject[defKey];
+            }
         }
     }
 }
@@ -260,17 +277,17 @@ function setupTimerReset(blocksetId) {
         list = [blocksetId];
     }
 
-    for (id_forward of list) {
+    for (let id_forward of list) {
 
         (function (id) {
             // Remove old alarm if it exists
             chrome.alarms.clear("timerReset_" + id, (removed) => {
 
-                var time = msToDate(blocksetDatas[id].resetTime);
+                let time = msToDate(blocksetDatas[id].resetTime);
 
                 resetTime.setHours(time.getHours(), time.getMinutes());
 
-                var lastReset = new Date(blocksetDatas[id].lastReset);
+                let lastReset = new Date(blocksetDatas[id].lastReset);
 
                 if (now.getTime() >= resetTime.getTime() && lastReset.getTime() < resetTime.getTime()) {
                     resetElapsedTime(id);
@@ -309,15 +326,15 @@ function setupActiveTimeUpdates(blocksetId) {
         list = [blocksetId];
     }
 
-    for (id_forward of list) {
+    for (let id_forward of list) {
 
         (function (id) {
             // Remove old alarm if it exists
             chrome.alarms.clear("activeTimeUpdateFrom_" + id, () => {
                 chrome.alarms.clear("activeTimeUpdateTo_" + id, () => {
 
-                    var activeTimeFrom = blocksetDatas[id].activeTime.from; // MS from midnight
-                    var activeTimeTo = blocksetDatas[id].activeTime.to; // MS from midnight
+                    let activeTimeFrom = blocksetDatas[id].activeTime.from; // MS from midnight
+                    let activeTimeTo = blocksetDatas[id].activeTime.to; // MS from midnight
 
                     if (activeTimeFrom != activeTimeTo) { // If from and to are same, blocksets are just always active, so dont do anything
                         //activeTimes[id] = {};
@@ -408,7 +425,7 @@ function activeTimeUpdate() {
 
 function evaluateAllTabs() {
     chrome.tabs.query({}, function (tabs) {
-        for (tab of tabs) {
+        for (let tab of tabs) {
             evaluateTab(tab);
         }
     });
@@ -429,8 +446,8 @@ function deleteLookUp(blocksetId) {
 }
 
 function convertToRegEx(fromList, toList, extraYT) {
-    for (var i = 0; i < fromList.length; i++) {
-        var type = fromList[i].type;
+    for (let i = 0; i < fromList.length; i++) {
+        let type = fromList[i].type;
         if (type === "urlContains") {
             toList[toList.length] = new RegExp(escapeRegExp(fromList[i].value));
         }
@@ -466,85 +483,101 @@ function escapeRegExp(string) {
 var saveTimer = 0;
 var callbacks = [];
 
-function update() {
-    if (windowIds.length != 0) {
+function areTabsOpen(tabIds) {
 
-        // Prevents icrementing multiple times in a single update
-        var incrementedBlocksetIds = [];
-
-        for (windowId of windowIds) {
-            if (minimizedWindows.includes(windowId))
-                continue;
-
-            var tabId = openTabs[windowId];
-
-            if (tabEvaluations[tabId] != undefined && tabEvaluations[tabId] != "safe") {
-                var doBlock = false;
-
-                var annoyBSIds = [];
-
-                for (var bsId of tabEvaluations[tabId]) {
-                    if (blocksetDatas[bsId] == undefined)
-                        continue;
-
-                    if (blocksetTimesElapsed[bsId] >= blocksetDatas[bsId].timeAllowed) { // Don't have time left
-                        if (!blocksetDatas[bsId].annoyMode) {
-                            doBlock = true;
-                        }
-                        else {
-                            if (!annoyBSIds.includes(bsId))
-                                annoyBSIds.push(bsId);
-
-                            // Increment for annoy too
-                            if (!incrementedBlocksetIds.includes(bsId)) {
-                                incrementedBlocksetIds.push(bsId);
-                                blocksetTimesElapsed[bsId] += UPDATE_INTERVAL;
-                            }
-                        }
-                    }
-                    else { // Have time left
-                        if (!incrementedBlocksetIds.includes(bsId)) {
-                            incrementedBlocksetIds.push(bsId);
-                            blocksetTimesElapsed[bsId] += UPDATE_INTERVAL;
-                        }
-                    }
-                }
-
-                // One of more block sets want to block this tab
-                if (doBlock) {
-                    block(tabId);
-                }
-
-                // Push annoy notification only once per update for each tab
-                if (annoyBSIds.length > 0) {
-                    annoy(tabId, annoyBSIds);
-                }
-
-                setBadge(tabId);
-            }
-        }
-
-        saveTimer += UPDATE_INTERVAL;
-
-        if (saveTimer >= 10000) { // save every 10 seconds
-            saveTimer = 0;
-            saveElapsedTimes();
-
-            for (bsId of saveInNextUpdate) {
-                saveBlockset(bsId);
-            }
-            saveInNextUpdate = [];
-        }
-
-
-        // Update popup and options page if they have registered their callbacks
-        for (var callback of callbacks) {
-            try {
-                callback();
-            }
-            catch (e) { }
+    for (let windowId in openTabIds) {
+        if (tabIds.includes(openTabIds[windowId]) && !minimizedWindowIds.includes(parseInt(windowId))) {
+            return true;
         }
     }
+    return false;
+}
+
+function update() {
+
+    //var t0 = performance.now()
+
+    var tabsToBlock = new Set();
+    var tabsToAnnoy = new Set();
+    var lowestTimer = Infinity;
+    var globalAnnoy = false;
+
+    for (let bsId in blocksetAffectedTabs) {
+        bsId = parseInt(bsId);
+        if (blocksetAffectedTabs[bsId].length == 0 || !blocksetIds.includes(bsId)) {
+            delete blocksetAffectedTabs[bsId];
+            continue;
+        }
+
+        if (!blocksetDatas[bsId].requireActive || areTabsOpen(blocksetAffectedTabs[bsId])) {
+
+            let curTimer = blocksetDatas[bsId].timeAllowed - blocksetTimesElapsed[bsId];
+
+            if (curTimer <= 0) {
+                if (blocksetDatas[bsId].annoyMode) {
+                    if (blocksetDatas[bsId].requireActive) {
+                        blocksetAffectedTabs[bsId].forEach(tabId => tabsToAnnoy.add(tabId));
+                    }
+                    else {
+                        globalAnnoy = true;
+                    }
+                    blocksetTimesElapsed[bsId] += UPDATE_INTERVAL;
+                }
+                else {
+                    blocksetAffectedTabs[bsId].forEach(tabId => tabsToBlock.add(tabId));
+                }
+            }
+            else {
+                blocksetTimesElapsed[bsId] += UPDATE_INTERVAL;
+            }
+
+
+            lowestTimer = Math.min(lowestTimer, curTimer);
+        }
+    }
+
+    setBadge(lowestTimer);
+
+    if (globalAnnoy) {
+        for (let windowId in openTabIds) {
+            annoy(openTabIds[windowId], lowestTimer);
+        }
+    }
+    else {
+        for (let tabId of tabsToAnnoy) {
+            annoy(tabId, lowestTimer);
+        }
+    }
+
+    for (let tabId of tabsToBlock) {
+        block(tabId);
+    }
+
+    // console.log("minimizedWindows: " + minimizedWindowIds)
+    // console.log("windows: " + windowIds)
+
+    saveTimer += UPDATE_INTERVAL;
+
+    if (saveTimer >= 10000) { // save every 10 seconds
+        saveTimer = 0;
+        saveElapsedTimes();
+
+        for (let bsId of saveInNextUpdate) {
+            saveBlockset(bsId);
+        }
+        saveInNextUpdate = [];
+    }
+
+    // Update popup and options page if they have registered their callbacks
+    for (let callback of callbacks) {
+        try {
+            callback();
+        }
+        catch (e) { }
+    }
+
+    // var t1 = performance.now()
+    // console.log("Update took " + (t1 - t0) + " milliseconds.")
 }
 
 
@@ -552,38 +585,35 @@ function update() {
 
 var windowIds = [];
 
-var minimizedWindows = [];
+var minimizedWindowIds = [];
 
-var openTabs = []; //windowId as key, tabid as value
+//windowId as key, tabid as value
+var openTabIds = {};
 
-var tabEvaluations = []; // tabId as key
+// Blockset ID as key, list of tabIds as value
+var blocksetAffectedTabs = {};
 
-var allTabs = [];
-
-chrome.tabs.onCreated.addListener(function (tab) {
-    allTabs.push(tab.id);
-});
+// chrome.tabs.onCreated.addListener(function (tab) {
+// });
 
 chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
-    delete tabEvaluations[tabId];
-
-    index = allTabs.indexOf(tabId)
-    if (index != -1)
-        allTabs.splice(index, 1);
+    for (let bsId in blocksetAffectedTabs) {
+        let index = blocksetAffectedTabs[bsId].indexOf(tabId);
+        if (index != -1) {
+            blocksetAffectedTabs[bsId].splice(index, 1);
+        }
+    }
 });
 
 chrome.tabs.onActivated.addListener(function (activeInfo) {
     if (!windowIds.includes(activeInfo.windowId)) {
         windowIds.push(activeInfo.windowId);
-        openTabs[activeInfo.windowId] = [];
-    }
-    if (!(Object.keys(tabEvaluations)).includes(activeInfo.tabId.toString())) {
-        chrome.tabs.get(activeInfo.tabId, function (tab) {
-            evaluateTab(tab);
-        });
+        openTabIds[activeInfo.windowId] = [];
     }
 
-    openTabs[activeInfo.windowId] = activeInfo.tabId;
+    openTabIds[activeInfo.windowId] = activeInfo.tabId;
+
+    setBadge(getLowestTimer())
 });
 
 
@@ -598,58 +628,59 @@ chrome.windows.onRemoved.addListener(function (windowId) {
     if (index != -1) {
         windowIds.splice(index, 1);
     }
-    index = minimizedWindows.indexOf(windowId);
+    index = minimizedWindowIds.indexOf(windowId);
     if (index != -1) {
-        minimizedWindows.splice(index, 1);
+        minimizedWindowIds.splice(index, 1);
     }
 
-    delete openTabs[windowId]
+    delete openTabIds[windowId]
 });
 
 chrome.windows.onFocusChanged.addListener(function (windowId) {
-    if (windowId = -1) {
-        chrome.windows.getAll(function (windowArray) {
-            for (windowItem of windowArray) {
-                var index = minimizedWindows.indexOf(windowItem.id);
-                if (windowItem.state === "minimized" && index === -1) {
-                    minimizedWindows.push(windowItem.id);
-                }
-                else if (index != -1) {
-                    minimizedWindows.splice(index, 1);
-                }
+    chrome.windows.getAll(function (windowArray) {
+        minimizedWindowIds = [];
+        windowIds = [];
+        for (let window of windowArray) {
+            if (window.state === "minimized") {
+                minimizedWindowIds.push(window.id);
             }
-        });
-    }
-    else {
-        var index = minimizedWindows.indexOf(windowId);
-        if (index != -1) {
-            minimizedWindows.splice(index, 1);
+            else {
+                windowIds.push(window.id);
+            }
         }
-    }
+    });
 });
 
 
 // Tab blocking evaluation
 function evaluateTab(tab) {
     blockedBy(tab, function (blocksetIdList) {
-        //var url = tab.url.replace(/(^\w+:|^)\/\//, ''); //remove protocol
-        if (blocksetIdList.length != 0) {
-            //console.log("block: " + url + " id: " + blocksetIdList);
-            tabEvaluations[tab.id] = blocksetIdList;
-            setBadge(tab.id);
+
+        // Remove from old blocksetAffectedTabs
+        for (let bsId in blocksetAffectedTabs) {
+            let index = blocksetAffectedTabs[bsId].indexOf(tab.id);
+            if (index != -1) {
+                blocksetAffectedTabs[bsId].splice(index, 1);
+            }
         }
-        else {
-            //console.log("safe: " + url);
-            tabEvaluations[tab.id] = "safe";
-            chrome.browserAction.setBadgeText({ text: "", tabId: tab.id });
+
+        // Add to new blocksetAffectedTabs
+        for (let bsId of blocksetIdList) {
+            if (blocksetAffectedTabs[bsId] == undefined) {
+                blocksetAffectedTabs[bsId] = [];
+            }
+            if (!blocksetAffectedTabs[bsId].includes(tab.id)) {
+                blocksetAffectedTabs[bsId].push(tab.id);
+            }
         }
+
         chrome.tabs.get(tab.id, function (t) {
             if (t.active === true) {
                 if (!windowIds.includes(t.windowId)) {
                     windowIds.push(t.windowId);
-                    openTabs[t.windowId] = [];
+                    openTabIds[t.windowId] = [];
                 }
-                openTabs[t.windowId] = t.id;
+                openTabIds[t.windowId] = t.id;
             }
         });
     });
@@ -659,42 +690,50 @@ var orange = [215, 134, 29, 255];
 var red = [215, 41, 29, 255];
 var grey = [123, 123, 123, 255];
 
-function setBadge(tabId) {
-    var time = getLowestTimeLeft(tabEvaluations[tabId]);
+function setBadge(lowestTimer) {
 
     var color;
     var text = " ";
-    if (time > 1000 * 60 * 60) { // time is more than one hour -> don't display time
+    if (lowestTimer == Infinity) {
+        text = "";
+    }
+    else if (lowestTimer > 1000 * 60 * 60) { // time is more than one hour -> don't display time
         color = grey;
     }
-    else if (time > 1000 * 60) { // time is more than one minute -> display time in minutes
+    else if (lowestTimer > 1000 * 60) { // time is more than one minute -> display time in minutes
         color = orange;
-        text = (Math.floor(time / (1000 * 60))).toString();
+        text = (Math.floor(lowestTimer / (1000 * 60))).toString();
     }
-    else if (time >= 0) { // time is positive -> display time left in seconds
+    else if (lowestTimer >= 0) { // time is positive -> display time left in seconds
         color = red;
-        text = (Math.floor(time / 1000)).toString();
+        text = (Math.floor(lowestTimer / 1000)).toString();
     }
-    else if (time < 0) {// annoy-mode is on
+    else if (lowestTimer < 0) {// annoy-mode is on
         color = red;
         text = "!!";
     }
 
-    chrome.browserAction.setBadgeText({ text: text, tabId: tabId });
-    chrome.browserAction.setBadgeBackgroundColor({ color: color, tabId: tabId });
+    chrome.browserAction.setBadgeText({ text: text });
+
+    if (text != "") {
+        chrome.browserAction.setBadgeBackgroundColor({ color: color });
+    }
 }
 
-function getLowestTimeLeft(blocksetIds) {
-    var lowest = Infinity;
-    for (id of blocksetIds) {
-        if ((blocksetDatas[id].timeAllowed - blocksetTimesElapsed[id]) < lowest)
-            lowest = (blocksetDatas[id].timeAllowed - blocksetTimesElapsed[id]);
+function getLowestTimer() {
+    lowestTimer = Infinity;
+    for (let bsId in blocksetAffectedTabs) {
+        if (!blocksetDatas[bsId].requireActive ||
+            blocksetAffectedTabs[bsId].some(tabId => Object.values(openTabIds).includes(tabId))) {
+
+            lowestTimer = Math.min(lowestTimer, blocksetDatas[bsId].timeAllowed - blocksetTimesElapsed[bsId]);
+        }
     }
-    return lowest;
+    return lowestTimer;
 }
 
 function areYTListsEmpty() {
-    for (var id of blocksetIds) {
+    for (let id of blocksetIds) {
         if (blYT[id].channels.length != 0 || blYT[id].categories.length != 0 || wlYT[id].channels.length != 0 || wlYT[id].categories.length != 0) {
             return false;
         }
@@ -723,14 +762,14 @@ function blockedBy(tab, callback) {
 
     var url = tab.url.replace(/(^\w+:|^)\/\//, ''); //remove protocol
 
-    if (url.endsWith("blockPage.html")) {
+    if (url.endsWith("dawdle-block-enough-page.html")) {
         callback([]);
         return;
     }
 
     var now = timeToMsSinceMidnight(new Date());
 
-    for (var id of blocksetIds) {
+    for (let id of blocksetIds) {
         if (!blocksetDatas[id].activeDays[currentWeekDay] || !isInActiveTime(now, id)) // if today is not an active day | or not in active hours
             continue;
 
@@ -742,18 +781,20 @@ function blockedBy(tab, callback) {
     }
 
     if (!areYTListsEmpty() && url.startsWith("www.youtube.com/")) {
-        if (url.startsWith("watch/", YT_BASE_URL_LEN)) {
-            var videoId = getStringBetween(url, "v=", "&");
+        if (url.startsWith("watch?", YT_BASE_URL_LEN)) {
+            let videoId = getStringBetween(url, "v=", "&");
 
             httpGetAsync("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + "&fields=items(snippet(categoryId%2CchannelId))&key=" + API_KEY, function (response) {
+
                 if (response.error != undefined) {
                     console.error(`Could not check video with id ${videoId}, error: ${response.error}`);
                     return;
                 }
-                var object = JSON.parse(response.message);
+                let object = JSON.parse(response.message);
+
                 if (object.items.length != 0) {
-                    var channelId = object.items[0].snippet.channelId;
-                    var categoryId = object.items[0].snippet.categoryId;
+                    let channelId = object.items[0].snippet.channelId;
+                    let categoryId = object.items[0].snippet.categoryId;
 
                     evalChannelId(channelId, blocksetIdList, categoryId);
                 }
@@ -762,26 +803,27 @@ function blockedBy(tab, callback) {
             });
         }
         else if (url.startsWith("channel/", YT_BASE_URL_LEN)) {
-            var list = url.split("/");
-            var channelId = list[2];
+            let list = url.split("/");
+            let channelId = list[2];
 
             evalChannelId(channelId, blocksetIdList);
 
             callback(blocksetIdList);
         }
         else if (url.startsWith("user/", YT_BASE_URL_LEN)) {
-            var list = url.split("/");
-            var userName = list[2];
+            let list = url.split("/");
+            let userName = list[2];
 
             httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&forUsername=" + userName + "&fields=items%2Fid&key=" + API_KEY, function (response) {
+
                 if (response.error != undefined) {
                     console.error(`Could not check channel with username ${userName}, error: ${response.error}`);
                     return;
                 }
-                var object = JSON.parse(response.message);
+                let object = JSON.parse(response.message);
 
                 if (object.items.length != 0) {
-                    var channelId = object.items[0].id;
+                    let channelId = object.items[0].id;
                     evalChannelId(channelId, blocksetIdList);
                 }
 
@@ -789,16 +831,16 @@ function blockedBy(tab, callback) {
             });
         }
         else if (url.startsWith("playlist/", YT_BASE_URL_LEN)) {
-            var playlistId = getStringBetween(url, "list=", "&");
+            let playlistId = getStringBetween(url, "list=", "&");
 
             httpGetAsync("https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=" + playlistId + "&fields=items%2Fsnippet%2FchannelId&key=" + API_KEY, function (response) {
                 if (response.error != undefined) {
                     console.error(`Could not check playlist with id ${playlistId}, error: ${response.error}`);
                     return;
                 }
-                var object = JSON.parse(response.message);
+                let object = JSON.parse(response.message);
                 if (object.items.length != 0) {
-                    var channelId = object.items[0].snippet.channelId;
+                    let channelId = object.items[0].snippet.channelId;
                     evalChannelId(channelId, blocksetIdList);
                 }
                 callback(blocksetIdList);
@@ -815,23 +857,42 @@ function blockedBy(tab, callback) {
 
 function evalChannelId(channelId, blocksetIdList, categoryId = undefined) {
     var now = timeToMsSinceMidnight(new Date());
-    for (var id of blocksetIds) {
+    for (let id of blocksetIds) {
         if (!blocksetDatas[id].activeDays[currentWeekDay] || !isInActiveTime(now, id)) // if today is not an active day | or not in active hours
             continue;
 
-        if ((categoryId === undefined || !wlYT[id].categories.includes(categoryId)) && !wlYT[id].channels.some(c => c.id === channelId)) {
-            if ((categoryId != undefined && blYT[id].categories.includes(categoryId)) || blYT[id].channels.some(c => c.id === channelId)) {
-                if (!blocksetIdList.includes(id)) {
-                    blocksetIdList[blocksetIdList.length] = id;
+
+        if (categoryId != undefined) {
+            if (!wlYT[id].categories.includes(categoryId) && !wlYT[id].channels.some(c => c.id === channelId)) {
+                if (blYT[id].categories.includes(categoryId) || blYT[id].channels.some(c => c.id === channelId)) {
+                    if (!blocksetIdList.includes(id)) {
+                        blocksetIdList.push(id);
+                    }
+                }
+            }
+            else {
+                let index = blocksetIdList.indexOf(id);
+                if (index != -1) {
+                    blocksetIdList.splice(index, 1);
                 }
             }
         }
         else {
-            var index = blocksetIdList.indexOf(id);
-            if (index != -1) {
-                blocksetIdList.splice(index, 1);
+            if (!wlYT[id].channels.some(c => c.id === channelId)) {
+                if (blYT[id].channels.some(c => c.id === channelId)) {
+                    if (!blocksetIdList.includes(id)) {
+                        blocksetIdList.push(id);
+                    }
+                }
+            }
+            else {
+                let index = blocksetIdList.indexOf(id);
+                if (index != -1) {
+                    blocksetIdList.splice(index, 1);
+                }
             }
         }
+
     }
 }
 
@@ -852,11 +913,11 @@ function isInActiveTime(timeNow, blocksetId) {
 
 function block(tabId) {
     chrome.tabs.update(tabId, {
-        url: "blockPage.html"
+        url: "dawdle-block-enough-page.html"
     });
 }
 
-function annoy(tabId, bsIds) {
+function annoy(tabId, lowestTimer) {
     chrome.tabs.executeScript(tabId, {
         code: "typeof db_contentScriptCreated != 'undefined'"
     }, (created) => {
@@ -865,23 +926,15 @@ function annoy(tabId, bsIds) {
             return;
         }
 
-        var largestOverTime = 0;
-        for (id of bsIds) {
-            var t = blocksetTimesElapsed[id] - blocksetDatas[id].timeAllowed;
-            if (t > largestOverTime) {
-                largestOverTime = t;
-            }
-        }
-
         if (created[0]) {
-            chrome.tabs.executeScript(tabId, { code: `dawdle_block_showTime("${msToTimeDisplay(largestOverTime)}");` });
+            chrome.tabs.executeScript(tabId, { code: `dawdle_block_showTime("${msToTimeDisplay(-lowestTimer)}");` });
         }
         else {
             chrome.tabs.executeScript(tabId, {
                 file: "js/contentScript.js"
             }, () => {
                 chrome.tabs.insertCSS(tabId, { file: "styles/annoy.css" });
-                chrome.tabs.executeScript(tabId, { code: `dawdle_block_showTime("${msToTimeDisplay(largestOverTime)}");` });
+                chrome.tabs.executeScript(tabId, { code: `dawdle_block_showTime("${msToTimeDisplay(-lowestTimer)}");` });
             });
         }
     });
@@ -922,7 +975,7 @@ function saveBlockset(blocksetId) {
 
 function saveAllBlocksets() {
     var saveItems = {};
-    for (id of blocksetIds) {
+    for (let id of blocksetIds) {
         saveItems[id] = blocksetDatas[id];
     }
     chrome.storage.sync.set(saveItems, () => {

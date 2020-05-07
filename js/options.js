@@ -245,6 +245,7 @@ function displayPage(id) {
         $("#name").html(blocksetDatas[id].name);
 
         $("#annoyMode").prop("checked", blocksetDatas[id].annoyMode);
+        $("#requireActive").prop("checked", blocksetDatas[id].requireActive);
         $(".timepicker#resetTime").timepicker("setTime", msToDate(blocksetDatas[id].resetTime));
         $(".timepicker#timeAllowed").timepicker("setTime", msToDate(blocksetDatas[id].timeAllowed));
         oldTime = -1;
@@ -287,7 +288,7 @@ function displayPage(id) {
 var inputsRestricted = false;
 function restrictInputs(toState) {
     inputsRestricted = toState;
-    $("#annoyMode, #resetTime, #timeAllowed, #activeFrom, #activeTo, input[id^='aDay'], #whitelistSelect, #whitelistInput, #whitelistAdd, li.siteItem[id^='bl'] > button[name=deleteSite], #delete").prop("disabled", toState);
+    $("#requireActive, #annoyMode, #resetTime, #timeAllowed, #activeFrom, #activeTo, input[id^='aDay'], #whitelistSelect, #whitelistInput, #whitelistAdd, li.siteItem[id^='bl'] > button[name=deleteSite], #delete").prop("disabled", toState);
     $("input[id^= 'aDay']").each(function (index) { // make aDay labels grey with class "disabled"
         if (toState === true)
             $(this).parent().attr("class", "disabled");
@@ -336,6 +337,7 @@ function addSite(toList, select, input, callback) {
                 return;
             }
             var object = JSON.parse(response.message);
+
             if (object.items.length != 0) {
                 toList[toList.length] = bgPage.bsItem(select.val(), [object.items[0].snippet.title, object.items[0].id]);
                 callback();
@@ -358,6 +360,7 @@ function addSite(toList, select, input, callback) {
         try {
             new RegExp(input.val());
             toList[toList.length] = bgPage.bsItem(select.val(), input.val());
+            callback();
         }
         catch (e) {
             dialog("Error", e.message + ".", "OK");
@@ -390,11 +393,12 @@ function addBlockset(newData) {
 
     if (newData != undefined) {
         blocksetDatas[newBlocksetId] = newData;
-        addAbsentItems(blocksetDatas[newBlocksetId], bgPage.defaultBlockset());
+        bgPage.addAbsentItems(blocksetDatas[newBlocksetId], bgPage.defaultBlockset());
     }
     else {
+        let newName = getNewBlocksetName();
         blocksetDatas[newBlocksetId] = bgPage.defaultBlockset();
-        blocksetDatas[newBlocksetId].name = getNewBlocksetName();
+        blocksetDatas[newBlocksetId].name = newName;
     }
 
     chrome.storage.sync.set({
@@ -417,55 +421,33 @@ function addBlockset(newData) {
 
 
 function getNewBlocksetName(copyName) {
-    var newName = "Block set 0";
-
-    if (copyName != undefined)
-        newName = copyName + "(0)";
-
-    var currentNum = 0;
-
-    var duplicate = true; // Assume to be duplicate until proven otherwise
-
-    while (duplicate) {
-        duplicate = hasDuplicateBSName(newName);
-        if (duplicate) {
-            currentNum++;
-
-            if (copyName != undefined) {
-                newName = copyName + "(" + currentNum + ")";
-            }
-            else {
-                newName = "Block set " + currentNum;
-            }
+    if (copyName != undefined) {
+        let duplicateNumber = 0;
+        let newName = `${copyName}(${duplicateNumber})`;
+        while (!isUniqueBSName(newName)) {
+            duplicateNumber++;
+            newName = `${copyName}(${duplicateNumber})`;
         }
+        return newName;
     }
-
-    return newName;
+    else {
+        let bsNumber = 1;
+        let newName = `Block set ${bsNumber}`;
+        while (!isUniqueBSName(newName)) {
+            bsNumber++;
+            newName = `Block set ${bsNumber}`;
+        }
+        return newName;
+    }
 }
 
-function hasDuplicateBSName(name) {
-    for (var bsId of blocksetIds) {
-        if (name == blocksetDatas[bsId].name) {
-            return true;
+function isUniqueBSName(blocksetName) {
+    for (let bsId in blocksetDatas) {
+        if (blocksetName == blocksetDatas[bsId].name) {
+            return false;
         }
     }
-    return false;
-}
-
-/**
- * Add items with default values to this object, if default object has them
- * Always do this before loading anything to account for updates, wich add new data to saves
- * @param {Object} object - object to check and modify
- * @param {Object} defaultObject - default
- */
-function addAbsentItems(object, defaultObject) {
-    var defKeys = Object.keys(defaultObject);
-    var keys = Object.keys(object);
-    for (defKey of defKeys) {
-        if (!keys.includes(defKey)) {
-            object[defKey] = defaultObject[defKey];
-        }
-    }
+    return true;
 }
 
 function deleteBlockset(id) {
@@ -821,6 +803,11 @@ $("input[id^=aDay]").on("change", function () {
     for (var i = 0; i < 7; i++) {
         blocksetDatas[currentPageId].activeDays[i] = $("#aDay" + i).prop("checked");
     }
+    saveCurrentBlockset();
+});
+
+$("#requireActive").on("change", function () {
+    blocksetDatas[currentPageId].requireActive = $("#requireActive").prop("checked");
     saveCurrentBlockset();
 });
 
