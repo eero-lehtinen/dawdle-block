@@ -297,7 +297,7 @@ select, select:hover {
 }
 
 select:disabled {
-    cursor: default;
+    cursor: not-allowed;
     color: var(--dark-grey) !important;
     background-image: url("../images/ic_arrow_drop_down_grey.png") !important;
 }
@@ -308,7 +308,7 @@ button:active {
 }
 
 button:disabled {
-    cursor: default;
+    cursor: not-allowed;
     color: var(--dark-grey) !important;
     background-color: var(--grey) !important
 }
@@ -352,7 +352,7 @@ input[type="radio"] {
 }
 
 input[type="checkbox"]:disabled {
-    cursor: default;
+    cursor: not-allowed;
     border-color: var(--dark-grey) !important;
 }
 input[type="checkbox"]:checked:disabled {
@@ -361,7 +361,7 @@ input[type="checkbox"]:checked:disabled {
 
 input:disabled, input:disabled:hover {
     border-color: var(--dark-grey);
-    cursor: default;
+    cursor: not-allowed;
     color: var(--dark-grey);
 }
 
@@ -475,6 +475,7 @@ button.close:disabled img {
 }
 
 label:disabled {
+    cursor: not-allowed;
     color: var(--dark-grey);
 }
 
@@ -559,5 +560,6 @@ button#donate *{
 }
 
 label.disabled {
+    cursor: not-allowed;
     color: var(--dark-grey);
 }

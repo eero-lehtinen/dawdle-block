@@ -16,15 +16,24 @@
     line-height: 1;
     padding: 6px;
     height: initial;
+    transition: opacity 0.2s;
+    animation: fadein 0.2s;
 }
 
 #dawdle_block_annoy.hidden {
     opacity: 0;
+    transition: opacity 0.05s;
+}
+
+@keyframes fadein {
+  from { opacity: 0}
+  to   { opacity: 0.6}
 }
 
 #dawdle_block_annoy::before {
     content: "OVERTIME ";
 }
+
 
 @media only screen and (max-width: 800px)  {
     #dawdle_block_annoy::before {

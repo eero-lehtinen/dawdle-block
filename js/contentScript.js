@@ -26,22 +26,13 @@ function dawdle_block_showTime(timeString) {
         mainDiv.className = "";
     }
 
-    count = 0;
     if (timeoutHandle != undefined) {
         clearTimeout(timeoutHandle);
     }
     timeoutHandle = setTimeout(dawdle_block_hideTime, 1500);
 }
 
-
-count = 0;
-
 function dawdle_block_hideTime() {
-    if (document.hasFocus() == false || count == 0) {
-        timeoutHandle = setTimeout(dawdle_block_hideTime, 1500);
-        count++;
-        return;
-    }
     mainDiv = document.getElementById("dawdle_block_annoy");
     if (mainDiv != null) {
         mainDiv.className = "hidden";
