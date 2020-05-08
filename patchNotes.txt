@@ -1,6 +1,9 @@
+Version 1.3.1
+- Fixed bug that caused the wrong blacklist rules to be removed when the amount of rules exceeded 10
+
 Version 1.3.0
-- removed unintended regex matching
-- added intentional regex matching
+- Removed unintended regex matching (eg. characters "?", "*", "+", and "=" didn't work correctly)
+- Added intentional regex matching
 - Added ability to choose if unfocused tabs deplete time
 - Small tweaks
 

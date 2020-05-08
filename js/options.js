@@ -375,7 +375,7 @@ function addSite(toList, select, input, callback) {
 function removeSite(type, button) {
     $("#" + type + "SiteItems").empty();
     var list = type === "bl" ? blocksetDatas[currentPageId].blacklist : blocksetDatas[currentPageId].whitelist;
-    list.splice(button.parent().attr("id").charAt(6), 1);
+    list.splice(parseInt(button.parent().attr("id").substring(6)), 1);
     displaySites(list, type);
     saveCurrentBlockset();
 }
