@@ -1,3 +1,8 @@
+Version 1.4.2
+- Numbers in number input now distinguishable from the background
+- Fixed bug where first blacklist/whitelist rule was always deleted regardless of button pressed
+- Fixed typos
+
 Version 1.4.1
 - Fixed old help message
 
