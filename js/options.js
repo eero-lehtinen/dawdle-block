@@ -348,8 +348,8 @@ function addSite(toList, select, input, callback) {
         });
     }
     else if (select.val() === "ytCategory") {
-        if (bgPage.ytCategoryNamesById[input.val()] != undefined) {
-            toList[toList.length] = bgPage.bsItem(select.val(), [bgPage.ytCategoryNamesById[input.val()], input.val()]);
+        if (bgPage.YT_CATEGORY_NAMES_BY_ID[input.val()] != undefined) {
+            toList[toList.length] = bgPage.bsItem(select.val(), [bgPage.YT_CATEGORY_NAMES_BY_ID[input.val()], input.val()]);
             callback();
         }
         else {
@@ -608,12 +608,12 @@ function listAllCategories() {
     var rightList = $("<ul>");
     rightList.appendTo(table.find("td:last"));
 
-    var keys = Object.keys(bgPage.ytCategoryNamesById);
+    var keys = Object.keys(bgPage.YT_CATEGORY_NAMES_BY_ID);
     var halfLength = Math.ceil(keys.length / 2);
 
     for (var i = 0; i < keys.length; i++) {
         var toList = (i < halfLength) ? leftList : rightList;
-        $("<li>").text(keys[i] + ": " + bgPage.ytCategoryNamesById[keys[i]]).appendTo(toList);
+        $("<li>").text(keys[i] + ": " + bgPage.YT_CATEGORY_NAMES_BY_ID[keys[i]]).appendTo(toList);
     }
 
     dialog("Categories by id", textBox.html(), "OK");
