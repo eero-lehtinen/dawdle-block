@@ -1,4 +1,4 @@
-var ytCategoryNamesById = {
+var YT_CATEGORY_NAMES_BY_ID = {
     1: "Film & Animation",
     2: "Autos & Vehicles",
     10: "Music",
@@ -33,7 +33,7 @@ var ytCategoryNamesById = {
     44: "Trailers"
 }
 
-var version = chrome.runtime.getManifest().version;
+var VERSION = chrome.runtime.getManifest().version;
 
 var API_KEY = "A%49%7a%61%53y%42O%4f%6e%39%79%2dbx%42%38%4c%48k%2d%35%51%36%4e%44tq%63y9%5f%46%48%6a%35R%484";
 
@@ -41,9 +41,9 @@ var UPDATE_INTERVAL = 1000;
 
 var blocksetIds = [];
 
-var blocksetDatas = {};
+var blocksetDatas = [];
 
-var blocksetTimesElapsed = {};
+var blocksetTimesElapsed = [];
 
 var blRegEx = [];
 var wlRegEx = [];
@@ -74,18 +74,26 @@ function defaultBlockset() {
 }
 
 function defaultTimesElapsed() {
-    var res = {};
+    var res = [];
     for (let blocksetId of blocksetIds) {
         res[blocksetId] = 0;
     }
     return res;
 }
 
+settingProtectionTypes = [
+    "timerZero",
+    "always",
+    "never"
+]
 
-const DEFAULT_GENERAL_OPTIONS = {
+
+const defaultGeneralOptions = {
     clockType: 24,
     displayHelp: true,
-    darkTheme: false
+    darkTheme: false,
+    settingProtection: "never",
+    typingTestWordCount: 30
 }
 
 var isUpdated = false;
@@ -105,14 +113,12 @@ function init() {
     //chrome.storage.local.clear();
     //chrome.storage.sync.clear();
 
-
-
     chrome.storage.sync.get({
         blocksetIds: [0],
         generalOptions: {}
     }, function (items) {
         generalOptions = items.generalOptions;
-        addAbsentItems(generalOptions, DEFAULT_GENERAL_OPTIONS);
+        addAbsentItems(generalOptions, defaultGeneralOptions);
 
         blocksetIds = items.blocksetIds;
 
@@ -127,7 +133,6 @@ function init() {
     setInterval(update, UPDATE_INTERVAL);
     var nextMidnight = new Date().setHours(24, 0, 0, 0); // setHours actually returns ms since epoch
     chrome.alarms.create("midnightUpdate", { when: nextMidnight + 1000, periodInMinutes: 24 * 60 });
-    //setTimeout(midnightUpdate, nextMidnight - new Date().getTime() + 1000);
     currentWeekDay = new Date().getDay();
 }
 
@@ -147,7 +152,10 @@ function loadBlocksets() {
     chrome.storage.sync.get({
         blocksetTimesElapsed: defaultTimesElapsed()
     }, (items) => {
-        blocksetTimesElapsed = items.blocksetTimesElapsed;
+        // Do it this way because historically this has been saved as a object by accident
+        for (let index in items.blocksetTimesElapsed) {
+            blocksetTimesElapsed[index] = items.blocksetTimesElapsed[index];
+        }
 
         for (let blocksetId of blocksetIds) {
             chrome.storage.sync.get({

@@ -32,6 +32,13 @@
                 <h1>General options</h1>
             </li>
             <li>
+                <h3>Settings protection</h3> <button class="help" id="help_settingProtection">?</button> <br>
+                <label><input type="radio" name="settingProtection" value="timerZero"> When timer hits zero</label> <br>
+                <label><input type="radio" name="settingProtection" value="always"> Always</label> <br>
+                <label><input type="radio" name="settingProtection" value="never"> Never</label> <br>
+                <label> words in typing test: <input type="number" step=5 id="typingTestWordCount"></label>
+            </li>
+            <li>
                 <h3>Time convention</h3> <br>
                 <label><input type="radio" name="clockType" value="24">24-hour clock</label> <br>
                 <label><input type="radio" name="clockType" value="12">12-hour clock</label>
@@ -150,6 +157,41 @@
             <li class="blocksetActions"><button class="big" id="duplicate">Duplicate</button>
                 <button class="big" id="rename">Rename</button> <button class="big" id="delete">Delete</button>
                 <span id="saveIndicator">Saved</span>
+            </li>
+        </ul>
+    </div>
+
+    <div id="typingTestContent" hidden>
+        <p>
+            Make sure that the monkey in your brain is not trying to escape responsibilities. Type all words belowe
+            without
+            making any typos.
+        </p>
+        <div style="display: flex;">
+            <div id="typingTestDisplay"></div>
+            <div id="liveWordCount"> x words left </div>
+        </div>
+        <div style="display: flex;">
+            <input id="typingTestInput" type="text">
+            <div id="typingTestSuccess"> </div>
+        </div>
+    </div>
+
+    <div id="help_settingProtection_text" header="Settings protection" hidden>
+        <ul class="text">
+            <li>Some settings are protected at the specified time and can't be modified</li>
+            <li>To make "cheating" more cumbersome, you need to do a typing test which unlocks protected settings for
+                editing
+            </li>
+            <li>After completing the test, all settings of the current block set are unlocked until you close the
+                options page
+            </li>
+            <li>Choose a word count for the typing test that works the best for your typing speed while being annoying
+            </li>
+            <li>Note that the test needs to be completed with zero mistakes</li>
+            <li>This setting will also be protected, but it will stay unlocked when you change it to help with
+                accidential
+                changes
             </li>
         </ul>
     </div>
@@ -288,7 +330,7 @@
         </ul>
     </div>
 
-    <div id="help_ytAdding" hidden>
+    <div id="help_ytAdding_text" hidden>
         <ul class="text">
             <li>To add YouTube channels use their ids<br>(find them by going to a video, click their channel name under
                 the video, id is found in the url after "www.youtube.com/channel/" )</li>
@@ -303,6 +345,7 @@
     <script type="text/javascript" src="libraries/jquery-ui/jquery-ui.min.js"></script>
     <script type="text/javascript" src="libraries/FileSaver.min.js"></script>
     <script type="text/javascript" src="js/options.js"></script>
+    <script type="text/javascript" src="js/1000-words.js"></script>
 </body>
 
 </html>

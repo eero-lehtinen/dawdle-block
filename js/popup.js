@@ -141,13 +141,6 @@ function selectBlockSet(id) {
                 $("p.yt").first().show();
             }
 
-            if (blocksetTimesElapsed[id] >= blocksetDatas[id].timeAllowed && blocksetDatas[id].timeAllowed != 0 && !blocksetDatas[id].annoyMode) {
-                $("a[id^='wl']").attr("class", "disabled");
-            }
-            else {
-                $("a[id^='wl']").removeAttr("class");
-            }
-
             $("#info").hide();
             $("div.controls").show();
         })
@@ -177,9 +170,7 @@ function addDomain(domain, toList) {
         saveCurrentBlockset();
     }
     else {
-        $("#addIndicator").text("Already exists");
-        $("#addIndicator").addClass("show");
-        setTimeout(() => { $("#addIndicator").removeClass("show") }, 100);
+        showIndicator("Already exists");
     }
 }
 
@@ -189,9 +180,7 @@ function addUrl(url, toList) {
         saveCurrentBlockset();
     }
     else {
-        $("#addIndicator").text("Already exists");
-        $("#addIndicator").addClass("show");
-        setTimeout(() => { $("#addIndicator").removeClass("show") }, 100);
+        showIndicator("Already exists");
     }
 }
 
@@ -201,9 +190,7 @@ function addChannel(channelId, channelTitle, toList) {
         saveCurrentBlockset();
     }
     else {
-        $("#addIndicator").text("Already exists");
-        $("#addIndicator").addClass("show");
-        setTimeout(() => { $("#addIndicator").removeClass("show") }, 100);
+        showIndicator("Already exists");
     }
 }
 
@@ -213,10 +200,14 @@ function addCategory(categoryId, categoryName, toList) {
         saveCurrentBlockset();
     }
     else {
-        $("#addIndicator").text("Already exists");
-        $("#addIndicator").addClass("show");
-        setTimeout(() => { $("#addIndicator").removeClass("show") }, 100);
+        showIndicator("Already exists");
     }
+}
+
+function showIndicator(text) {
+    $("#addIndicator").text(text);
+    $("#addIndicator").addClass("show");
+    setTimeout(() => { $("#addIndicator").removeClass("show") }, 100);
 }
 
 function getYTData(_url, callback) {
@@ -224,6 +215,7 @@ function getYTData(_url, callback) {
         if (_url.startsWith("www.youtube.com/watch")) {
             var videoId = _url.split("v=")[1].substring(0, 11);
             bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + "&fields=items(snippet(categoryId%2CchannelId%2CchannelTitle))&key=" + bgPage.API_KEY, function (response) {
+                console.log("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + "&fields=items(snippet(categoryId%2CchannelId%2CchannelTitle))&key=" + bgPage.API_KEY)
 
                 if (response.error != undefined) {
                     console.error(`Could not get video info with id ${videoId}, error: ${response.error}`);
@@ -280,14 +272,35 @@ function getYTData(_url, callback) {
     }
 }
 
+/**
+ * Check if currently settings are protected for this block set.
+ * We would need to do the typing test to open settings if they are protected, but in this popup we can't do it.
+ * @param {Number} bsId block set id to check
+ */
+function areSettingsProtected(bsId) {
+    if (generalOptions.settingProtection === "never") {
+        return false;
+    }
+    else if (generalOptions.settingProtection === "always") {
+        return true;
+    }
+    else if (generalOptions.settingProtection === "timerZero") {
+        // If timer is more than zero, settings aren't protected
+        if (blocksetTimesElapsed[bsId] < blocksetDatas[bsId].timeAllowed) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+}
+
 function saveCurrentBlockset() {
     chrome.storage.sync.set({
         [currentId]: blocksetDatas[currentId]
     }, function () {
         if (chrome.runtime.lastError == null) {
-            $("#addIndicator").text("Added");
-            $("#addIndicator").addClass("show");
-            setTimeout(() => { $("#addIndicator").removeClass("show") }, 100);
+            showIndicator("Added");
         }
         else {
             console.log(chrome.runtime.lastError);
@@ -315,9 +328,7 @@ $("#bl_domain").on("click", function () {
     if (blocksetDatas[currentId] != undefined && (new URL(urlWithProtocol).hostname) != "")
         addDomain(new URL(urlWithProtocol).hostname, blocksetDatas[currentId].blacklist);
     else {
-        $("#addIndicator").text("Domain undefined");
-        $("#addIndicator").addClass("show");
-        setTimeout(() => { $("#addIndicator").removeClass("show") }, 100);
+        showIndicator("Domain undefined");
     }
 });
 
@@ -327,8 +338,12 @@ $("#bl_url").on("click", function () {
 });
 
 $("#wl_url").on("click", function () {
-    if (blocksetDatas[currentId] != undefined)
-        addUrl(url, blocksetDatas[currentId].whitelist);
+    if (blocksetDatas[currentId] != undefined) {
+        if (areSettingsProtected(currentId))
+            showIndicator("Not added: settings protected");
+        else
+            addUrl(url, blocksetDatas[currentId].whitelist);
+    }
 });
 
 $("#bl_channel").on("click", function () {
@@ -341,24 +356,32 @@ $("#bl_channel").on("click", function () {
 
 $("#wl_channel").on("click", function () {
     if (blocksetDatas[currentId] != undefined) {
-        getYTData(url, function (data) {
-            addChannel(data.channelId, data.channelTitle, blocksetDatas[currentId].whitelist);
-        });
+        if (areSettingsProtected(currentId))
+            showIndicator("Not added: settings protected");
+        else {
+            getYTData(url, function (data) {
+                addChannel(data.channelId, data.channelTitle, blocksetDatas[currentId].whitelist);
+            });
+        }
     }
 });
 
 $("#bl_category").on("click", function () {
     if (blocksetDatas[currentId] != undefined) {
         getYTData(url, function (data) {
-            addCategory(data.categoryId, bgPage.ytCategoryNamesById[data.categoryId], blocksetDatas[currentId].blacklist);
+            addCategory(data.categoryId, bgPage.YT_CATEGORY_NAMES_BY_ID[data.categoryId], blocksetDatas[currentId].blacklist);
         });
     }
 });
 
 $("#wl_category").on("click", function () {
     if (blocksetDatas[currentId] != undefined) {
-        getYTData(url, function (data) {
-            addCategory(data.categoryId, bgPage.ytCategoryNamesById[data.categoryId], blocksetDatas[currentId].whitelist);
-        });
+        if (areSettingsProtected(currentId))
+            showIndicator("Not added: settings protected");
+        else {
+            getYTData(url, function (data) {
+                addCategory(data.categoryId, bgPage.YT_CATEGORY_NAMES_BY_ID[data.categoryId], blocksetDatas[currentId].whitelist);
+            });
+        }
     }
 });

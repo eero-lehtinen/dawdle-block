@@ -1,3 +1,10 @@
+/**
+ * This file contains all logic for the options page.
+ * Options data is first loaded in bg.js, this file can only modify it.
+ * We have a reference to bg, so we can modify options from it.
+ */
+
+
 var filterLookUp = {
     "urlEquals": "url equals",
     "urlContains": "url contains",
@@ -9,9 +16,9 @@ var filterLookUp = {
 }
 
 var bgPage;
-var blocksetIds;
-var blocksetDatas;
-var blocksetTimesElapsed;
+var blocksetIds = [];
+var blocksetDatas = [];
+var blocksetTimesElapsed = [];
 
 var generalOptions;
 
@@ -46,6 +53,117 @@ function init() {
 
     setupJQueryUI();
 
+    if (blocksetDatas.some(blocksetData => blocksetData.annoyMode === true)) {
+        ensureAnnoyModePermissions((hasPermissions) => {
+            if (!hasPermissions) {
+                for (let blocksetData of blocksetDatas) {
+                    blocksetData.annoyMode = false;
+                }
+                saveAllBlocksets();
+            }
+        });
+    }
+}
+
+function setTimeAllowed(value, pageId) {
+    blocksetDatas[pageId].timeAllowed = value;
+    $("#timeLeft").text(msToTimeDisplay(blocksetDatas[pageId].timeAllowed - blocksetTimesElapsed[pageId]));
+    saveCurrentBlockset();
+}
+
+chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+    if (message.type === "blocksetChanged") {
+        if (currentPageId === parseInt(message.id)) {
+            displaySites(blocksetDatas[currentPageId].blacklist, "bl");
+            displaySites(blocksetDatas[currentPageId].whitelist, "wl");
+        }
+    }
+});
+
+function update() {
+
+    if (currentPageId >= 0) {
+        setTimeDisplay($("#timeLeft"), blocksetDatas[currentPageId].timeAllowed - blocksetTimesElapsed[currentPageId]);
+    }
+}
+
+function loadTimePickers() {
+    if ($('.timepicker#resetTime').timepicker != undefined) {
+        $('.timepicker#resetTime').timepicker("destroy");
+    }
+
+    $('.timepicker#resetTime').timepicker({
+        timeFormat: generalOptions.clockType === 24 ? 'HH:mm' : "hh:mm p",
+        dynamic: false, dropdown: false, scrollbar: false,
+        change: function (time) {
+            var ms = dateToMs(time);
+            if (blocksetDatas[currentPageId].resetTime !== ms && oldResetTime !== ms) {
+                oldResetTime = ms;
+                ensureProtectedSettingAccess(currentPageId, function (granted) {
+                    if (!granted) {
+                        $('.timepicker#resetTime').timepicker("setTime", msToDate(blocksetDatas[currentPageId].resetTime));
+                        oldResetTime = blocksetDatas[currentPageId].resetTime;
+                        return;
+                    }
+                    blocksetDatas[currentPageId].resetTime = ms;
+                    saveCurrentBlockset();
+                });
+            }
+        }
+    });
+
+    if ($('.timepicker#activeFrom').timepicker != undefined) {
+        $('.timepicker#activeFrom').timepicker("destroy");
+    }
+
+    $('.timepicker#activeFrom').timepicker({
+        timeFormat: generalOptions.clockType === 24 ? 'HH:mm' : "hh:mm p",
+        dynamic: false, dropdown: false, scrollbar: false,
+        change: function (time) {
+            var ms = dateToMs(time);
+            if (blocksetDatas[currentPageId].activeTime.from !== ms && oldActiveTimeFrom !== ms) {
+                oldActiveTimeFrom = ms;
+                ensureProtectedSettingAccess(currentPageId, function (granted) {
+                    if (!granted) {
+                        $('.timepicker#activeFrom').timepicker("setTime", msToDate(blocksetDatas[currentPageId].activeTime.from));
+                        oldActiveTimeFrom = blocksetDatas[currentPageId].activeTime.from;
+                        return;
+                    }
+                    blocksetDatas[currentPageId].activeTime.from = ms;
+                    saveCurrentBlockset();
+                });
+            }
+        }
+    });
+
+    if ($('.timepicker#activeTo').timepicker != undefined) {
+        $('.timepicker#activeTo').timepicker("destroy");
+    }
+
+    $('.timepicker#activeTo').timepicker({
+        timeFormat: generalOptions.clockType === 24 ? 'HH:mm' : "hh:mm p",
+        dynamic: false, dropdown: false, scrollbar: false,
+        change: function (time) {
+            var ms = dateToMs(time);
+            if (blocksetDatas[currentPageId].activeTime.to !== ms && oldActiveTimeTo !== ms) {
+                oldActiveTimeTo = ms;
+                ensureProtectedSettingAccess(currentPageId, function (granted) {
+                    if (!granted) {
+                        $('.timepicker#activeTo').timepicker("setTime", msToDate(blocksetDatas[currentPageId].activeTime.to));
+                        oldActiveTimeTo = blocksetDatas[currentPageId].activeTime.to;
+                        return;
+                    }
+                    blocksetDatas[currentPageId].activeTime.to = ms;
+                    saveCurrentBlockset();
+                });
+            }
+        }
+    });
+
+    if ($('.timepicker#timeAllowed').timepicker != undefined) {
+        $('.timepicker#timeAllowed').timepicker("destroy");
+    }
+
     $('.timepicker#timeAllowed').timepicker({
         timeFormat: 'HH:mm:ss',
         dynamic: false,
@@ -53,17 +171,25 @@ function init() {
         scrollbar: false,
         change: function (time) {
             var timeMs = dateToMs(time);
-            if (currentPageId >= 0 && blocksetDatas[currentPageId].timeAllowed != timeMs && oldTime != timeMs) {
-                oldTime = timeMs;
+            if (currentPageId >= 0 && blocksetDatas[currentPageId].timeAllowed != timeMs && oldAllowedTime != timeMs) {
+                oldAllowedTime = timeMs;
                 if (blocksetDatas[currentPageId].timeAllowed < timeMs) {
+                    // Cache value because user may change tabs while the dialog is open
                     var pageId = currentPageId;
                     dialog("Do you want more time to waste?", "Are you really sure you want to slack off even more? It most likely isn't healthy.",
                         "Yes", function () {
-                            setTimeAllowed(timeMs, pageId);
+                            ensureProtectedSettingAccess(pageId, function (granted) {
+                                if (!granted && pageId == currentPageId) {
+                                    $(".timepicker#timeAllowed").timepicker("setTime", msToDate(blocksetDatas[pageId].timeAllowed));
+                                    oldAllowedTime = blocksetDatas[pageId].timeAllowed;
+                                    return;
+                                }
+                                setTimeAllowed(timeMs, pageId);
+                            });
                         }, "Not Really", function () {
                             if (pageId === currentPageId) {
                                 $(".timepicker#timeAllowed").timepicker("setTime", msToDate(blocksetDatas[pageId].timeAllowed));
-                                oldTime = blocksetDatas[pageId].timeAllowed;
+                                oldAllowedTime = blocksetDatas[pageId].timeAllowed;
                             }
                         });
                 }
@@ -75,92 +201,10 @@ function init() {
     });
 }
 
-var oldTime = -1;
-
-function setTimeAllowed(value, pageId) {
-    blocksetDatas[pageId].timeAllowed = value;
-    $("#timeLeft").text(msToTimeDisplay(blocksetDatas[pageId].timeAllowed - blocksetTimesElapsed[pageId]));
-    saveCurrentBlockset();
-}
-
-chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-    if (message.type === "blocksetChanged") {
-        if (currentPageId === parseInt(message.id)) {
-            console.log("Blockset changed2")
-            displaySites(blocksetDatas[currentPageId].blacklist, "bl");
-            displaySites(blocksetDatas[currentPageId].whitelist, "wl");
-        }
-    }
-});
-
-function update() {
-
-    if (currentPageId >= 0) {
-
-        setTimeDisplay($("#timeLeft"), blocksetDatas[currentPageId].timeAllowed - blocksetTimesElapsed[currentPageId]);
-
-        if (blocksetTimesElapsed[currentPageId] >= blocksetDatas[currentPageId].timeAllowed &&
-            blocksetDatas[currentPageId].timeAllowed != 0 && !blocksetDatas[currentPageId].annoyMode) {
-            if (!inputsRestricted)
-                restrictInputs(true);
-
-        }
-        else {
-            if (inputsRestricted)
-                restrictInputs(false);
-        }
-    }
-}
-
-function loadTimePickers() {
-    if ($('.timepicker#resetTime').timepicker != undefined) {
-        $('.timepicker#resetTime').timepicker("destroy");
-    }
-
-    $('.timepicker#resetTime').timepicker({
-        timeFormat: generalOptions.clockType === 24 ? 'HH:mm' : "hh:mm p",
-        defaultTime: 0, dynamic: false, dropdown: false, scrollbar: false,
-        change: function (time) {
-            var ms = dateToMs(time);
-            if (currentPageId >= 0 && blocksetDatas[currentPageId].resetTime != ms) {
-                blocksetDatas[currentPageId].resetTime = ms;
-                saveCurrentBlockset();
-            }
-        }
-    });
-
-    if ($('.timepicker#activeFrom').timepicker != undefined) {
-        $('.timepicker#activeFrom').timepicker("destroy");
-    }
-
-    $('.timepicker#activeFrom').timepicker({
-        timeFormat: generalOptions.clockType === 24 ? 'HH:mm' : "hh:mm p",
-        defaultTime: 0, dynamic: false, dropdown: false, scrollbar: false,
-        change: function (time) {
-            var ms = dateToMs(time);
-            if (currentPageId >= 0 && ms != blocksetDatas[currentPageId].activeTime.from) {
-                blocksetDatas[currentPageId].activeTime.from = ms;
-                saveCurrentBlockset();
-            }
-        }
-    });
-
-    if ($('.timepicker#activeTo').timepicker != undefined) {
-        $('.timepicker#activeTo').timepicker("destroy");
-    }
-
-    $('.timepicker#activeTo').timepicker({
-        timeFormat: generalOptions.clockType === 24 ? 'HH:mm' : "hh:mm p",
-        defaultTime: 0, dynamic: false, dropdown: false, scrollbar: false,
-        change: function (time) {
-            var ms = dateToMs(time);
-            if (currentPageId >= 0 && ms != blocksetDatas[currentPageId].activeTime.to) {
-                blocksetDatas[currentPageId].activeTime.to = ms;
-                saveCurrentBlockset();
-            }
-        }
-    });
-}
+let oldResetTime = -1;
+let oldActiveTimeFrom = -1;
+let oldActiveTimeTo = -1;
+let oldAllowedTime = -1;
 
 function setupJQueryUI() {
     $("ul.nav").sortable({
@@ -202,6 +246,7 @@ function displayBlocksetNavs() {
 
         blocksetLink = displayBlocksetNav(blocksetIds[i])
         blocksetLink.click(function () {
+            cancelTypingTestDialogs();
             displayPage(parseInt($(this).attr("id")))
         });
     }
@@ -225,6 +270,19 @@ function displayBlocksetNav(id) {
     return blocksetLink;
 }
 
+/** Check if there are typing test dialog windows open, then cancel them */
+function cancelTypingTestDialogs() {
+    let dialogs = $("#typingTestDialog");
+    dialogs.each(function () {
+        $(this).find("button.decline").click();
+    });
+}
+
+function typingTestDialogExists() {
+    return ($("#typingTestDialog").length > 0);
+}
+
+
 //general id=-1, deselect= -10
 function displayPage(id) {
     $("#" + currentPageId).removeAttr("class");
@@ -247,10 +305,13 @@ function displayPage(id) {
         $("#annoyMode").prop("checked", blocksetDatas[id].annoyMode);
         $("#requireActive").prop("checked", blocksetDatas[id].requireActive);
         $(".timepicker#resetTime").timepicker("setTime", msToDate(blocksetDatas[id].resetTime));
+        oldResetTime = -1;
         $(".timepicker#timeAllowed").timepicker("setTime", msToDate(blocksetDatas[id].timeAllowed));
-        oldTime = -1;
+        oldAllowedTime = -1;
         $(".timepicker#activeFrom").timepicker("setTime", msToDate(blocksetDatas[id].activeTime.from));
+        oldActiveTimeFrom = -1;
         $(".timepicker#activeTo").timepicker("setTime", msToDate(blocksetDatas[id].activeTime.to));
+        oldActiveTimeTo = -1;
         setTimeDisplay($("#timeLeft"), blocksetDatas[id].timeAllowed - blocksetTimesElapsed[id]);
         for (var i = 0; i < 7; i++) {
             $("#aDay" + i).prop("checked", blocksetDatas[id].activeDays[i]);
@@ -261,18 +322,11 @@ function displayPage(id) {
 
         displaySites(blocksetDatas[id].blacklist, "bl");
         displaySites(blocksetDatas[id].whitelist, "wl");
-
-        if (blocksetTimesElapsed[id] >= blocksetDatas[id].timeAllowed &&
-            blocksetDatas[id].timeAllowed != 0 && !blocksetDatas[id].annoyMode) {
-            restrictInputs(true);
-        }
-        else {
-            restrictInputs(false);
-        }
     }
     else if (id === -1) {
         $("ul.general").show();
-
+        $("input[type=radio][name=settingProtection][value=" + generalOptions.settingProtection + "]").prop("checked", true);
+        $("input[type=number]#typingTestWordCount").val(generalOptions.typingTestWordCount);
         $("input[type=radio][name=clockType][value=" + generalOptions.clockType + "]").prop("checked", true);
         $("#displayHelp").prop("checked", generalOptions.displayHelp);
         $("#darkTheme").prop("checked", generalOptions.darkTheme);
@@ -282,25 +336,6 @@ function displayPage(id) {
     }
     else if (id === -10) {
         // Deselect
-    }
-}
-
-var inputsRestricted = false;
-function restrictInputs(toState) {
-    inputsRestricted = toState;
-    $("#requireActive, #annoyMode, #resetTime, #timeAllowed, #activeFrom, #activeTo, input[id^='aDay'], #whitelistSelect, #whitelistInput, #whitelistAdd, li.siteItem[id^='bl'] > button[name=deleteSite], #delete").prop("disabled", toState);
-    $("input[id^= 'aDay']").each(function (index) { // make aDay labels grey with class "disabled"
-        if (toState === true)
-            $(this).parent().attr("class", "disabled");
-        else
-            $(this).parent().removeAttr("class");
-    });
-
-    if (toState === true) {
-        $("#timeLeftSuffix").text(" (some inputs restricted)");
-    }
-    else {
-        $("#timeLeftSuffix").text("");
     }
 }
 
@@ -320,11 +355,20 @@ function displaySites(list, type) {
         $("<span>", { class: "filter" }).html(filterLookUp[list[i].type] + ":").appendTo(siteItem);
         $("<span>", { class: "site" }).html(siteValue).appendTo(siteItem);
         var button = $("<button>", { class: "close", name: "deleteSite" }).html("<img src='images/cancel.png'>").appendTo(siteItem);
-        if (type === "bl" && inputsRestricted)
-            button.prop("disabled", true);
-        button.on("click", function () {
-            removeSite(type, $(this));
-        });
+        if (type === "bl") {
+            button.on("click", function () {
+                ensureProtectedSettingAccess(currentPageId, function (granted) {
+                    if (!granted)
+                        return;
+                    removeSite(type, button);
+                });
+            });
+        }
+        else {
+            button.on("click", function () {
+                removeSite(type, button);
+            });
+        }
     }
 }
 
@@ -373,11 +417,22 @@ function addSite(toList, select, input, callback) {
 }
 
 function removeSite(type, button) {
-    $("#" + type + "SiteItems").empty();
-    var list = type === "bl" ? blocksetDatas[currentPageId].blacklist : blocksetDatas[currentPageId].whitelist;
-    list.splice(parseInt(button.parent().attr("id").substring(6)), 1);
-    displaySites(list, type);
-    saveCurrentBlockset();
+    if (type === "bl") {
+        ensureProtectedSettingAccess(currentPageId, function (granted) {
+            if (!granted)
+                return;
+            $("#blSiteItems").empty();
+            blocksetDatas[currentPageId].blacklist.splice(parseInt(button.parent().attr("id").substring(6)), 1);
+            displaySites(blocksetDatas[currentPageId].blacklist, type);
+            saveCurrentBlockset();
+        })
+    }
+    else {
+        $("#wlSiteItems").empty();
+        blocksetDatas[currentPageId].whitelist.splice(parseInt(button.parent().attr("id").substring(6)), 1);
+        displaySites(blocksetDatas[currentPageId].whitelist, type);
+        saveCurrentBlockset();
+    }
 }
 
 function addBlockset(newData) {
@@ -555,6 +610,189 @@ function setTimeDisplay(element, time) {
     }
 }
 
+/** Contains cached protected access booleans for each blockset, blockset id as a key, boolean as a value.
+ * General settings has the key -1 */
+let protectedAccess = {};
+
+/** 
+ * Some settings are protected from impulsive editing, 
+ * test user with a typing test or do nothing based on protection settings.
+ * 
+ * Calls callback with true if granted
+ * @param {Number} bsId block set id to check, use -1 for general settings
+ * @param {function} callback returns (bool, int), bool is granted and int is block set id
+ * */
+function ensureProtectedSettingAccess(bsId, callback) {
+    if (protectedAccess[bsId] === true) {
+        callback(true, bsId);
+        return;
+    }
+
+    else if (protectedAccess[bsId] === undefined) {
+        protectedAccess[bsId] = false;
+    }
+
+    if (generalOptions.settingProtection === "never") {
+        // Access granted always, never do typing test
+        protectedAccess[bsId] = true;
+        callback(true, bsId);
+    }
+    else if (generalOptions.settingProtection === "always") {
+        // Always do typing test the first time user tries to edit in this session
+        typingTestDialog(bsId, function (success) {
+            if (success) protectedAccess[bsId] = true;
+
+            callback(protectedAccess[bsId], bsId);
+        });
+    }
+    else if (generalOptions.settingProtection === "timerZero") {
+        // If timer is more than zero, don't do typing test
+        let test = true;
+        if (bsId >= 0) {
+            if (blocksetTimesElapsed[bsId] < blocksetDatas[bsId].timeAllowed)
+                test = false;
+        }
+        else { // if trying to edit general settings
+            if (blocksetTimesElapsed.some((timeElapsed, index) => {
+                if (blocksetDatas[index]) return timeElapsed < blocksetDatas[index].timeAllowed
+            }))
+                test = false;
+        }
+
+        if (test) {
+            typingTestDialog(bsId, function (success) {
+                if (success) protectedAccess[bsId] = true;
+                callback(protectedAccess[bsId], bsId);
+            });
+        }
+        else {
+            // don't set cache because we may need to do test when timer hits zero
+            // protectedAccess[bsId] = true; 
+            callback(true, bsId);
+        }
+    }
+}
+
+
+let dialogWindow;
+/**
+ * Tests user in a typing test, calls callback with boolean based on success
+ * @param {function} callback 
+ */
+function typingTestDialog(bsId, callback) {
+    cancelTypingTestDialogs();
+    dialogWindow = dialog("Typing Test: Open Protected Settings", $("#typingTestContent").html(),
+        undefined, undefined, "Cancel", () => { if (!protectedAccess[bsId]) callback(false); });
+
+    dialogWindow.attr("id", "typingTestDialog");
+    dialogWindow.css("width", "450px");
+
+    doTest(function (result) {
+        callback(result);
+    });
+}
+
+
+function doTest(callback) {
+
+    let tryAgain;
+    let tryAgainTimeout;
+    let testInput = dialogWindow.find("#typingTestInput");
+    let testDisplay = dialogWindow.find("#typingTestDisplay");
+    let liveWordCount = dialogWindow.find("#liveWordCount");
+    let testWords = randomWordList(generalOptions.typingTestWordCount, words1000);
+    let currentPos = 0;
+    testInput.focus();
+    updateValues();
+
+    function updateValues() {
+        testDisplay.html(testWords.join(" "));
+        testInput.val("");
+        liveWordCount.html(testWords.length + " words left");
+        currentPos = 0;
+    }
+
+    testInput.on("keyup", function (e) {
+        // Swallow first space or enter because they may get triggered when opening this dialog from a text input
+        if (currentPos === 0 && (e.key === " " || e.key === "Enter"))
+            return;
+
+        let curTextChar;
+        if (currentPos === testWords[0].length)
+            curTextChar = " ";
+        else
+            curTextChar = testWords[0].charAt(currentPos)
+
+        if (e.key === curTextChar ||
+            (curTextChar === " " && (e.key === " " || e.key === "Enter"))) {
+            currentPos++;
+            if (e.key === " " || e.key === "Enter") {
+
+                // Success
+                if (testWords.length === 1) {
+                    dialogWindow.find("button.decline").html("OK");
+                    dialogWindow.find("#typingTestSuccess").html("Access granted")
+                    callback(true);
+                }
+
+                testWords.shift();
+                updateValues();
+            }
+        }
+        else {
+            // Failure, try again
+            if (!tryAgain) {
+                tryAgain = $("<p></p>").attr("id", "testTryAgain").text("Try again.");
+                tryAgain.insertAfter(dialogWindow.find("p")[0]);
+            }
+
+            tryAgain.css("font-weight", "bold");
+            clearTimeout(tryAgainTimeout);
+            tryAgainTimeout = setTimeout(function () { tryAgain.css("font-weight", "normal"); }, 1000);
+
+            testWords = randomWordList(generalOptions.typingTestWordCount, words1000);
+            updateValues();
+        }
+    });
+}
+
+function readLocalFile(fileName, callback) {
+    chrome.runtime.getPackageDirectoryEntry(function (root) {
+        root.getFile(fileName, {}, function (fileEntry) {
+            fileEntry.file(function (file) {
+                var reader = new FileReader();
+                reader.onloadend = function (e) {
+                    callback(this.result);
+                }
+                reader.readAsText(file);
+            });
+        });
+    });
+}
+
+function randomWordList(length, fromWords) {
+    let words = [];
+    for (var i = 0; i < length; i++) {
+        words.push(fromWords[getRandomInt(0, fromWords.length)]);
+    }
+    return words;
+}
+
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+}
+
+/**
+ * Creates dialog window with given arguments and returns the window as a jquery object
+ * @param {string} title Dialog main title
+ * @param {string} text Content for the dialog, can be html stringified
+ * @param {string} acceptText Text for accept button
+ * @param {function} onAccept Callback for pressing accept button
+ * @param {string} declineText Text for decline button
+ * @param {function} onDecline Callback for pressing decline button
+ */
 function dialog(title, text, acceptText, onAccept, declineText, onDecline) {
     var dWindow = $("<div>", { class: "dialog" }).appendTo($("body"));
     var topBar = $("<div>", { class: "topBar" }).appendTo(dWindow);
@@ -562,12 +800,8 @@ function dialog(title, text, acceptText, onAccept, declineText, onDecline) {
 
     var textBox = $("<div>", { class: "text" }).html(text).appendTo(dWindow);
     var botBar = $("<div>", { class: "botBar" }).appendTo(dWindow);
-    var decline;
-    if (declineText != undefined)
-        decline = $("<button>").html(declineText).appendTo(botBar);
-    var accept = $("<button>").html(acceptText).appendTo(botBar);
-
     if (declineText != undefined) {
+        let decline = $("<button>").addClass("decline").html(declineText).appendTo(botBar);
         decline.on("click", function () {
             if (onDecline != undefined)
                 onDecline();
@@ -575,11 +809,14 @@ function dialog(title, text, acceptText, onAccept, declineText, onDecline) {
         });
     }
 
-    accept.on("click", function () {
-        if (onAccept != undefined)
-            onAccept();
-        dWindow.remove();
-    });
+    if (acceptText != undefined) {
+        let accept = $("<button>").addClass("accept").html(acceptText).appendTo(botBar);
+        accept.on("click", function () {
+            if (onAccept != undefined)
+                onAccept();
+            dWindow.remove();
+        });
+    }
 
     dWindow.draggable({ handle: topBar, scroll: false });
 
@@ -591,7 +828,7 @@ function dialog(title, text, acceptText, onAccept, declineText, onDecline) {
             link.on("click", function () { listAllCategories(); });
         }
         if (link.attr("name") === "ytAdding") {
-            link.on("click", function () { dialog("Adding YouTube channels/categories", $("div#help_ytAdding").html(), "OK") });
+            link.on("click", function () { dialog("Adding YouTube channels/categories", $("div#help_ytAdding_text").html(), "OK") });
         }
     }
 
@@ -716,10 +953,12 @@ $("button#donate").click(function () {
 });
 
 $("#-2").click(function () {
+    cancelTypingTestDialogs();
     displayPage(-2);
 });
 
 $("#-1").click(function () {
+    cancelTypingTestDialogs();
     displayPage(-1);
 });
 
@@ -727,15 +966,20 @@ $("#-1").click(function () {
 
 var deleteDialog;
 $("#delete").on("click", function () {
-    var page = currentPageId;
-    if (deleteDialog != undefined) {
-        deleteDialog.remove();
-        deleteDialog = undefined;
-    }
+    ensureProtectedSettingAccess(currentPageId, function (granted) {
+        if (!granted)
+            return;
 
-    deleteDialog = dialog("Delete block set: " + blocksetDatas[page].name, "This block set will be deleted permanently. Are you sure?", "Delete", function () {
-        deleteBlockset(page);
-    }, "Cancel", undefined);
+        if (deleteDialog != undefined) {
+            deleteDialog.remove();
+            deleteDialog = undefined;
+        }
+
+        deleteDialog = dialog("Delete block set: " + blocksetDatas[currentPageId].name,
+            "This block set will be deleted permanently. Are you sure?", "Delete", function () {
+                deleteBlockset(currentPageId);
+            }, "Cancel", undefined);
+    });
 });
 
 $("#duplicate").on("click", function () {
@@ -783,10 +1027,22 @@ function blacklistAddSite() {
     }
 }
 
-$("#whitelistAdd").on("click", whitelistAddSite);
-$("#whitelistInput").on("keypress", function (event) {
-    if (event.originalEvent.key === "Enter")
+$("#whitelistAdd").on("click", function () {
+    ensureProtectedSettingAccess(currentPageId, function (granted) {
+        if (!granted)
+            return;
         whitelistAddSite();
+    });
+});
+
+$("#whitelistInput").on("keypress", function (event) {
+    if (event.originalEvent.key === "Enter") {
+        ensureProtectedSettingAccess(currentPageId, function (granted) {
+            if (!granted)
+                return;
+            whitelistAddSite();
+        });
+    }
 });
 
 function whitelistAddSite() {
@@ -800,55 +1056,123 @@ function whitelistAddSite() {
 }
 
 $("input[id^=aDay]").on("change", function () {
-    for (var i = 0; i < 7; i++) {
-        blocksetDatas[currentPageId].activeDays[i] = $("#aDay" + i).prop("checked");
-    }
-    saveCurrentBlockset();
+    let dayIndex = $(this).attr("id").slice("aDay".length);
+    ensureProtectedSettingAccess(currentPageId, function (granted) {
+        if (!granted) {
+            $(`input[id=aDay${dayIndex}]`).prop("checked", blocksetDatas[currentPageId].activeDays[dayIndex]);
+            return;
+        }
+        blocksetDatas[currentPageId].activeDays[dayIndex] = $(`input[id=aDay${dayIndex}]`).prop("checked");
+        saveCurrentBlockset();
+    });
 });
 
 $("#requireActive").on("change", function () {
-    blocksetDatas[currentPageId].requireActive = $("#requireActive").prop("checked");
-    saveCurrentBlockset();
+    ensureProtectedSettingAccess(currentPageId, function (granted) {
+        if (!granted) {
+            $("#requireActive").prop("checked", blocksetDatas[currentPageId].requireActive);
+            return;
+        }
+        blocksetDatas[currentPageId].requireActive = $(this).prop("checked");
+        saveCurrentBlockset();
+    });
 });
 
 $("#annoyMode").on("change", function () {
     var checkBox = $(this);
     if (checkBox.prop("checked")) {
-        chrome.permissions.contains({
-            origins: ["<all_urls>"]
-        }, (res) => {
-            if (res) {
-                blocksetDatas[currentPageId].annoyMode = true;
-                saveCurrentBlockset();
-            }
-            else {
-                var textObj = $("#help_annoyMode_permission_text");
-                dialog(textObj.attr("header"), textObj.html(), "Continue", () => {
-                    // On continue
-                    chrome.permissions.request({
-                        origins: ["<all_urls>"]
-                    }, (granted) => {
-                        if (granted) {
-                            blocksetDatas[currentPageId].annoyMode = true;
-                            saveCurrentBlockset();
-                        } else {
-                            checkBox.prop("checked", false);
-                        }
-                    });
-                }, "Cancel", () => {
-                    // On cancel
-                    checkBox.prop("checked", false);
+        ensureAnnoyModePermissions(function (havePermissions) {
+            if (havePermissions) {
+                ensureProtectedSettingAccess(currentPageId, function (granted) {
+                    if (!granted) {
+                        $("#annoyMode").prop("checked", blocksetDatas[currentPageId].requireActive);
+                        return;
+                    }
+                    blocksetDatas[currentPageId].annoyMode = $("#annoyMode").prop("checked");
+                    saveCurrentBlockset();
                 });
             }
-        });
+            else {
+                checkBox.prop("checked", false);
+            }
+        })
     }
     else {
-        blocksetDatas[currentPageId].annoyMode = false;
-        saveCurrentBlockset();
+        ensureProtectedSettingAccess(currentPageId, function (granted) {
+            if (!granted) {
+                $("#annoyMode").prop("checked", blocksetDatas[currentPageId].requireActive);
+                return;
+            }
+            blocksetDatas[currentPageId].annoyMode = $("#annoyMode").prop("checked");
+            saveCurrentBlockset();
+        });
     }
 });
 
+function ensureAnnoyModePermissions(callback) {
+    chrome.permissions.contains({
+        origins: ["<all_urls>"]
+    }, (res) => {
+        if (res) {
+            callback(true);
+        }
+        else {
+            var textObj = $("#help_annoyMode_permission_text");
+            dialog(textObj.attr("header"), textObj.html(), "Continue", () => {
+                // On continue
+                chrome.permissions.request({
+                    origins: ["<all_urls>"]
+                }, (granted) => {
+                    if (granted) {
+                        callback(true);
+                    } else {
+                        callback(false);
+                    }
+                });
+            }, "Cancel", () => {
+                callback(false);
+            });
+        }
+    });
+}
+
+
 //---General options---
+
+$("input[type=number]#typingTestWordCount").on("change", function () {
+    let input = $(this)
+    if (parseInt(input.val()) > 400) {
+        input.val(400);
+    }
+    else if (parseInt(input.val()) < 1) {
+        input.val(1);
+    }
+
+    ensureProtectedSettingAccess(-1, function (granted) {
+        if (!granted) {
+            input.val(generalOptions.typingTestWordCount)
+            return;
+        }
+        generalOptions.typingTestWordCount = parseInt(input.val());
+        saveGeneralOptions();
+    });
+});
+
+$("input[type=radio][name=settingProtection]").on("change", function () {
+    ensureProtectedSettingAccess(-1, function (granted) {
+        if (!granted) {
+            $("input[type=radio][name=settingProtection][value=" + generalOptions.settingProtection + "]").prop("checked", true);
+            return;
+        }
+        generalOptions.settingProtection = $("input[type=radio][name=settingProtection]:checked").val();
+        saveGeneralOptions();
+
+        // Reset all protected access caches
+        protectedAccess = {};
+        // But allow general settings access to allow users to easily undo mistakes
+        protectedAccess[-1] = true;
+    });
+});
 
 $("input[type=radio][name=clockType]").on("change", function () {
     generalOptions.clockType = parseInt($(this).val());
