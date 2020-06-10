@@ -57,7 +57,7 @@ body {
 
 
 .red {
-    color: red !important;
+    color: var(--red) !important;
 }
 
 hr.border {
@@ -250,6 +250,9 @@ input.timepicker {
     min-height: 2em;
 }
 
+input[type="number"]#typingTestWordCount {
+    width: 60px;
+}
 
 #timeLeft {
     font-family: 'PT Mono', monospace;
@@ -418,6 +421,42 @@ button.help {
     margin-left: 4px;
 }
 
+div#typingTestDisplay {
+    flex-basis: 70%;
+    border: 1px solid grey;
+    border-radius: 3px;
+    background-color: white;
+    margin: 5px 0;
+    padding: 3px;
+    font-size: 130%;
+    min-height: 2em;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+div#liveWordCount, div#typingTestSuccess {
+    flex-basis: 30%;
+    margin: auto;
+    padding-left: 5px;
+    font-size: 130%;
+}
+
+div#typingTestSuccess {
+    font-weight: bold;
+}
+
+input#typingTestInput {
+    width: 70%;
+    border: 1px solid grey;
+    border-radius: 2px;
+    background-color: white;
+    margin: 5px 0;
+    padding: 3px;
+    font-size: 130%;
+}
+
+
 div.dialog {
     z-index: 3;
     width: 380px;
@@ -428,6 +467,7 @@ div.dialog {
     margin-left: -170px;
     background-color: var(--dialog-color);
     border-radius: 3px;
+    box-shadow: 0 0 5px grey;
 }
 
 div.topBar {
