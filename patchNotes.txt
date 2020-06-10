@@ -1,3 +1,6 @@
+Version 1.4.1
+- Fixed old help message
+
 Version 1.4.0
 - Implemented settings protection system, which allows you to edit settings when timers are zero
 
