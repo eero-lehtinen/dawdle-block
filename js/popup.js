@@ -2,12 +2,13 @@ var bgPage;
 var blocksetIds;
 var blocksetDatas;
 var blocksetTimesElapsed;
+var generalOptions;
 
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     if (tabId === currentTabId && changeInfo.status === "complete") {
         $("#info").hide();
         if (blocksetIds.length === 1) {
-            selectSet(blocksetIds[0]);
+            selectBlockSet(blocksetIds[0]);
             $("#bsName").hide();
         }
         else {
@@ -21,11 +22,12 @@ chrome.runtime.getBackgroundPage(function (bg) {
     blocksetIds = bgPage.blocksetIds;
     blocksetDatas = bgPage.blocksetDatas;
     blocksetTimesElapsed = bgPage.blocksetTimesElapsed;
+    generalOptions = bgPage.generalOptions;
     start();
 });
 
 function start() {
-    setDarkTheme(bgPage.generalOptions.darkTheme);
+    setDarkTheme(generalOptions.darkTheme);
 
     loadAllBlocksets();
     bgPage.callbacks[1] = update;
@@ -39,7 +41,7 @@ function start() {
         }
     });
 
-    $("p.header").text("Dawdle block " + bgPage.version);
+    $("p.header").text("Dawdle block " + bgPage.VERSION);
 }
 
 
@@ -57,7 +59,7 @@ function loadAllBlocksets() {
         var name = $("<a>", { class: "blocksiteName", href: "#" }).text(blocksetDatas[id].name);
         name.on("click", function (e) {
             var blocksetId = $(this).parent().attr("id");
-            selectSet(blocksetId);
+            selectBlockSet(blocksetId);
         });
 
         var time = $("<span>", { class: "blocksiteTime" });
@@ -70,7 +72,7 @@ function loadAllBlocksets() {
     }
 
     if (blocksetIds.length === 1) {
-        selectSet(blocksetIds[0]);
+        selectBlockSet(blocksetIds[0]);
         $("#bsName").hide();
     }
     else {
@@ -86,7 +88,7 @@ function update() {
     }
 }
 
-// Update dom element text to time in ms
+/** Update dom element text to time in ms */
 function setTimeDisplay(element, time) {
     element.text(msToTimeDisplay(time));
 
@@ -107,7 +109,7 @@ var url;
 var urlWithProtocol;
 var currentTabId;
 
-function selectSet(id) {
+function selectBlockSet(id) {
     if (currentId != -1)
         $("#" + currentId).removeAttr("class");
 
