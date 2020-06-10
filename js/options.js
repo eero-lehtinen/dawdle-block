@@ -346,15 +346,15 @@ function displaySites(list, type) {
     else if (type === "wl") {
         $("#wlSiteItems").empty();
     }
-    for (var i = 0; i < list.length; i++) {
-        var siteValue = list[i].value;
+    for (let i = 0; i < list.length; i++) {
+        let siteValue = list[i].value;
         if (list[i].type === "ytChannel" || list[i].type === "ytCategory") {
             siteValue = list[i].value.name + " <span style='color:grey'>" + list[i].value.id + "</span>";
         }
-        var siteItem = $("<li>", { class: "siteItem", id: type + "Item" + i }).prependTo("#" + type + "SiteItems");
+        let siteItem = $("<li>", { class: "siteItem", id: type + "Item" + i }).prependTo("#" + type + "SiteItems");
         $("<span>", { class: "filter" }).html(filterLookUp[list[i].type] + ":").appendTo(siteItem);
         $("<span>", { class: "site" }).html(siteValue).appendTo(siteItem);
-        var button = $("<button>", { class: "close", name: "deleteSite" }).html("<img src='images/cancel.png'>").appendTo(siteItem);
+        let button = $("<button>", { class: "close", name: "deleteSite" }).html("<img src='images/cancel.png'>").appendTo(siteItem);
         if (type === "bl") {
             button.on("click", function () {
                 ensureProtectedSettingAccess(currentPageId, function (granted) {
