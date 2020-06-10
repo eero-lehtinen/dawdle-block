@@ -1,3 +1,6 @@
+Version 1.4.0
+- Implemented settings protection system, which allows you to edit settings when timers are zero
+
 Version 1.3.1
 - Fixed bug that caused the wrong blacklist rules to be removed when the amount of rules exceeded 10
 
