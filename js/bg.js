@@ -135,9 +135,7 @@ function init() {
 
 var saveInNextUpdate = [];
 
-/**
- * For some reason, saves done close to startup don't go through, this is to help that
- *  */
+/** For some reason, saves done close to startup don't go through, this is to help with that */
 function saveBlocksetInNextUpdate(blocksetId) {
     if (!saveInNextUpdate.includes(blocksetId))
         saveInNextUpdate.push(blocksetId);
@@ -215,7 +213,7 @@ function addAbsentItems(object, defaultObject) {
 
 
 
-// Listen for updates in settings
+/** Listen for updates in settings */
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     bsId = parseInt(message.id);
     if (message.type === "blocksetChanged") {
@@ -231,15 +229,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         chrome.alarms.clear("timerReset_" + bsId);
         chrome.alarms.clear("activeTimeUpdateFrom_" + bsId);
         chrome.alarms.clear("activeTimeUpdateTo_" + bsId);
-
-        // if (timerResets[message.id] != undefined) {
-        //     clearTimeout(timerResets[message.id]);
-        // }
-
-        // if (activeTimes[message.id] != undefined) {
-        //     clearTimeout(activeTimes[message.id].from);
-        //     clearTimeout(activeTimes[message.id].to);
-        // }
     }
     else if (message.type === "generalOptionsChanged") {
         // Not really used yet
@@ -262,7 +251,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 });
 
 
-// Timers to update tabs when needed
+/* Timers to update tabevaluations on user selected reset time. When blocksetId is undefined, setup for all block sets */
 function setupTimerReset(blocksetId) {
     const now = new Date();
     var resetTime = new Date();
@@ -295,22 +284,15 @@ function setupTimerReset(blocksetId) {
 
                 if (now.getTime() >= resetTime.getTime()) {
                     // already done for today, set timeout for tomorrow's reset
-                    //timerResets[id] = setTimeout(resetElapsedTime, resetTime.getTime() - now.getTime() + 86400000, id);
                     chrome.alarms.create("timerReset_" + id, { when: resetTime.getTime() + 86400000, periodInMinutes: 24 * 60 });
                 }
                 else if (now.getTime() < resetTime.getTime()) {
                     // set timeout for later today
-                    //timerResets[id] = setTimeout(resetElapsedTime, resetTime.getTime() - now.getTime(), id);
                     chrome.alarms.create("timerReset_" + id, { when: resetTime.getTime(), periodInMinutes: 24 * 60 });
                 }
             });
         })(id_forward);
     }
-
-
-    // if (timerResets[id] != undefined) {
-    //     clearTimeout(timerResets[id]);
-    // }
 }
 
 function setupActiveTimeUpdates(blocksetId) {
@@ -333,30 +315,25 @@ function setupActiveTimeUpdates(blocksetId) {
             chrome.alarms.clear("activeTimeUpdateFrom_" + id, () => {
                 chrome.alarms.clear("activeTimeUpdateTo_" + id, () => {
 
-                    let activeTimeFrom = blocksetDatas[id].activeTime.from; // MS from midnight
-                    let activeTimeTo = blocksetDatas[id].activeTime.to; // MS from midnight
+                    const activeTimeFrom = blocksetDatas[id].activeTime.from; // MS from midnight
+                    const activeTimeTo = blocksetDatas[id].activeTime.to; // MS from midnight
 
                     if (activeTimeFrom != activeTimeTo) { // If from and to are same, blocksets are just always active, so dont do anything
-                        //activeTimes[id] = {};
 
                         if (activeTimeFrom >= nowSinceMidnight) {
-                            //activeTimes[id].from = setTimeout(activeTimeUpdate, activeTimeFrom - now + 1000, id, "from"); // add one second of padding so eval functions are surely correct
                             chrome.alarms.create("activeTimeUpdateFrom_" + id,
                                 { when: todayZeroTime + activeTimeFrom + 1000, periodInMinutes: 24 * 60 });
                         }
                         else if (activeTimeFrom < nowSinceMidnight) {
-                            //activeTimes[id].from = setTimeout(activeTimeUpdate, activeTimeFrom - nowSinceMidnight + 86400000 + 1000, id, "from"); // timefrom gone for today, set timer for tomorrow
                             chrome.alarms.create("activeTimeUpdateFrom_" + id,
                                 { when: todayZeroTime + activeTimeFrom + 86400000 + 1000, periodInMinutes: 24 * 60 });
                         }
 
                         if (activeTimeTo >= nowSinceMidnight) {
-                            //activeTimes[id].to = setTimeout(activeTimeUpdate, activeTimeTo - nowSinceMidnight + 1000, id, "to");
                             chrome.alarms.create("activeTimeUpdateTo_" + id,
                                 { when: todayZeroTime + activeTimeTo + 1000, periodInMinutes: 24 * 60 });
                         }
                         else if (activeTimeTo < nowSinceMidnight) {
-                            //activeTimes[id].to = setTimeout(activeTimeUpdate, activeTimeTo - nowSinceMidnight + 86400000 + 1000, id, "to");
                             chrome.alarms.create("activeTimeUpdateTo_" + id,
                                 { when: todayZeroTime + activeTimeTo + 86400000 + 1000, periodInMinutes: 24 * 60 });
                         }
@@ -369,14 +346,14 @@ function setupActiveTimeUpdates(blocksetId) {
 
 
 function msToDate(time) {
-    var h = parseInt((time / (1000 * 60 * 60)) % 24);
-    var m = parseInt((time / (1000 * 60)) % 60);
-    var s = parseInt((time / 1000) % 60);
+    const h = parseInt((time / (1000 * 60 * 60)) % 24);
+    const m = parseInt((time / (1000 * 60)) % 60);
+    const s = parseInt((time / 1000) % 60);
     return new Date(0, 0, 0, h, m, s);
 }
 
 function msToTimeDisplay(duration) {
-    var isNegative = (duration < 0);
+    const isNegative = (duration < 0);
 
     duration = Math.abs(duration);
 
@@ -395,8 +372,6 @@ function timeToMsSinceMidnight(time) {
     return (time.getSeconds() * 1000) + (time.getMinutes() * 60000) + (time.getHours() * 3600000);
 }
 
-//var timerResets = {};
-
 function resetElapsedTime(id) {
     blocksetTimesElapsed[id] = 0;
     blocksetDatas[id].lastReset = (new Date()).getTime();
@@ -407,10 +382,7 @@ function resetElapsedTime(id) {
     saveBlocksetInNextUpdate(id); // resetting can happen close to startup, so use this also
 }
 
-/** 
- * Updates current weekday
- * Rechecks all tabs
- */
+/** Updates current weekday. Rechecks all tabs */
 function midnightUpdate() {
     currentWeekDay = new Date().getDay();
     evaluateAllTabs();
@@ -418,7 +390,7 @@ function midnightUpdate() {
 
 //var activeTimes = {};
 
-// Just update all tabs because it may not be active time anymore
+/** Just update all tabs because it may not be active time anymore */
 function activeTimeUpdate() {
     evaluateAllTabs();
 }
@@ -431,7 +403,6 @@ function evaluateAllTabs() {
     });
 }
 
-// Lookup tables
 function generateLookUp(blocksetId) {
     deleteLookUp(blocksetId);
     convertToRegEx(blocksetDatas[blocksetId].blacklist, blRegEx[blocksetId], blYT[blocksetId]);
@@ -479,10 +450,10 @@ function escapeRegExp(string) {
     return string.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 
-// Update loop
 var saveTimer = 0;
 var callbacks = [];
 
+/** Returns true if the tab is the currently active tab in any window and not minimized */
 function areTabsOpen(tabIds) {
 
     for (let windowId in openTabIds) {
@@ -502,6 +473,9 @@ function update() {
     var lowestTimer = Infinity;
     var globalAnnoy = false;
 
+
+    // blocksetAffectedTabs contains block set ids as keys and lists of tab ids that they are affecting.
+    // We need to check each tab if they need to be blocked or if we have to display annoy banner in them.
     for (let bsId in blocksetAffectedTabs) {
         bsId = parseInt(bsId);
         if (blocksetAffectedTabs[bsId].length == 0 || !blocksetIds.includes(bsId)) {
@@ -509,6 +483,7 @@ function update() {
             continue;
         }
 
+        // If requireActive is false for a given block set, we don't need to check if they are active 
         if (!blocksetDatas[bsId].requireActive || areTabsOpen(blocksetAffectedTabs[bsId])) {
 
             let curTimer = blocksetDatas[bsId].timeAllowed - blocksetTimesElapsed[bsId];
@@ -582,15 +557,14 @@ function update() {
 
 
 // Tab and window listeners
-
 var windowIds = [];
 
 var minimizedWindowIds = [];
 
-//windowId as key, tabid as value
+/** windowId as key, tabid as value */
 var openTabIds = {};
 
-// Blockset ID as key, list of tabIds as value
+/** Blockset ID as key, list of tabIds as value */
 var blocksetAffectedTabs = {};
 
 // chrome.tabs.onCreated.addListener(function (tab) {
@@ -652,7 +626,7 @@ chrome.windows.onFocusChanged.addListener(function (windowId) {
 });
 
 
-// Tab blocking evaluation
+/** Adds or removes the tab from 'blocksetAffectedTabs' based on url */
 function evaluateTab(tab) {
     blockedBy(tab, function (blocksetIdList) {
 
@@ -708,7 +682,7 @@ function setBadge(lowestTimer) {
         color = red;
         text = (Math.floor(lowestTimer / 1000)).toString();
     }
-    else if (lowestTimer < 0) {// annoy-mode is on
+    else if (lowestTimer < 0) { // annoy-mode is on
         color = red;
         text = "!!";
     }
@@ -754,7 +728,7 @@ function getStringBetween(source, a, b) {
 }
 
 
-YT_BASE_URL_LEN = "www.youtube.com/".length
+const YT_BASE_URL_LEN = "www.youtube.com/".length
 
 function blockedBy(tab, callback) {
 
@@ -940,7 +914,7 @@ function annoy(tabId, lowestTimer) {
     });
 }
 
-// janky solution to firefox dead object syndrome
+/** janky solution to firefox dead object syndrome */
 function bsItem(type, value) {
     var item;
     if (type.startsWith("yt") == false) {
@@ -961,7 +935,6 @@ function bsItem(type, value) {
     return item;
 }
 
-// Saving
 function saveBlockset(blocksetId) {
     chrome.storage.sync.set({
         [blocksetId]: blocksetDatas[blocksetId]
@@ -998,7 +971,6 @@ function saveElapsedTimes() {
 }
 
 
-// HTTP get
 function httpGetAsync(theUrl, callback) {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.timeout = 1500;
@@ -1019,7 +991,6 @@ function httpGetAsync(theUrl, callback) {
     xmlHttp.send(null);
 }
 
-//Donation
 function openDonationPage() {
     chrome.tabs.create({ url: "https://paypal.me/eerolehtinen" }, function (tab) { });
 }
