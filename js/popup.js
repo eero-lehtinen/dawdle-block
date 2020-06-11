@@ -166,7 +166,7 @@ function msToTimeDisplay(duration) {
 
 function addDomain(domain, toList) {
     if (!toList.some(val => val.type === "urlPrefix" && val.value === domain)) {
-        toList[toList.length] = bgPage.bsItem("urlPrefix", domain);
+        toList.push(bgPage.bsItem("urlPrefix", domain));
         saveCurrentBlockset();
     }
     else {
@@ -176,7 +176,7 @@ function addDomain(domain, toList) {
 
 function addUrl(url, toList) {
     if (!toList.some(val => val.type === "urlEquals" && val.value === url)) {
-        toList[toList.length] = bgPage.bsItem("urlEquals", url);
+        toList.push(bgPage.bsItem("urlEquals", url));
         saveCurrentBlockset();
     }
     else {
@@ -186,7 +186,7 @@ function addUrl(url, toList) {
 
 function addChannel(channelId, channelTitle, toList) {
     if (!toList.some(val => val.type === "ytChannel" && val.value.id === channelId)) {
-        toList[toList.length] = bgPage.bsItem("ytChannel", [channelTitle, channelId]);
+        toList.push(bgPage.bsItem("ytChannel", [channelTitle, channelId]));
         saveCurrentBlockset();
     }
     else {
@@ -196,7 +196,7 @@ function addChannel(channelId, channelTitle, toList) {
 
 function addCategory(categoryId, categoryName, toList) {
     if (!toList.some(val => val.type === "ytCategory" && val.value.id === categoryId)) {
-        toList[toList.length] = bgPage.bsItem("ytCategory", [categoryName, categoryId]);
+        toList.push(bgPage.bsItem("ytCategory", [categoryName, categoryId]));
         saveCurrentBlockset();
     }
     else {

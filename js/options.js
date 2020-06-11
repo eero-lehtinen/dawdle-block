@@ -383,7 +383,7 @@ function addSite(toList, select, input, callback) {
             var object = JSON.parse(response.message);
 
             if (object.items.length != 0) {
-                toList[toList.length] = bgPage.bsItem(select.val(), [object.items[0].snippet.title, object.items[0].id]);
+                toList.push(bgPage.bsItem(select.val(), [object.items[0].snippet.title, object.items[0].id]));
                 callback();
             }
             else {
@@ -393,7 +393,7 @@ function addSite(toList, select, input, callback) {
     }
     else if (select.val() === "ytCategory") {
         if (bgPage.YT_CATEGORY_NAMES_BY_ID[input.val()] != undefined) {
-            toList[toList.length] = bgPage.bsItem(select.val(), [bgPage.YT_CATEGORY_NAMES_BY_ID[input.val()], input.val()]);
+            toList.push(bgPage.bsItem(select.val(), [bgPage.YT_CATEGORY_NAMES_BY_ID[input.val()], input.val()]));
             callback();
         }
         else {
@@ -403,7 +403,7 @@ function addSite(toList, select, input, callback) {
     else if (select.val() === "urlRegexp") {
         try {
             new RegExp(input.val());
-            toList[toList.length] = bgPage.bsItem(select.val(), input.val());
+            toList.push(bgPage.bsItem(select.val(), input.val()));
             callback();
         }
         catch (e) {
@@ -411,7 +411,7 @@ function addSite(toList, select, input, callback) {
         }
     }
     else {
-        toList[toList.length] = bgPage.bsItem(select.val(), input.val());
+        toList.push(bgPage.bsItem(select.val(), input.val()));
         callback();
     }
 }
@@ -437,7 +437,7 @@ function removeSite(type, button) {
 
 function addBlockset(newData) {
     var newBlocksetId = findNewBlocksetId();
-    blocksetIds[blocksetIds.length] = newBlocksetId;
+    blocksetIds.push(newBlocksetId);
     blocksetTimesElapsed[newBlocksetId] = 0;
 
     chrome.storage.sync.set({

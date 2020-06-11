@@ -428,25 +428,25 @@ function convertToRegEx(fromList, toList, extraYT) {
     for (let i = 0; i < fromList.length; i++) {
         let type = fromList[i].type;
         if (type === "urlContains") {
-            toList[toList.length] = new RegExp(escapeRegExp(fromList[i].value));
+            toList.push(new RegExp(escapeRegExp(fromList[i].value)));
         }
         else if (type === "urlEquals") {
-            toList[toList.length] = new RegExp("^" + escapeRegExp(fromList[i].value) + "$");
+            toList.push(new RegExp("^" + escapeRegExp(fromList[i].value) + "$"));
         }
         else if (type === "urlPrefix") {
-            toList[toList.length] = new RegExp("^" + escapeRegExp(fromList[i].value));
+            toList.push(new RegExp("^" + escapeRegExp(fromList[i].value)));
         }
         else if (type === "urlSuffix") {
-            toList[toList.length] = new RegExp(escapeRegExp(fromList[i].value) + "$");
+            toList.push(new RegExp(escapeRegExp(fromList[i].value) + "$"));
         }
         else if (type === "urlRegexp") {
-            toList[toList.length] = new RegExp(fromList[i].value);
+            toList.push(new RegExp(fromList[i].value));
         }
         else if (type === "ytChannel") {
-            extraYT.channels[extraYT.channels.length] = fromList[i].value;
+            extraYT.channels.push(fromList[i].value);
         }
         else if (type === "ytCategory") {
-            extraYT.categories[extraYT.categories.length] = fromList[i].value.id;
+            extraYT.categories.push(fromList[i].value.id);
         }
         else {
             console.warn("Unknown blockset match type: " + type);
@@ -757,7 +757,7 @@ function blockedBy(tab, callback) {
 
         if (!wlRegEx[id].some((regEx) => regEx.test(url) === true)) { // if not in whitelist
             if (blRegEx[id].some((regEx) => regEx.test(url) === true)) { // if is in blacklist
-                blocksetIdList[blocksetIdList.length] = id;
+                blocksetIdList.push(id);
             }
         }
     }
