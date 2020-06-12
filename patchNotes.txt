@@ -1,3 +1,6 @@
+Version 1.4.4
+- Fixed bug where youtube playlists would get blocked unintentionally
+
 Version 1.4.3
 - Numbers in number input now distinguishable from the background in dark mode
 - Fixed bug where first blacklist/whitelist rule was always deleted regardless of button pressed
