@@ -815,7 +815,15 @@ function blockedBy(tab, callback) {
                 callback(blocksetIdList);
             });
         }
-        else if (url.startsWith("playlist/", YT_BASE_URL_LEN)) {
+        else if (url.startsWith("playlist?", YT_BASE_URL_LEN)) {
+            // If url contains "playnext=1", then the url is just used for forwarding, 
+            // so wait for the real url to show up.
+            // Usually happens when playlist has shuffle on and yt finds next video to play.
+            if (url.includes("playnext=1")) {
+                callback([]); // Return empty cause we want to block nothing so far
+                return;
+            }
+
             let playlistId = getStringBetween(url, "list=", "&");
 
             httpGetAsync("https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=" + playlistId + "&fields=items%2Fsnippet%2FchannelId&key=" + API_KEY, function (response) {
