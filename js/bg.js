@@ -770,8 +770,10 @@ function blockedBy(tab, callback) {
 
                 if (response.error != undefined) {
                     console.error(`Could not check video with id ${videoId}, error: ${response.error}`);
+                    callback(blocksetIdList);
                     return;
                 }
+
                 let object = JSON.parse(response.message);
 
                 if (object.items.length != 0) {
@@ -800,6 +802,7 @@ function blockedBy(tab, callback) {
 
                 if (response.error != undefined) {
                     console.error(`Could not check channel with username ${userName}, error: ${response.error}`);
+                    callback(blocksetIdList);
                     return;
                 }
                 let object = JSON.parse(response.message);
@@ -818,6 +821,7 @@ function blockedBy(tab, callback) {
             httpGetAsync("https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=" + playlistId + "&fields=items%2Fsnippet%2FchannelId&key=" + API_KEY, function (response) {
                 if (response.error != undefined) {
                     console.error(`Could not check playlist with id ${playlistId}, error: ${response.error}`);
+                    callback(blocksetIdList);
                     return;
                 }
                 let object = JSON.parse(response.message);
