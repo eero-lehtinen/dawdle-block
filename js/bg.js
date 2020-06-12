@@ -841,12 +841,12 @@ function blockedBy(tab, callback) {
     }
 }
 
+/** Evaluate which block sets want to block this channel combined with possible category */
 function evalChannelId(channelId, blocksetIdList, categoryId = undefined) {
     var now = timeToMsSinceMidnight(new Date());
     for (let id of blocksetIds) {
         if (!blocksetDatas[id].activeDays[currentWeekDay] || !isInActiveTime(now, id)) // if today is not an active day | or not in active hours
             continue;
-
 
         if (categoryId != undefined) {
             if (!wlYT[id].categories.includes(categoryId) && !wlYT[id].channels.some(c => c.id === channelId)) {
