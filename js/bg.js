@@ -205,7 +205,7 @@ function addAbsentItems(object, defaultObject) {
     }
     else { // This is for backwards compatability
         for (let defKey of defKeys) {
-            if (!keys.includes(defKey)) {
+            if (!keys.includes(defKey) || object[defKey] === undefined) {
 
                 if (defKey == "requireActive") { // Set this to true on old saves, in new blocksets it is false
                     object[defKey] = true;
