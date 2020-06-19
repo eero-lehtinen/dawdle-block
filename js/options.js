@@ -1068,12 +1068,13 @@ $("input[id^=aDay]").on("change", function () {
 });
 
 $("#requireActive").on("change", function () {
+    let checkBox = $(this);
     ensureProtectedSettingAccess(currentPageId, function (granted) {
         if (!granted) {
             $("#requireActive").prop("checked", blocksetDatas[currentPageId].requireActive);
             return;
         }
-        blocksetDatas[currentPageId].requireActive = $(this).prop("checked");
+        blocksetDatas[currentPageId].requireActive = checkBox.prop("checked");
         saveCurrentBlockset();
     });
 });
