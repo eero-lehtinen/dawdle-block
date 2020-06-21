@@ -429,7 +429,8 @@ div#typingTestDisplay {
     flex-basis: 70%;
     border: 1px solid grey;
     border-radius: 3px;
-    background-color: white;
+    background-color: var(--bg-color);
+    color: var(--primary-text-color);
     margin: 5px 0;
     padding: 3px;
     font-size: 130%;
@@ -454,7 +455,8 @@ input#typingTestInput {
     width: 70%;
     border: 1px solid grey;
     border-radius: 2px;
-    background-color: white;
+    background-color: var(--bg-color);
+    color: var(--primary-text-color);
     margin: 5px 0;
     padding: 3px;
     font-size: 130%;
