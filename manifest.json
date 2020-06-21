@@ -3,7 +3,7 @@
   "name": "Dawdle block",
   "short_name": "Dawdle block",
   "description": "Put time limits on unproductive sites.",
-  "version": "1.4.5",
+  "version": "1.4.6",
   "options_ui": {
     "page": "options.html",
     "chrome_style": true,
