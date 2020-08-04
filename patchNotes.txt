@@ -1,5 +1,6 @@
 Version 1.4.7
 - Fixed bug where deleting drag and dropped block sets would break the settings user interface until reload
+- Annoy mode banner made more consistent on different websites
 
 Version 1.4.6
 - Fixed colors in typing test to be visible in dark mode
