@@ -2,7 +2,7 @@ var db_contentScriptCreated = true;
 
 var timeoutHandle = undefined;
 
-function init() {
+function dawdle_block_init() {
     var link = document.createElement("link")
     link.setAttribute("href", "https://fonts.googleapis.com/css?family=PT+Mono");
     link.setAttribute("rel", "stylesheet");
@@ -17,10 +17,10 @@ function dawdle_block_showTime(timeString) {
     mainDiv = document.getElementById("dawdle_block_annoy");
 
     if (mainDiv == null) {
-        init();
+        dawdle_block_init();
     }
 
-    mainDiv.innerHTML = timeString;
+    mainDiv.textContent = timeString;
 
     if (mainDiv.className == "hidden") {
         mainDiv.className = "";
