@@ -211,14 +211,13 @@ function setupJQueryUI() {
         axis: "y",
         items: "> li[list='blocksets']",
         update: function (event, ui) {
-            var newBlocksetIds = [];
+            blocksetIds.length = 0;
             var listItems = $("ul.nav > li[list='blocksets']");
             listItems.each(function (i) {
-                newBlocksetIds[i] = parseInt($(this).find("a").attr("id"));
-                blocksetIds = newBlocksetIds;
-                chrome.storage.sync.set({
-                    blocksetIds: blocksetIds
-                });
+                blocksetIds.push(parseInt($(this).find("a").attr("id")));
+            });
+            chrome.storage.sync.set({
+                blocksetIds: blocksetIds
             });
         },
 
@@ -440,12 +439,6 @@ function addBlockset(newData) {
     blocksetIds.push(newBlocksetId);
     blocksetTimesElapsed[newBlocksetId] = 0;
 
-    chrome.storage.sync.set({
-        blocksetIds: blocksetIds,
-        blocksetTimesElapsed: blocksetTimesElapsed
-    });
-
-
     if (newData != undefined) {
         blocksetDatas[newBlocksetId] = newData;
         bgPage.addAbsentItems(blocksetDatas[newBlocksetId], bgPage.defaultBlockset());
@@ -457,6 +450,8 @@ function addBlockset(newData) {
     }
 
     chrome.storage.sync.set({
+        blocksetIds: blocksetIds,
+        blocksetTimesElapsed: blocksetTimesElapsed,
         [newBlocksetId]: blocksetDatas[newBlocksetId]
     });
 
@@ -513,7 +508,7 @@ function deleteBlockset(id) {
 
     chrome.storage.sync.remove(id.toString());
 
-    blocksetIds.splice(blocksetIds.indexOf(parseInt(id, 10)), 1);
+    blocksetIds.splice(blocksetIds.indexOf(parseInt(id)), 1);
     delete blocksetTimesElapsed[id];
 
     chrome.storage.sync.set({
