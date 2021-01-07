@@ -261,12 +261,8 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 /* Timers to update tabevaluations on user selected reset time. When blocksetId is undefined, setup for all block sets */
 function setupTimerReset(blocksetId) {
-    const now = new Date();
-    var resetTime = new Date();
 
-    resetTime.setSeconds(0, 0);
-
-    var list = [];
+    let list = [];
     if (blocksetId === undefined) { // If undefined, setup for all blocksets
         list = blocksetIds;
     }
@@ -274,32 +270,28 @@ function setupTimerReset(blocksetId) {
         list = [blocksetId];
     }
 
-    for (let id_forward of list) {
+    for (let bsId of list) {
+        // Remove old alarm if it exists
+        chrome.alarms.clear("timerReset_" + bsId, _ => {
 
-        (function (id) {
-            // Remove old alarm if it exists
-            chrome.alarms.clear("timerReset_" + id, (removed) => {
+            const now = new Date();
+            let lastPossibleReset = new Date(now.getTime());
+            const t = msToTime(blocksetDatas[bsId].resetTime);
 
-                let time = msToDate(blocksetDatas[id].resetTime);
+            lastPossibleReset.setHours(t.h, t.m, t.s, t.ms);
 
-                resetTime.setHours(time.getHours(), time.getMinutes());
+            // If true, today's reset is coming later today and last possible reset should be yesterday.
+            // If false, last possible reset was earlier today and is already correct
+            if (lastPossibleReset > now) {
+                lastPossibleReset.setTime(lastPossibleReset.getTime() - 86400000)
+            }
 
-                let lastReset = new Date(blocksetDatas[id].lastReset);
+            if (blocksetDatas[bsId].lastReset < lastPossibleReset.getTime()) {
+                resetElapsedTime(bsId);
+            }
 
-                if (now.getTime() >= resetTime.getTime() && lastReset.getTime() < resetTime.getTime()) {
-                    resetElapsedTime(id);
-                }
-
-                if (now.getTime() >= resetTime.getTime()) {
-                    // already done for today, set timeout for tomorrow's reset
-                    chrome.alarms.create("timerReset_" + id, { when: resetTime.getTime() + 86400000, periodInMinutes: 24 * 60 });
-                }
-                else if (now.getTime() < resetTime.getTime()) {
-                    // set timeout for later today
-                    chrome.alarms.create("timerReset_" + id, { when: resetTime.getTime(), periodInMinutes: 24 * 60 });
-                }
-            });
-        })(id_forward);
+            chrome.alarms.create("timerReset_" + bsId, { when: lastPossibleReset.getTime() + 86400000, periodInMinutes: 24 * 60 });
+        });
     }
 }
 
@@ -353,11 +345,13 @@ function setupActiveTimeUpdates(blocksetId) {
 }
 
 
-function msToDate(time) {
-    const h = parseInt((time / (1000 * 60 * 60)) % 24);
-    const m = parseInt((time / (1000 * 60)) % 60);
-    const s = parseInt((time / 1000) % 60);
-    return new Date(0, 0, 0, h, m, s);
+
+function msToTime(ms_) {
+    let h = Math.floor(ms_ / (1000 * 60 * 60) % 60);
+    let m = Math.floor(ms_ / (1000 * 60) % 60);
+    let s = Math.floor(ms_ / 1000 % 60);
+    let ms = Math.floor(ms_ % 1000);
+    return { h, m, s, ms }
 }
 
 function msToTimeDisplay(duration) {
