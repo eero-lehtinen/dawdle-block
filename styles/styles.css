@@ -44,16 +44,50 @@ body {
     color: var(--secondary-text-color);
 }
 
-#saveIndicator.show, #generalSaveIndicator.show {
+#saveIndicator {
+    z-index: 10;
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    transition: opacity 0.5s;
+    opacity: 0;
+    background-color: var(--dialog-color);
+    border-radius: 3px 3px 0 0;
+    box-shadow: 0 0 3px black;
+    pointer-events: none;
+}
+
+#saveIndicator.show {
     transition: opacity 0s;
     opacity: 1;
 }
 
-#saveIndicator, #generalSaveIndicator {
-    transition: opacity 1.8s linear;
-    opacity: 0;
+#saveIndicator.success > img.success,
+#saveIndicator.error > img.error {
+    display: inline;
 }
 
+#saveIndicator.success > img.error,
+#saveIndicator.error > img.success {
+    display: none;
+}
+
+
+#saveIndicator > * {
+    margin: 6px;
+}
+
+img.icon {
+    filter: brightness(0.19);
+}
+
+.dark img.icon {
+    filter: none;
+}
 
 
 .red {
@@ -473,7 +507,7 @@ div.dialog {
     margin-left: -170px;
     background-color: var(--dialog-color);
     border-radius: 3px;
-    box-shadow: 0 0 5px grey;
+    box-shadow: 0 0 5px black;
 }
 
 div.topBar {

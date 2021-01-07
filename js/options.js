@@ -541,16 +541,50 @@ function findNewBlocksetId() {
     return i;
 }
 
+
+let saveIndicatorTimeout;
+
+/**
+ * 
+ * @param {string} text 
+ * @param {boolean} error 
+ */
+function showSaveIndicator(text, error) {
+    let saveIndicator = $("#saveIndicator");
+    saveIndicator.addClass("show");
+
+    saveIndicator.children("span").text(text);
+
+    if (saveIndicator.hasClass("success"))
+        saveIndicator.removeClass("success")
+    if (saveIndicator.hasClass("error"))
+        saveIndicator.removeClass("error")
+
+    let lifeTime = 2000;
+    if (error) {
+        lifeTime = 10000;
+        saveIndicator.addClass("error")
+    }
+    else {
+        saveIndicator.addClass("success")
+    }
+
+    clearTimeout(saveIndicatorTimeout);
+    saveIndicatorTimeout = setTimeout(() => { $("#saveIndicator").removeClass("show") }, lifeTime);
+}
+
 function saveCurrentBlockset() {
     bgPage.saveBlockset(currentPageId, error => {
         if (!error) {
-            $("#saveIndicator").addClass("show");
-            setTimeout(() => { $("#saveIndicator").removeClass("show") }, 100);
+            showSaveIndicator("Cloud save success", false);
 
             chrome.runtime.sendMessage({
                 type: "blocksetChanged",
                 id: currentPageId
             });
+        }
+        else {
+            showSaveIndicator("Cloud save failure: " + error, true);
         }
     });
 }
@@ -909,10 +943,10 @@ function saveGeneralOptions() {
         generalOptions: generalOptions
     }, function () {
         if (chrome.runtime.lastError == null) {
-            $("#generalSaveIndicator").addClass("show");
-            setTimeout(() => { $("#generalSaveIndicator").removeClass("show") }, 100);
+            showSaveIndicator("Cloud save success", false);
         }
         else {
+            showSaveIndicator("Cloud save failure: " + chrome.runtime.lastError, false);
             console.log(chrome.runtime.lastError);
         }
     });

@@ -58,9 +58,6 @@
                 <span id="fileIndicator" hidden></span>
                 <input id="chooseFileHidden" type="file" name="file" accept=".json" />
             </li>
-            <li>
-                <span id="generalSaveIndicator">Saved</span>
-            </li>
         </ul>
         <ul class="blockset" hidden>
             <li>
@@ -156,9 +153,14 @@
             </li>
             <li class="blocksetActions"><button class="big" id="duplicate">Duplicate</button>
                 <button class="big" id="rename">Rename</button> <button class="big" id="delete">Delete</button>
-                <span id="saveIndicator">Saved</span>
             </li>
         </ul>
+    </div>
+
+    <div id="saveIndicator">
+        <span></span>
+        <img class="icon success" src="Images/baseline_cloud_done_white.png" />
+        <img class="icon error" src="Images/baseline_warning_white.png" />
     </div>
 
     <div id="typingTestContent" hidden>
