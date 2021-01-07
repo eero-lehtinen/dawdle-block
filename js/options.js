@@ -59,7 +59,7 @@ function init() {
                 for (let blocksetData of blocksetDatas) {
                     blocksetData.annoyMode = false;
                 }
-                saveAllBlocksets();
+                bgPage.saveAllBlocksets();
             }
         });
     }
@@ -542,21 +542,16 @@ function findNewBlocksetId() {
 }
 
 function saveCurrentBlockset() {
-    chrome.storage.sync.set({
-        [currentPageId]: blocksetDatas[currentPageId]
-    }, function () {
-        if (chrome.runtime.lastError == null) {
+    bgPage.saveBlockset(currentPageId, error => {
+        if (!error) {
             $("#saveIndicator").addClass("show");
             setTimeout(() => { $("#saveIndicator").removeClass("show") }, 100);
-        }
-        else {
-            console.log(chrome.runtime.lastError);
-        }
-    });
 
-    chrome.runtime.sendMessage({
-        type: "blocksetChanged",
-        id: currentPageId
+            chrome.runtime.sendMessage({
+                type: "blocksetChanged",
+                id: currentPageId
+            });
+        }
     });
 }
 
@@ -889,7 +884,7 @@ function diskLoadData(file) {
                     addBlockset(saves.blocksetDatas[key]);
                 }
             }
-            saveAllBlocksets();
+            bgPage.saveAllBlocksets();
         }
         else {
             feedback += " (no block sets found)";
@@ -907,19 +902,6 @@ function diskLoadData(file) {
     };
 
     reader.readAsText(file);
-}
-
-function saveAllBlocksets() {
-    for (id of blocksetIds) {
-        chrome.storage.sync.set({
-            [id]: blocksetDatas[id]
-        });
-
-        chrome.runtime.sendMessage({
-            type: "blocksetChanged",
-            id: id
-        });
-    }
 }
 
 function saveGeneralOptions() {

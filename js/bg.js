@@ -955,14 +955,28 @@ function bsItem(type, value) {
     return item;
 }
 
-function saveBlockset(blocksetId) {
+/**
+ * @callback saveCallback
+ * @param {string} errorMsg empty if no error
+ */
+
+/**
+ * 
+ * @param {number} blocksetId 
+ * @param {saveCallback} callback
+ */
+function saveBlockset(blocksetId, callback = _ => { }) {
     chrome.storage.sync.set({
         [blocksetId]: blocksetDatas[blocksetId]
     }, () => {
         if (chrome.runtime.lastError) {
             console.log("Could not save blockset with id: " + blocksetId);
-            console.log(chrome.runtime.lastError);
+            console.log(chrome.runtime.lastError.message);
+            callback(chrome.runtime.lastError.message);
+            return;
         }
+
+        callback(undefined);
     });
 }
 

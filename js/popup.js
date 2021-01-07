@@ -296,20 +296,15 @@ function areSettingsProtected(bsId) {
 }
 
 function saveCurrentBlockset() {
-    chrome.storage.sync.set({
-        [currentId]: blocksetDatas[currentId]
-    }, function () {
-        if (chrome.runtime.lastError == null) {
+    bgPage.saveBlockset(currentId, error => {
+        if (!error) {
             showIndicator("Added");
-        }
-        else {
-            console.log(chrome.runtime.lastError);
-        }
-    });
 
-    chrome.runtime.sendMessage({
-        type: "blocksetChanged",
-        id: currentId
+            chrome.runtime.sendMessage({
+                type: "blocksetChanged",
+                id: currentId
+            });
+        }
     });
 }
 
