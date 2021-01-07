@@ -1,4 +1,5 @@
 #dawdle_block_annoy {
+    all: unset !important;
     box-sizing: border-box !important;
     position: fixed !important;
     bottom: 0 !important; 
