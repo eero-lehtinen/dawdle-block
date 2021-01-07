@@ -347,12 +347,14 @@ function displaySites(list, type) {
     }
     for (let i = 0; i < list.length; i++) {
         let siteValue = list[i].value;
+        let siteHtml = list[i].value;
         if (list[i].type === "ytChannel" || list[i].type === "ytCategory") {
-            siteValue = list[i].value.name + " <span style='color:grey'>" + list[i].value.id + "</span>";
+            siteValue = list[i].value.name + " " + list[i].value.id;
+            siteHtml = list[i].value.name + " <span style='color:grey'>" + list[i].value.id + "</span>";
         }
         let siteItem = $("<li>", { class: "siteItem", id: type + "Item" + i }).prependTo("#" + type + "SiteItems");
         $("<span>", { class: "filter" }).html(filterLookUp[list[i].type] + ":").appendTo(siteItem);
-        $("<span>", { class: "site" }).html(siteValue).appendTo(siteItem);
+        $("<span>", { class: "site", title: siteValue }).html(siteHtml).appendTo(siteItem);
         let button = $("<button>", { class: "close", name: "deleteSite" }).html("<img src='images/cancel.png'>").appendTo(siteItem);
         if (type === "bl") {
             button.on("click", function () {
