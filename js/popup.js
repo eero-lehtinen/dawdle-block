@@ -41,7 +41,7 @@ function start() {
         }
     });
 
-    $("p.header").text("Dawdle block " + bgPage.VERSION);
+    $("p.header").text("Dawdle Block " + bgPage.VERSION);
 }
 
 

@@ -1,4 +1,4 @@
-# Dawdle block
+# Dawdle Block
 
 Chrome and Firefox extension
 

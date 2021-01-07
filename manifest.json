@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
-  "name": "Dawdle block",
-  "short_name": "Dawdle block",
+  "name": "Dawdle Block",
+  "short_name": "Dawdle Block",
   "description": "Put time limits on unproductive sites.",
   "version": "1.4.7",
   "options_ui": {
@@ -13,7 +13,7 @@
   "browser_action": {
     "default_icon": "images/icon.png",
     "default_popup": "popup.html",
-    "default_title": "Dawdle block"
+    "default_title": "Dawdle Block"
   },
   "icons": {
     "128": "images/icon.png"
