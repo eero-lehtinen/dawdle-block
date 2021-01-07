@@ -62,7 +62,7 @@ body {
 }
 
 #saveIndicator.show {
-    transition: opacity 0s;
+    transition: opacity 0.2s;
     opacity: 1;
 }
 
@@ -79,6 +79,7 @@ body {
 
 #saveIndicator > * {
     margin: 6px;
+    white-space: nowrap;
 }
 
 img.icon {

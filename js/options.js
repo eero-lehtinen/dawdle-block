@@ -545,24 +545,28 @@ function findNewBlocksetId() {
 let saveIndicatorTimeout;
 
 /**
- * 
- * @param {string} text 
- * @param {boolean} error 
+ * Show message about success or failure if errorMessage is set
+ * @param {string} errorMessage
  */
-function showSaveIndicator(text, error) {
+function showSaveIndicator(errorMessage = undefined) {
     let saveIndicator = $("#saveIndicator");
     saveIndicator.addClass("show");
 
-    saveIndicator.children("span").text(text);
+    if (errorMessage) {
+        saveIndicator.children("span").text("Cloud sync failed: " + humanizeSaveErrorMsg(errorMessage));
+    }
+    else {
+        saveIndicator.children("span").text("Settings synced to cloud");
+    }
 
     if (saveIndicator.hasClass("success"))
         saveIndicator.removeClass("success")
     if (saveIndicator.hasClass("error"))
         saveIndicator.removeClass("error")
 
-    let lifeTime = 2000;
-    if (error) {
-        lifeTime = 10000;
+    let lifeTime = 3000;
+    if (errorMessage) {
+        lifeTime = 15000;
         saveIndicator.addClass("error")
     }
     else {
@@ -576,7 +580,7 @@ function showSaveIndicator(text, error) {
 function saveCurrentBlockset() {
     bgPage.saveBlockset(currentPageId, error => {
         if (!error) {
-            showSaveIndicator("Cloud save success", false);
+            showSaveIndicator();
 
             chrome.runtime.sendMessage({
                 type: "blocksetChanged",
@@ -584,7 +588,7 @@ function saveCurrentBlockset() {
             });
         }
         else {
-            showSaveIndicator("Cloud save failure: " + error, true);
+            showSaveIndicator(error);
         }
     });
 }
@@ -943,17 +947,33 @@ function saveGeneralOptions() {
         generalOptions: generalOptions
     }, function () {
         if (chrome.runtime.lastError == null) {
-            showSaveIndicator("Cloud save success", false);
+            showSaveIndicator();
         }
         else {
-            showSaveIndicator("Cloud save failure: " + chrome.runtime.lastError, false);
-            console.log(chrome.runtime.lastError);
+            showSaveIndicator(chrome.runtime.lastError.message);
+            console.log(chrome.runtime.lastError.message);
         }
     });
 
     chrome.runtime.sendMessage({
         type: "generalOptionsChanged"
     });
+}
+
+/**
+ * 
+ * @param {string} errorMsg 
+ */
+function humanizeSaveErrorMsg(errorMsg) {
+    if (errorMsg.includes("QUOTA_BYTES")) {
+        return "Too many rules in blacklist or whitelist! Remove some to continue saving!"
+    }
+    else if (errorMsg.includes("WRITE_OPERATIONS")) {
+        return "Too many changes in quick succession! Wait a little and slow down to continue saving!"
+    }
+    else {
+        return errorMsg;
+    }
 }
 
 
