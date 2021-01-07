@@ -162,7 +162,15 @@ function loadBlocksets() {
                 [blocksetId]: {}
             }, (data) => {
                 let bsId = Object.keys(data)[0];
-                blocksetDatas[bsId] = data[bsId];
+
+                // Strings are always compressed
+                if (typeof data[bsId] === "string") {
+                    blocksetDatas[bsId] = decompress(data[bsId]);
+                }
+                else {
+                    blocksetDatas[bsId] = data[bsId];
+                }
+
 
                 addAbsentItems(blocksetDatas[bsId], defaultBlockset(bsId));
                 generateLookUp(bsId);
@@ -950,6 +958,42 @@ function bsItem(type, value) {
 }
 
 /**
+ * Converts uint8 array to base64 string
+ * @param {Uint8Array} array
+ * @returns {string} base 64 array
+ */
+function toBase64(array) {
+    return btoa(String.fromCharCode.apply(null, array));
+}
+
+/**
+ * Converts base64 string to uint8 array
+ * @param {string} base64str 64 array
+ * @returns {Uint8Array} array
+ */
+function fromBase64(base64str) {
+    return new Uint8Array(atob(base64str).split("").map(c => c.charCodeAt(0)));
+}
+
+/**
+ * compress js object and convert to base64 string for easy json storage
+ * @param {Object} object
+ * @returns {string} base64 string
+ */
+function compress(object) {
+    return toBase64(fflate.compressSync(fflate.strToU8(JSON.stringify(object))));
+}
+
+/**
+ * decompress base64 encoded string and return the object it stores
+ * @param {string} base64str 
+ * @returns {Object} object
+ */
+function decompress(base64str) {
+    return JSON.parse(fflate.strFromU8(fflate.decompressSync(fromBase64(base64str))));
+}
+
+/**
  * @callback saveCallback
  * @param {string} errorMsg empty if no error
  */
@@ -960,8 +1004,16 @@ function bsItem(type, value) {
  * @param {saveCallback} callback
  */
 function saveBlockset(blocksetId, callback = _ => { }) {
+
+    const compressed = compress(blocksetDatas[blocksetId]);
+
+    if (compressed + 20 > chrome.storage.sync.QUOTA_BYTES_PER_ITEM) {
+        callback("QUOTA_BYTES_PER_ITEM");
+        return;
+    }
+
     chrome.storage.sync.set({
-        [blocksetId]: blocksetDatas[blocksetId]
+        [blocksetId]: compressed
     }, () => {
         if (chrome.runtime.lastError) {
             console.log("Could not save blockset with id: " + blocksetId);
@@ -977,7 +1029,7 @@ function saveBlockset(blocksetId, callback = _ => { }) {
 function saveAllBlocksets() {
     var saveItems = {};
     for (let id of blocksetIds) {
-        saveItems[id] = blocksetDatas[id];
+        saveItems[id] = compress(blocksetDatas[id]);
     }
     chrome.storage.sync.set(saveItems, () => {
         if (chrome.runtime.lastError != null) {

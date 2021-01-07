@@ -2,3 +2,4 @@ jquery-3.2.1.min.js: https://code.jquery.com/jquery-3.2.1.min.js
 jquery-ui.min.js downloaded using download builder: https://jqueryui.com/download/
 FileSaver.min.js: https://github.com/eligrey/FileSaver.js/blob/v2.0.2/dist/FileSaver.min.js
 jquery.timepicker.js: https://github.com/wvega/timepicker/blob/1.3.5/jquery.timepicker.js
+fflate.min.js: https://unpkg.com/fflate@0.4.8/umd/index.js

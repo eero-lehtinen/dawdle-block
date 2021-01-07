@@ -30,6 +30,7 @@
   ],
   "background": {
     "scripts": [
+      "libraries/fflate.min.js",
       "js/bg.js"
     ]
   }
