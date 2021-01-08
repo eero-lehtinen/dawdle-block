@@ -1,3 +1,13 @@
+Version 1.5.0
+- Added compression for saves to allow more blocking rules for each block set 
+   (from ~80 rules to 500 and more depending on shortness of the rules)
+- Improved save indicator 
+   * Message shown is clearer than before when settings are successfully saved
+   * Now shows a message if there was an error when saving, eg. storage is full
+- Fixed timer not resetting in some situations
+- Improved annoy mode banner consistency on different websites
+- Added hover tooltip to show full contents of long blocking rules
+
 Version 1.4.7
 - Fixed bug where deleting drag and dropped block sets would break the settings user interface until reload
 - Annoy mode banner made more consistent on different websites
