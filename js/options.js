@@ -555,10 +555,10 @@ function showSaveIndicator(errorMessage = undefined) {
     saveIndicator.addClass("show");
 
     if (errorMessage) {
-        saveIndicator.children("span").text("Cloud sync failed: " + humanizeSaveErrorMsg(errorMessage));
+        saveIndicator.children("span").text("Save failed: " + humanizeSaveErrorMsg(errorMessage));
     }
     else {
-        saveIndicator.children("span").text("Settings synced to cloud");
+        saveIndicator.children("span").text("Saved");
     }
 
     if (saveIndicator.hasClass("success"))
@@ -566,7 +566,7 @@ function showSaveIndicator(errorMessage = undefined) {
     if (saveIndicator.hasClass("error"))
         saveIndicator.removeClass("error")
 
-    let lifeTime = 3000;
+    let lifeTime = 2000;
     if (errorMessage) {
         lifeTime = 15000;
         saveIndicator.addClass("error")

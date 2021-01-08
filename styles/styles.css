@@ -53,12 +53,13 @@ body {
     display: flex;
     flex-flow: row nowrap;
     align-items: center;
-    transition: opacity 0.5s;
+    transition: opacity 0.3s;
     opacity: 0;
     background-color: var(--dialog-color);
     border-radius: 3px 3px 0 0;
     box-shadow: 0 0 3px black;
     pointer-events: none;
+    padding: 0 5px;
 }
 
 #saveIndicator.show {
