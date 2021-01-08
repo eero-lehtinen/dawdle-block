@@ -967,9 +967,12 @@ function saveGeneralOptions() {
  * @param {string} errorMsg 
  */
 function humanizeSaveErrorMsg(errorMsg) {
-    if (errorMsg.includes("QUOTA_BYTES")) {
+    // QUOTA_BYTES is for chrome, QuotaExceededError is for firefox
+    if (errorMsg.includes("QUOTA_BYTES") || errorMsg.includes("QuotaExceededError")) {
         return "Too many rules in blacklist or whitelist! Remove some to continue saving!"
     }
+
+    // chrome watches write operations, firefox seems to not care
     else if (errorMsg.includes("WRITE_OPERATIONS")) {
         return "Too many changes in quick succession! Wait a little and slow down to continue saving!"
     }
