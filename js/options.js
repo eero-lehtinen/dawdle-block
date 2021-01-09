@@ -1164,7 +1164,8 @@ function ensureAnnoyModePermissions(callback) {
 				}, (granted) => {
 					if (granted) {
 						callback(true)
-					} else {
+					} 
+					else {
 						callback(false)
 					}
 				})

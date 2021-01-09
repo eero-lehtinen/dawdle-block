@@ -38,6 +38,13 @@
 			"error",
 			"always"
 		],
-		"camelcase": "error"
+		"camelcase": "error",
+		"brace-style": [
+			"error",
+			"stroustrup",
+			{
+				"allowSingleLine": true
+			}
+		]
 	}
 }
