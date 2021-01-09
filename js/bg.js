@@ -517,6 +517,7 @@ function update() {
 				blocksetTimesElapsed[bsId] += UPDATE_INTERVAL
 			}
 
+			curTimer = blocksetDatas[bsId].timeAllowed - blocksetTimesElapsed[bsId]
 
 			lowestTimer = Math.min(lowestTimer, curTimer)
 		}
