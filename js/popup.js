@@ -218,9 +218,6 @@ function getYTData(url, callback) {
 				"https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + 
 				"&fields=items(snippet(categoryId%2CchannelId%2CchannelTitle))&key=" + bgPage.API_KEY, 
 				response => {
-					console.log("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + 
-						"&fields=items(snippet(categoryId%2CchannelId%2CchannelTitle))&key=" + bgPage.API_KEY)
-
 					if (response.error) {
 						console.error(`Could not get video info with id ${videoId}, error: ${response.error}`)
 						return
