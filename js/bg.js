@@ -1,3 +1,6 @@
+/* global fflate */
+
+/* exported YT_CATEGORY_NAMES_BY_ID */
 var YT_CATEGORY_NAMES_BY_ID = {
 	1: "Film & Animation",
 	2: "Autos & Vehicles",
@@ -33,6 +36,7 @@ var YT_CATEGORY_NAMES_BY_ID = {
 	44: "Trailers"
 }
 
+/* exported VERSION */
 var VERSION = chrome.runtime.getManifest().version
 
 var API_KEY = "A%49%7a%61%53y%42O%4f%6e%39%79%2dbx%42%38%4c%48k%2d%35%51%36%4e%44tq%63y9%5f%46%48%6a%35R%484"
@@ -49,8 +53,6 @@ var blRegEx = []
 var wlRegEx = []
 var blYT = []
 var wlYT = []
-
-var listeners = []
 
 var initDone = false
 
@@ -80,13 +82,6 @@ function defaultTimesElapsed() {
 	}
 	return res
 }
-
-settingProtectionTypes = [
-	"timerZero",
-	"always",
-	"never"
-]
-
 
 const defaultGeneralOptions = {
 	clockType: 24,
@@ -187,6 +182,7 @@ function loadBlocksets() {
 					setupActiveTimeUpdates()
 					evaluateAllTabs()
 
+					// eslint-disable-next-line no-unused-vars
 					initDone = true
 				}
 			})
@@ -230,8 +226,8 @@ function addAbsentItems(object, defaultObject) {
 
 
 /** Listen for updates in settings */
-chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-	bsId = parseInt(message.id)
+chrome.runtime.onMessage.addListener(function (message, _sender, _sendResponse) {
+	let bsId = parseInt(message.id)
 	if (message.type === "blocksetChanged") {
 		generateLookUp(bsId)
 		setupTimerReset(bsId)
@@ -461,7 +457,10 @@ function escapeRegExp(string) {
 }
 
 var saveTimer = 0
-var callbacks = []
+var callbacks = {
+	options: _ => {},
+	popup: _ => {}
+}
 
 /** Returns true if the tab is the currently active tab in any window and not minimized */
 function areTabsOpen(tabIds) {
@@ -554,12 +553,8 @@ function update() {
 	}
 
 	// Update popup and options page if they have registered their callbacks
-	for (let callback of callbacks) {
-		try {
-			callback()
-		}
-		catch (e) { }
-	}
+	callbacks.options()
+	callbacks.popup()
 
 	// var t1 = performance.now()
 	// console.log("Update took " + (t1 - t0) + " milliseconds.")
@@ -580,7 +575,7 @@ var blocksetAffectedTabs = {}
 // chrome.tabs.onCreated.addListener(function (tab) {
 // });
 
-chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
+chrome.tabs.onRemoved.addListener(function (tabId, _removeInfo) {
 	for (let bsId in blocksetAffectedTabs) {
 		let index = blocksetAffectedTabs[bsId].indexOf(tabId)
 		if (index != -1) {
@@ -620,7 +615,7 @@ chrome.windows.onRemoved.addListener(function (windowId) {
 	delete openTabIds[windowId]
 })
 
-chrome.windows.onFocusChanged.addListener(function (windowId) {
+chrome.windows.onFocusChanged.addListener(function (_windowId) {
 	chrome.windows.getAll(function (windowArray) {
 		minimizedWindowIds = []
 		windowIds = []
@@ -705,7 +700,7 @@ function setBadge(lowestTimer) {
 }
 
 function getLowestTimer() {
-	lowestTimer = Infinity
+	let lowestTimer = Infinity
 	for (let bsId in blocksetAffectedTabs) {
 		if (!blocksetDatas[bsId].requireActive ||
             blocksetAffectedTabs[bsId].some(tabId => Object.values(openTabIds).includes(tabId))) {
@@ -936,6 +931,7 @@ function annoy(tabId, lowestTimer) {
 	})
 }
 
+/* exported bsItem */
 /** janky solution to firefox dead object syndrome */
 function bsItem(type, value) {
 	var item
@@ -1026,6 +1022,7 @@ function saveBlockset(blocksetId, callback = _ => { }) {
 	})
 }
 
+/* exported saveAllBlocksets */
 function saveAllBlocksets() {
 	var saveItems = {}
 	for (let id of blocksetIds) {
@@ -1054,7 +1051,7 @@ function saveElapsedTimes() {
 function httpGetAsync(theUrl, callback) {
 	var xmlHttp = new XMLHttpRequest()
 	xmlHttp.timeout = 1500
-	xmlHttp.ontimeout = function (e) {
+	xmlHttp.ontimeout = function (_e) {
 		callback({ error: "timed out" })
 	}
 	xmlHttp.onreadystatechange = function () {
@@ -1072,5 +1069,5 @@ function httpGetAsync(theUrl, callback) {
 }
 
 function openDonationPage() {
-	chrome.tabs.create({ url: "https://paypal.me/eerolehtinen" }, function (tab) { })
+	chrome.tabs.create({ url: "https://paypal.me/eerolehtinen" }, function (_tab) { })
 }

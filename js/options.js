@@ -4,6 +4,10 @@
  * We have a reference to bg, so we can modify options from it.
  */
 
+/* global words1000 */
+
+// saveAs function comes from FileSaver.min.js
+/* global saveAs */ 
 
 var filterLookUp = {
 	"urlEquals": "url equals",
@@ -49,7 +53,7 @@ function init() {
 
 	displayBlocksetNavs()
 
-	bgPage.callbacks[0] = update // Register for updates from background script
+	bgPage.callbacks.options = update // Register for updates from background script
 
 	setupJQueryUI()
 
@@ -71,7 +75,7 @@ function setTimeAllowed(value, pageId) {
 	saveCurrentBlockset()
 }
 
-chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function (message, _sender, _sendResponse) {
 	if (message.type === "blocksetChanged") {
 		if (currentPageId === parseInt(message.id)) {
 			displaySites(blocksetDatas[currentPageId].blacklist, "bl")
@@ -210,10 +214,10 @@ function setupJQueryUI() {
 	$("ul.nav").sortable({
 		axis: "y",
 		items: "> li[list='blocksets']",
-		update: function (event, ui) {
+		update: function (_event, _ui) {
 			blocksetIds.length = 0
 			var listItems = $("ul.nav > li[list='blocksets']")
-			listItems.each(function (i) {
+			listItems.each(function (_i) {
 				blocksetIds.push(parseInt($(this).find("a").attr("id")))
 			})
 			chrome.storage.sync.set({
@@ -243,7 +247,7 @@ function displayBlocksetNavs() {
 
 	for (var i = 0; i < blocksetIds.length; i++) {
 
-		blocksetLink = displayBlocksetNav(blocksetIds[i])
+		let blocksetLink = displayBlocksetNav(blocksetIds[i])
 		blocksetLink.click(function () {
 			cancelTypingTestDialogs()
 			displayPage(parseInt($(this).attr("id")))
@@ -276,11 +280,6 @@ function cancelTypingTestDialogs() {
 		$(this).find("button.decline").click()
 	})
 }
-
-function typingTestDialogExists() {
-	return ($("#typingTestDialog").length > 0)
-}
-
 
 //general id=-1, deselect= -10
 function displayPage(id) {
@@ -533,7 +532,7 @@ function deleteBlockset(id) {
 }
 
 function findNewBlocksetId() {
-	i = 0
+	let i = 0
 	while (i < blocksetIds.length) {
 		if (!blocksetIds.includes(i)) {
 			return i
@@ -786,12 +785,13 @@ function doTest(callback) {
 	})
 }
 
+/* exported readLocalFile */
 function readLocalFile(fileName, callback) {
 	chrome.runtime.getPackageDirectoryEntry(function (root) {
 		root.getFile(fileName, {}, function (fileEntry) {
 			fileEntry.file(function (file) {
 				var reader = new FileReader()
-				reader.onloadend = function (e) {
+				reader.onloadend = function (_e) {
 					callback(this.result)
 				}
 				reader.readAsText(file)
@@ -826,7 +826,7 @@ function getRandomInt(min, max) {
 function dialog(title, text, acceptText, onAccept, declineText, onDecline) {
 	var dWindow = $("<div>", { class: "dialog" }).appendTo($("body"))
 	var topBar = $("<div>", { class: "topBar" }).appendTo(dWindow)
-	var title = $("<span>").html(title).appendTo(topBar)
+	$("<span>").html(title).appendTo(topBar)
 
 	var textBox = $("<div>", { class: "text" }).html(text).appendTo(dWindow)
 	var botBar = $("<div>", { class: "botBar" }).appendTo(dWindow)
@@ -918,8 +918,7 @@ function diskLoadData(file) {
 		var saves = JSON.parse(e.target.result)
 		var feedback = "Save file loaded"
 		if (saves.blocksetDatas != undefined) {
-			keys = Object.keys(saves.blocksetDatas)
-			for (key of keys) {
+			for (let key in saves.blocksetDatas) {
 				if (blocksetIds.length < 50) {
 					addBlockset(saves.blocksetDatas[key])
 				}

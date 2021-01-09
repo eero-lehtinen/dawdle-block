@@ -14,15 +14,16 @@ var dawdle_block_annoy = {
 		link.setAttribute("rel", "stylesheet")
 		document.head.appendChild(link)
 
-		mainDiv = document.createElement("div")
+		let mainDiv = document.createElement("div")
 		mainDiv.setAttribute("id", "dawdle_block_annoy")
 		document.body.appendChild(mainDiv)
+		return mainDiv
 	},
 	showTime: timeString => {
-		mainDiv = document.getElementById("dawdle_block_annoy")
+		let mainDiv = document.getElementById("dawdle_block_annoy")
 
-		if (mainDiv == null) {
-			dawdle_block_annoy.init()
+		if (!mainDiv) {
+			mainDiv = dawdle_block_annoy.init()
 		}
 
 		mainDiv.textContent = timeString
@@ -35,8 +36,8 @@ var dawdle_block_annoy = {
 		dawdle_block_annoy.timeoutHandle = setTimeout(dawdle_block_annoy.hideTime, 1500)
 	},
 	hideTime: _ => {
-		mainDiv = document.getElementById("dawdle_block_annoy")
-		if (mainDiv != null) {
+		let mainDiv = document.getElementById("dawdle_block_annoy")
+		if (mainDiv) {
 			mainDiv.className = "hidden"
 		}
 	}

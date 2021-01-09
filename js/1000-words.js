@@ -1,3 +1,4 @@
+/* exported words1000 */
 var words1000 = [
 	"of",
 	"to",

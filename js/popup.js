@@ -4,7 +4,7 @@ var blocksetDatas
 var blocksetTimesElapsed
 var generalOptions
 
-chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, _tab) {
 	if (tabId === currentTabId && changeInfo.status === "complete") {
 		$("#info").hide()
 		if (blocksetIds.length === 1) {
@@ -30,9 +30,9 @@ function start() {
 	setDarkTheme(generalOptions.darkTheme)
 
 	loadAllBlocksets()
-	bgPage.callbacks[1] = update
+	bgPage.callbacks.popup = update
 
-	chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+	chrome.runtime.onMessage.addListener(function (message, _sender, _sendResponse) {
 		if (message.type === "blocksetChanged") {
 			loadAllBlocksets()
 		}
@@ -54,10 +54,10 @@ function loadAllBlocksets() {
 
 	blocksetTimes = []
 
-	for (id of blocksetIds) {
+	for (let id of blocksetIds) {
 		var listItem = $("<li>", { id: id })
 		var name = $("<a>", { class: "blocksiteName", href: "#" }).text(blocksetDatas[id].name)
-		name.on("click", function (e) {
+		name.on("click", function (_e) {
 			var blocksetId = $(this).parent().attr("id")
 			selectBlockSet(blocksetId)
 		})
@@ -81,7 +81,7 @@ function loadAllBlocksets() {
 }
 
 function update() {
-	for (id of blocksetIds) {
+	for (let id of blocksetIds) {
 		if (blocksetTimes[id] != undefined) {
 			setTimeDisplay(blocksetTimes[id], blocksetDatas[id].timeAllowed - blocksetTimesElapsed[id])
 		}
@@ -210,10 +210,10 @@ function showIndicator(text) {
 	setTimeout(() => { $("#addIndicator").removeClass("show") }, 100)
 }
 
-function getYTData(_url, callback) {
+function getYTData(url, callback) {
 	if (blocksetDatas[currentId] != undefined) {
-		if (_url.startsWith("www.youtube.com/watch")) {
-			var videoId = _url.split("v=")[1].substring(0, 11)
+		if (url.startsWith("www.youtube.com/watch")) {
+			var videoId = url.split("v=")[1].substring(0, 11)
 			bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + "&fields=items(snippet(categoryId%2CchannelId%2CchannelTitle))&key=" + bgPage.API_KEY, function (response) {
 				console.log("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + "&fields=items(snippet(categoryId%2CchannelId%2CchannelTitle))&key=" + bgPage.API_KEY)
 
@@ -231,9 +231,8 @@ function getYTData(_url, callback) {
 				})
 			})
 		}
-		else if (_url.startsWith("www.youtube.com/channel/")) {
-			var list = _url.split("/")
-			var channelId = list[2]
+		else if (url.startsWith("www.youtube.com/channel/")) {
+			var channelId = url.split("/")[2]
 
 			bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&id=" + channelId + "&fields=items(snippet%2Ftitle)&key=" + bgPage.API_KEY, function (response) {
 
@@ -250,9 +249,8 @@ function getYTData(_url, callback) {
 				})
 			})
 		}
-		else if (_url.startsWith("www.youtube.com/user/")) {
-			var list = _url.split("/")
-			var channelUserName = list[2]
+		else if (url.startsWith("www.youtube.com/user/")) {
+			var channelUserName = url.split("/")[2]
 
 			bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&forUsername=" + channelUserName + "&fields=items(id%2Csnippet%2Ftitle)&key=" + bgPage.API_KEY, function (response) {
 
