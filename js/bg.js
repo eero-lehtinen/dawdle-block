@@ -915,22 +915,22 @@ function block(tabId) {
 
 function annoy(tabId, lowestTimer) {
     chrome.tabs.executeScript(tabId, {
-        code: "typeof db_contentScriptCreated != 'undefined'"
-    }, (created) => {
+        code: "dawdle_block_annoy" // returns true if exists, false if not
+    }, ([annoyExists]) => {
         if (chrome.runtime.lastError != undefined) {
             console.log(chrome.runtime.lastError.message);
             return;
         }
 
-        if (created[0]) {
-            chrome.tabs.executeScript(tabId, { code: `dawdle_block_showTime("${msToTimeDisplay(-lowestTimer)}");` });
+        if (annoyExists) {
+            chrome.tabs.executeScript(tabId, { code: `dawdle_block_annoy.showTime("${msToTimeDisplay(-lowestTimer)}");` });
         }
         else {
             chrome.tabs.executeScript(tabId, {
                 file: "js/contentScript.js"
             }, () => {
                 chrome.tabs.insertCSS(tabId, { file: "styles/annoy.css" });
-                chrome.tabs.executeScript(tabId, { code: `dawdle_block_showTime("${msToTimeDisplay(-lowestTimer)}");` });
+                chrome.tabs.executeScript(tabId, { code: `dawdle_block_annoy.showTime("${msToTimeDisplay(-lowestTimer)}");` });
             });
         }
     });

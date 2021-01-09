@@ -1,40 +1,35 @@
-var db_contentScriptCreated = true;
+var dawdle_block_annoy = {
+    timeoutHandle: undefined,
+    init: _ => {
+        let link = document.createElement("link")
+        link.setAttribute("href", "https://fonts.googleapis.com/css?family=PT+Mono");
+        link.setAttribute("rel", "stylesheet");
+        document.head.appendChild(link);
 
-var timeoutHandle = undefined;
+        mainDiv = document.createElement("div");
+        mainDiv.setAttribute("id", "dawdle_block_annoy");
+        document.body.appendChild(mainDiv);
+    },
+    showTime: timeString => {
+        mainDiv = document.getElementById("dawdle_block_annoy");
 
-function dawdle_block_init() {
-    var link = document.createElement("link")
-    link.setAttribute("href", "https://fonts.googleapis.com/css?family=PT+Mono");
-    link.setAttribute("rel", "stylesheet");
-    document.head.appendChild(link)
+        if (mainDiv == null) {
+            dawdle_block_annoy.init();
+        }
 
-    mainDiv = document.createElement("div");
-    mainDiv.setAttribute("id", "dawdle_block_annoy")
-    document.body.appendChild(mainDiv)
-}
+        mainDiv.textContent = timeString;
 
-function dawdle_block_showTime(timeString) {
-    mainDiv = document.getElementById("dawdle_block_annoy");
+        if (mainDiv.className == "hidden") {
+            mainDiv.className = "";
+        }
 
-    if (mainDiv == null) {
-        dawdle_block_init();
-    }
-
-    mainDiv.textContent = timeString;
-
-    if (mainDiv.className == "hidden") {
-        mainDiv.className = "";
-    }
-
-    if (timeoutHandle != undefined) {
-        clearTimeout(timeoutHandle);
-    }
-    timeoutHandle = setTimeout(dawdle_block_hideTime, 1500);
-}
-
-function dawdle_block_hideTime() {
-    mainDiv = document.getElementById("dawdle_block_annoy");
-    if (mainDiv != null) {
-        mainDiv.className = "hidden";
+        clearTimeout(dawdle_block_annoy.timeoutHandle);
+        dawdle_block_annoy.timeoutHandle = setTimeout(dawdle_block_annoy.hideTime, 1500);
+    },
+    hideTime: _ => {
+        mainDiv = document.getElementById("dawdle_block_annoy");
+        if (mainDiv != null) {
+            mainDiv.className = "hidden";
+        }
     }
 }
