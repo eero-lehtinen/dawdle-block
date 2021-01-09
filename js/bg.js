@@ -909,15 +909,16 @@ function block(tabId) {
 }
 
 function annoy(tabId, lowestTimer) {
+	
 	chrome.tabs.executeScript(tabId, {
-		code: "dawdle_block_annoy" // returns true if exists, false if not
-	}, ([annoyExists]) => {
-		if (chrome.runtime.lastError != undefined) {
-			console.log(chrome.runtime.lastError.message)
+		code: "typeof dawdle_block_annoy != 'undefined'" // returns true if exists, false if not
+	}, results => {
+		// This happens on chrome:// urls, because extensions cannot access them
+		if (chrome.runtime.lastError) {
 			return
 		}
 
-		if (annoyExists) {
+		if (results[0]) {
 			chrome.tabs.executeScript(tabId, { code: `dawdle_block_annoy.showTime("${msToTimeDisplay(-lowestTimer)}");` })
 		}
 		else {
