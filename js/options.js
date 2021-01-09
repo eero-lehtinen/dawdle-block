@@ -180,7 +180,9 @@ function loadTimePickers() {
 				if (blocksetDatas[currentPageId].timeAllowed < timeMs) {
 					// Cache value because user may change tabs while the dialog is open
 					var pageId = currentPageId
-					dialog("Do you want more time to waste?", "Are you really sure you want to slack off even more? It most likely isn't healthy.",
+					dialog(
+						"Do you want more time to waste?", 
+						"Are you really sure you want to slack off even more? It most likely isn't healthy.",
 						"Yes", function () {
 							ensureProtectedSettingAccess(pageId, function (granted) {
 								if (!granted && pageId === currentPageId) {
@@ -256,7 +258,10 @@ function displayBlocksetNavs() {
 
 	if (blocksetIds.length < 50) {
 		var listItem = $("<li>", { class: "blocksetNav" }).appendTo("ul.nav")
-		var addBlocksetLink = $("<a>").css({ "fontSize": "20px", "padding": "0px 16px 5px 16px", "font-weight": "500" }).attr({ href: "#", class: "blocksetLink" }).append("+")
+		var addBlocksetLink = $("<a>")
+			.css({ "fontSize": "20px", "padding": "0px 16px 5px 16px", "font-weight": "500" })
+			.attr({ href: "#", class: "blocksetLink" })
+			.append("+")
 		addBlocksetLink.appendTo(listItem)
 
 		addBlocksetLink.click(function () {
@@ -354,7 +359,8 @@ function displaySites(list, type) {
 		let siteItem = $("<li>", { class: "siteItem", id: type + "Item" + i }).prependTo("#" + type + "SiteItems")
 		$("<span>", { class: "filter" }).html(filterLookUp[list[i].type] + ":").appendTo(siteItem)
 		$("<span>", { class: "site", title: siteValue }).html(siteHtml).appendTo(siteItem)
-		let button = $("<button>", { class: "close", name: "deleteSite" }).html("<img src='images/cancel.png'>").appendTo(siteItem)
+		let button = $("<button>", { class: "close", name: "deleteSite" })
+			.html("<img src='images/cancel.png'>").appendTo(siteItem)
 		if (type === "bl") {
 			button.on("click", function () {
 				ensureProtectedSettingAccess(currentPageId, function (granted) {
@@ -374,7 +380,8 @@ function displaySites(list, type) {
 
 function addSite(toList, select, input, callback) {
 	if (select.val() === "ytChannel") {
-		bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&id=" + input.val() + "&fields=items(id%2Csnippet%2Ftitle)&key=" + bgPage.API_KEY, function (response) {
+		bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&id=" + 
+				input.val() + "&fields=items(id%2Csnippet%2Ftitle)&key=" + bgPage.API_KEY, function (response) {
 			if (response.error) {
 				console.error(`Could not check channel with id ${input.val()}, error: ${response.error}`)
 				dialog("Error", "Could not communicate with youtube api.<br>Reason: " + response.error, "OK")
@@ -397,7 +404,8 @@ function addSite(toList, select, input, callback) {
 			callback()
 		}
 		else {
-			dialog("Error", "This category id doesn't exist, faulty id: " + input.val() + "<br> <a href='#' name='allCategories'>list of all categories by their ids</a>", "OK")
+			dialog("Error", "This category id doesn't exist, faulty id: " + 
+				input.val() + "<br> <a href='#' name='allCategories'>list of all categories by their ids</a>", "OK")
 		}
 	}
 	else if (select.val() === "urlRegexp") {
@@ -459,7 +467,11 @@ function addBlockset(newData) {
 	displayBlocksetNavs()
 
 	if (blocksetIds.length >= 50) {
-		dialog("Block set maximum reached", "You have reached the maximum of 50 block sets. Consider combining their rules.", "OK")
+		dialog(
+			"Block set maximum reached", 
+			"You have reached the maximum of 50 block sets. Consider combining their rules.", 
+			"OK"
+		)
 	}
 
 	chrome.runtime.sendMessage({
@@ -861,7 +873,9 @@ function dialog(title, text, acceptText, onAccept, declineText, onDecline) {
 			link.on("click", function () { listAllCategories() })
 		}
 		if (link.attr("name") === "ytAdding") {
-			link.on("click", function () { dialog("Adding YouTube channels/categories", $("div#help_ytAdding_text").html(), "OK") })
+			link.on("click", function () { 
+				dialog("Adding YouTube channels/categories", $("div#help_ytAdding_text").html(), "OK") 
+			})
 		}
 	}
 
@@ -1201,7 +1215,8 @@ $("input[type=number]#typingTestWordCount").on("change", function () {
 $("input[type=radio][name=settingProtection]").on("change", function () {
 	ensureProtectedSettingAccess(-1, function (granted) {
 		if (!granted) {
-			$("input[type=radio][name=settingProtection][value=" + generalOptions.settingProtection + "]").prop("checked", true)
+			$("input[type=radio][name=settingProtection][value=" + generalOptions.settingProtection + "]")
+				.prop("checked", true)
 			return
 		}
 		generalOptions.settingProtection = $("input[type=radio][name=settingProtection]:checked").val()

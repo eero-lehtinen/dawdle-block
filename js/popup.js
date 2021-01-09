@@ -214,58 +214,68 @@ function getYTData(url, callback) {
 	if (blocksetDatas[currentId]) {
 		if (url.startsWith("www.youtube.com/watch")) {
 			var videoId = url.split("v=")[1].substring(0, 11)
-			bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + "&fields=items(snippet(categoryId%2CchannelId%2CchannelTitle))&key=" + bgPage.API_KEY, function (response) {
-				console.log("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + "&fields=items(snippet(categoryId%2CchannelId%2CchannelTitle))&key=" + bgPage.API_KEY)
+			bgPage.httpGetAsync(
+				"https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + 
+				"&fields=items(snippet(categoryId%2CchannelId%2CchannelTitle))&key=" + bgPage.API_KEY, 
+				response => {
+					console.log("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + 
+						"&fields=items(snippet(categoryId%2CchannelId%2CchannelTitle))&key=" + bgPage.API_KEY)
 
-				if (response.error) {
-					console.error(`Could not get video info with id ${videoId}, error: ${response.error}`)
-					return
-				}
+					if (response.error) {
+						console.error(`Could not get video info with id ${videoId}, error: ${response.error}`)
+						return
+					}
 
-				var object = JSON.parse(response.message)
+					var object = JSON.parse(response.message)
 
-				callback({
-					channelId: object.items[0].snippet.channelId,
-					channelTitle: object.items[0].snippet.channelTitle,
-					categoryId: object.items[0].snippet.categoryId
+					callback({
+						channelId: object.items[0].snippet.channelId,
+						channelTitle: object.items[0].snippet.channelTitle,
+						categoryId: object.items[0].snippet.categoryId
+					})
 				})
-			})
 		}
 		else if (url.startsWith("www.youtube.com/channel/")) {
 			var channelId = url.split("/")[2]
 
-			bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&id=" + channelId + "&fields=items(snippet%2Ftitle)&key=" + bgPage.API_KEY, function (response) {
+			bgPage.httpGetAsync(
+				"https://www.googleapis.com/youtube/v3/channels?part=snippet&id=" + channelId + 
+				"&fields=items(snippet%2Ftitle)&key=" + bgPage.API_KEY, 
+				response => {
 
-				if (response.error) {
-					console.error(`Could not get channel info with id ${channelId}, error: ${response.error}`)
-					return
-				}
+					if (response.error) {
+						console.error(`Could not get channel info with id ${channelId}, error: ${response.error}`)
+						return
+					}
 
-				var object = JSON.parse(response.message)
+					var object = JSON.parse(response.message)
 
-				callback({
-					channelId: channelId,
-					channelTitle: object.items[0].snippet.title
+					callback({
+						channelId: channelId,
+						channelTitle: object.items[0].snippet.title
+					})
 				})
-			})
 		}
 		else if (url.startsWith("www.youtube.com/user/")) {
 			var channelUserName = url.split("/")[2]
 
-			bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&forUsername=" + channelUserName + "&fields=items(id%2Csnippet%2Ftitle)&key=" + bgPage.API_KEY, function (response) {
+			bgPage.httpGetAsync(
+				"https://www.googleapis.com/youtube/v3/channels?part=snippet&forUsername=" + channelUserName + 
+				"&fields=items(id%2Csnippet%2Ftitle)&key=" + bgPage.API_KEY, 
+				response => {
 
-				if (response.error) {
-					console.error(`Could not get channel info with username ${channelUserName}, error: ${response.error}`)
-					return
-				}
+					if (response.error) {
+						console.error(`Could not get channel info with username ${channelUserName}, error: ${response.error}`)
+						return
+					}
 
-				var object = JSON.parse(response.message)
+					var object = JSON.parse(response.message)
 
-				callback({
-					channelId: object.items[0].id,
-					channelTitle: object.items[0].snippet.title
+					callback({
+						channelId: object.items[0].id,
+						channelTitle: object.items[0].snippet.title
+					})
 				})
-			})
 		}
 	}
 }
@@ -366,7 +376,11 @@ $("#wl_channel").on("click", function () {
 $("#bl_category").on("click", function () {
 	if (blocksetDatas[currentId]) {
 		getYTData(url, function (data) {
-			addCategory(data.categoryId, bgPage.YT_CATEGORY_NAMES_BY_ID[data.categoryId], blocksetDatas[currentId].blacklist)
+			addCategory(
+				data.categoryId, 
+				bgPage.YT_CATEGORY_NAMES_BY_ID[data.categoryId], 
+				blocksetDatas[currentId].blacklist
+			)
 		})
 	}
 })
@@ -377,7 +391,11 @@ $("#wl_category").on("click", function () {
 			showIndicator("Not added: settings protected")
 		else {
 			getYTData(url, function (data) {
-				addCategory(data.categoryId, bgPage.YT_CATEGORY_NAMES_BY_ID[data.categoryId], blocksetDatas[currentId].whitelist)
+				addCategory(
+					data.categoryId, 
+					bgPage.YT_CATEGORY_NAMES_BY_ID[data.categoryId], 
+					blocksetDatas[currentId].whitelist
+				)
 			})
 		}
 	}

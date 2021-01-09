@@ -263,7 +263,8 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 })
 
 
-/* Timers to update tabevaluations on user selected reset time. When blocksetId is undefined, setup for all block sets */
+/* Timers to update tabevaluations on user selected reset time. 
+	When blocksetId is undefined, setup for all block sets */
 function setupTimerReset(blocksetId) {
 
 	let list = []
@@ -294,7 +295,10 @@ function setupTimerReset(blocksetId) {
 				resetElapsedTime(bsId)
 			}
 
-			chrome.alarms.create("timerReset_" + bsId, { when: lastPossibleReset.getTime() + 86400000, periodInMinutes: 24 * 60 })
+			chrome.alarms.create("timerReset_" + bsId, { 
+				when: lastPossibleReset.getTime() + 86400000, 
+				periodInMinutes: 24 * 60 
+			})
 		})
 	}
 }
@@ -320,7 +324,8 @@ function setupActiveTimeUpdates(blocksetId) {
 				const activeTimeFrom = blocksetDatas[id].activeTime.from // MS from midnight
 				const activeTimeTo = blocksetDatas[id].activeTime.to // MS from midnight
 
-				if (activeTimeFrom !== activeTimeTo) { // If from and to are same, blocksets are just always active, so dont do anything
+				// If from and to are same, blocksets are just always active, so dont do anything
+				if (activeTimeFrom !== activeTimeTo) { 
 
 					if (activeTimeFrom >= nowSinceMidnight) {
 						chrome.alarms.create("activeTimeUpdateFrom_" + id,
@@ -747,7 +752,8 @@ function blockedBy(tab, callback) {
 	var now = timeToMsSinceMidnight(new Date())
 
 	for (let id of blocksetIds) {
-		if (!blocksetDatas[id].activeDays[currentWeekDay] || !isInActiveTime(now, id)) // if today is not an active day | or not in active hours
+		// if today is not an active day | or not in active hours
+		if (!blocksetDatas[id].activeDays[currentWeekDay] || !isInActiveTime(now, id)) 
 			continue
 
 		if (!wlRegEx[id].some((regEx) => regEx.test(url) === true)) { // if not in whitelist
@@ -761,7 +767,8 @@ function blockedBy(tab, callback) {
 		if (url.startsWith("watch?", YT_BASE_URL_LEN)) {
 			let videoId = getStringBetween(url, "v=", "&")
 
-			httpGetAsync("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + "&fields=items(snippet(categoryId%2CchannelId))&key=" + API_KEY, function (response) {
+			httpGetAsync("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + 
+					"&fields=items(snippet(categoryId%2CchannelId))&key=" + API_KEY, function (response) {
 
 				if (response.error) {
 					console.error(`Could not check video with id ${videoId}, error: ${response.error}`)
@@ -793,7 +800,8 @@ function blockedBy(tab, callback) {
 			let list = url.split("/")
 			let userName = list[2]
 
-			httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&forUsername=" + userName + "&fields=items%2Fid&key=" + API_KEY, function (response) {
+			httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&forUsername=" + 
+					userName + "&fields=items%2Fid&key=" + API_KEY, function (response) {
 
 				if (response.error) {
 					console.error(`Could not check channel with username ${userName}, error: ${response.error}`)
@@ -821,7 +829,8 @@ function blockedBy(tab, callback) {
 
 			let playlistId = getStringBetween(url, "list=", "&")
 
-			httpGetAsync("https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=" + playlistId + "&fields=items%2Fsnippet%2FchannelId&key=" + API_KEY, function (response) {
+			httpGetAsync("https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=" + 
+					playlistId + "&fields=items%2Fsnippet%2FchannelId&key=" + API_KEY, function (response) {
 				if (response.error) {
 					console.error(`Could not check playlist with id ${playlistId}, error: ${response.error}`)
 					callback(blocksetIdList)
@@ -848,7 +857,8 @@ function blockedBy(tab, callback) {
 function evalChannelId(channelId, blocksetIdList, categoryId = undefined) {
 	var now = timeToMsSinceMidnight(new Date())
 	for (let id of blocksetIds) {
-		if (!blocksetDatas[id].activeDays[currentWeekDay] || !isInActiveTime(now, id)) // if today is not an active day | or not in active hours
+		// if today is not an active day | or not in active hours
+		if (!blocksetDatas[id].activeDays[currentWeekDay] || !isInActiveTime(now, id)) 
 			continue
 
 		if (categoryId) {
@@ -917,14 +927,18 @@ function annoy(tabId, lowestTimer) {
 		}
 
 		if (results[0]) {
-			chrome.tabs.executeScript(tabId, { code: `dawdleBlockAnnoy.showTime("${msToTimeDisplay(-lowestTimer)}");` })
+			chrome.tabs.executeScript(tabId, { 
+				code: `dawdleBlockAnnoy.showTime("${msToTimeDisplay(-lowestTimer)}");` 
+			})
 		}
 		else {
 			chrome.tabs.executeScript(tabId, {
 				file: "js/annoyInjection.js"
 			}, () => {
 				chrome.tabs.insertCSS(tabId, { file: "styles/annoy.css" })
-				chrome.tabs.executeScript(tabId, { code: `dawdleBlockAnnoy.showTime("${msToTimeDisplay(-lowestTimer)}");` })
+				chrome.tabs.executeScript(tabId, { 
+					code: `dawdleBlockAnnoy.showTime("${msToTimeDisplay(-lowestTimer)}");` 
+				})
 			})
 		}
 	})
