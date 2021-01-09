@@ -95,7 +95,7 @@ var isUpdated = false
 var previousVersion = ""
 
 chrome.runtime.onInstalled.addListener(function (details) {
-	if (details.reason == "update") {
+	if (details.reason === "update") {
 		isUpdated = true
 		previousVersion = details.previousVersion
 	}
@@ -202,7 +202,7 @@ function addAbsentItems(object, defaultObject) {
 	var defKeys = Object.keys(defaultObject)
 	var keys = Object.keys(object)
 
-	if (keys.length == 0) { // This is for completely new objects
+	if (keys.length === 0) { // This is for completely new objects
 		for (let defKey of defKeys) {
 			object[defKey] = defaultObject[defKey]
 		}
@@ -211,7 +211,7 @@ function addAbsentItems(object, defaultObject) {
 		for (let defKey of defKeys) {
 			if (!keys.includes(defKey) || object[defKey] === undefined) {
 
-				if (defKey == "requireActive") { // Set this to true on old saves, in new blocksets it is false
+				if (defKey === "requireActive") { // Set this to true on old saves, in new blocksets it is false
 					object[defKey] = true
 					continue
 				}
@@ -322,7 +322,7 @@ function setupActiveTimeUpdates(blocksetId) {
 					const activeTimeFrom = blocksetDatas[id].activeTime.from // MS from midnight
 					const activeTimeTo = blocksetDatas[id].activeTime.to // MS from midnight
 
-					if (activeTimeFrom != activeTimeTo) { // If from and to are same, blocksets are just always active, so dont do anything
+					if (activeTimeFrom !== activeTimeTo) { // If from and to are same, blocksets are just always active, so dont do anything
 
 						if (activeTimeFrom >= nowSinceMidnight) {
 							chrome.alarms.create("activeTimeUpdateFrom_" + id,
@@ -487,7 +487,7 @@ function update() {
 	// We need to check each tab if they need to be blocked or if we have to display annoy banner in them.
 	for (let bsId in blocksetAffectedTabs) {
 		bsId = parseInt(bsId)
-		if (blocksetAffectedTabs[bsId].length == 0 || !blocksetIds.includes(bsId)) {
+		if (blocksetAffectedTabs[bsId].length === 0 || !blocksetIds.includes(bsId)) {
 			delete blocksetAffectedTabs[bsId]
 			continue
 		}
@@ -578,7 +578,7 @@ var blocksetAffectedTabs = {}
 chrome.tabs.onRemoved.addListener(function (tabId, _removeInfo) {
 	for (let bsId in blocksetAffectedTabs) {
 		let index = blocksetAffectedTabs[bsId].indexOf(tabId)
-		if (index != -1) {
+		if (index !== -1) {
 			blocksetAffectedTabs[bsId].splice(index, 1)
 		}
 	}
@@ -604,11 +604,11 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 
 chrome.windows.onRemoved.addListener(function (windowId) {
 	var index = windowIds.indexOf(windowId)
-	if (index != -1) {
+	if (index !== -1) {
 		windowIds.splice(index, 1)
 	}
 	index = minimizedWindowIds.indexOf(windowId)
-	if (index != -1) {
+	if (index !== -1) {
 		minimizedWindowIds.splice(index, 1)
 	}
 
@@ -638,14 +638,14 @@ function evaluateTab(tab) {
 		// Remove from old blocksetAffectedTabs
 		for (let bsId in blocksetAffectedTabs) {
 			let index = blocksetAffectedTabs[bsId].indexOf(tab.id)
-			if (index != -1) {
+			if (index !== -1) {
 				blocksetAffectedTabs[bsId].splice(index, 1)
 			}
 		}
 
 		// Add to new blocksetAffectedTabs
 		for (let bsId of blocksetIdList) {
-			if (blocksetAffectedTabs[bsId] == undefined) {
+			if (!blocksetAffectedTabs[bsId]) {
 				blocksetAffectedTabs[bsId] = []
 			}
 			if (!blocksetAffectedTabs[bsId].includes(tab.id)) {
@@ -673,7 +673,7 @@ function setBadge(lowestTimer) {
 
 	var color
 	var text = " "
-	if (lowestTimer == Infinity) {
+	if (lowestTimer === Infinity) {
 		text = ""
 	}
 	else if (lowestTimer > 1000 * 60 * 60) { // time is more than one hour -> don't display time
@@ -694,7 +694,7 @@ function setBadge(lowestTimer) {
 
 	chrome.browserAction.setBadgeText({ text: text })
 
-	if (text != "") {
+	if (text !== "") {
 		chrome.browserAction.setBadgeBackgroundColor({ color: color })
 	}
 }
@@ -713,7 +713,8 @@ function getLowestTimer() {
 
 function areYTListsEmpty() {
 	for (let id of blocksetIds) {
-		if (blYT[id].channels.length != 0 || blYT[id].categories.length != 0 || wlYT[id].channels.length != 0 || wlYT[id].categories.length != 0) {
+		if (blYT[id].channels.length !== 0 || blYT[id].categories.length !== 0 ||
+				wlYT[id].channels.length !== 0 || wlYT[id].categories.length !== 0) {
 			return false
 		}
 	}
@@ -765,7 +766,7 @@ function blockedBy(tab, callback) {
 
 			httpGetAsync("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + "&fields=items(snippet(categoryId%2CchannelId))&key=" + API_KEY, function (response) {
 
-				if (response.error != undefined) {
+				if (response.error) {
 					console.error(`Could not check video with id ${videoId}, error: ${response.error}`)
 					callback(blocksetIdList)
 					return
@@ -773,7 +774,7 @@ function blockedBy(tab, callback) {
 
 				let object = JSON.parse(response.message)
 
-				if (object.items.length != 0) {
+				if (object.items.length !== 0) {
 					let channelId = object.items[0].snippet.channelId
 					let categoryId = object.items[0].snippet.categoryId
 
@@ -797,14 +798,14 @@ function blockedBy(tab, callback) {
 
 			httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&forUsername=" + userName + "&fields=items%2Fid&key=" + API_KEY, function (response) {
 
-				if (response.error != undefined) {
+				if (response.error) {
 					console.error(`Could not check channel with username ${userName}, error: ${response.error}`)
 					callback(blocksetIdList)
 					return
 				}
 				let object = JSON.parse(response.message)
 
-				if (object.items.length != 0) {
+				if (object.items.length !== 0) {
 					let channelId = object.items[0].id
 					evalChannelId(channelId, blocksetIdList)
 				}
@@ -824,13 +825,13 @@ function blockedBy(tab, callback) {
 			let playlistId = getStringBetween(url, "list=", "&")
 
 			httpGetAsync("https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=" + playlistId + "&fields=items%2Fsnippet%2FchannelId&key=" + API_KEY, function (response) {
-				if (response.error != undefined) {
+				if (response.error) {
 					console.error(`Could not check playlist with id ${playlistId}, error: ${response.error}`)
 					callback(blocksetIdList)
 					return
 				}
 				let object = JSON.parse(response.message)
-				if (object.items.length != 0) {
+				if (object.items.length !== 0) {
 					let channelId = object.items[0].snippet.channelId
 					evalChannelId(channelId, blocksetIdList)
 				}
@@ -853,7 +854,7 @@ function evalChannelId(channelId, blocksetIdList, categoryId = undefined) {
 		if (!blocksetDatas[id].activeDays[currentWeekDay] || !isInActiveTime(now, id)) // if today is not an active day | or not in active hours
 			continue
 
-		if (categoryId != undefined) {
+		if (categoryId) {
 			if (!wlYT[id].categories.includes(categoryId) && !wlYT[id].channels.some(c => c.id === channelId)) {
 				if (blYT[id].categories.includes(categoryId) || blYT[id].channels.some(c => c.id === channelId)) {
 					if (!blocksetIdList.includes(id)) {
@@ -863,7 +864,7 @@ function evalChannelId(channelId, blocksetIdList, categoryId = undefined) {
 			}
 			else {
 				let index = blocksetIdList.indexOf(id)
-				if (index != -1) {
+				if (index !== -1) {
 					blocksetIdList.splice(index, 1)
 				}
 			}
@@ -878,7 +879,7 @@ function evalChannelId(channelId, blocksetIdList, categoryId = undefined) {
 			}
 			else {
 				let index = blocksetIdList.indexOf(id)
-				if (index != -1) {
+				if (index !== -1) {
 					blocksetIdList.splice(index, 1)
 				}
 			}
@@ -897,7 +898,7 @@ function isInActiveTime(timeNow, blocksetId) {
 	else if (from < to) {
 		return (timeNow > from && timeNow < to)
 	}
-	else if (from > to) {
+	else {
 		return (timeNow > from || timeNow < to)
 	}
 }
@@ -911,7 +912,7 @@ function block(tabId) {
 function annoy(tabId, lowestTimer) {
 	
 	chrome.tabs.executeScript(tabId, {
-		code: "typeof dawdle_block_annoy != 'undefined'" // returns true if exists, false if not
+		code: "typeof dawdle_block_annoy !== 'undefined'" // returns true if exists, false if not
 	}, results => {
 		// This happens on chrome:// urls, because extensions cannot access them
 		if (chrome.runtime.lastError) {
@@ -936,19 +937,19 @@ function annoy(tabId, lowestTimer) {
 /** janky solution to firefox dead object syndrome */
 function bsItem(type, value) {
 	var item
-	if (type.startsWith("yt") == false) {
-		item = {
-			"type": type,
-			"value": value
-		}
-	}
-	else {
+	if (type.startsWith("yt")) {
 		item = {
 			"type": type,
 			"value": {
 				"name": value[0],
 				"id": value[1]
 			}
+		}
+	}
+	else {
+		item = {
+			"type": type,
+			"value": value
 		}
 	}
 	return item
@@ -1030,7 +1031,7 @@ function saveAllBlocksets() {
 		saveItems[id] = compress(blocksetDatas[id])
 	}
 	chrome.storage.sync.set(saveItems, () => {
-		if (chrome.runtime.lastError != null) {
+		if (chrome.runtime.lastError) {
 			console.log("Could not save all blocksets")
 			console.log(chrome.runtime.lastError)
 		}
@@ -1041,7 +1042,7 @@ function saveElapsedTimes() {
 	chrome.storage.sync.set({
 		blocksetTimesElapsed: blocksetTimesElapsed
 	}, () => {
-		if (chrome.runtime.lastError != null) {
+		if (chrome.runtime.lastError) {
 			console.log("Could not save elapsed times")
 			console.log(chrome.runtime.lastError)
 		}
@@ -1056,11 +1057,11 @@ function httpGetAsync(theUrl, callback) {
 		callback({ error: "timed out" })
 	}
 	xmlHttp.onreadystatechange = function () {
-		if (xmlHttp.readyState == 4) {
-			if (xmlHttp.status == 200) {
+		if (xmlHttp.readyState === 4) {
+			if (xmlHttp.status === 200) {
 				callback({ message: xmlHttp.responseText })
 			}
-			else if (xmlHttp.status == 400) {
+			else if (xmlHttp.status === 400) {
 				callback({ error: "bad request" })
 			}
 		}

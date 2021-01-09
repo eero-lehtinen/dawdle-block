@@ -28,7 +28,7 @@ var dawdle_block_annoy = {
 
 		mainDiv.textContent = timeString
 
-		if (mainDiv.className == "hidden") {
+		if (mainDiv.className === "hidden") {
 			mainDiv.className = ""
 		}
 

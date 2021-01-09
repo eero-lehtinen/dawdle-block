@@ -82,7 +82,7 @@ function loadAllBlocksets() {
 
 function update() {
 	for (let id of blocksetIds) {
-		if (blocksetTimes[id] != undefined) {
+		if (blocksetTimes[id]) {
 			setTimeDisplay(blocksetTimes[id], blocksetDatas[id].timeAllowed - blocksetTimesElapsed[id])
 		}
 	}
@@ -110,7 +110,7 @@ var urlWithProtocol
 var currentTabId
 
 function selectBlockSet(id) {
-	if (currentId != -1)
+	if (currentId !== -1)
 		$("#" + currentId).removeAttr("class")
 
 	$("#" + id).attr("class", "selected")
@@ -211,13 +211,13 @@ function showIndicator(text) {
 }
 
 function getYTData(url, callback) {
-	if (blocksetDatas[currentId] != undefined) {
+	if (blocksetDatas[currentId]) {
 		if (url.startsWith("www.youtube.com/watch")) {
 			var videoId = url.split("v=")[1].substring(0, 11)
 			bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + "&fields=items(snippet(categoryId%2CchannelId%2CchannelTitle))&key=" + bgPage.API_KEY, function (response) {
 				console.log("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + "&fields=items(snippet(categoryId%2CchannelId%2CchannelTitle))&key=" + bgPage.API_KEY)
 
-				if (response.error != undefined) {
+				if (response.error) {
 					console.error(`Could not get video info with id ${videoId}, error: ${response.error}`)
 					return
 				}
@@ -236,7 +236,7 @@ function getYTData(url, callback) {
 
 			bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&id=" + channelId + "&fields=items(snippet%2Ftitle)&key=" + bgPage.API_KEY, function (response) {
 
-				if (response.error != undefined) {
+				if (response.error) {
 					console.error(`Could not get channel info with id ${channelId}, error: ${response.error}`)
 					return
 				}
@@ -254,7 +254,7 @@ function getYTData(url, callback) {
 
 			bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&forUsername=" + channelUserName + "&fields=items(id%2Csnippet%2Ftitle)&key=" + bgPage.API_KEY, function (response) {
 
-				if (response.error != undefined) {
+				if (response.error) {
 					console.error(`Could not get channel info with username ${channelUserName}, error: ${response.error}`)
 					return
 				}
@@ -291,6 +291,10 @@ function areSettingsProtected(bsId) {
 			return true
 		}
 	}
+	else {
+		console.error("Setting protection has unsupported value: " + generalOptions.settingProtection)
+		return false
+	}
 }
 
 function saveCurrentBlockset() {
@@ -318,7 +322,7 @@ $("#options").on("click", function () {
 })
 
 $("#bl_domain").on("click", function () {
-	if (blocksetDatas[currentId] != undefined && (new URL(urlWithProtocol).hostname) != "")
+	if (blocksetDatas[currentId] && (new URL(urlWithProtocol).hostname) !== "")
 		addDomain(new URL(urlWithProtocol).hostname, blocksetDatas[currentId].blacklist)
 	else {
 		showIndicator("Domain undefined")
@@ -326,12 +330,12 @@ $("#bl_domain").on("click", function () {
 })
 
 $("#bl_url").on("click", function () {
-	if (blocksetDatas[currentId] != undefined)
+	if (blocksetDatas[currentId])
 		addUrl(url, blocksetDatas[currentId].blacklist)
 })
 
 $("#wl_url").on("click", function () {
-	if (blocksetDatas[currentId] != undefined) {
+	if (blocksetDatas[currentId]) {
 		if (areSettingsProtected(currentId))
 			showIndicator("Not added: settings protected")
 		else
@@ -340,7 +344,7 @@ $("#wl_url").on("click", function () {
 })
 
 $("#bl_channel").on("click", function () {
-	if (blocksetDatas[currentId] != undefined) {
+	if (blocksetDatas[currentId]) {
 		getYTData(url, function (data) {
 			addChannel(data.channelId, data.channelTitle, blocksetDatas[currentId].blacklist)
 		})
@@ -348,7 +352,7 @@ $("#bl_channel").on("click", function () {
 })
 
 $("#wl_channel").on("click", function () {
-	if (blocksetDatas[currentId] != undefined) {
+	if (blocksetDatas[currentId]) {
 		if (areSettingsProtected(currentId))
 			showIndicator("Not added: settings protected")
 		else {
@@ -360,7 +364,7 @@ $("#wl_channel").on("click", function () {
 })
 
 $("#bl_category").on("click", function () {
-	if (blocksetDatas[currentId] != undefined) {
+	if (blocksetDatas[currentId]) {
 		getYTData(url, function (data) {
 			addCategory(data.categoryId, bgPage.YT_CATEGORY_NAMES_BY_ID[data.categoryId], blocksetDatas[currentId].blacklist)
 		})
@@ -368,7 +372,7 @@ $("#bl_category").on("click", function () {
 })
 
 $("#wl_category").on("click", function () {
-	if (blocksetDatas[currentId] != undefined) {
+	if (blocksetDatas[currentId]) {
 		if (areSettingsProtected(currentId))
 			showIndicator("Not added: settings protected")
 		else {

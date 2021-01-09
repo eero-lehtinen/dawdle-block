@@ -92,7 +92,7 @@ function update() {
 }
 
 function loadTimePickers() {
-	if ($(".timepicker#resetTime").timepicker != undefined) {
+	if ($(".timepicker#resetTime").timepicker) {
 		$(".timepicker#resetTime").timepicker("destroy")
 	}
 
@@ -116,7 +116,7 @@ function loadTimePickers() {
 		}
 	})
 
-	if ($(".timepicker#activeFrom").timepicker != undefined) {
+	if ($(".timepicker#activeFrom").timepicker) {
 		$(".timepicker#activeFrom").timepicker("destroy")
 	}
 
@@ -140,7 +140,7 @@ function loadTimePickers() {
 		}
 	})
 
-	if ($(".timepicker#activeTo").timepicker != undefined) {
+	if ($(".timepicker#activeTo").timepicker) {
 		$(".timepicker#activeTo").timepicker("destroy")
 	}
 
@@ -164,7 +164,7 @@ function loadTimePickers() {
 		}
 	})
 
-	if ($(".timepicker#timeAllowed").timepicker != undefined) {
+	if ($(".timepicker#timeAllowed").timepicker) {
 		$(".timepicker#timeAllowed").timepicker("destroy")
 	}
 
@@ -175,7 +175,7 @@ function loadTimePickers() {
 		scrollbar: false,
 		change: function (time) {
 			var timeMs = dateToMs(time)
-			if (currentPageId >= 0 && blocksetDatas[currentPageId].timeAllowed != timeMs && oldAllowedTime != timeMs) {
+			if (currentPageId >= 0 && blocksetDatas[currentPageId].timeAllowed !== timeMs && oldAllowedTime !== timeMs) {
 				oldAllowedTime = timeMs
 				if (blocksetDatas[currentPageId].timeAllowed < timeMs) {
 					// Cache value because user may change tabs while the dialog is open
@@ -183,7 +183,7 @@ function loadTimePickers() {
 					dialog("Do you want more time to waste?", "Are you really sure you want to slack off even more? It most likely isn't healthy.",
 						"Yes", function () {
 							ensureProtectedSettingAccess(pageId, function (granted) {
-								if (!granted && pageId == currentPageId) {
+								if (!granted && pageId === currentPageId) {
 									$(".timepicker#timeAllowed").timepicker("setTime", msToDate(blocksetDatas[pageId].timeAllowed))
 									oldAllowedTime = blocksetDatas[pageId].timeAllowed
 									return
@@ -226,11 +226,11 @@ function setupJQueryUI() {
 		},
 
 		start: function (event, ui) {
-			if (ui.item.find("a").attr("class") != "selected")
+			if (ui.item.find("a").attr("class") !== "selected")
 				ui.item.find("a").attr("class", "drag")
 		},
 		stop: function (event, ui) {
-			if (ui.item.find("a").attr("class") != "selected") {
+			if (ui.item.find("a").attr("class") !== "selected") {
 				ui.item.find("a").removeAttr("class")
 			}
 
@@ -375,14 +375,14 @@ function displaySites(list, type) {
 function addSite(toList, select, input, callback) {
 	if (select.val() === "ytChannel") {
 		bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&id=" + input.val() + "&fields=items(id%2Csnippet%2Ftitle)&key=" + bgPage.API_KEY, function (response) {
-			if (response.error != undefined) {
+			if (response.error) {
 				console.error(`Could not check channel with id ${input.val()}, error: ${response.error}`)
 				dialog("Error", "Could not communicate with youtube api.<br>Reason: " + response.error, "OK")
 				return
 			}
 			var object = JSON.parse(response.message)
 
-			if (object.items.length != 0) {
+			if (object.items.length !== 0) {
 				toList.push(bgPage.bsItem(select.val(), [object.items[0].snippet.title, object.items[0].id]))
 				callback()
 			}
@@ -392,7 +392,7 @@ function addSite(toList, select, input, callback) {
 		})
 	}
 	else if (select.val() === "ytCategory") {
-		if (bgPage.YT_CATEGORY_NAMES_BY_ID[input.val()] != undefined) {
+		if (bgPage.YT_CATEGORY_NAMES_BY_ID[input.val()]) {
 			toList.push(bgPage.bsItem(select.val(), [bgPage.YT_CATEGORY_NAMES_BY_ID[input.val()], input.val()]))
 			callback()
 		}
@@ -440,7 +440,7 @@ function addBlockset(newData) {
 	blocksetIds.push(newBlocksetId)
 	blocksetTimesElapsed[newBlocksetId] = 0
 
-	if (newData != undefined) {
+	if (newData) {
 		blocksetDatas[newBlocksetId] = newData
 		bgPage.addAbsentItems(blocksetDatas[newBlocksetId], bgPage.defaultBlockset())
 	}
@@ -472,7 +472,7 @@ function addBlockset(newData) {
 
 
 function getNewBlocksetName(copyName) {
-	if (copyName != undefined) {
+	if (copyName) {
 		let duplicateNumber = 0
 		let newName = `${copyName}(${duplicateNumber})`
 		while (!isUniqueBSName(newName)) {
@@ -494,7 +494,7 @@ function getNewBlocksetName(copyName) {
 
 function isUniqueBSName(blocksetName) {
 	for (let bsId in blocksetDatas) {
-		if (blocksetName == blocksetDatas[bsId].name) {
+		if (blocksetName === blocksetDatas[bsId].name) {
 			return false
 		}
 	}
@@ -683,7 +683,10 @@ function ensureProtectedSettingAccess(bsId, callback) {
 		}
 		else { // if trying to edit general settings
 			if (blocksetTimesElapsed.some((timeElapsed, index) => {
-				if (blocksetDatas[index]) return timeElapsed < blocksetDatas[index].timeAllowed
+				if (blocksetDatas[index]) 
+					return timeElapsed < blocksetDatas[index].timeAllowed
+				else
+					return false
 			}))
 				test = false
 		}
@@ -830,19 +833,19 @@ function dialog(title, text, acceptText, onAccept, declineText, onDecline) {
 
 	var textBox = $("<div>", { class: "text" }).html(text).appendTo(dWindow)
 	var botBar = $("<div>", { class: "botBar" }).appendTo(dWindow)
-	if (declineText != undefined) {
+	if (declineText) {
 		let decline = $("<button>").addClass("decline").html(declineText).appendTo(botBar)
 		decline.on("click", function () {
-			if (onDecline != undefined)
+			if (onDecline)
 				onDecline()
 			dWindow.remove()
 		})
 	}
 
-	if (acceptText != undefined) {
+	if (acceptText) {
 		let accept = $("<button>").addClass("accept").html(acceptText).appendTo(botBar)
 		accept.on("click", function () {
-			if (onAccept != undefined)
+			if (onAccept)
 				onAccept()
 			dWindow.remove()
 		})
@@ -853,7 +856,7 @@ function dialog(title, text, acceptText, onAccept, declineText, onDecline) {
 	dWindow.css("margin-top", -(dWindow.height() / 2) + "px")
 
 	var link = textBox.find("a")
-	if (link != undefined) {
+	if (link) {
 		if (link.attr("name") === "allCategories") {
 			link.on("click", function () { listAllCategories() })
 		}
@@ -917,7 +920,7 @@ function diskLoadData(file) {
 	reader.onload = function (e) {
 		var saves = JSON.parse(e.target.result)
 		var feedback = "Save file loaded"
-		if (saves.blocksetDatas != undefined) {
+		if (saves.blocksetDatas) {
 			for (let key in saves.blocksetDatas) {
 				if (blocksetIds.length < 50) {
 					addBlockset(saves.blocksetDatas[key])
@@ -928,7 +931,7 @@ function diskLoadData(file) {
 		else {
 			feedback += " (no block sets found)"
 		}
-		if (saves.generalOptions != undefined) {
+		if (saves.generalOptions) {
 			generalOptions = saves.generalOptions
 			saveGeneralOptions()
 		}
@@ -947,12 +950,12 @@ function saveGeneralOptions() {
 	chrome.storage.sync.set({
 		generalOptions: generalOptions
 	}, function () {
-		if (chrome.runtime.lastError == null) {
-			showSaveIndicator()
-		}
-		else {
+		if (chrome.runtime.lastError) {
 			showSaveIndicator(chrome.runtime.lastError.message)
 			console.log(chrome.runtime.lastError.message)
+		}
+		else {
+			showSaveIndicator()
 		}
 	})
 
@@ -1005,7 +1008,7 @@ $("#delete").on("click", function () {
 		if (!granted)
 			return
 
-		if (deleteDialog != undefined) {
+		if (deleteDialog) {
 			deleteDialog.remove()
 			deleteDialog = undefined
 		}
@@ -1034,7 +1037,7 @@ $("#rename").on("click", function () {
 $("input.blocksetRename").on("blur keypress", function (e) {
 	if (e.originalEvent.type === "blur" || (e.originalEvent.type === "keypress" && e.originalEvent.key === "Enter")) {
 		var newName = $("input.blocksetRename").val()
-		if (newName != "") {
+		if (newName) {
 			blocksetDatas[currentPageId].name = newName
 			saveCurrentBlockset()
 			$("input.blocksetRename").val("")
@@ -1053,7 +1056,7 @@ $("#blacklistInput").on("keypress", function (event) {
 })
 
 function blacklistAddSite() {
-	if ($("#blacklistInput").val() != "") {
+	if ($("#blacklistInput").val()) {
 		addSite(blocksetDatas[currentPageId].blacklist, $("#blacklistSelect"), $("#blacklistInput"), function () {
 			$("#blacklistInput").val("")
 			saveCurrentBlockset()
@@ -1081,7 +1084,7 @@ $("#whitelistInput").on("keypress", function (event) {
 })
 
 function whitelistAddSite() {
-	if ($("#whitelistInput").val() != "") {
+	if ($("#whitelistInput").val()) {
 		addSite(blocksetDatas[currentPageId].whitelist, $("#whitelistSelect"), $("#whitelistInput"), function () {
 			$("#whitelistInput").val("")
 			saveCurrentBlockset()

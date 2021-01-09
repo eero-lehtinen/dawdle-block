@@ -32,6 +32,11 @@
 			{
 				"argsIgnorePattern": "^_"
 			}
+		],
+		"consistent-return": "error",
+		"eqeqeq": [
+			"error",
+			"always"
 		]
 	}
 }
