@@ -927,7 +927,7 @@ function annoy(tabId, lowestTimer) {
         }
         else {
             chrome.tabs.executeScript(tabId, {
-                file: "js/contentScript.js"
+                file: "js/annoyInjection.js"
             }, () => {
                 chrome.tabs.insertCSS(tabId, { file: "styles/annoy.css" });
                 chrome.tabs.executeScript(tabId, { code: `dawdle_block_annoy.showTime("${msToTimeDisplay(-lowestTimer)}");` });
