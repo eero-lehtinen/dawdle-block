@@ -1,3 +1,11 @@
+/**
+ * This file contains annoy mode banner logic.
+ * It's single purpose is to show overtime in the bottom of the window.
+ * bg.js calls showTime() and it initializes the display div if needed,
+ * and if bg.js stops calling showTime(), this hides the div.
+ * Uses dawdle_block_annoy "namespace" to not clash with existing definitions.
+ */
+
 var dawdle_block_annoy = {
     timeoutHandle: undefined,
     init: _ => {
