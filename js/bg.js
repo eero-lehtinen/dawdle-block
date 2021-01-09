@@ -312,39 +312,36 @@ function setupActiveTimeUpdates(blocksetId) {
 		list = [blocksetId]
 	}
 
-	for (let id_forward of list) {
+	for (let id of list) {
+		// Remove old alarm if it exists
+		chrome.alarms.clear("activeTimeUpdateFrom_" + id, () => {
+			chrome.alarms.clear("activeTimeUpdateTo_" + id, () => {
 
-		(function (id) {
-			// Remove old alarm if it exists
-			chrome.alarms.clear("activeTimeUpdateFrom_" + id, () => {
-				chrome.alarms.clear("activeTimeUpdateTo_" + id, () => {
+				const activeTimeFrom = blocksetDatas[id].activeTime.from // MS from midnight
+				const activeTimeTo = blocksetDatas[id].activeTime.to // MS from midnight
 
-					const activeTimeFrom = blocksetDatas[id].activeTime.from // MS from midnight
-					const activeTimeTo = blocksetDatas[id].activeTime.to // MS from midnight
+				if (activeTimeFrom !== activeTimeTo) { // If from and to are same, blocksets are just always active, so dont do anything
 
-					if (activeTimeFrom !== activeTimeTo) { // If from and to are same, blocksets are just always active, so dont do anything
-
-						if (activeTimeFrom >= nowSinceMidnight) {
-							chrome.alarms.create("activeTimeUpdateFrom_" + id,
-								{ when: todayZeroTime + activeTimeFrom + 1000, periodInMinutes: 24 * 60 })
-						}
-						else if (activeTimeFrom < nowSinceMidnight) {
-							chrome.alarms.create("activeTimeUpdateFrom_" + id,
-								{ when: todayZeroTime + activeTimeFrom + 86400000 + 1000, periodInMinutes: 24 * 60 })
-						}
-
-						if (activeTimeTo >= nowSinceMidnight) {
-							chrome.alarms.create("activeTimeUpdateTo_" + id,
-								{ when: todayZeroTime + activeTimeTo + 1000, periodInMinutes: 24 * 60 })
-						}
-						else if (activeTimeTo < nowSinceMidnight) {
-							chrome.alarms.create("activeTimeUpdateTo_" + id,
-								{ when: todayZeroTime + activeTimeTo + 86400000 + 1000, periodInMinutes: 24 * 60 })
-						}
+					if (activeTimeFrom >= nowSinceMidnight) {
+						chrome.alarms.create("activeTimeUpdateFrom_" + id,
+							{ when: todayZeroTime + activeTimeFrom + 1000, periodInMinutes: 24 * 60 })
 					}
-				})
+					else if (activeTimeFrom < nowSinceMidnight) {
+						chrome.alarms.create("activeTimeUpdateFrom_" + id,
+							{ when: todayZeroTime + activeTimeFrom + 86400000 + 1000, periodInMinutes: 24 * 60 })
+					}
+
+					if (activeTimeTo >= nowSinceMidnight) {
+						chrome.alarms.create("activeTimeUpdateTo_" + id,
+							{ when: todayZeroTime + activeTimeTo + 1000, periodInMinutes: 24 * 60 })
+					}
+					else if (activeTimeTo < nowSinceMidnight) {
+						chrome.alarms.create("activeTimeUpdateTo_" + id,
+							{ when: todayZeroTime + activeTimeTo + 86400000 + 1000, periodInMinutes: 24 * 60 })
+					}
+				}
 			})
-		})(id_forward)
+		})
 	}
 }
 
@@ -912,7 +909,7 @@ function block(tabId) {
 function annoy(tabId, lowestTimer) {
 	
 	chrome.tabs.executeScript(tabId, {
-		code: "typeof dawdle_block_annoy !== 'undefined'" // returns true if exists, false if not
+		code: "typeof dawdleBlockAnnoy !== 'undefined'" // returns true if exists, false if not
 	}, results => {
 		// This happens on chrome:// urls, because extensions cannot access them
 		if (chrome.runtime.lastError) {
@@ -920,14 +917,14 @@ function annoy(tabId, lowestTimer) {
 		}
 
 		if (results[0]) {
-			chrome.tabs.executeScript(tabId, { code: `dawdle_block_annoy.showTime("${msToTimeDisplay(-lowestTimer)}");` })
+			chrome.tabs.executeScript(tabId, { code: `dawdleBlockAnnoy.showTime("${msToTimeDisplay(-lowestTimer)}");` })
 		}
 		else {
 			chrome.tabs.executeScript(tabId, {
 				file: "js/annoyInjection.js"
 			}, () => {
 				chrome.tabs.insertCSS(tabId, { file: "styles/annoy.css" })
-				chrome.tabs.executeScript(tabId, { code: `dawdle_block_annoy.showTime("${msToTimeDisplay(-lowestTimer)}");` })
+				chrome.tabs.executeScript(tabId, { code: `dawdleBlockAnnoy.showTime("${msToTimeDisplay(-lowestTimer)}");` })
 			})
 		}
 	})

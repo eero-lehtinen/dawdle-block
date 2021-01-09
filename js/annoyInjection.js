@@ -3,10 +3,10 @@
  * It's single purpose is to show overtime in the bottom of the window.
  * bg.js calls showTime() and it initializes the display div if needed,
  * and if bg.js stops calling showTime(), this hides the div.
- * Uses dawdle_block_annoy "namespace" to not clash with existing definitions.
+ * Uses dawdleBlockAnnoy "namespace" to not clash with existing definitions.
  */
 
-var dawdle_block_annoy = {
+var dawdleBlockAnnoy = {
 	timeoutHandle: undefined,
 	init: _ => {
 		let link = document.createElement("link")
@@ -15,15 +15,15 @@ var dawdle_block_annoy = {
 		document.head.appendChild(link)
 
 		let mainDiv = document.createElement("div")
-		mainDiv.setAttribute("id", "dawdle_block_annoy")
+		mainDiv.setAttribute("id", "dawdleBlockAnnoy")
 		document.body.appendChild(mainDiv)
 		return mainDiv
 	},
 	showTime: timeString => {
-		let mainDiv = document.getElementById("dawdle_block_annoy")
+		let mainDiv = document.getElementById("dawdleBlockAnnoy")
 
 		if (!mainDiv) {
-			mainDiv = dawdle_block_annoy.init()
+			mainDiv = dawdleBlockAnnoy.init()
 		}
 
 		mainDiv.textContent = timeString
@@ -32,11 +32,11 @@ var dawdle_block_annoy = {
 			mainDiv.className = ""
 		}
 
-		clearTimeout(dawdle_block_annoy.timeoutHandle)
-		dawdle_block_annoy.timeoutHandle = setTimeout(dawdle_block_annoy.hideTime, 1500)
+		clearTimeout(dawdleBlockAnnoy.timeoutHandle)
+		dawdleBlockAnnoy.timeoutHandle = setTimeout(dawdleBlockAnnoy.hideTime, 1500)
 	},
 	hideTime: _ => {
-		let mainDiv = document.getElementById("dawdle_block_annoy")
+		let mainDiv = document.getElementById("dawdleBlockAnnoy")
 		if (mainDiv) {
 			mainDiv.className = "hidden"
 		}

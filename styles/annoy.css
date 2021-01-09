@@ -1,4 +1,4 @@
-#dawdle_block_annoy {
+#dawdleBlockAnnoy {
     all: unset !important;
     box-sizing: border-box !important;
     position: fixed !important;
@@ -21,7 +21,7 @@
     animation: dawdle_block_fadein 0.2s !important;
 }
 
-#dawdle_block_annoy.hidden {
+#dawdleBlockAnnoy.hidden {
     opacity: 0 !important;
     transition: opacity 0.05s !important;
 }
@@ -31,27 +31,27 @@
   to   { opacity: 0.6}
 }
 
-#dawdle_block_annoy::before {
+#dawdleBlockAnnoy::before {
     content: "OVERTIME " !important;
 }
 
 
 @media only screen and (max-width: 800px)  {
-    #dawdle_block_annoy::before {
+    #dawdleBlockAnnoy::before {
         content: "" !important;
     }
 }
 
 /* 1440p screens */
 @media only screen and (min-height: 1100px)  {
-    #dawdle_block_annoy {
+    #dawdleBlockAnnoy {
         font-size: 80px !important;
     }
 }
 
 /* 2160p screens */
 @media only screen and (min-height: 1500px)  { 
-    #dawdle_block_annoy {
+    #dawdleBlockAnnoy {
         font-size: 100px !important;
     }
 }

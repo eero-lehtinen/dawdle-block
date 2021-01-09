@@ -37,6 +37,7 @@
 		"eqeqeq": [
 			"error",
 			"always"
-		]
+		],
+		"camelcase": "error"
 	}
 }
