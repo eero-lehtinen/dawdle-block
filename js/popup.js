@@ -4,7 +4,7 @@ var blocksetDatas
 var blocksetTimesElapsed
 var generalOptions
 
-chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, _tab) {
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, _tab) {
 	if (tabId === currentTabId && changeInfo.status === "complete") {
 		$("#info").hide()
 		if (blocksetIds.length === 1) {
@@ -17,7 +17,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, _tab) {
 	}
 })
 
-chrome.runtime.getBackgroundPage(function (bg) {
+chrome.runtime.getBackgroundPage(function(bg) {
 	bgPage = bg
 	blocksetIds = bgPage.blocksetIds
 	blocksetDatas = bgPage.blocksetDatas
@@ -32,7 +32,7 @@ function start() {
 	loadAllBlocksets()
 	bgPage.callbacks.popup = update
 
-	chrome.runtime.onMessage.addListener(function (message, _sender, _sendResponse) {
+	chrome.runtime.onMessage.addListener(function(message, _sender, _sendResponse) {
 		if (message.type === "blocksetChanged") {
 			loadAllBlocksets()
 		}
@@ -57,7 +57,7 @@ function loadAllBlocksets() {
 	for (let id of blocksetIds) {
 		var listItem = $("<li>", { id: id })
 		var name = $("<a>", { class: "blocksiteName", href: "#" }).text(blocksetDatas[id].name)
-		name.on("click", function (_e) {
+		name.on("click", function(_e) {
 			var blocksetId = $(this).parent().attr("id")
 			selectBlockSet(blocksetId)
 		})
@@ -116,10 +116,10 @@ function selectBlockSet(id) {
 	$("#" + id).attr("class", "selected")
 	currentId = id
 
-	chrome.windows.getCurrent(function (w) {
+	chrome.windows.getCurrent(function(w) {
 		var tabId = bgPage.openTabIds[w.id]
 		currentTabId = tabId
-		chrome.tabs.get(tabId, function (tab) {
+		chrome.tabs.get(tabId, function(tab) {
 			url = tab.url.replace(/(^\w+:|^)\/\//, "")
 			urlWithProtocol = tab.url
 
@@ -327,11 +327,11 @@ function setDarkTheme(bool) {
 		$("html").removeAttr("class")
 }
 
-$("#options").on("click", function () {
+$("#options").on("click", function() {
 	chrome.runtime.openOptionsPage()
 })
 
-$("#bl_domain").on("click", function () {
+$("#bl_domain").on("click", function() {
 	if (blocksetDatas[currentId] && (new URL(urlWithProtocol).hostname) !== "")
 		addDomain(new URL(urlWithProtocol).hostname, blocksetDatas[currentId].blacklist)
 	else {
@@ -339,12 +339,12 @@ $("#bl_domain").on("click", function () {
 	}
 })
 
-$("#bl_url").on("click", function () {
+$("#bl_url").on("click", function() {
 	if (blocksetDatas[currentId])
 		addUrl(url, blocksetDatas[currentId].blacklist)
 })
 
-$("#wl_url").on("click", function () {
+$("#wl_url").on("click", function() {
 	if (blocksetDatas[currentId]) {
 		if (areSettingsProtected(currentId))
 			showIndicator("Not added: settings protected")
@@ -353,29 +353,29 @@ $("#wl_url").on("click", function () {
 	}
 })
 
-$("#bl_channel").on("click", function () {
+$("#bl_channel").on("click", function() {
 	if (blocksetDatas[currentId]) {
-		getYTData(url, function (data) {
+		getYTData(url, function(data) {
 			addChannel(data.channelId, data.channelTitle, blocksetDatas[currentId].blacklist)
 		})
 	}
 })
 
-$("#wl_channel").on("click", function () {
+$("#wl_channel").on("click", function() {
 	if (blocksetDatas[currentId]) {
 		if (areSettingsProtected(currentId))
 			showIndicator("Not added: settings protected")
 		else {
-			getYTData(url, function (data) {
+			getYTData(url, function(data) {
 				addChannel(data.channelId, data.channelTitle, blocksetDatas[currentId].whitelist)
 			})
 		}
 	}
 })
 
-$("#bl_category").on("click", function () {
+$("#bl_category").on("click", function() {
 	if (blocksetDatas[currentId]) {
-		getYTData(url, function (data) {
+		getYTData(url, function(data) {
 			addCategory(
 				data.categoryId, 
 				bgPage.YT_CATEGORY_NAMES_BY_ID[data.categoryId], 
@@ -385,12 +385,12 @@ $("#bl_category").on("click", function () {
 	}
 })
 
-$("#wl_category").on("click", function () {
+$("#wl_category").on("click", function() {
 	if (blocksetDatas[currentId]) {
 		if (areSettingsProtected(currentId))
 			showIndicator("Not added: settings protected")
 		else {
-			getYTData(url, function (data) {
+			getYTData(url, function(data) {
 				addCategory(
 					data.categoryId, 
 					bgPage.YT_CATEGORY_NAMES_BY_ID[data.categoryId], 

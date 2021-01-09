@@ -26,7 +26,7 @@ var blocksetTimesElapsed = []
 
 var generalOptions
 
-chrome.runtime.getBackgroundPage(function (bg) {
+chrome.runtime.getBackgroundPage(function(bg) {
 	// Store refernces to background script variables
 	bgPage = bg
 	blocksetIds = bgPage.blocksetIds
@@ -75,7 +75,7 @@ function setTimeAllowed(value, pageId) {
 	saveCurrentBlockset()
 }
 
-chrome.runtime.onMessage.addListener(function (message, _sender, _sendResponse) {
+chrome.runtime.onMessage.addListener(function(message, _sender, _sendResponse) {
 	if (message.type === "blocksetChanged") {
 		if (currentPageId === parseInt(message.id)) {
 			displaySites(blocksetDatas[currentPageId].blacklist, "bl")
@@ -99,11 +99,11 @@ function loadTimePickers() {
 	$(".timepicker#resetTime").timepicker({
 		timeFormat: generalOptions.clockType === 24 ? "HH:mm" : "hh:mm p",
 		dynamic: false, dropdown: false, scrollbar: false,
-		change: function (time) {
+		change: function(time) {
 			var ms = dateToMs(time)
 			if (blocksetDatas[currentPageId].resetTime !== ms && oldResetTime !== ms) {
 				oldResetTime = ms
-				ensureProtectedSettingAccess(currentPageId, function (granted) {
+				ensureProtectedSettingAccess(currentPageId, function(granted) {
 					if (!granted) {
 						$(".timepicker#resetTime").timepicker("setTime", msToDate(blocksetDatas[currentPageId].resetTime))
 						oldResetTime = blocksetDatas[currentPageId].resetTime
@@ -123,11 +123,11 @@ function loadTimePickers() {
 	$(".timepicker#activeFrom").timepicker({
 		timeFormat: generalOptions.clockType === 24 ? "HH:mm" : "hh:mm p",
 		dynamic: false, dropdown: false, scrollbar: false,
-		change: function (time) {
+		change: function(time) {
 			var ms = dateToMs(time)
 			if (blocksetDatas[currentPageId].activeTime.from !== ms && oldActiveTimeFrom !== ms) {
 				oldActiveTimeFrom = ms
-				ensureProtectedSettingAccess(currentPageId, function (granted) {
+				ensureProtectedSettingAccess(currentPageId, function(granted) {
 					if (!granted) {
 						$(".timepicker#activeFrom").timepicker("setTime", msToDate(blocksetDatas[currentPageId].activeTime.from))
 						oldActiveTimeFrom = blocksetDatas[currentPageId].activeTime.from
@@ -147,11 +147,11 @@ function loadTimePickers() {
 	$(".timepicker#activeTo").timepicker({
 		timeFormat: generalOptions.clockType === 24 ? "HH:mm" : "hh:mm p",
 		dynamic: false, dropdown: false, scrollbar: false,
-		change: function (time) {
+		change: function(time) {
 			var ms = dateToMs(time)
 			if (blocksetDatas[currentPageId].activeTime.to !== ms && oldActiveTimeTo !== ms) {
 				oldActiveTimeTo = ms
-				ensureProtectedSettingAccess(currentPageId, function (granted) {
+				ensureProtectedSettingAccess(currentPageId, function(granted) {
 					if (!granted) {
 						$(".timepicker#activeTo").timepicker("setTime", msToDate(blocksetDatas[currentPageId].activeTime.to))
 						oldActiveTimeTo = blocksetDatas[currentPageId].activeTime.to
@@ -173,7 +173,7 @@ function loadTimePickers() {
 		dynamic: false,
 		dropdown: false,
 		scrollbar: false,
-		change: function (time) {
+		change: function(time) {
 			var timeMs = dateToMs(time)
 			if (currentPageId >= 0 && blocksetDatas[currentPageId].timeAllowed !== timeMs && oldAllowedTime !== timeMs) {
 				oldAllowedTime = timeMs
@@ -183,8 +183,8 @@ function loadTimePickers() {
 					dialog(
 						"Do you want more time to waste?", 
 						"Are you really sure you want to slack off even more? It most likely isn't healthy.",
-						"Yes", function () {
-							ensureProtectedSettingAccess(pageId, function (granted) {
+						"Yes", function() {
+							ensureProtectedSettingAccess(pageId, function(granted) {
 								if (!granted && pageId === currentPageId) {
 									$(".timepicker#timeAllowed").timepicker("setTime", msToDate(blocksetDatas[pageId].timeAllowed))
 									oldAllowedTime = blocksetDatas[pageId].timeAllowed
@@ -192,7 +192,7 @@ function loadTimePickers() {
 								}
 								setTimeAllowed(timeMs, pageId)
 							})
-						}, "Not Really", function () {
+						}, "Not Really", function() {
 							if (pageId === currentPageId) {
 								$(".timepicker#timeAllowed").timepicker("setTime", msToDate(blocksetDatas[pageId].timeAllowed))
 								oldAllowedTime = blocksetDatas[pageId].timeAllowed
@@ -216,10 +216,10 @@ function setupJQueryUI() {
 	$("ul.nav").sortable({
 		axis: "y",
 		items: "> li[list='blocksets']",
-		update: function (_event, _ui) {
+		update: function(_event, _ui) {
 			blocksetIds.length = 0
 			var listItems = $("ul.nav > li[list='blocksets']")
-			listItems.each(function (_i) {
+			listItems.each(function(_i) {
 				blocksetIds.push(parseInt($(this).find("a").attr("id")))
 			})
 			chrome.storage.sync.set({
@@ -227,11 +227,11 @@ function setupJQueryUI() {
 			})
 		},
 
-		start: function (event, ui) {
+		start: function(event, ui) {
 			if (ui.item.find("a").attr("class") !== "selected")
 				ui.item.find("a").attr("class", "drag")
 		},
-		stop: function (event, ui) {
+		stop: function(event, ui) {
 			if (ui.item.find("a").attr("class") !== "selected") {
 				ui.item.find("a").removeAttr("class")
 			}
@@ -250,7 +250,7 @@ function displayBlocksetNavs() {
 	for (var i = 0; i < blocksetIds.length; i++) {
 
 		let blocksetLink = displayBlocksetNav(blocksetIds[i])
-		blocksetLink.click(function () {
+		blocksetLink.click(function() {
 			cancelTypingTestDialogs()
 			displayPage(parseInt($(this).attr("id")))
 		})
@@ -264,7 +264,7 @@ function displayBlocksetNavs() {
 			.append("+")
 		addBlocksetLink.appendTo(listItem)
 
-		addBlocksetLink.click(function () {
+		addBlocksetLink.click(function() {
 			if (blocksetIds.length < 50)
 				displayPage(addBlockset())
 		})
@@ -281,7 +281,7 @@ function displayBlocksetNav(id) {
 /** Check if there are typing test dialog windows open, then cancel them */
 function cancelTypingTestDialogs() {
 	let dialogs = $("#typingTestDialog")
-	dialogs.each(function () {
+	dialogs.each(function() {
 		$(this).find("button.decline").click()
 	})
 }
@@ -362,8 +362,8 @@ function displaySites(list, type) {
 		let button = $("<button>", { class: "close", name: "deleteSite" })
 			.html("<img src='images/cancel.png'>").appendTo(siteItem)
 		if (type === "bl") {
-			button.on("click", function () {
-				ensureProtectedSettingAccess(currentPageId, function (granted) {
+			button.on("click", function() {
+				ensureProtectedSettingAccess(currentPageId, function(granted) {
 					if (!granted)
 						return
 					removeSite(type, button)
@@ -371,7 +371,7 @@ function displaySites(list, type) {
 			})
 		}
 		else {
-			button.on("click", function () {
+			button.on("click", function() {
 				removeSite(type, button)
 			})
 		}
@@ -381,7 +381,7 @@ function displaySites(list, type) {
 function addSite(toList, select, input, callback) {
 	if (select.val() === "ytChannel") {
 		bgPage.httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&id=" + 
-				input.val() + "&fields=items(id%2Csnippet%2Ftitle)&key=" + bgPage.API_KEY, function (response) {
+				input.val() + "&fields=items(id%2Csnippet%2Ftitle)&key=" + bgPage.API_KEY, function(response) {
 			if (response.error) {
 				console.error(`Could not check channel with id ${input.val()}, error: ${response.error}`)
 				dialog("Error", "Could not communicate with youtube api.<br>Reason: " + response.error, "OK")
@@ -426,7 +426,7 @@ function addSite(toList, select, input, callback) {
 
 function removeSite(type, button) {
 	if (type === "bl") {
-		ensureProtectedSettingAccess(currentPageId, function (granted) {
+		ensureProtectedSettingAccess(currentPageId, function(granted) {
 			if (!granted)
 				return
 			$("#blSiteItems").empty()
@@ -680,7 +680,7 @@ function ensureProtectedSettingAccess(bsId, callback) {
 	}
 	else if (generalOptions.settingProtection === "always") {
 		// Always do typing test the first time user tries to edit in this session
-		typingTestDialog(bsId, function (success) {
+		typingTestDialog(bsId, function(success) {
 			if (success) protectedAccess[bsId] = true
 
 			callback(protectedAccess[bsId], bsId)
@@ -704,7 +704,7 @@ function ensureProtectedSettingAccess(bsId, callback) {
 		}
 
 		if (test) {
-			typingTestDialog(bsId, function (success) {
+			typingTestDialog(bsId, function(success) {
 				if (success) protectedAccess[bsId] = true
 				callback(protectedAccess[bsId], bsId)
 			})
@@ -731,7 +731,7 @@ function typingTestDialog(bsId, callback) {
 	dialogWindow.attr("id", "typingTestDialog")
 	dialogWindow.css("width", "450px")
 
-	doTest(function (result) {
+	doTest(function(result) {
 		callback(result)
 	})
 }
@@ -756,7 +756,7 @@ function doTest(callback) {
 		currentPos = 0
 	}
 
-	testInput.on("keyup", function (e) {
+	testInput.on("keyup", function(e) {
 		// Swallow first space or enter because they may get triggered when opening this dialog from a text input
 		if (currentPos === 0 && (e.key === " " || e.key === "Enter"))
 			return
@@ -792,7 +792,7 @@ function doTest(callback) {
 
 			tryAgain.css("font-weight", "bold")
 			clearTimeout(tryAgainTimeout)
-			tryAgainTimeout = setTimeout(function () { tryAgain.css("font-weight", "normal") }, 1000)
+			tryAgainTimeout = setTimeout(function() { tryAgain.css("font-weight", "normal") }, 1000)
 
 			testWords = randomWordList(generalOptions.typingTestWordCount, words1000)
 			updateValues()
@@ -802,11 +802,11 @@ function doTest(callback) {
 
 /* exported readLocalFile */
 function readLocalFile(fileName, callback) {
-	chrome.runtime.getPackageDirectoryEntry(function (root) {
-		root.getFile(fileName, {}, function (fileEntry) {
-			fileEntry.file(function (file) {
+	chrome.runtime.getPackageDirectoryEntry(function(root) {
+		root.getFile(fileName, {}, function(fileEntry) {
+			fileEntry.file(function(file) {
 				var reader = new FileReader()
-				reader.onloadend = function (_e) {
+				reader.onloadend = function(_e) {
 					callback(this.result)
 				}
 				reader.readAsText(file)
@@ -847,7 +847,7 @@ function dialog(title, text, acceptText, onAccept, declineText, onDecline) {
 	var botBar = $("<div>", { class: "botBar" }).appendTo(dWindow)
 	if (declineText) {
 		let decline = $("<button>").addClass("decline").html(declineText).appendTo(botBar)
-		decline.on("click", function () {
+		decline.on("click", function() {
 			if (onDecline)
 				onDecline()
 			dWindow.remove()
@@ -856,7 +856,7 @@ function dialog(title, text, acceptText, onAccept, declineText, onDecline) {
 
 	if (acceptText) {
 		let accept = $("<button>").addClass("accept").html(acceptText).appendTo(botBar)
-		accept.on("click", function () {
+		accept.on("click", function() {
 			if (onAccept)
 				onAccept()
 			dWindow.remove()
@@ -870,10 +870,10 @@ function dialog(title, text, acceptText, onAccept, declineText, onDecline) {
 	var link = textBox.find("a")
 	if (link) {
 		if (link.attr("name") === "allCategories") {
-			link.on("click", function () { listAllCategories() })
+			link.on("click", function() { listAllCategories() })
 		}
 		if (link.attr("name") === "ytAdding") {
-			link.on("click", function () { 
+			link.on("click", function() { 
 				dialog("Adding YouTube channels/categories", $("div#help_ytAdding_text").html(), "OK") 
 			})
 		}
@@ -931,7 +931,7 @@ function diskDownloadData() {
 
 function diskLoadData(file) {
 	var reader = new FileReader()
-	reader.onload = function (e) {
+	reader.onload = function(e) {
 		var saves = JSON.parse(e.target.result)
 		var feedback = "Save file loaded"
 		if (saves.blocksetDatas) {
@@ -963,7 +963,7 @@ function diskLoadData(file) {
 function saveGeneralOptions() {
 	chrome.storage.sync.set({
 		generalOptions: generalOptions
-	}, function () {
+	}, function() {
 		if (chrome.runtime.lastError) {
 			showSaveIndicator(chrome.runtime.lastError.message)
 			console.log(chrome.runtime.lastError.message)
@@ -998,18 +998,18 @@ function humanizeSaveErrorMsg(errorMsg) {
 }
 
 
-$("button#donate").click(function () {
+$("button#donate").click(function() {
 	chrome.runtime.sendMessage({
 		type: "donate"
 	})
 })
 
-$("#-2").click(function () {
+$("#-2").click(function() {
 	cancelTypingTestDialogs()
 	displayPage(-2)
 })
 
-$("#-1").click(function () {
+$("#-1").click(function() {
 	cancelTypingTestDialogs()
 	displayPage(-1)
 })
@@ -1017,8 +1017,8 @@ $("#-1").click(function () {
 //---Blockset---
 
 var deleteDialog
-$("#delete").on("click", function () {
-	ensureProtectedSettingAccess(currentPageId, function (granted) {
+$("#delete").on("click", function() {
+	ensureProtectedSettingAccess(currentPageId, function(granted) {
 		if (!granted)
 			return
 
@@ -1028,27 +1028,27 @@ $("#delete").on("click", function () {
 		}
 
 		deleteDialog = dialog("Delete block set: " + blocksetDatas[currentPageId].name,
-			"This block set will be deleted permanently. Are you sure?", "Delete", function () {
+			"This block set will be deleted permanently. Are you sure?", "Delete", function() {
 				deleteBlockset(currentPageId)
 			}, "Cancel", undefined)
 	})
 })
 
-$("#duplicate").on("click", function () {
+$("#duplicate").on("click", function() {
 	var newData = JSON.parse(JSON.stringify(blocksetDatas[currentPageId])) // deep copy
 	newData.name = getNewBlocksetName(newData.name)
 	addBlockset(newData)
 	displayPage(currentPageId)
 })
 
-$("#rename").on("click", function () {
+$("#rename").on("click", function() {
 	$("div.main").scrollTop(0)
 	$("#name").hide()
 	$("input.blocksetRename").val(blocksetDatas[currentPageId].name)
 	$("input.blocksetRename").show().focus()
 })
 
-$("input.blocksetRename").on("blur keypress", function (e) {
+$("input.blocksetRename").on("blur keypress", function(e) {
 	if (e.originalEvent.type === "blur" || (e.originalEvent.type === "keypress" && e.originalEvent.key === "Enter")) {
 		var newName = $("input.blocksetRename").val()
 		if (newName) {
@@ -1064,14 +1064,14 @@ $("input.blocksetRename").on("blur keypress", function (e) {
 })
 
 $("#blacklistAdd").on("click", blacklistAddSite)
-$("#blacklistInput").on("keypress", function (event) {
+$("#blacklistInput").on("keypress", function(event) {
 	if (event.originalEvent.key === "Enter")
 		blacklistAddSite()
 })
 
 function blacklistAddSite() {
 	if ($("#blacklistInput").val()) {
-		addSite(blocksetDatas[currentPageId].blacklist, $("#blacklistSelect"), $("#blacklistInput"), function () {
+		addSite(blocksetDatas[currentPageId].blacklist, $("#blacklistSelect"), $("#blacklistInput"), function() {
 			$("#blacklistInput").val("")
 			saveCurrentBlockset()
 			displaySites(blocksetDatas[currentPageId].blacklist, "bl")
@@ -1079,17 +1079,17 @@ function blacklistAddSite() {
 	}
 }
 
-$("#whitelistAdd").on("click", function () {
-	ensureProtectedSettingAccess(currentPageId, function (granted) {
+$("#whitelistAdd").on("click", function() {
+	ensureProtectedSettingAccess(currentPageId, function(granted) {
 		if (!granted)
 			return
 		whitelistAddSite()
 	})
 })
 
-$("#whitelistInput").on("keypress", function (event) {
+$("#whitelistInput").on("keypress", function(event) {
 	if (event.originalEvent.key === "Enter") {
-		ensureProtectedSettingAccess(currentPageId, function (granted) {
+		ensureProtectedSettingAccess(currentPageId, function(granted) {
 			if (!granted)
 				return
 			whitelistAddSite()
@@ -1099,7 +1099,7 @@ $("#whitelistInput").on("keypress", function (event) {
 
 function whitelistAddSite() {
 	if ($("#whitelistInput").val()) {
-		addSite(blocksetDatas[currentPageId].whitelist, $("#whitelistSelect"), $("#whitelistInput"), function () {
+		addSite(blocksetDatas[currentPageId].whitelist, $("#whitelistSelect"), $("#whitelistInput"), function() {
 			$("#whitelistInput").val("")
 			saveCurrentBlockset()
 			displaySites(blocksetDatas[currentPageId].whitelist, "wl")
@@ -1107,9 +1107,9 @@ function whitelistAddSite() {
 	}
 }
 
-$("input[id^=aDay]").on("change", function () {
+$("input[id^=aDay]").on("change", function() {
 	let dayIndex = $(this).attr("id").slice("aDay".length)
-	ensureProtectedSettingAccess(currentPageId, function (granted) {
+	ensureProtectedSettingAccess(currentPageId, function(granted) {
 		if (!granted) {
 			$(`input[id=aDay${dayIndex}]`).prop("checked", blocksetDatas[currentPageId].activeDays[dayIndex])
 			return
@@ -1119,9 +1119,9 @@ $("input[id^=aDay]").on("change", function () {
 	})
 })
 
-$("#requireActive").on("change", function () {
+$("#requireActive").on("change", function() {
 	let checkBox = $(this)
-	ensureProtectedSettingAccess(currentPageId, function (granted) {
+	ensureProtectedSettingAccess(currentPageId, function(granted) {
 		if (!granted) {
 			$("#requireActive").prop("checked", blocksetDatas[currentPageId].requireActive)
 			return
@@ -1131,12 +1131,12 @@ $("#requireActive").on("change", function () {
 	})
 })
 
-$("#annoyMode").on("change", function () {
+$("#annoyMode").on("change", function() {
 	var checkBox = $(this)
 	if (checkBox.prop("checked")) {
-		ensureAnnoyModePermissions(function (havePermissions) {
+		ensureAnnoyModePermissions(function(havePermissions) {
 			if (havePermissions) {
-				ensureProtectedSettingAccess(currentPageId, function (granted) {
+				ensureProtectedSettingAccess(currentPageId, function(granted) {
 					if (!granted) {
 						$("#annoyMode").prop("checked", blocksetDatas[currentPageId].requireActive)
 						return
@@ -1151,7 +1151,7 @@ $("#annoyMode").on("change", function () {
 		})
 	}
 	else {
-		ensureProtectedSettingAccess(currentPageId, function (granted) {
+		ensureProtectedSettingAccess(currentPageId, function(granted) {
 			if (!granted) {
 				$("#annoyMode").prop("checked", blocksetDatas[currentPageId].requireActive)
 				return
@@ -1193,7 +1193,7 @@ function ensureAnnoyModePermissions(callback) {
 
 //---General options---
 
-$("input[type=number]#typingTestWordCount").on("change", function () {
+$("input[type=number]#typingTestWordCount").on("change", function() {
 	let input = $(this)
 	if (parseInt(input.val()) > 400) {
 		input.val(400)
@@ -1202,7 +1202,7 @@ $("input[type=number]#typingTestWordCount").on("change", function () {
 		input.val(1)
 	}
 
-	ensureProtectedSettingAccess(-1, function (granted) {
+	ensureProtectedSettingAccess(-1, function(granted) {
 		if (!granted) {
 			input.val(generalOptions.typingTestWordCount)
 			return
@@ -1212,8 +1212,8 @@ $("input[type=number]#typingTestWordCount").on("change", function () {
 	})
 })
 
-$("input[type=radio][name=settingProtection]").on("change", function () {
-	ensureProtectedSettingAccess(-1, function (granted) {
+$("input[type=radio][name=settingProtection]").on("change", function() {
+	ensureProtectedSettingAccess(-1, function(granted) {
 		if (!granted) {
 			$("input[type=radio][name=settingProtection][value=" + generalOptions.settingProtection + "]")
 				.prop("checked", true)
@@ -1229,25 +1229,25 @@ $("input[type=radio][name=settingProtection]").on("change", function () {
 	})
 })
 
-$("input[type=radio][name=clockType]").on("change", function () {
+$("input[type=radio][name=clockType]").on("change", function() {
 	generalOptions.clockType = parseInt($(this).val())
 	saveGeneralOptions()
 	loadTimePickers()
 })
 
-$("#displayHelp").on("change", function () {
+$("#displayHelp").on("change", function() {
 	generalOptions.displayHelp = $(this).prop("checked")
 	displayHelp(generalOptions.displayHelp)
 	saveGeneralOptions()
 })
 
-$("#darkTheme").on("change", function () {
+$("#darkTheme").on("change", function() {
 	generalOptions.darkTheme = $(this).prop("checked")
 	setDarkTheme(generalOptions.darkTheme)
 	saveGeneralOptions()
 })
 
-$("#whitelistSelect").on("change", function () {
+$("#whitelistSelect").on("change", function() {
 	var input = $("#whitelistInput")
 	if ($(this).val().startsWith("url")) {
 		input.attr("placeholder", "e.g. www.youtube.com/watch?v=useful_video")
@@ -1261,7 +1261,7 @@ $("#whitelistSelect").on("change", function () {
 	input.focus()
 })
 
-$("#blacklistSelect").on("change", function () {
+$("#blacklistSelect").on("change", function() {
 	var input = $("#blacklistInput")
 	if ($(this).val().startsWith("url")) {
 		input.attr("placeholder", "e.g. www.youtube.com")
@@ -1275,16 +1275,16 @@ $("#blacklistSelect").on("change", function () {
 	input.focus()
 })
 
-$("button.help").on("click", function () {
+$("button.help").on("click", function() {
 	var text = $("#" + $(this).attr("id") + "_text")
 	dialog(text.attr("header"), text.html(), "OK")
 })
 
-$("button#export").on("click", function () {
+$("button#export").on("click", function() {
 	diskDownloadData()
 })
 
-$("input#chooseFileHidden").on("change", function () {
+$("input#chooseFileHidden").on("change", function() {
 	if ($(this).prop("files")[0] === undefined) {
 		$("button#import").prop("disabled", true)
 		$("span#chooseFileLabel").text("No file chosen")
@@ -1295,10 +1295,10 @@ $("input#chooseFileHidden").on("change", function () {
 	}
 })
 
-$("button#chooseFile").on("click", function () {
+$("button#chooseFile").on("click", function() {
 	$("input#chooseFileHidden").click()
 })
 
-$("button#import").on("click", function () {
+$("button#import").on("click", function() {
 	diskLoadData($("input#chooseFileHidden").prop("files")[0])
 })

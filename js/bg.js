@@ -94,7 +94,7 @@ const defaultGeneralOptions = {
 var isUpdated = false
 var previousVersion = ""
 
-chrome.runtime.onInstalled.addListener(function (details) {
+chrome.runtime.onInstalled.addListener(function(details) {
 	if (details.reason === "update") {
 		isUpdated = true
 		previousVersion = details.previousVersion
@@ -111,7 +111,7 @@ function init() {
 	chrome.storage.sync.get({
 		blocksetIds: [0],
 		generalOptions: {}
-	}, function (items) {
+	}, function(items) {
 		generalOptions = items.generalOptions
 		addAbsentItems(generalOptions, defaultGeneralOptions)
 
@@ -226,7 +226,7 @@ function addAbsentItems(object, defaultObject) {
 
 
 /** Listen for updates in settings */
-chrome.runtime.onMessage.addListener(function (message, _sender, _sendResponse) {
+chrome.runtime.onMessage.addListener(function(message, _sender, _sendResponse) {
 	let bsId = parseInt(message.id)
 	if (message.type === "blocksetChanged") {
 		generateLookUp(bsId)
@@ -404,7 +404,7 @@ function activeTimeUpdate() {
 }
 
 function evaluateAllTabs() {
-	chrome.tabs.query({}, function (tabs) {
+	chrome.tabs.query({}, function(tabs) {
 		for (let tab of tabs) {
 			evaluateTab(tab)
 		}
@@ -577,7 +577,7 @@ var blocksetAffectedTabs = {}
 // chrome.tabs.onCreated.addListener(function (tab) {
 // });
 
-chrome.tabs.onRemoved.addListener(function (tabId, _removeInfo) {
+chrome.tabs.onRemoved.addListener(function(tabId, _removeInfo) {
 	for (let bsId in blocksetAffectedTabs) {
 		let index = blocksetAffectedTabs[bsId].indexOf(tabId)
 		if (index !== -1) {
@@ -586,7 +586,7 @@ chrome.tabs.onRemoved.addListener(function (tabId, _removeInfo) {
 	}
 })
 
-chrome.tabs.onActivated.addListener(function (activeInfo) {
+chrome.tabs.onActivated.addListener(function(activeInfo) {
 	if (!windowIds.includes(activeInfo.windowId)) {
 		windowIds.push(activeInfo.windowId)
 		openTabIds[activeInfo.windowId] = []
@@ -598,13 +598,13 @@ chrome.tabs.onActivated.addListener(function (activeInfo) {
 })
 
 
-chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 	if (changeInfo.status === "complete") {
 		evaluateTab(tab)
 	}
 })
 
-chrome.windows.onRemoved.addListener(function (windowId) {
+chrome.windows.onRemoved.addListener(function(windowId) {
 	var index = windowIds.indexOf(windowId)
 	if (index !== -1) {
 		windowIds.splice(index, 1)
@@ -617,8 +617,8 @@ chrome.windows.onRemoved.addListener(function (windowId) {
 	delete openTabIds[windowId]
 })
 
-chrome.windows.onFocusChanged.addListener(function (_windowId) {
-	chrome.windows.getAll(function (windowArray) {
+chrome.windows.onFocusChanged.addListener(function(_windowId) {
+	chrome.windows.getAll(function(windowArray) {
 		minimizedWindowIds = []
 		windowIds = []
 		for (let window of windowArray) {
@@ -635,7 +635,7 @@ chrome.windows.onFocusChanged.addListener(function (_windowId) {
 
 /** Adds or removes the tab from 'blocksetAffectedTabs' based on url */
 function evaluateTab(tab) {
-	blockedBy(tab, function (blocksetIdList) {
+	blockedBy(tab, function(blocksetIdList) {
 
 		// Remove from old blocksetAffectedTabs
 		for (let bsId in blocksetAffectedTabs) {
@@ -655,7 +655,7 @@ function evaluateTab(tab) {
 			}
 		}
 
-		chrome.tabs.get(tab.id, function (t) {
+		chrome.tabs.get(tab.id, function(t) {
 			if (t.active === true) {
 				if (!windowIds.includes(t.windowId)) {
 					windowIds.push(t.windowId)
@@ -768,7 +768,7 @@ function blockedBy(tab, callback) {
 			let videoId = getStringBetween(url, "v=", "&")
 
 			httpGetAsync("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + videoId + 
-					"&fields=items(snippet(categoryId%2CchannelId))&key=" + API_KEY, function (response) {
+					"&fields=items(snippet(categoryId%2CchannelId))&key=" + API_KEY, function(response) {
 
 				if (response.error) {
 					console.error(`Could not check video with id ${videoId}, error: ${response.error}`)
@@ -801,7 +801,7 @@ function blockedBy(tab, callback) {
 			let userName = list[2]
 
 			httpGetAsync("https://www.googleapis.com/youtube/v3/channels?part=snippet&forUsername=" + 
-					userName + "&fields=items%2Fid&key=" + API_KEY, function (response) {
+					userName + "&fields=items%2Fid&key=" + API_KEY, function(response) {
 
 				if (response.error) {
 					console.error(`Could not check channel with username ${userName}, error: ${response.error}`)
@@ -830,7 +830,7 @@ function blockedBy(tab, callback) {
 			let playlistId = getStringBetween(url, "list=", "&")
 
 			httpGetAsync("https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=" + 
-					playlistId + "&fields=items%2Fsnippet%2FchannelId&key=" + API_KEY, function (response) {
+					playlistId + "&fields=items%2Fsnippet%2FchannelId&key=" + API_KEY, function(response) {
 				if (response.error) {
 					console.error(`Could not check playlist with id ${playlistId}, error: ${response.error}`)
 					callback(blocksetIdList)
@@ -1064,10 +1064,10 @@ function saveElapsedTimes() {
 function httpGetAsync(theUrl, callback) {
 	var xmlHttp = new XMLHttpRequest()
 	xmlHttp.timeout = 1500
-	xmlHttp.ontimeout = function (_e) {
+	xmlHttp.ontimeout = function(_e) {
 		callback({ error: "timed out" })
 	}
-	xmlHttp.onreadystatechange = function () {
+	xmlHttp.onreadystatechange = function() {
 		if (xmlHttp.readyState === 4) {
 			if (xmlHttp.status === 200) {
 				callback({ message: xmlHttp.responseText })
@@ -1082,5 +1082,5 @@ function httpGetAsync(theUrl, callback) {
 }
 
 function openDonationPage() {
-	chrome.tabs.create({ url: "https://paypal.me/eerolehtinen" }, function (_tab) { })
+	chrome.tabs.create({ url: "https://paypal.me/eerolehtinen" }, function(_tab) { })
 }
