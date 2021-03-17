@@ -1,3 +1,7 @@
+Version 1.5.1
+- Fix inability to add more than 15 block sets in options.
+- Switch to overall more usable whole page options menu
+
 Version 1.5.0
 - Added compression for saves to allow more blocking rules for each block set 
    (from ~80 rules to 500 and more depending on shortness of the rules)
