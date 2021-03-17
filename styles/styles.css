@@ -18,6 +18,8 @@
     --primary-text-color: hsl(0, 0%, 0%);
     --secondary-text-color: hsl(0, 0%, 30%);
     --red: rgb(192, 31, 31);
+
+    height: 100%;
 }
 
 html.dark {
@@ -32,34 +34,77 @@ html.dark {
 }
 
 body {
-    height: 600px;
-    min-width: 880px;
+    height: 100%;
     width: 100%;
-    padding: 0;
+    padding: 15px 0;
     margin: 0;
     font-family: "Tahoma", "Roboto", "Helvetica Neue", "Helvetica", sans-serif;
     overflow: hidden;
     font-size: 12px;
-    background-color: var(--bg-color);
+    background-color: var(--grey);
     color: var(--secondary-text-color);
 }
 
+::-webkit-scrollbar {
+  width: 14px;
+}
+
+.container {
+    max-width: 920px;
+    height: 100%;
+    margin: auto;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    overflow: auto;
+    background-color: var(--bg-color);
+    border-radius: 6px;
+}
+
+div.nav {
+    flex-basis: 22%;
+    height: 100%;
+    overflow: auto;
+    scrollbar-color: var(--dark-grey) var(--light-grey);
+}
+
+div.nav::-webkit-scrollbar-track {
+  background-color: var(--light-grey);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--dark-grey);
+}
+
+div.main {
+    flex-basis: 78%;
+    padding: 0px;
+    height: 100%;
+    overflow-y: auto;
+}
+
+div.main::-webkit-scrollbar-track {
+  background-color: var(--bg-color);
+}
+
+.saveIndicatorContainer {
+    padding: 4px 0px;
+    width: 100%;
+    display: flex;
+    padding: 0 10px;
+}
+
+
 #saveIndicator {
-    z-index: 10;
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
     display: flex;
     flex-flow: row nowrap;
     align-items: center;
     transition: opacity 0.3s;
     opacity: 0;
     background-color: var(--dialog-color);
-    border-radius: 3px 3px 0 0;
-    box-shadow: 0 0 3px black;
+    border-radius: 3px;
     pointer-events: none;
-    padding: 0 5px;
+    padding: 0px 5px;
 }
 
 #saveIndicator.show {
@@ -117,30 +162,6 @@ h1,h2,h3 {
     color: var(--primary-text-color);
 }
 
-
-div.nav {
-    display: inline-block;
-    height: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
-    width: 130px;
-    background-color: var(--light-grey);
-    z-index: 1;
-    position: relative;
-}
-
-div.main {
-    width: calc(100% - 130px);
-    padding: 0px;
-    height: 100%;
-    display: inline-block;
-    overflow-y: auto;
-    overflow-x: hidden;
-    z-index: 0;
-    position: absolute;
-    right: 0;
-}
-
 ul {
 	list-style-type: none;
 	margin: 0;
@@ -149,9 +170,10 @@ ul {
 
 ul.nav li a {
     display: block;
+    background-color: var(--light-grey);
     color: var(--primary-text-color);
     text-align: center;
-    padding: 8px 8px;
+    padding: 10px 8px;
     text-decoration: none;
     font-size: 120%;
     white-space: nowrap;
@@ -267,11 +289,6 @@ span.site {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    width: calc(100% - 168px);
-}
-
-#blacklistInput, #whitelistInput {
-    width: calc(100% - 147px);
 }
 
 textarea {
@@ -326,6 +343,7 @@ button, button:hover, select, select:hover {
     -moz-appearance: none;
 }
 
+/*
 .dark select, .dark select:hover {
     background-image: url("../images/ic_arrow_drop_down_white.png") !important;
 }
@@ -337,7 +355,7 @@ select, select:hover {
     background-position: right center;
     background-repeat: no-repeat;
     padding-inline-end: 20px;
-}
+}*/
 
 select:disabled {
     cursor: not-allowed;
@@ -368,6 +386,7 @@ input, input:hover {
 
 input[type="checkbox"] {
     margin-bottom: 4px;
+    filter: grayscale(100%);
 }
 
 input[type="checkbox"]:checked {
@@ -376,7 +395,6 @@ input[type="checkbox"]:checked {
 
 input[type="checkbox"]:checked::before {
     background-image: url("../images/ic_check.png");
-    filter: none;
     transform: scale(1.2);
 }
 
@@ -390,6 +408,7 @@ input[type="radio"]:checked::before {
 
 
 input[type="radio"] {
+    filter: grayscale(100%);
     border-radius: 100% !important;
     margin: 0px 2px 4px 20px;
 }
@@ -625,7 +644,7 @@ a:hover {
 }
 
 div.donate {
-    height: 100%;
+    height: 300px;
     width: 100%;
     display: flex;
     flex-direction: column;
