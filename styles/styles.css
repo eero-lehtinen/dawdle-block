@@ -88,10 +88,14 @@ div.main::-webkit-scrollbar-track {
 }
 
 .saveIndicatorContainer {
-    padding: 4px 0px;
     width: 100%;
     display: flex;
-    padding: 0 10px;
+    flex-flow: row nowrap;
+    justify-content: flex-end;
+    padding: 10px 10px;
+    position: sticky;
+    left: 0;
+    bottom: 0;
 }
 
 
@@ -125,7 +129,6 @@ div.main::-webkit-scrollbar-track {
 
 #saveIndicator > * {
     margin: 6px;
-    white-space: nowrap;
 }
 
 img.icon {
