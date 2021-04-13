@@ -1,3 +1,7 @@
+Version 1.5.2
+- Save indicator made sticky to always be on screen
+- Small visual improvements
+
 Version 1.5.1
 - Fix inability to add more than 15 block sets in options.
 - Switch to overall more usable whole page options menu
