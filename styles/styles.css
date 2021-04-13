@@ -109,6 +109,7 @@ div.main::-webkit-scrollbar-track {
     border-radius: 3px;
     pointer-events: none;
     padding: 0px 5px;
+    box-shadow: 0 3px 3px rgba(0,0,0,0.2);
 }
 
 #saveIndicator.show {
@@ -520,7 +521,6 @@ input#typingTestInput {
     font-size: 130%;
 }
 
-
 div.dialog {
     z-index: 3;
     width: 380px;
@@ -531,7 +531,7 @@ div.dialog {
     margin-left: -170px;
     background-color: var(--dialog-color);
     border-radius: 3px;
-    box-shadow: 0 0 5px black;
+    box-shadow: 0 3px 3px rgba(0,0,0,0.2);
 }
 
 div.topBar {
