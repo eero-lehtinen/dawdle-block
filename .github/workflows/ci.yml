@@ -12,15 +12,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: use Node.js
+      - name: Use Node.js
         uses: actions/setup-node@v1
         with:
           node-version: 15.x
-      - name: install modules
+      - name: Install modules
         run: yarn ci
-      - name: test
+      - name: Test
         run: yarn test
-      - name: lint
+      - name: Lint
         run: yarn lint
-      - name: build
+      - name: Build
         run: yarn build
