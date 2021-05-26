@@ -1,4 +1,4 @@
-import { compress, decompress } from "../utils"
+import { compress, decompress } from "../src/scripts/utils"
 
 test('Save data compress and decompress', () => {
 	const testObject = { test: { test: [{}, 42, "test"] } }
