@@ -35,7 +35,7 @@ module.exports = {
 			"never"
 		],
 		"no-unused-vars": [
-			error,
+			"error",
 			{
 				argsIgnorePattern: "^_"
 			}
@@ -45,7 +45,7 @@ module.exports = {
 			"error",
 			"always"
 		],
-		camelcase: error,
+		camelcase: "error",
 		"brace-style": [
 			"error",
 			"stroustrup",
@@ -60,7 +60,7 @@ module.exports = {
 				tabWidth: 2
 			}
 		],
-		"space-before-blocks": error,
+		"space-before-blocks": "error",
 		"space-before-function-paren": [
 			"error",
 			"never"
@@ -69,6 +69,6 @@ module.exports = {
 			"error",
 			"never"
 		],
-		"arrow-spacing": error
+		"arrow-spacing": "error"
 	}
 }

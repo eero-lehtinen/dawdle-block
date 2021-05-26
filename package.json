@@ -21,14 +21,17 @@
 		"ts-jest": "^27.0.0",
 		"ts-loader": "^9.2.2",
 		"typescript": "^4.3.2",
+		"webextension-polyfill": "^0.8.0",
+		"webextension-polyfill-ts": "^0.25.0",
 		"webpack": "^5.37.1",
 		"webpack-cli": "^4.7.0"
 	},
 	"scripts": {
-		"test": "jest",
 		"ci": "rm -rf node_modules && yarn install --frozen-lockfile",
-		"watch": "webpack --watch --mode=development",
-		"build": "webpack --mode=production"
+		"lint": "eslint ./src/scripts/**/*",
+		"test": "jest",
+		"build": "webpack --mode=production",
+		"watch": "webpack --watch --mode=development"
 	},
 	"repository": {
 		"type": "git",

@@ -1,4 +1,4 @@
-# Dawdle Block &middot; [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/birusq/dawdle-block/blob/master/LICENSE) [![tests](https://github.com/birusq/dawdle-block/actions/workflows/run-jest.yml/badge.svg?branch=master)](https://github.com/birusq/dawdle-block/actions/workflows/run-jest.yml)
+# Dawdle Block &middot; [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/birusq/dawdle-block/blob/master/LICENSE) [![ci](https://github.com/birusq/dawdle-block/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/birusq/dawdle-block/actions/workflows/ci.yml)
 
 Chrome and Firefox extension
 

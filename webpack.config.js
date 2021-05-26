@@ -4,7 +4,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: {
-		bg: './src/script/bg.ts',
+		bg: './src/scripts/bg.ts',
 	},
   module: {
     rules: [
@@ -20,7 +20,7 @@ module.exports = {
   },
   output: {
     path: path.join(path.resolve(__dirname), "dist"),
-    filename: "[name].min.js"
+    filename: "[name].js"
   },
   plugins: [
     new CopyWebpackPlugin({
