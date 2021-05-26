@@ -16,5 +16,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 15.x
-      - run: yarn ci
-      - run: yarn test
+      - name: Install modules
+        run: yarn ci
+      - name: Run tests
+        run: yarn test
