@@ -1,4 +1,4 @@
-name: Run Jest
+name: tests
 
 on:
   push:
