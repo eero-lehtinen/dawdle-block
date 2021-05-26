@@ -1,4 +1,4 @@
-# Dawdle Block
+# Dawdle Block [![tests](https://github.com/birusq/dawdle-block/actions/workflows/run-jest.yml/badge.svg?branch=master)](https://github.com/birusq/dawdle-block/actions/workflows/run-jest.yml)
 
 Chrome and Firefox extension
 
