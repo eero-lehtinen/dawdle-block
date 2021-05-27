@@ -27,7 +27,6 @@
 		"webpack-cli": "^4.7.0"
 	},
 	"scripts": {
-		"ci": "rm -rf node_modules && yarn install --frozen-lockfile",
 		"lint": "eslint ./src/scripts/**/*",
 		"test": "jest",
 		"build": "webpack --mode=production",
