@@ -1,23 +1,23 @@
 {
-	"root": true,
-	"parser": "@typescript-eslint/parser",
-	"plugins": [
-		"@typescript-eslint"
-	],
+	"plugins": [],
 	"extends": [
-		"eslint:recommended",
-		"plugin:@typescript-eslint/recommended"
+		"eslint:recommended"
 	],
 	"parserOptions": {
 		"project": "./tsconfig.json",
 		"ecmaVersion": 12,
 		"sourceType": "module"
 	},
-	"ignorePatterns": "libraries/*",
+	"ignorePatterns": [
+		"libraries/**/*",
+		"dist/**/*"
+	],
 	"env": {
 		"webextensions": true,
 		"jquery": true,
 		"browser": true,
+		"node": true,
+		"amd": true,
 		"es2021": true
 	},
 	"rules": {
@@ -73,5 +73,20 @@
 			"never"
 		],
 		"arrow-spacing": "error"
-	}
+	},
+	"overrides": [
+		{
+			"files": [
+				"*.ts",
+				"*.tsx"
+			],
+			"parser": "@typescript-eslint/parser",
+			"plugins": [
+				"@typescript-eslint"
+			],
+			"extends": [
+				"plugin:@typescript-eslint/recommended"
+			]
+		}
+	]
 }
