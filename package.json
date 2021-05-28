@@ -27,7 +27,7 @@
 		"webpack-cli": "^4.7.0"
 	},
 	"scripts": {
-		"lint": "eslint --max-warnings=0 ./src/scripts/**/* ./tests/**/*",
+		"lint": "eslint --max-warnings=0 './**/*.{js,ts}'",
 		"test": "jest",
 		"build": "webpack --mode=production",
 		"watch": "webpack --watch --mode=development"
