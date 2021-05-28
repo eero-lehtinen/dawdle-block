@@ -1,27 +1,27 @@
-{
-	"plugins": [],
-	"extends": [
+module.exports = {
+	plugins: [],
+	extends: [
 		"eslint:recommended"
 	],
-	"parserOptions": {
-		"project": "./tsconfig.json",
-		"ecmaVersion": 12,
-		"sourceType": "module"
+	parserOptions: {
+		project: "./tsconfig.json",
+		ecmaVersion: 12,
+		sourceType: "module"
 	},
-	"ignorePatterns": [
+	ignorePatterns: [
 		"libraries/**/*",
 		"dist/**/*"
 	],
-	"env": {
-		"webextensions": true,
-		"jquery": true,
-		"browser": true,
-		"node": true,
-		"amd": true,
-		"es2021": true
+	env: {
+		webextensions: true,
+		jquery: true,
+		browser: true,
+		node: true,
+		amd: true,
+		es2021: true
 	},
-	"rules": {
-		"indent": [
+	rules: {
+		indent: [
 			"error",
 			"tab"
 		],
@@ -29,38 +29,38 @@
 			"error",
 			"unix"
 		],
-		"quotes": [
+		quotes: [
 			"error",
 			"double"
 		],
-		"semi": [
+		semi: [
 			"error",
 			"never"
 		],
 		"no-unused-vars": [
 			"error",
 			{
-				"argsIgnorePattern": "^_"
+				argsIgnorePattern: "^_"
 			}
 		],
 		"consistent-return": "error",
-		"eqeqeq": [
+		eqeqeq: [
 			"error",
 			"always"
 		],
-		"camelcase": "error",
+		camelcase: "error",
 		"brace-style": [
 			"error",
 			"stroustrup",
 			{
-				"allowSingleLine": true
+				allowSingleLine: true
 			}
 		],
 		"max-len": [
 			"error",
 			{
-				"code": 120,
-				"tabWidth": 2
+				code: 120,
+				tabWidth: 2
 			}
 		],
 		"space-before-blocks": "error",
@@ -74,17 +74,17 @@
 		],
 		"arrow-spacing": "error"
 	},
-	"overrides": [
+	overrides: [
 		{
-			"files": [
+			files: [
 				"*.ts",
 				"*.tsx"
 			],
-			"parser": "@typescript-eslint/parser",
-			"plugins": [
+			parser: "@typescript-eslint/parser",
+			plugins: [
 				"@typescript-eslint"
 			],
-			"extends": [
+			extends: [
 				"plugin:@typescript-eslint/recommended"
 			]
 		}
