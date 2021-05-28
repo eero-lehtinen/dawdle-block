@@ -54,6 +54,7 @@ var wlRegEx = []
 var blYT = []
 var wlYT = []
 
+/* exported initDone */
 var initDone = false
 
 var currentWeekDay
