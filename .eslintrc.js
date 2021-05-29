@@ -45,37 +45,17 @@ module.exports = {
 			}
 		],
 		"consistent-return": "error",
-		eqeqeq: [
-			"error",
-			"always"
-		],
+		eqeqeq: ["error",	"always"],
 		camelcase: "error",
-		"brace-style": [
-			"error",
-			"stroustrup",
-			{
-				allowSingleLine: true
-			}
-		],
-		"max-len": [
-			"error",
-			{
-				code: 120,
-				tabWidth: 2
-			}
-		],
+		"brace-style": ["error",	"stroustrup", { allowSingleLine: true	}],
+		"max-len": ["error",	{ code: 120,	tabWidth: 2 }],
 		"space-before-blocks": "error",
-		"space-before-function-paren": [
-			"error",
-			"never"
-		],
-		"space-in-parens": [
-			"error",
-			"never"
-		],
+		"space-before-function-paren": ["error",	"never"],
+		"space-in-parens": ["error","never"],
 		"arrow-spacing": "error",
-		"object-curly-spacing": "error",
-		"array-bracket-spacing": "error"
+		"object-curly-spacing": ["error", "always"],
+		"array-bracket-spacing": "error",
+		"key-spacing": "error"
 	},
 	overrides: [
 		{

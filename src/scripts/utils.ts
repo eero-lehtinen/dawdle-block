@@ -1,5 +1,5 @@
-import {compressSync, decompressSync, strToU8, strFromU8} from "fflate"
-import {fromUint8Array, toUint8Array} from "js-base64"
+import { compressSync, decompressSync, strToU8, strFromU8 } from "fflate"
+import { fromUint8Array, toUint8Array } from "js-base64"
 
 /**
  * compress js object and convert to base64 string for easy json storage

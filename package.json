@@ -5,8 +5,10 @@
 	"main": "",
 	"private": true,
 	"dependencies": {
+		"class-transformer": "^0.4.0",
 		"fflate": "^0.7.0",
-		"js-base64": "^3.6.1"
+		"js-base64": "^3.6.1",
+		"reflect-metadata": "^0.1.13"
 	},
 	"devDependencies": {
 		"@types/jest": "^26.0.23",
