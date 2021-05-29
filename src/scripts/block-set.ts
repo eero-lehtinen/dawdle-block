@@ -1,6 +1,12 @@
 
 import { z } from "zod"
 
+const zBlocksetIds = z.array(z.number().int().positive())
+export type BlockSetIds = z.infer<typeof zBlocksetIds>
+
+const zBlocksetTimesElapsed = z.array(z.number().int().positive())
+export type BlocksetTimesElapsed = z.infer<typeof zBlocksetTimesElapsed>
+
 const zActiveTime = z.object({
 	from: z.number().int().default(0),
 	to: z.number().int().default(0)
