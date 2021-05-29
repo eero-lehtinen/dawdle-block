@@ -1,36 +1,64 @@
-import { BlockSet, plainToBlockSet } from "../src/scripts/block-set"
+import { plainToBlockSet, createDefaultBlockSet } from "../src/scripts/block-set"
 
-test("Empty js object becomes default BlockSet", () => {
-	expect(plainToBlockSet({})).toStrictEqual(new BlockSet())
-})
+describe("createDefaultBlockSet function", () => {
+	test("Non-objects throw", () => {
 
-test("Basic blockset js object converts correctly to BlockSet", () => {
+		expect(() => { plainToBlockSet(undefined) }).toThrow()
+		expect(() => { plainToBlockSet(null) }).toThrow()
+		expect(() => { plainToBlockSet("string") }).toThrow()
+		expect(() => { plainToBlockSet(42) }).toThrow()
+		expect(() => { plainToBlockSet(false) }).toThrow()
+	})
 
-	const testBlockSetObj = {
-		v: 1,
-		name: "Test block set",
-		requireActive: true,
-		annoyMode: true,
-		timeAllowed: 42, // milliseconds
-		resetTime: 42, // milliseconds from midnight
-		lastReset: 42, // millisecods from 1970
-		activeDays: new Array(7).fill(false),
-		activeTime: { from: 42, to: 1337 }, // milliseconds from midnight
-		blacklist: [{ type: "urlEquals" , value: "asdf" }],
-		whitelist: [{ type: "ytChannel", value: { name: "asdf", id: "ID" } }]
-	}
+	test("Objects with invalid types get rejeted and throw", () => {
 
-	const testBlockSet = new BlockSet()
-	testBlockSet.name = "Test block set"
-	testBlockSet.requireActive = true
-	testBlockSet.annoyMode = true
-	testBlockSet.timeAllowed = 42
-	testBlockSet.resetTime = 42
-	testBlockSet.lastReset = 42
-	testBlockSet.activeDays = new Array(7).fill(false)
-	testBlockSet.activeTime = { from: 42, to: 1337 }
-	testBlockSet.blacklist = [{ type: "urlEquals" , value: "asdf" }]
-	testBlockSet.whitelist = [{ type: "ytChannel", value: { name: "asdf", id: "ID" } }]
+		const testBlockSetObj = {
+			requireActive: "string", 
+			activeDays: undefined
+		}
 
-	expect(plainToBlockSet(testBlockSetObj)).toStrictEqual(testBlockSet)
+		expect(() => { plainToBlockSet(testBlockSetObj)}).toThrow()
+	})
+
+	test("Empty objects get filled with defaults", () => {
+		expect(plainToBlockSet({})).toStrictEqual(createDefaultBlockSet())
+	})
+
+	test("Objects retain their valid property names and lose invalid ones", () => {
+
+		const testBlockSetObj = {
+			name: "retained", 
+			loseMe: "lost"
+		}
+
+		const blockSet = plainToBlockSet(testBlockSetObj)
+
+		expect(blockSet).toHaveProperty("name")
+		expect(blockSet).not.toHaveProperty("loseMe")
+	})
+
+	test("V0 block sets get converted to V1", () => {
+
+		const testBlockSetObj = {
+			blacklist: [
+				{ type: "urlEquals", value: "test" },
+				{ type: "urlContains", value: "test" },
+				{ type: "urlPrefix", value: "test" },
+				{ type: "urlSuffix", value: "test" },
+				{ type: "urlRegexp", value: "test" },
+			]
+		}
+
+		const testBlockSetObjResult = {
+			blacklist: [
+				{ type: "urlPattern", value: "test" },
+				{ type: "urlPattern", value: "*test*" },
+				{ type: "urlPattern", value: "test*" },
+				{ type: "urlPattern", value: "*test" },
+				{ type: "urlRegexp", value: "test" },
+			]
+		}
+
+		expect(plainToBlockSet(testBlockSetObj)).toMatchObject(testBlockSetObjResult)
+	})
 })

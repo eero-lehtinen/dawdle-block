@@ -26,14 +26,8 @@ module.exports = {
 			"error",
 			"tab"
 		],
-		"linebreak-style": [
-			"error",
-			"unix"
-		],
-		quotes: [
-			"error",
-			"double"
-		],
+		"linebreak-style": ["error", "unix"],
+		quotes: ["error", "double"],
 		semi: [
 			"error",
 			"never"
@@ -51,11 +45,11 @@ module.exports = {
 		"max-len": ["error",	{ code: 120,	tabWidth: 2 }],
 		"space-before-blocks": "error",
 		"space-before-function-paren": ["error",	"never"],
-		"space-in-parens": ["error","never"],
+		"space-in-parens": ["error", "never"],
 		"arrow-spacing": "error",
 		"object-curly-spacing": ["error", "always"],
 		"array-bracket-spacing": "error",
-		"key-spacing": "error"
+		"comma-spacing": ["error", { "before": false, "after": true }]
 	},
 	overrides: [
 		{
@@ -69,7 +63,15 @@ module.exports = {
 			],
 			extends: [
 				"plugin:@typescript-eslint/recommended"
-			]
+			],
+			rules: {
+				"no-unused-vars": "off",
+				"@typescript-eslint/no-unused-vars": ["error",
+					{
+						argsIgnorePattern: "^_"
+					}]
+			}
 		}
+	
 	]
 }
