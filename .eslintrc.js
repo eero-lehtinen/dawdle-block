@@ -10,7 +10,8 @@ module.exports = {
 	},
 	ignorePatterns: [
 		"libraries/**/*",
-		"dist/**/*"
+		"dist/**/*",
+		"js/**/*"
 	],
 	env: {
 		webextensions: true,
@@ -72,7 +73,9 @@ module.exports = {
 			"error",
 			"never"
 		],
-		"arrow-spacing": "error"
+		"arrow-spacing": "error",
+		"object-curly-spacing": "error",
+		"array-bracket-spacing": "error"
 	},
 	overrides: [
 		{
