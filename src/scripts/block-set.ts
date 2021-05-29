@@ -55,6 +55,7 @@ export type BlockSet = z.infer<typeof zBlockSetV1>
 
 /**
  * Converts plain js object into a BlockSet with type validation
+ * @throws {Error} if object is not parseable
  * @param obj 
  * @returns 
  */
