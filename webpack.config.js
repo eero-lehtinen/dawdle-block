@@ -4,7 +4,7 @@ const CopyPlugin = require("copy-webpack-plugin")
 
 module.exports = {
 	entry: {
-		bg: "./src/scripts/bg.ts",
+		bg: "./src/scripts/main.ts",
 	},
 	module: {
 		rules: [
