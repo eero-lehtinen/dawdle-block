@@ -1,4 +1,4 @@
-import { BlockSetData, BlockRuleYt, plainToBlockSetData, createDefaultBlockSet } from "./block-set-parsing"
+import { BlockSetData, BlockRuleYt, plainToBlockSetData, createDefaultBlockSet } from "./block-set-parser"
 
 export enum BlockTestRes {
 	Blacklisted,
