@@ -29,6 +29,7 @@ const zBlockRuleUrlV0 = z.object({
 const zBlockRuleV0 = z.union([zBlockRuleYt, zBlockRuleUrlV0])
 type BlockRuleV0 = z.infer<typeof zBlockRuleV0>
 
+// Original blockset options data structure
 const zBlockSetV0 = z.object({
 	v: z.undefined().optional(),
 	name: z.string().default("Block Set 1"),
@@ -51,6 +52,8 @@ const zBlockRuleUrlV1 = zBlockRuleUrlV0.extend({
 const zBlockRuleV1 = z.union([zBlockRuleYt, zBlockRuleUrlV1])
 type BlockRuleV1 = z.infer<typeof zBlockRuleV1>
 
+// Most recent blockset options data structure version with 
+// updated block rule structure. Extends block set version 0.
 const zBlockSetV1 = zBlockSetV0.extend({
 	v: z.literal(1).default(1),
 	blacklist: z.array(zBlockRuleV1).default([] as BlockRuleV1[]),
