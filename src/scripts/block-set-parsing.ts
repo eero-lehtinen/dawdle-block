@@ -9,25 +9,24 @@ export type BlocksetTimesElapsed = z.infer<typeof zBlocksetTimesElapsed>
 
 const zActiveTime = z.object({
 	from: z.number().int().default(0),
-	to: z.number().int().default(0)
+	to: z.number().int().default(0),
 })
 type ActiveTime = z.infer<typeof zActiveTime>
 
-const zBlockRuleYt = z.object({
+const zBlockRuleYtV0 = z.object({
 	type: z.enum(["ytChannel", "ytCategory"]),
 	value: z.object({
 		name: z.string(),
-		id: z.string()
-	})
+		id: z.string(),
+	}),
 })
 
 const zBlockRuleUrlV0 = z.object({
 	type: z.enum(["urlEquals", "urlContains", "urlPrefix", "urlSuffix", "urlRegexp"]),
-	value: z.string()
+	value: z.string(),
 })
 
-const zBlockRuleV0 = z.union([zBlockRuleYt, zBlockRuleUrlV0])
-type BlockRuleV0 = z.infer<typeof zBlockRuleV0>
+const zBlockRuleV0 = z.union([zBlockRuleYtV0, zBlockRuleUrlV0])
 
 // Original blockset options data structure
 const zBlockSetV0 = z.object({
@@ -40,24 +39,33 @@ const zBlockSetV0 = z.object({
 	lastReset: z.number().int().default(0),
 	activeDays: z.array(z.boolean()).length(7).default(new Array(7).fill(false)),
 	activeTime: zActiveTime.default({ from: 0, to: 0 } as ActiveTime),
-	blacklist: z.array(zBlockRuleV0).default([] as BlockRuleV0[]),
-	whitelist: z.array(zBlockRuleV0).default([] as BlockRuleV0[])
+	blacklist: z.array(zBlockRuleV0).default([]),
+	whitelist: z.array(zBlockRuleV0).default([]),
 })
 
 
-const zBlockRuleUrlV1 = zBlockRuleUrlV0.extend({
-	type: z.enum(["urlPattern", "urlRegexp"])
+const zBlockRuleUrlV1 = z.string()
+
+const zBlockRuleYtV1 = z.object({
+	id: z.string(),
+	name: z.string(),
 })
 
-const zBlockRuleV1 = z.union([zBlockRuleYt, zBlockRuleUrlV1])
-type BlockRuleV1 = z.infer<typeof zBlockRuleV1>
+export type BlockRuleYt = z.infer<typeof zBlockRuleYtV1>
+
+const zBlockListV1 = z.object({
+	urlPatterns: z.array(zBlockRuleUrlV1).default([]),
+	urlRegExps: z.array(zBlockRuleUrlV1).default([]),
+	ytChannels: z.array(zBlockRuleYtV1).default([]),
+	ytCategories: z.array(zBlockRuleYtV1).default([]),
+}).default({})
 
 // Most recent blockset options data structure version with 
 // updated block rule structure. Extends block set version 0.
 const zBlockSetV1 = zBlockSetV0.extend({
 	v: z.literal(1).default(1),
-	blacklist: z.array(zBlockRuleV1).default([] as BlockRuleV1[]),
-	whitelist: z.array(zBlockRuleV1).default([] as BlockRuleV1[])
+	blacklist: zBlockListV1,
+	whitelist: zBlockListV1,
 })
 
 export type BlockSetData = z.infer<typeof zBlockSetV1>
@@ -115,25 +123,35 @@ const parseableV1 = (obj: any) => {
  */
 const convertV0toV1 = (blockSet: any) => {
 	for (const list of ["blacklist", "whitelist"]) {
+		const newBlockList = zBlockListV1.parse({})
+
 		for (const blockRule of blockSet[list]) {
 			switch (blockRule.type) {
 			case "urlEquals":
-				blockRule.type = "urlPattern"
+				newBlockList.urlPatterns.push(blockRule.value)
 				break
 			case "urlContains":
-				blockRule.type = "urlPattern"
-				blockRule.value = `*${blockRule.value}*` 
+				newBlockList.urlPatterns.push(`*${blockRule.value}*`)
 				break
 			case "urlPrefix":
-				blockRule.type = "urlPattern"
-				blockRule.value = `${blockRule.value}*` 
+				newBlockList.urlPatterns.push(`${blockRule.value}*`)
 				break
 			case "urlSuffix":
-				blockRule.type = "urlPattern"
-				blockRule.value = `*${blockRule.value}` 
+				newBlockList.urlPatterns.push(`*${blockRule.value}`)
+				break
+			case "urlRegexp":
+				newBlockList.urlRegExps.push(blockRule.value)
+				break
+			case "ytChannel":
+				newBlockList.ytChannels.push(blockRule.value)
+				break
+			case "ytCategory":
+				newBlockList.ytCategories.push(blockRule.value)
 				break
 			}
 		}
+
+		blockSet[list] = newBlockList
 	}
 	return blockSet
 }

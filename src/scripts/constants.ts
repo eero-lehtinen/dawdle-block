@@ -30,7 +30,7 @@ export const ytCategoryNamesById = {
 	41: "Thriller",
 	42: "Shorts",
 	43: "Shows",
-	44: "Trailers"
+	44: "Trailers",
 }
 
 export const ytApiKey = 
@@ -1033,5 +1033,5 @@ export const typingTestWords = [
 	"quotient",
 	"teeth",
 	"shell",
-	"neck"
+	"neck",
 ]

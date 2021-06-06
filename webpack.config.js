@@ -20,7 +20,7 @@ module.exports = {
 	},
 	output: {
 		path: path.join(path.resolve(__dirname), "dist"),
-		filename: "[name].js"
+		filename: "[name].js",
 	},
 	plugins: [
 		new CopyPlugin({
@@ -30,6 +30,6 @@ module.exports = {
 				{ from: "options.html" },
 				{ from: "images", to: "images" },
 			],
-		})
-	]
+		}),
+	],
 }

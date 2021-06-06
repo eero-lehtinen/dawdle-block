@@ -1,17 +1,17 @@
 module.exports = {
 	plugins: [],
 	extends: [
-		"eslint:recommended"
+		"eslint:recommended",
 	],
 	parserOptions: {
 		project: "./tsconfig.json",
 		ecmaVersion: 12,
-		sourceType: "module"
+		sourceType: "module",
 	},
 	ignorePatterns: [
 		"libraries/**/*",
 		"dist/**/*",
-		"js/**/*"
+		"js/**/*",
 	],
 	env: {
 		webextensions: true,
@@ -19,25 +19,31 @@ module.exports = {
 		browser: true,
 		node: true,
 		amd: true,
-		es2021: true
+		es2021: true,
 	},
+	
 	rules: {
 		indent: [
 			"error",
-			"tab"
+			"tab",
 		],
 		"linebreak-style": ["error", "unix"],
 		quotes: ["error", "double"],
 		semi: [
 			"error",
-			"never"
+			"never",
 		],
 		"no-unused-vars": [
 			"error",
 			{
-				argsIgnorePattern: "^_"
-			}
+				argsIgnorePattern: "^_",
+			},
 		],
+		"key-spacing": ["error", { 
+			beforeColon: false,
+			afterColon: true,
+			mode: "strict",
+		}],
 		"consistent-return": "error",
 		eqeqeq: ["error",	"always"],
 		camelcase: "error",
@@ -49,29 +55,23 @@ module.exports = {
 		"arrow-spacing": "error",
 		"object-curly-spacing": ["error", "always"],
 		"array-bracket-spacing": "error",
-		"comma-spacing": ["error", { "before": false, "after": true }]
+		"comma-spacing": ["error", { "before": false, "after": true }],
+		"comma-dangle": ["error", "always-multiline"],
 	},
 	overrides: [
 		{
 			files: [
 				"*.ts",
-				"*.tsx"
+				"*.tsx",
 			],
 			parser: "@typescript-eslint/parser",
-			plugins: [
-				"@typescript-eslint"
-			],
-			extends: [
-				"plugin:@typescript-eslint/recommended"
-			],
+			plugins: ["@typescript-eslint"],
+			extends: ["plugin:@typescript-eslint/recommended"],
 			rules: {
 				"no-unused-vars": "off",
 				"@typescript-eslint/no-unused-vars": ["error",
-					{
-						argsIgnorePattern: "^_"
-					}]
-			}
-		}
-	
-	]
+					{ argsIgnorePattern: "^_"	}],
+			},
+		},
+	],
 }

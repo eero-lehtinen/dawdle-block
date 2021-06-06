@@ -1,15 +1,29 @@
-import { BlockSetData, plainToBlockSetData, createDefaultBlockSet } from "./block-set-parsing"
+import { BlockSetData, BlockRuleYt, plainToBlockSetData, createDefaultBlockSet } from "./block-set-parsing"
 
-export enum TestUrlRes {
+export enum BlockTestRes {
 	Blacklisted,
 	Whitelisted,
-	Ignored
+	Ignored,
 }
 
-const enoughPageName = "dawdle-block-enough-page.html"
+export enum ListType {
+	Blacklist,
+	Whitelist,
+}
+
+interface CompiledRules {
+	blacklist: RegExp[],
+	whitelist:  RegExp[],
+}
 
 export class BlockSet {
 	private data: BlockSetData
+
+	// Blocking rules compiled to regular expressions (doesn't include yt rules)
+	private compiledUrlRules: CompiledRules = { 
+		blacklist: [], 
+		whitelist: [],
+	}
 
 	/**
 	 * Parses blocksetPlanObject and initializes internal state to match that.
@@ -21,20 +35,52 @@ export class BlockSet {
 			this.data = createDefaultBlockSet()
 		else 
 			this.data = plainToBlockSetData(blocksetPlanObject)
+
+		this.compileRules("whitelist")
+		this.compileRules("blacklist")
+	}
+
+	private compileRules(rulesType: "whitelist" | "blacklist") {
+		this.compiledUrlRules[rulesType] =
+			this.data[rulesType].urlRegExps.map((value: string) => new RegExp(value))
+				.concat(this.data[rulesType].urlPatterns.map((value: string) => this.urlPatternToRegExp(value)))
 	}
 
 	/**
-	 * Returns current state of block set as a plain js object for saving purposes.
-	 * @returns plain js object
+	 * Replaces all non escaped wildcards into regular expression wildcards.
+	 * Basically changes "*" to ".*".
+	 * @param urlPattern url pattern with possible wildcards
+	 * @returns regular expression object
 	 */
-	getData(): unknown {
+	private urlPatternToRegExp(urlPattern: string): RegExp {
+		let result = ""
+		let backslash = false
+		for (let i = 0; i < urlPattern.length; i++) {
+			if (!backslash && urlPattern[i] === "*") {
+				result += "."
+			}
+			else if (urlPattern[i] === "\\") {
+				backslash = true
+			}
+			result += urlPattern[i]
+		}
+
+		return new RegExp(result)
+	}
+
+	getData(): BlockSetData {
 		return this.data
 	}
 
-	testUrl(url: string): TestUrlRes {
-		if (url.endsWith(enoughPageName)) {
-			return TestUrlRes.Ignored
-		}
-		return TestUrlRes.Ignored
+	getUrlRules(rulesType: "whitelist" | "blacklist"): RegExp[] { 
+		return this.compiledUrlRules[rulesType]
+	}
+
+	getYtChannelRules(rulesType: "whitelist" | "blacklist"): BlockRuleYt[] { 
+		return this.data[rulesType].ytChannels
+	}
+
+	getYtCategoryRules(rulesType: "whitelist" | "blacklist"): BlockRuleYt[] { 
+		return this.data[rulesType].ytCategories
 	}
 }

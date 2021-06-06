@@ -1,4 +1,4 @@
-import { BlockSet, TestUrlRes } from "../src/scripts/block-set"
+import { BlockSet } from "../src/scripts/block-set"
 
 describe("BlockSet construction parameters", () => {
 	const defaultBlockSetData = new BlockSet().getData()
@@ -14,7 +14,7 @@ describe("BlockSet construction parameters", () => {
 
 		const testBlockSetObj = {
 			requireActive: "string", 
-			activeDays: undefined
+			activeDays: undefined,
 		}
 
 		expect(() => { new BlockSet(testBlockSetObj)}).toThrow()
@@ -32,7 +32,7 @@ describe("BlockSet construction parameters", () => {
 
 		const testBlockSetObj = {
 			name: "retained", 
-			loseMe: "lost"
+			loseMe: "lost",
 		}
 
 		const blockSetData = new BlockSet(testBlockSetObj).getData()
@@ -50,17 +50,21 @@ describe("BlockSet construction parameters", () => {
 				{ type: "urlPrefix", value: "test" },
 				{ type: "urlSuffix", value: "test" },
 				{ type: "urlRegexp", value: "test" },
-			]
+			],
 		}
 
 		const testBlockSetObjResult = {
-			blacklist: [
-				{ type: "urlPattern", value: "test" },
-				{ type: "urlPattern", value: "*test*" },
-				{ type: "urlPattern", value: "test*" },
-				{ type: "urlPattern", value: "*test" },
-				{ type: "urlRegexp", value: "test" },
-			]
+			blacklist: {
+				urlPatterns: [
+					"test",
+					"*test*",
+					"test*",
+					"*test",
+				],
+				urlRegExps: [
+					"test",
+				],
+			},
 		}
 
 		expect(new BlockSet(testBlockSetObj).getData()).toMatchObject(testBlockSetObjResult)
@@ -68,13 +72,6 @@ describe("BlockSet construction parameters", () => {
 })
 
 describe("BlockSet url testing", () => {
-	test("Returns Ignored on the enough page", () => {
-		expect(new BlockSet().testUrl("dawdle-block-enough-page.html")).toBe(TestUrlRes.Ignored)
-		expect(new BlockSet().testUrl(
-			"chrome-extension://eabokghknmioahcpppkglnlkedldgfhb/dawdle-block-enough-page.html"
-		)).toBe(TestUrlRes.Ignored)
-	})
-
 	test.todo("Returns Blacklisted when url is contained in black list")
 
 	test.todo("Returns Whitelisted when url is contained in white list")
