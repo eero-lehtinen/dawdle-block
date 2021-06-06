@@ -24,9 +24,12 @@ module.exports = {
 	},
 	plugins: [
 		new CopyPlugin({
-			patterns: [{
-				from: "node_modules/webextension-polyfill/dist/browser-polyfill.js",
-			}],
+			patterns: [
+				{ from: "manifest.json" },
+				{ from: "node_modules/webextension-polyfill/dist/browser-polyfill.js" },
+				{ from: "options.html" },
+				{ from: "images", to: "images" },
+			],
 		})
 	]
 }

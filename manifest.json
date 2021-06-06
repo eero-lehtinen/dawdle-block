@@ -29,8 +29,8 @@
   ],
   "background": {
     "scripts": [
-      "libraries/fflate.min.js",
-      "js/bg.js"
+      "browser-polyfill.js",
+      "bg.js"
     ]
   }
 }
