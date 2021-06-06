@@ -1,4 +1,4 @@
-import { plainToBlockSet } from "./block-set"
+import { BlockSet } from "./block-set"
 
-console.log(plainToBlockSet({}))
+console.log(new BlockSet())
 

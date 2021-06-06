@@ -60,7 +60,7 @@ const zBlockSetV1 = zBlockSetV0.extend({
 	whitelist: z.array(zBlockRuleV1).default([] as BlockRuleV1[])
 })
 
-export type BlockSet = z.infer<typeof zBlockSetV1>
+export type BlockSetData = z.infer<typeof zBlockSetV1>
 
 /**
  * Converts plain js object into a BlockSet with type validation
@@ -68,9 +68,9 @@ export type BlockSet = z.infer<typeof zBlockSetV1>
  * @param obj 
  * @returns 
  */
-export const plainToBlockSet = 
+export const plainToBlockSetData = 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-(obj: any): BlockSet => {
+(obj: any): BlockSetData => {
 	
 	if (parseableV0(obj)) {
 		const parsedBlockSet = zBlockSetV0.parse(obj)
@@ -83,7 +83,7 @@ export const plainToBlockSet =
 	throw new Error("Can't parse to block set")
 }
 
-export const createDefaultBlockSet = () : BlockSet => {
+export const createDefaultBlockSet = () : BlockSetData => {
 	return zBlockSetV1.parse({})
 }
 

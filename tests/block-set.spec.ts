@@ -1,13 +1,13 @@
-import { plainToBlockSet, createDefaultBlockSet } from "../src/scripts/block-set"
+import { BlockSet } from "../src/scripts/block-set"
 
-describe("createDefaultBlockSet function", () => {
+describe("BlockSet construction parameters", () => {
+	const defaultBlockSetData = new BlockSet().getData()
+
 	test("Non-objects throw", () => {
-
-		expect(() => { plainToBlockSet(undefined) }).toThrow()
-		expect(() => { plainToBlockSet(null) }).toThrow()
-		expect(() => { plainToBlockSet("string") }).toThrow()
-		expect(() => { plainToBlockSet(42) }).toThrow()
-		expect(() => { plainToBlockSet(false) }).toThrow()
+		expect(() => { new BlockSet("string") }).toThrow()
+		expect(() => { new BlockSet(42) }).toThrow()
+		expect(() => { new BlockSet(() => {return 0}) }).toThrow()
+		expect(() => { new BlockSet(null)}).toThrow()
 	})
 
 	test("Objects with invalid types get rejeted and throw", () => {
@@ -17,11 +17,15 @@ describe("createDefaultBlockSet function", () => {
 			activeDays: undefined
 		}
 
-		expect(() => { plainToBlockSet(testBlockSetObj)}).toThrow()
+		expect(() => { new BlockSet(testBlockSetObj)}).toThrow()
 	})
 
-	test("Empty objects get filled with defaults", () => {
-		expect(plainToBlockSet({})).toStrictEqual(createDefaultBlockSet())
+	test("Incomplete objects get filled with defaults", () => {
+		expect(new BlockSet({}).getData()).toStrictEqual(defaultBlockSetData)
+	})
+
+	test("Undefined parameter creates a default block set", () => {
+		expect(new BlockSet(undefined).getData()).toStrictEqual(defaultBlockSetData)
 	})
 
 	test("Objects retain their valid property names and lose invalid ones", () => {
@@ -31,10 +35,10 @@ describe("createDefaultBlockSet function", () => {
 			loseMe: "lost"
 		}
 
-		const blockSet = plainToBlockSet(testBlockSetObj)
+		const blockSetData = new BlockSet(testBlockSetObj).getData()
 
-		expect(blockSet).toHaveProperty("name")
-		expect(blockSet).not.toHaveProperty("loseMe")
+		expect(blockSetData).toHaveProperty("name")
+		expect(blockSetData).not.toHaveProperty("loseMe")
 	})
 
 	test("V0 block sets get converted to V1", () => {
@@ -59,6 +63,6 @@ describe("createDefaultBlockSet function", () => {
 			]
 		}
 
-		expect(plainToBlockSet(testBlockSetObj)).toMatchObject(testBlockSetObjResult)
+		expect(new BlockSet(testBlockSetObj).getData()).toMatchObject(testBlockSetObjResult)
 	})
 })
