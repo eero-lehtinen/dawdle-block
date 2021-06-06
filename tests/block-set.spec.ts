@@ -1,4 +1,4 @@
-import { BlockSet } from "../src/scripts/block-set"
+import { BlockSet, TestUrlRes } from "../src/scripts/block-set"
 
 describe("BlockSet construction parameters", () => {
 	const defaultBlockSetData = new BlockSet().getData()
@@ -65,4 +65,29 @@ describe("BlockSet construction parameters", () => {
 
 		expect(new BlockSet(testBlockSetObj).getData()).toMatchObject(testBlockSetObjResult)
 	})
+})
+
+describe("BlockSet url testing", () => {
+	test("Returns Ignored on the enough page", () => {
+		expect(new BlockSet().testUrl("dawdle-block-enough-page.html")).toBe(TestUrlRes.Ignored)
+		expect(new BlockSet().testUrl(
+			"chrome-extension://eabokghknmioahcpppkglnlkedldgfhb/dawdle-block-enough-page.html"
+		)).toBe(TestUrlRes.Ignored)
+	})
+
+	test.todo("Returns Blacklisted when url is contained in black list")
+
+	test.todo("Returns Whitelisted when url is contained in white list")
+
+	test.todo("Whitelisting overrides blacklisting")
+
+	test.todo("Returns Ignored when url is not contained in whole block set")
+
+	test.todo("Rules with wildcards work")
+
+	test.todo("Rules with RegExps work")
+
+	test.todo("YouTube channel rules work")
+
+	test.todo("YouTube category rules work")
 })

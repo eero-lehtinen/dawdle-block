@@ -1,5 +1,13 @@
 import { BlockSetData, plainToBlockSetData, createDefaultBlockSet } from "./block-set-parsing"
 
+export enum TestUrlRes {
+	Blacklisted,
+	Whitelisted,
+	Ignored
+}
+
+const enoughPageName = "dawdle-block-enough-page.html"
+
 export class BlockSet {
 	private data: BlockSetData
 
@@ -21,5 +29,12 @@ export class BlockSet {
 	 */
 	getData(): unknown {
 		return this.data
+	}
+
+	testUrl(url: string): TestUrlRes {
+		if (url.endsWith(enoughPageName)) {
+			return TestUrlRes.Ignored
+		}
+		return TestUrlRes.Ignored
 	}
 }
