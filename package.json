@@ -31,7 +31,7 @@
 		"validate": "yarn lint && yarn test && yarn build",
 		"lint": "eslint --max-warnings=0 './**/*.{js,ts}'",
 		"test": "jest",
-		"build": "webpack --mode=production",
+		"build": "rm -r ./dist && webpack --mode=production",
 		"watch": "webpack --watch --mode=development"
 	},
 	"repository": {
