@@ -6,33 +6,39 @@
 	"private": true,
 	"dependencies": {
 		"fflate": "^0.7.0",
-		"js-base64": "^3.6.1"
+		"js-base64": "^3.6.1",
+		"preact": "^10.5.13",
+		"webextension-polyfill-ts": "^0.25.0"
 	},
 	"devDependencies": {
 		"@types/jest": "^26.0.23",
 		"@typescript-eslint/eslint-plugin": "^4.25.0",
 		"@typescript-eslint/parser": "^4.25.0",
+		"clean-webpack-plugin": "^4.0.0-alpha.0",
 		"copy-webpack-plugin": "^9.0.0",
+		"cross-env": "^7.0.3",
 		"eslint": "^7.27.0",
-		"install": "^0.13.0",
+		"filemanager-webpack-plugin": "^5.0.0",
+		"html-webpack-plugin": "^5.3.1",
 		"jest": "^27.0.1",
-		"mockzilla": "^0.9.0",
-		"npm": "^7.14.0",
+		"sass-loader": "^12.0.0",
 		"ts-jest": "^27.0.0",
-		"ts-loader": "^9.2.2",
+		"ts-loader": "^9.2.3",
 		"typescript": "4.2.4",
-		"webextension-polyfill": "^0.8.0",
-		"webextension-polyfill-ts": "^0.25.0",
-		"webpack": "^5.37.1",
+		"webpack": "^5.38.1",
 		"webpack-cli": "^4.7.0",
+		"webpack-merge": "^5.8.0",
+		"webpack-webextension-plugin": "^0.3.0",
 		"zod": "^3.1.0"
 	},
 	"scripts": {
-		"validate": "yarn lint && yarn test && yarn build",
 		"lint": "eslint --max-warnings=0 './**/*.{js,ts}'",
 		"test": "jest",
-		"build": "rm -rf ./dist && webpack --mode=production",
-		"watch": "webpack --watch --mode=development"
+		"build:chrome": "cross-env TARGET_BROWSER=chrome webpack --config webpack.prod.js",
+		"build:firefox": "cross-env TARGET_BROWSER=firefox webpack --config webpack.prod.js",
+		"dev:chrome": "cross-env TARGET_BROWSER=chrome webpack --watch --config webpack.dev.js",
+		"dev:firefox": "cross-env TARGET_BROWSER=firefox webpack --watch --config webpack.dev.js",
+		"build": "yarn build:chrome && yarn build:firefox"
 	},
 	"repository": {
 		"type": "git",

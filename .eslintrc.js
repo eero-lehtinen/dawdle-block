@@ -36,7 +36,7 @@ module.exports = {
 		"no-unused-vars": [
 			"error",
 			{
-				argsIgnorePattern: "^_",
+				varsIgnorePattern: "^_",
 			},
 		],
 		"key-spacing": ["error", { 
@@ -57,6 +57,7 @@ module.exports = {
 		"array-bracket-spacing": "error",
 		"comma-spacing": ["error", { "before": false, "after": true }],
 		"comma-dangle": ["error", "always-multiline"],
+		
 	},
 	overrides: [
 		{
@@ -70,7 +71,10 @@ module.exports = {
 			rules: {
 				"no-unused-vars": "off",
 				"@typescript-eslint/no-unused-vars": ["error",
-					{ argsIgnorePattern: "^_"	}],
+					{ varsIgnorePattern: "^_"	}],
+				"no-empty-function": "off",
+				"@typescript-eslint/no-empty-function": ["error", {
+					"allow": ["private-constructors"] }],
 			},
 		},
 	],

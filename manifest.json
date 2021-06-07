@@ -3,7 +3,6 @@
   "name": "Dawdle Block",
   "short_name": "Dawdle Block",
   "description": "Put time limits on unproductive sites.",
-  "version": "1.5.2",
   "options_ui": {
     "page": "options.html",
     "open_in_tab": true,
@@ -29,8 +28,7 @@
   ],
   "background": {
     "scripts": [
-      "browser-polyfill.js",
-      "bg.js"
+      "js/background.js"
     ]
   }
 }
