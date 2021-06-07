@@ -129,7 +129,7 @@ const convertV0toV1 = (blockSet: any) => {
 
 			// Escape *-characters, because they are used as wildcards in v1
 			if (!blockRule.type.startsWith("yt")) {
-				blockRule.value = blockRule.value.replaceAll("*", "\\*")
+				blockRule.value = blockRule.value.replace(/\*/g, "\\*")
 			}
 
 			// Switch from old block list structure to new.
