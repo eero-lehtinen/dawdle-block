@@ -10,8 +10,7 @@ export type BlocksetTimesElapsed = z.infer<typeof zBlocksetTimesElapsed>
 const zActiveTime = z.object({
 	from: z.number().int().default(0),
 	to: z.number().int().default(0),
-})
-type ActiveTime = z.infer<typeof zActiveTime>
+}).default({})
 
 const zBlockRuleYtV0 = z.object({
 	type: z.enum(["ytChannel", "ytCategory"]),
@@ -38,7 +37,7 @@ const zBlockSetV0 = z.object({
 	resetTime: z.number().int().default(0),
 	lastReset: z.number().int().default(0),
 	activeDays: z.array(z.boolean()).length(7).default(new Array(7).fill(false)),
-	activeTime: zActiveTime.default({ from: 0, to: 0 } as ActiveTime),
+	activeTime: zActiveTime,
 	blacklist: z.array(zBlockRuleV0).default([]),
 	whitelist: z.array(zBlockRuleV0).default([]),
 })
