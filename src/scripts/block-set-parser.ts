@@ -126,6 +126,14 @@ const convertV0toV1 = (blockSet: any) => {
 		const newBlockList = zBlockListV1.parse({})
 
 		for (const blockRule of blockSet[list]) {
+
+			// Escape *-characters, because they are used as wildcards in v1
+			if (!blockRule.type.startsWith("yt")) {
+				blockRule.value = blockRule.value.replaceAll("*", "\\*")
+			}
+
+			// Switch from old block list structure to new.
+			// Also switch from "urlEquals", "urlContains", etc. to simpler wildcard system.
 			switch (blockRule.type) {
 			case "urlEquals":
 				newBlockList.urlPatterns.push(blockRule.value)

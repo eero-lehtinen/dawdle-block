@@ -69,4 +69,25 @@ describe("BlockSet construction parameters", () => {
 
 		expect(new BlockSet(testBlockSetObj).getData()).toMatchObject(testBlockSetObjResult)
 	})
+
+	test("V0 \"*\"-characters get escaped when converting to V1", () => {
+
+		const testBlockSetObj = {
+			whitelist: [
+				{ type: "urlEquals", value: "*te*st*" },
+				{ type: "urlContains", value: "*te*st*" },
+			],
+		}
+
+		const testBlockSetObjResult = {
+			whitelist: {
+				urlPatterns: [
+					"\\*te\\*st\\*",
+					"*\\*te\\*st\\**",
+				],
+			},
+		}
+
+		expect(new BlockSet(testBlockSetObj).getData()).toMatchObject(testBlockSetObjResult)
+	})
 })
