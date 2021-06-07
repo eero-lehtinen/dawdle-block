@@ -1,11 +1,23 @@
 
 import { z } from "zod"
 
-const zBlocksetIds = z.array(z.number().int().positive())
-export type BlockSetIds = z.infer<typeof zBlocksetIds>
+const zBlockSetIds = z.array(z.number().int().nonnegative())
+export type BlockSetIds = z.infer<typeof zBlockSetIds>
 
-const zBlocksetTimesElapsed = z.array(z.number().int().positive())
-export type BlocksetTimesElapsed = z.infer<typeof zBlocksetTimesElapsed>
+export const plainToBlockSetIds = 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
+(obj: any): BlockSetIds => {
+	return zBlockSetIds.parse(obj)
+}
+
+const zBlockSetTimesElapsed = z.array(z.number().int().nonnegative().optional())
+export type BlockSetTimesElapsed = z.infer<typeof zBlockSetTimesElapsed>
+
+export const plainToBlockSetTimesElapsed = 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
+(obj: any): BlockSetTimesElapsed => {
+	return zBlockSetTimesElapsed.parse(obj)
+}
 
 const zActiveTime = z.object({
 	from: z.number().int().default(0),
