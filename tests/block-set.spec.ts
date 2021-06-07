@@ -13,6 +13,7 @@ describe("BlockSet construction parameters", () => {
 	test("Objects with invalid types get rejeted and throw", () => {
 
 		const testBlockSetObj = {
+			v: 1,
 			requireActive: "string", 
 			activeDays: undefined,
 		}
@@ -31,6 +32,7 @@ describe("BlockSet construction parameters", () => {
 	test("Objects retain their valid property names and lose invalid ones", () => {
 
 		const testBlockSetObj = {
+			v: 1,
 			name: "retained", 
 			loseMe: "lost",
 		}
@@ -50,6 +52,8 @@ describe("BlockSet construction parameters", () => {
 				{ type: "urlPrefix", value: "test" },
 				{ type: "urlSuffix", value: "test" },
 				{ type: "urlRegexp", value: "test" },
+				{ type: "ytChannel", value: { id: "channelid", name: "testchannel" } },
+				{ type: "ytCategory", value: { id: "categoryid", name: "testcategory" } },
 			],
 		}
 
@@ -63,6 +67,12 @@ describe("BlockSet construction parameters", () => {
 				],
 				urlRegExps: [
 					"test",
+				],
+				ytChannels: [
+					{ id: "channelid", name: "testchannel" },
+				],
+				ytCategories: [
+					{ id: "categoryid", name: "testcategory" },
 				],
 			},
 		}
