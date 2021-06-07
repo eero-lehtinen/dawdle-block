@@ -1,4 +1,4 @@
-import { compress, decompress } from "../src/background/utils"
+import { compress, decompress } from "../background/utils"
 
 const testObject = { test: { test: [{}, 42, "test"] } }
 

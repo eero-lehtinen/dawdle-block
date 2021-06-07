@@ -5,4 +5,5 @@ module.exports = {
 	transform: {
 		"\\.(ts|js)x?$": "ts-jest",
 	},
+	setupFilesAfterEnv: ["./src/scripts/tests/setupTests.ts"],
 }

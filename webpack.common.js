@@ -9,8 +9,8 @@ const PACKAGE = require("./package.json")
 
 module.exports = {
 	entry: {
-		background: path.join(__dirname, "src/background/index.ts"),
-		popup: path.join(__dirname, "src/popup/index.ts"),
+		background: path.join(__dirname, "src/scripts/background/index.ts"),
+		popup: path.join(__dirname, "src/scripts/popup/index.ts"),
 	},
 	output: {
 		path: path.join(__dirname, `dist/${targetBrowser}`),
@@ -56,14 +56,14 @@ module.exports = {
 			verbose: true,
 		}),
 		new HtmlWebpackPlugin({
-			template: "views/popup.html",
+			template: "src/views/popup.html",
 			inject: "body",
 			chunks: ["popup"],
 			hash: true,
 			filename: "popup.html",
 		}),
 		new HtmlWebpackPlugin({
-			template: "views/options.html",
+			template: "src/views/options.html",
 			inject: "body",
 			chunks: ["options"],
 			hash: true,
