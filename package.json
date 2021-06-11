@@ -39,6 +39,7 @@
 		"zod": "^3.1.0"
 	},
 	"scripts": {
+		"validate": "yarn lint && yarn test && yarn build",
 		"lint": "eslint --max-warnings=0 './**/*.{js,ts}'",
 		"test": "jest",
 		"build:chrome": "cross-env TARGET_BROWSER=chrome webpack --config webpack.prod.js",
