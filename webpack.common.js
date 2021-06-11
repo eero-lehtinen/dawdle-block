@@ -53,7 +53,7 @@ module.exports = {
 				path.resolve(__dirname, `./dist/${targetBrowser}*.zip`),
 			],
 			cleanStaleWebpackAssets: false,
-			verbose: true,
+			verbose: false,
 		}),
 		new HtmlWebpackPlugin({
 			template: "src/views/popup.html",
