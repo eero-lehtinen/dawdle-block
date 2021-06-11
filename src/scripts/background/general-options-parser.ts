@@ -7,7 +7,7 @@ import { z } from "zod"
 
 
 const zClockType = z.union([z.literal(12), z.literal(24)]).default(24)
-const zSettingsProtection = z.union([z.literal("never"), z.literal("always"), z.literal("timerZero")]).default("never")
+const zSettingsProtection = z.enum(["never", "always", "timerZero"]).default("never")
 
 const zGeneralOptionsV1 = z.object({
 	v: z.union([z.undefined(), z.literal(1)]).transform(() => 1),
