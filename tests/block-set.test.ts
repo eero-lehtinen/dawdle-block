@@ -10,7 +10,7 @@ describe("test BlockSet construction parameters", () => {
 		expect(() => { new BlockSet(null)}).toThrow()
 	})
 
-	it("objects with ", () => {
+	it("objects with members of invalid types throw", () => {
 
 		const testBlockSetObj = {
 			v: 1,
@@ -21,15 +21,15 @@ describe("test BlockSet construction parameters", () => {
 		expect(() => { new BlockSet(testBlockSetObj)}).toThrow()
 	})
 
-	it("Incomplete objects get filled with defaults", () => {
+	it("incomplete objects get filled with defaults", () => {
 		expect(new BlockSet({}).getData()).toStrictEqual(defaultBlockSetData)
 	})
 
-	it("Undefined parameter creates a default block set", () => {
+	it("undefined creates a default block set", () => {
 		expect(new BlockSet(undefined).getData()).toStrictEqual(defaultBlockSetData)
 	})
 
-	it("Objects retain their valid property names and lose invalid ones", () => {
+	it("objects retain their valid property names and lose invalid ones", () => {
 
 		const testBlockSetObj = {
 			v: 1,
