@@ -1,3 +1,7 @@
+/**
+ * @file General constant values
+ */
+
 export const ytCategoryNamesById = {
 	1: "Film & Animation",
 	2: "Autos & Vehicles",
