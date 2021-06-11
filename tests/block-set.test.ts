@@ -1,4 +1,4 @@
-import { BlockSet } from "../background/block-set"
+import { BlockSet } from "../src/scripts/background/block-set"
 
 describe("test BlockSet construction parameters", () => {
 	const defaultBlockSetData = new BlockSet().getData()
