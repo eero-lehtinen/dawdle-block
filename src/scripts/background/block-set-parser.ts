@@ -14,7 +14,7 @@ export const plainToBlockSetIds =
 	return zBlockSetIds.parse(obj)
 }
 
-const zBlockSetTimesElapsed = z.array(z.number().int().nonnegative().optional())
+const zBlockSetTimesElapsed = z.array(z.number().int().optional())
 export type BlockSetTimesElapsed = z.infer<typeof zBlockSetTimesElapsed>
 
 export const plainToBlockSetTimesElapsed = 
@@ -45,7 +45,7 @@ const zBlockRuleV0 = z.union([zBlockRuleYtV0, zBlockRuleUrlV0])
 
 // Original blockset options data structure
 const zBlockSetDataV0 = z.object({
-	v: z.undefined().optional(),
+	v: z.union([z.undefined(), z.literal(0)]).transform(() => 0),
 	name: z.string().default("Block Set 1"),
 	requireActive: z.boolean().default(false),
 	annoyMode: z.boolean().default(false),
@@ -107,7 +107,7 @@ export const plainToBlockSetData =
 }
 
 export const createDefaultBlockSet = () : BlockSetData => {
-	return zBlockSetDataV1.parse({})
+	return zBlockSetDataV1.parse({ v: 1 })
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -176,5 +176,7 @@ const convertV0toV1 = (blockSet: any) => {
 
 		blockSet[list] = newBlockList
 	}
+
+	blockSet.v = 1
 	return blockSet
 }
