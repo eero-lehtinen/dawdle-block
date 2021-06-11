@@ -1,3 +1,7 @@
+/**
+ * @file Contains BlockSet class implementation.
+ */
+
 import { BlockSetData, BlockRuleYt, plainToBlockSetData, createDefaultBlockSet } from "./block-set-parser"
 
 export enum BlockTestRes {

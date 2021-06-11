@@ -1,3 +1,7 @@
+/**
+ * @file Contains types for representing block set save data. 
+ * Has parsing functions for converting plain js objects to them.
+ */
 
 import { z } from "zod"
 
@@ -40,7 +44,7 @@ const zBlockRuleUrlV0 = z.object({
 const zBlockRuleV0 = z.union([zBlockRuleYtV0, zBlockRuleUrlV0])
 
 // Original blockset options data structure
-const zBlockSetV0 = z.object({
+const zBlockSetDataV0 = z.object({
 	v: z.undefined().optional(),
 	name: z.string().default("Block Set 1"),
 	requireActive: z.boolean().default(false),
@@ -73,13 +77,13 @@ const zBlockListV1 = z.object({
 
 // Most recent blockset options data structure version with 
 // updated block rule structure. Extends block set version 0.
-const zBlockSetV1 = zBlockSetV0.extend({
+const zBlockSetDataV1 = zBlockSetDataV0.extend({
 	v: z.literal(1).default(1),
 	blacklist: zBlockListV1,
 	whitelist: zBlockListV1,
 })
 
-export type BlockSetData = z.infer<typeof zBlockSetV1>
+export type BlockSetData = z.infer<typeof zBlockSetDataV1>
 
 /**
  * Converts plain js object into a BlockSet with type validation
@@ -92,18 +96,18 @@ export const plainToBlockSetData =
 (obj: any): BlockSetData => {
 	
 	if (parseableV0(obj)) {
-		const parsedBlockSet = zBlockSetV0.parse(obj)
-		return zBlockSetV1.parse(convertV0toV1(parsedBlockSet))
+		const parsedBlockSet = zBlockSetDataV0.parse(obj)
+		return zBlockSetDataV1.parse(convertV0toV1(parsedBlockSet))
 	}
 	else if (parseableV1(obj)) {
-		return zBlockSetV1.parse(obj)
+		return zBlockSetDataV1.parse(obj)
 	}
 
 	throw new Error("Can't parse to block set")
 }
 
 export const createDefaultBlockSet = () : BlockSetData => {
-	return zBlockSetV1.parse({})
+	return zBlockSetDataV1.parse({})
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */

@@ -1,3 +1,7 @@
+/**
+ * @file Contains BlockSetManager class for loading, updating and saving block sets.
+ */
+
 import { browser } from "webextension-polyfill-ts"
 import { BlockSet } from "./block-set"
 import { BlockSetIds, plainToBlockSetIds, plainToBlockSetTimesElapsed } from "./block-set-parser"
