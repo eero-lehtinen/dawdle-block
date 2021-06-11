@@ -1,16 +1,16 @@
 import { BlockSet } from "../background/block-set"
 
-describe("BlockSet construction parameters", () => {
+describe("test BlockSet construction parameters", () => {
 	const defaultBlockSetData = new BlockSet().getData()
 
-	test("Non-objects throw", () => {
+	it("non-objects throw", () => {
 		expect(() => { new BlockSet("string") }).toThrow()
 		expect(() => { new BlockSet(42) }).toThrow()
 		expect(() => { new BlockSet(() => {return 0}) }).toThrow()
 		expect(() => { new BlockSet(null)}).toThrow()
 	})
 
-	test("Objects with invalid types get rejeted and throw", () => {
+	it("objects with ", () => {
 
 		const testBlockSetObj = {
 			v: 1,
@@ -21,15 +21,15 @@ describe("BlockSet construction parameters", () => {
 		expect(() => { new BlockSet(testBlockSetObj)}).toThrow()
 	})
 
-	test("Incomplete objects get filled with defaults", () => {
+	it("Incomplete objects get filled with defaults", () => {
 		expect(new BlockSet({}).getData()).toStrictEqual(defaultBlockSetData)
 	})
 
-	test("Undefined parameter creates a default block set", () => {
+	it("Undefined parameter creates a default block set", () => {
 		expect(new BlockSet(undefined).getData()).toStrictEqual(defaultBlockSetData)
 	})
 
-	test("Objects retain their valid property names and lose invalid ones", () => {
+	it("Objects retain their valid property names and lose invalid ones", () => {
 
 		const testBlockSetObj = {
 			v: 1,
@@ -43,7 +43,7 @@ describe("BlockSet construction parameters", () => {
 		expect(blockSetData).not.toHaveProperty("loseMe")
 	})
 
-	test("V0 block sets get converted to V1", () => {
+	it("V0 block sets get converted to V1", () => {
 
 		const testBlockSetObj = {
 			blacklist: [

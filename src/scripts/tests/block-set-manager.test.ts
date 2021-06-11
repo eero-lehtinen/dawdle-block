@@ -1,7 +1,6 @@
 import type { Browser } from "webextension-polyfill-ts"
 import { deepMock } from "mockzilla"
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const [browser, mockBrowser, mockBrowserNode] = deepMock<Browser>("browser", false)
 
 jest.mock("webextension-polyfill-ts", () => ({ browser }))
@@ -10,7 +9,7 @@ import { BlockSetManager, bsIdsSaveKey, bsTimesElapsedSaveKey } from "../backgro
 import { BlockSet } from "../background/block-set"
 import { BlockSetIds, BlockSetTimesElapsed } from "../background/block-set-parser"
 
-describe("WebExtension api mocking", () => {
+describe("test BlockSetManager with browser api mocking", () => {
 	
 	beforeEach(() => mockBrowserNode.enable())
 
@@ -24,7 +23,7 @@ describe("WebExtension api mocking", () => {
 			.andResolve({ [bsTimesElapsedSaveKey]: elapsedReturn })
 	}
 
-	test("Loads block set ids, blocksets, and elapsed times from sync storage", async() => {
+	it("can load block set ids, blocksets, and elapsed times from sync storage", async() => {
 		setUpMockStorage([0], [0])
 		mockBrowser.storage.sync.get.expect({ "0": undefined })
 			.andResolve({ "0": undefined })
@@ -35,7 +34,7 @@ describe("WebExtension api mocking", () => {
 		expect(bsManager.getBSs()).toMatchObject([new BlockSet()])
 	})
 
-	test("Handles non continous ids", async() => {
+	it("can handle non continous ids", async() => {
 		setUpMockStorage([3, 2], [undefined, undefined, 0, 0])
 		mockBrowser.storage.sync.get.expect({ "3": undefined, "2": undefined })
 			.andResolve({ "3": undefined, "2": undefined })
