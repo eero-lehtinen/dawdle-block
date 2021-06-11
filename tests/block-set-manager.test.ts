@@ -15,8 +15,9 @@ describe("test BlockSetManager with browser api mocking", () => {
 
 	afterEach(() => mockBrowserNode.verifyAndDisable())
 
-	const setUpMockStorage = (idReturn: BlockSetIds, 
-		elapsedReturn: BlockSetTimesElapsed) => {
+	const setUpMockStorage = ({ idReturn, elapsedReturn }: 
+		{idReturn: BlockSetIds, elapsedReturn: BlockSetTimesElapsed}) => {
+
 		mockBrowser.storage.sync.get.expect({ [bsIdsSaveKey]: [0] })
 			.andResolve({ [bsIdsSaveKey]: idReturn })
 		mockBrowser.storage.sync.get.expect({ [bsTimesElapsedSaveKey]: [0] })
@@ -24,7 +25,7 @@ describe("test BlockSetManager with browser api mocking", () => {
 	}
 
 	it("can load block set ids, blocksets, and elapsed times from sync storage", async() => {
-		setUpMockStorage([0], [0])
+		setUpMockStorage({ idReturn: [0], elapsedReturn: [0] })
 		mockBrowser.storage.sync.get.expect({ "0": undefined })
 			.andResolve({ "0": undefined })
 
@@ -35,9 +36,9 @@ describe("test BlockSetManager with browser api mocking", () => {
 	})
 
 	it("can handle non continous ids", async() => {
-		setUpMockStorage([3, 2], [undefined, undefined, 0, 0])
-		mockBrowser.storage.sync.get.expect({ "3": undefined, "2": undefined })
-			.andResolve({ "3": undefined, "2": undefined })
+		setUpMockStorage({ idReturn: [3, 2], elapsedReturn: [undefined, undefined, 0, 0] })
+		mockBrowser.storage.sync.get.expect({ 3: undefined, 2: undefined })
+			.andResolve({ 3: undefined, 2: undefined })
 
 		const bsManager = await BlockSetManager.create()
 		expect(bsManager.getBSIds()).toStrictEqual([3, 2])
