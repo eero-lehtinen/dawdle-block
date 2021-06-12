@@ -24,7 +24,7 @@ describe("test save compression and decompression", () => {
 })
 
 describe("test regular expression escaping", () => {
-	it("can escape basic example", () => {
+	it("can escape a basic example", () => {
 		expect(escapeRegExp("[.*+?^${}()|[]\\]asdfäxcopåvij❤"))
 			.toStrictEqual(String.raw`\[\.\*\+\?\^\$\{\}\(\)\|\[\]\\\]asdfäxcopåvij❤`)
 	})
