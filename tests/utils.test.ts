@@ -18,7 +18,7 @@ describe("test save compression and decompression", () => {
 		expect(decompress(compressed)).toStrictEqual(testObject)
 	})
 
-	it("old saves decompress correctly", () => {
+	it("saves compressed with old system decompress into the same value", () => {
 		expect(decompress(testObjectCompressedOld)).toStrictEqual(testObject)
 	})
 })
