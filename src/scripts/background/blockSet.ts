@@ -3,6 +3,7 @@
  */
 
 import { BlockSetData, BlockRuleYt, plainToBlockSetData, createDefaultBlockSet } from "./blockSetParser"
+import { escapeWildcardRegExp } from "./utils"
 
 export enum BlockTestRes {
 	Blacklisted,
@@ -54,31 +55,10 @@ export class BlockSet {
 			this.compileRules("blacklist")
 			return
 		}
-		this.compiledUrlRules[rulesType] =
-			this.data[rulesType].urlRegExps.map((value: string) => new RegExp(value))
-				.concat(this.data[rulesType].urlPatterns.map((value: string) => this.urlPatternToRegExp(value)))
-	}
-
-	/**
-	 * Replaces all non escaped wildcards into regular expression wildcards.
-	 * Basically changes "*" to ".*".
-	 * @param urlPattern url pattern with possible wildcards
-	 * @returns regular expression object
-	 */
-	private urlPatternToRegExp(urlPattern: string): RegExp {
-		let result = ""
-		let backslash = false
-		for (let i = 0; i < urlPattern.length; i++) {
-			if (!backslash && urlPattern[i] === "*") {
-				result += "."
-			}
-			else if (urlPattern[i] === "\\") {
-				backslash = true
-			}
-			result += urlPattern[i]
-		}
-
-		return new RegExp(result)
+		this.compiledUrlRules[rulesType] = [
+			...this.data[rulesType].urlRegExps.map((value: string) => new RegExp(value)),
+			...this.data[rulesType].urlPatterns.map((value: string) => new RegExp(escapeWildcardRegExp(value))),
+		]
 	}
 
 	getData(): BlockSetData {

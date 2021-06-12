@@ -26,4 +26,27 @@ export const decompress = (base64str: string): unknown =>
 export const escapeRegExp = (string: string): string =>
 	string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") // $& means the whole matched string
 
+/**
+ * Escape user defined strings to be used in regular expressions for exact matching with wildcards.
+ * Part of regular expression copied from escapeRegExp.
+ * @param string string to escape
+ * @returns escaped string
+ */
+export const escapeWildcardRegExp = (string: string): string =>
+	string.replace(/(\\\*)|(\*)|([.+?^${}()|[\]\\])/g, 
+		(_, p1, p2, p3): string => {
+			// If we found an escaped wildcard, just return it
+			if (p1)
+				return p1
+
+			// If we found an unescaped wildcard, replace it with a regular expression wildcard
+			if (p2)
+				return ".*"
+			
+			// Otherwise just escape the forbidden character
+			return `\\${p3}`
+		})
+
+
+
 
