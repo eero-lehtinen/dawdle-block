@@ -1,4 +1,4 @@
-import { BlockSet } from "./block-set"
+import { BlockSet } from "./blockSet"
 
 console.log(new BlockSet())
 

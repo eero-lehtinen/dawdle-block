@@ -2,7 +2,7 @@
  * @file Contains BlockSet class implementation.
  */
 
-import { BlockSetData, BlockRuleYt, plainToBlockSetData, createDefaultBlockSet } from "./block-set-parser"
+import { BlockSetData, BlockRuleYt, plainToBlockSetData, createDefaultBlockSet } from "./blockSetParser"
 
 export enum BlockTestRes {
 	Blacklisted,

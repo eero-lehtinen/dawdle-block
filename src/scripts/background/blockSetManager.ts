@@ -3,8 +3,8 @@
  */
 
 import { browser } from "webextension-polyfill-ts"
-import { BlockSet } from "./block-set"
-import { BlockSetIds, plainToBlockSetIds, plainToBlockSetTimesElapsed } from "./block-set-parser"
+import { BlockSet } from "./blockSet"
+import { BlockSetIds, plainToBlockSetIds, plainToBlockSetTimesElapsed } from "./blockSetParser"
 
 export const bsIdsSaveKey = "blocksetIds"
 export const bsTimesElapsedSaveKey = "blocksetTimesElapsed"

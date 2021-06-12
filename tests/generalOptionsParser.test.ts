@@ -1,4 +1,4 @@
-import { plainToGeneralOptions, createDefaultGeneralOptions } from "../src/scripts/background/general-options-parser"
+import { plainToGeneralOptions, createDefaultGeneralOptions } from "../src/scripts/background/generalOptionsParser"
 
 describe("test GeneralOptions parsing", () => {
 	const defaultGeneralOptions = createDefaultGeneralOptions()
