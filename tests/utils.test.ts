@@ -1,5 +1,5 @@
 
-import { compress, decompress } from "../src/scripts/background/utils"
+import { compress, decompress, escapeRegExp } from "../src/scripts/background/utils"
 
 const testObject = { test: { test: [{}, 42, "test"] } }
 
@@ -20,5 +20,23 @@ describe("test save compression and decompression", () => {
 
 	it("old saves decompress correctly", () => {
 		expect(decompress(testObjectCompressedOld)).toStrictEqual(testObject)
+	})
+})
+
+describe("test regular expression escaping", () => {
+	it("can escape basic example", () => {
+		expect(escapeRegExp("[.*+?^${}()|[]\\]asdfäxcopåvij❤"))
+			.toStrictEqual(String.raw`\[\.\*\+\?\^\$\{\}\(\)\|\[\]\\\]asdfäxcopåvij❤`)
+	})
+
+	const expectRegExp = (regExpString: string, testString: string) =>
+		expect(new RegExp("^" + escapeRegExp(regExpString) + "$").test(testString))
+
+	it("weird backslash escaping works as intended", () => {
+		expectRegExp(String.raw`\a\\b\\\c`, String.raw`\a\\b\\\c`).toBeTruthy()
+
+		expectRegExp(String.raw`\c`, String.raw`c`).toBeFalsy()
+		expectRegExp(String.raw`\c`, String.raw`\\c`).toBeFalsy()
+		expectRegExp(String.raw`\c`, String.raw`\\\c`).toBeFalsy()
 	})
 })
