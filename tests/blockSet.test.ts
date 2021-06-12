@@ -80,7 +80,7 @@ describe("test BlockSet construction parameters", () => {
 		expect(new BlockSet(testBlockSetObj).getData()).toMatchObject(testBlockSetObjResult)
 	})
 
-	test("V0 \"*\"-characters get escaped when converting to V1", () => {
+	it("V0 \"*\"-characters get escaped when converting to V1", () => {
 
 		const testBlockSetObj = {
 			whitelist: [
@@ -99,5 +99,46 @@ describe("test BlockSet construction parameters", () => {
 		}
 
 		expect(new BlockSet(testBlockSetObj).getData()).toMatchObject(testBlockSetObjResult)
+	})
+})
+
+describe("test BlockSet methods", () => {
+
+	it("isInActiveTime returns always true, if activeTime from and to are the same", () => {
+		const blockSet = new BlockSet({ activeTime: { from: 0, to: 0 } })
+		expect(blockSet.isInActiveTime(new Date(0))).toBe(true)
+		expect(blockSet.isInActiveTime(new Date(42))).toBe(true)
+		expect(blockSet.isInActiveTime(new Date())).toBe(true)
+	})
+
+	it("isInActiveTime returns true, if today's time is between from and to", () => {
+		const blockSet = new BlockSet({ activeTime: { from: 0, to: 1 * 60 * 60 * 1000 } })
+		expect(blockSet.isInActiveTime(new Date("2000-01-01T00:00:00"))).toBe(false)
+		expect(blockSet.isInActiveTime(new Date("2000-01-01T00:30:00"))).toBe(true)
+		expect(blockSet.isInActiveTime(new Date("2000-01-01T01:00:00"))).toBe(false)
+		expect(blockSet.isInActiveTime(new Date("2000-01-01T06:00:00"))).toBe(false)
+	})
+
+	it("if to is less than to, calculation of being in between wraps around midnight instead", () => {
+		const blockSet = new BlockSet({ activeTime: { from: 1 * 60 * 60 * 1000, to: 0 } })
+		expect(blockSet.isInActiveTime(new Date("2000-01-01T00:00:00"))).toBe(false)
+		expect(blockSet.isInActiveTime(new Date("2000-01-01T00:30:00"))).toBe(false)
+		expect(blockSet.isInActiveTime(new Date("2000-01-01T01:00:00"))).toBe(false)
+		expect(blockSet.isInActiveTime(new Date("2000-01-01T06:00:00"))).toBe(true)
+	})
+
+
+	it("active weekday detection returns values of activeDays for values between 0 and 6", () => {
+		const activeDays = [false, true, false, false, true, false, false]
+		const blockSet = new BlockSet({ activeDays })
+		for (let i = 0; i < activeDays.length; i++) {
+			expect(blockSet.isInActiveWeekday(i)).toBe(activeDays[i])
+		}
+	})
+
+	it("active weekday detection returns false for all numbers that aren't between 0 and 6", () => {
+		const blockSet = new BlockSet()
+		expect(blockSet.isInActiveWeekday(-1000)).toBe(false)
+		expect(blockSet.isInActiveWeekday(42)).toBe(false)
 	})
 })

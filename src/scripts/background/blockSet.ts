@@ -3,13 +3,7 @@
  */
 
 import { BlockSetData, BlockRuleYt, plainToBlockSetData, createDefaultBlockSet } from "./blockSetParser"
-import { escapeToWildcardRegExp } from "./utils"
-
-export enum BlockTestRes {
-	Blacklisted,
-	Whitelisted,
-	Ignored,
-}
+import { escapeToWildcardRegExp, timeToMSSinceMidnight } from "./utils"
 
 export enum ListType {
 	Blacklist,
@@ -63,6 +57,26 @@ export class BlockSet {
 
 	getData(): BlockSetData {
 		return this.data
+	}
+
+	isInActiveTime(time: Date): boolean {
+		const msSinceMidnight = timeToMSSinceMidnight(time)
+		const from = this.data.activeTime.from
+		const to = this.data.activeTime.to
+
+		if (from === to) {
+			return true
+		}
+		else if (from < to) {
+			return (msSinceMidnight > from && msSinceMidnight < to)
+		}
+		else {
+			return (msSinceMidnight > from || msSinceMidnight < to)
+		}
+	}
+
+	isInActiveWeekday(weekdayNumber: number): boolean {
+		return !!this.data.activeDays[weekdayNumber]
 	}
 
 	getUrlRules(rulesType: "whitelist" | "blacklist"): RegExp[] { 
