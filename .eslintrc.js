@@ -57,6 +57,7 @@ module.exports = {
 		"array-bracket-spacing": ["error", "never"],
 		"comma-spacing": ["error", { "before": false, "after": true }],
 		"comma-dangle": ["error", "always-multiline"],
+		"space-infix-ops": "error",
 	},
 	overrides: [
 		{
