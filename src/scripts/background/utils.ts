@@ -18,15 +18,6 @@ export const decompress = (base64str: string): unknown =>
 	JSON.parse(strFromU8(decompressSync(toUint8Array(base64str))))
 
 /**
- * Escape user defined strings to be used in regular expressions for exact matching.
- * Copied from MDN https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#escaping.
- * @param string string to escape
- * @returns escaped string
- */
-export const escapeRegExp = (string: string): string =>
-	string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") // $& means the whole matched string
-
-/**
  * Escape user defined strings to be used in regular expressions for exact matching with wildcards.
  * Part of regular expression copied from MDN 
  * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#escaping.
