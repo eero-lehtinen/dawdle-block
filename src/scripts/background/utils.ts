@@ -48,5 +48,5 @@ export const escapeToPattern = (string: string): string =>
 	string.replace(/\*/g, String.raw`\*`)
 
 
-
-
+export const timeToMSSinceMidnight = (time: Date): number =>
+	time.getSeconds() * 1000 + time.getMinutes() * 60000 + time.getHours() * 3600000

@@ -1,5 +1,5 @@
 
-import { compress, decompress, escapeToWildcardRegExp, escapeToPattern } from "../src/scripts/background/utils"
+import { compress, decompress, escapeToWildcardRegExp, escapeToPattern, timeToMSSinceMidnight } from "../src/scripts/background/utils"
 
 const testObject = { test: { test: [{}, 42, "test"] } }
 
@@ -41,6 +41,15 @@ describe("test wildcarded pattern escaping", () => {
 describe("test pattern escaping", () => {
 	it("escapes *-characters", () => {
 		expect(escapeToPattern("**a*-.0/{")).toStrictEqual("\\*\\*a\\*-.0/{")
+	})
+})
+
+describe("test time to ms since midnight", () => {
+	it("converts basic examples correctly", () => {
+		expect(timeToMSSinceMidnight(new Date("2000-01-01T00:00:00"))).toStrictEqual(0)
+		expect(timeToMSSinceMidnight(new Date("2000-01-01T00:00:05"))).toStrictEqual(5 * 1000)
+		expect(timeToMSSinceMidnight(new Date("2000-01-01T00:05:00"))).toStrictEqual(5 * 60000)
+		expect(timeToMSSinceMidnight(new Date("2000-01-01T05:00:00"))).toStrictEqual(5 * 3600000)
 	})
 })
 
