@@ -28,7 +28,8 @@ export const escapeRegExp = (string: string): string =>
 
 /**
  * Escape user defined strings to be used in regular expressions for exact matching with wildcards.
- * Part of regular expression copied from escapeRegExp.
+ * Part of regular expression copied from MDN 
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#escaping.
  * @param string string to escape
  * @returns escaped string
  */
@@ -46,6 +47,14 @@ export const escapeWildcardRegExp = (string: string): string =>
 			// Otherwise just escape the forbidden character
 			return `\\${p3}`
 		})
+
+/**
+ * Escape characters reserved for patterns. Currently only *.
+ * @param string string to escape
+ * @returns escaped string safe to use as pattern
+ */
+export const escapePattern = (string: string): string =>
+	string.replace(/\*/g, String.raw`\*`)
 
 
 

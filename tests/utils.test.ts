@@ -1,5 +1,5 @@
 
-import { compress, decompress, escapeRegExp, escapeWildcardRegExp } from "../src/scripts/background/utils"
+import { compress, decompress, escapeWildcardRegExp, escapePattern } from "../src/scripts/background/utils"
 
 const testObject = { test: { test: [{}, 42, "test"] } }
 
@@ -23,35 +23,24 @@ describe("test save compression and decompression", () => {
 	})
 })
 
-describe("test regular expression escaping", () => {
+describe("test wildcarded pattern escaping", () => {
 	it("can escape a basic example", () => {
-		expect(escapeRegExp("[.*+?^${}()|[]\\]asdfäxcopåvij❤"))
-			.toStrictEqual(String.raw`\[\.\*\+\?\^\$\{\}\(\)\|\[\]\\\]asdfäxcopåvij❤`)
+		expect(escapeWildcardRegExp("[.*\\*+?^${}()|[]\\]asdfäxcopåvij❤"))
+			.toStrictEqual(String.raw`\[\..*\*\+\?\^\$\{\}\(\)\|\[\]\\\]asdfäxcopåvij❤`)
 	})
 
-	const expectRegExp = (regExpString: string, testString: string) =>
-		expect(new RegExp("^" + escapeRegExp(regExpString) + "$").test(testString))
-
-	it("weird backslash escaping works as intended", () => {
-		expectRegExp(String.raw`\a\\b\\\c`, String.raw`\a\\b\\\c`).toBeTruthy()
-
-		expectRegExp(String.raw`\c`, String.raw`c`).toBeFalsy()
-		expectRegExp(String.raw`\c`, String.raw`\\c`).toBeFalsy()
-		expectRegExp(String.raw`\c`, String.raw`\\\c`).toBeFalsy()
+	it("replaces wildcards(*) with regexp wildcards(.*)", () => {
+		expect(escapeWildcardRegExp("a*b*")).toStrictEqual("a.*b.*")
 	})
 
-	describe("test wildcarded pattern escaping", () => {
-		it("can escape a basic example", () => {
-			expect(escapeWildcardRegExp("[.*\\*+?^${}()|[]\\]asdfäxcopåvij❤"))
-				.toStrictEqual(String.raw`\[\..*\*\+\?\^\$\{\}\(\)\|\[\]\\\]asdfäxcopåvij❤`)
-		})
-
-		it("replaces wildcards(*) with regexp wildcards(.*)", () => {
-			expect(escapeWildcardRegExp("a*b*")).toStrictEqual("a.*b.*")
-		})
-
-		it("does not replace already escaped wildcards(*)", () => {
-			expect(escapeWildcardRegExp(String.raw`a\*b\*`)).toStrictEqual(String.raw`a\*b\*`)
-		})
+	it("does not replace already escaped wildcards(*)", () => {
+		expect(escapeWildcardRegExp(String.raw`a\*b\*`)).toStrictEqual(String.raw`a\*b\*`)
 	})
 })
+
+describe("test pattern escaping", () => {
+	it("escapes *-characters", () => {
+		expect(escapePattern("**a*-.0/{")).toStrictEqual("\\*\\*a\\*-.0/{")
+	})
+})
+
