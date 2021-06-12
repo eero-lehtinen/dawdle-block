@@ -3,6 +3,19 @@ import { plainToGeneralOptions, createDefaultGeneralOptions } from "../src/scrip
 describe("test GeneralOptions parsing", () => {
 	const defaultGeneralOptions = createDefaultGeneralOptions()
 
+	it("basic example is parsed", () => {
+		const testOptionsObj = {
+			v: 1,
+			clockType: 12,
+			displayHelp: false,
+			darkTheme: true,
+			settingProtection: "always",
+			typingTestWordCount: 100,
+		}
+
+		expect(plainToGeneralOptions(testOptionsObj)).toMatchObject(testOptionsObj)
+	})
+
 	it("non-objects throw", () => {
 		expect(() => { plainToGeneralOptions("string") }).toThrow()
 		expect(() => { plainToGeneralOptions(42) }).toThrow()
