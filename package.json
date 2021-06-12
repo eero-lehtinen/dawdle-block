@@ -19,13 +19,8 @@
 		"copy-webpack-plugin": "^9.0.0",
 		"cross-env": "^7.0.3",
 		"eslint": "^7.27.0",
-		"expect": "^27.0.2",
-		"filemanager-webpack-plugin": "^5.0.0",
 		"html-webpack-plugin": "^5.3.1",
 		"jest": "^27.0.1",
-		"jest-diff": "^27.0.2",
-		"jest-message-util": "^27.0.2",
-		"jest-validate": "^27.0.2",
 		"mockzilla": "^0.9.0",
 		"mockzilla-webextension": "^0.9.0",
 		"sass-loader": "^12.0.0",
@@ -36,6 +31,7 @@
 		"webpack-cli": "^4.7.0",
 		"webpack-merge": "^5.8.0",
 		"webpack-webextension-plugin": "^0.3.0",
+		"zip-webpack-plugin": "^4.0.1",
 		"zod": "^3.1.0"
 	},
 	"scripts": {
