@@ -92,8 +92,8 @@ describe("test BlockSet construction parameters", () => {
 		const testBlockSetObjResult = {
 			whitelist: {
 				urlPatterns: [
-					"\\*te\\*st\\*",
-					"*\\*te\\*st\\**",
+					String.raw`\*te\*st\*`,
+					String.raw`*\*te\*st\**`,
 				],
 			},
 		}
