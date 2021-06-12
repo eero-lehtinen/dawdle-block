@@ -24,7 +24,7 @@ export const decompress = (base64str: string): unknown =>
  * @param string string to escape
  * @returns escaped string
  */
-export const escapeWildcardRegExp = (string: string): string =>
+export const escapeToWildcardRegExp = (string: string): string =>
 	string.replace(/(\\\*)|(\*)|([.+?^${}()|[\]\\])/g, 
 		(_, p1, p2, p3): string => {
 			// If we found an escaped wildcard, just return it
@@ -44,7 +44,7 @@ export const escapeWildcardRegExp = (string: string): string =>
  * @param string string to escape
  * @returns escaped string safe to use as pattern
  */
-export const escapePattern = (string: string): string =>
+export const escapeToPattern = (string: string): string =>
 	string.replace(/\*/g, String.raw`\*`)
 
 

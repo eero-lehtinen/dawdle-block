@@ -1,5 +1,5 @@
 
-import { compress, decompress, escapeWildcardRegExp, escapePattern } from "../src/scripts/background/utils"
+import { compress, decompress, escapeToWildcardRegExp, escapeToPattern } from "../src/scripts/background/utils"
 
 const testObject = { test: { test: [{}, 42, "test"] } }
 
@@ -25,22 +25,22 @@ describe("test save compression and decompression", () => {
 
 describe("test wildcarded pattern escaping", () => {
 	it("can escape a basic example", () => {
-		expect(escapeWildcardRegExp("[.*\\*+?^${}()|[]\\]asdfäxcopåvij❤"))
+		expect(escapeToWildcardRegExp("[.*\\*+?^${}()|[]\\]asdfäxcopåvij❤"))
 			.toStrictEqual(String.raw`\[\..*\*\+\?\^\$\{\}\(\)\|\[\]\\\]asdfäxcopåvij❤`)
 	})
 
 	it("replaces wildcards(*) with regexp wildcards(.*)", () => {
-		expect(escapeWildcardRegExp("a*b*")).toStrictEqual("a.*b.*")
+		expect(escapeToWildcardRegExp("a*b*")).toStrictEqual("a.*b.*")
 	})
 
 	it("does not replace already escaped wildcards(*)", () => {
-		expect(escapeWildcardRegExp(String.raw`a\*b\*`)).toStrictEqual(String.raw`a\*b\*`)
+		expect(escapeToWildcardRegExp(String.raw`a\*b\*`)).toStrictEqual(String.raw`a\*b\*`)
 	})
 })
 
 describe("test pattern escaping", () => {
 	it("escapes *-characters", () => {
-		expect(escapePattern("**a*-.0/{")).toStrictEqual("\\*\\*a\\*-.0/{")
+		expect(escapeToPattern("**a*-.0/{")).toStrictEqual("\\*\\*a\\*-.0/{")
 	})
 })
 

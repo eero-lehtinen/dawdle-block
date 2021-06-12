@@ -3,7 +3,7 @@
  */
 
 import { BlockSetData, BlockRuleYt, plainToBlockSetData, createDefaultBlockSet } from "./blockSetParser"
-import { escapeWildcardRegExp } from "./utils"
+import { escapeToWildcardRegExp } from "./utils"
 
 export enum BlockTestRes {
 	Blacklisted,
@@ -57,7 +57,7 @@ export class BlockSet {
 		}
 		this.compiledUrlRules[rulesType] = [
 			...this.data[rulesType].urlRegExps.map((value: string) => new RegExp(value)),
-			...this.data[rulesType].urlPatterns.map((value: string) => new RegExp(escapeWildcardRegExp(value))),
+			...this.data[rulesType].urlPatterns.map((value: string) => new RegExp(escapeToWildcardRegExp(value))),
 		]
 	}
 
