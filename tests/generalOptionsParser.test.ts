@@ -37,7 +37,7 @@ describe("test GeneralOptions parsing", () => {
 		expect(plainToGeneralOptions({})).toStrictEqual(defaultGeneralOptions)
 	})
 
-	it("undefined creates a default block set", () => {
+	it("undefined creates a default general options", () => {
 		expect(plainToGeneralOptions(undefined)).toStrictEqual(defaultGeneralOptions)
 	})
 
