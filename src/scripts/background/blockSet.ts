@@ -40,11 +40,20 @@ export class BlockSet {
 		else 
 			this.data = plainToBlockSetData(blocksetPlanObject)
 
-		this.compileRules("whitelist")
-		this.compileRules("blacklist")
+		this.compileRules()
 	}
 
-	private compileRules(rulesType: "whitelist" | "blacklist") {
+	/**
+	 * Compile user written block rules into machine friendly regular expressions.
+	 * @param rulesType whitelist or blacklist (if not set, do both)
+	 * 
+	 */
+	private compileRules(rulesType?: "whitelist" | "blacklist"): void {
+		if (!rulesType) {
+			this.compileRules("whitelist")
+			this.compileRules("blacklist")
+			return
+		}
 		this.compiledUrlRules[rulesType] =
 			this.data[rulesType].urlRegExps.map((value: string) => new RegExp(value))
 				.concat(this.data[rulesType].urlPatterns.map((value: string) => this.urlPatternToRegExp(value)))
