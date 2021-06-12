@@ -10,7 +10,7 @@ const zClockType = z.union([z.literal(12), z.literal(24)]).default(24)
 const zSettingsProtection = z.enum(["never", "always", "timerZero"]).default("never")
 
 const zGeneralOptionsV1 = z.object({
-	v: z.union([z.undefined(), z.literal(1)]).transform(() => 1),
+	v: z.union([z.undefined(), z.literal(1)]).transform((): 1 => 1),
 	clockType: zClockType,
 	displayHelp: z.boolean().default(true),
 	darkTheme: z.boolean().default(false),

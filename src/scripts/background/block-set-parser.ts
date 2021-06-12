@@ -45,7 +45,7 @@ const zBlockRuleV0 = z.union([zBlockRuleYtV0, zBlockRuleUrlV0])
 
 // Original blockset options data structure
 const zBlockSetDataV0 = z.object({
-	v: z.union([z.undefined(), z.literal(0)]).transform(() => 0),
+	v: z.union([z.undefined(), z.literal(0)]).transform((): 0 => 0),
 	name: z.string().default("Block Set 1"),
 	requireActive: z.boolean().default(false),
 	annoyMode: z.boolean().default(false),
