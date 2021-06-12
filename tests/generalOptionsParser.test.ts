@@ -13,7 +13,7 @@ describe("test GeneralOptions parsing", () => {
 			typingTestWordCount: 100,
 		}
 
-		expect(plainToGeneralOptions(testOptionsObj)).toMatchObject(testOptionsObj)
+		expect(plainToGeneralOptions(testOptionsObj)).toStrictEqual(testOptionsObj)
 	})
 
 	it("non-objects throw", () => {
