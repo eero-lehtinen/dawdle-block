@@ -1,5 +1,6 @@
 
-import { compress, decompress, escapeToWildcardRegExp, escapeToPattern, timeToMSSinceMidnight } from "../src/scripts/background/utils"
+import { compress, decompress, escapeToWildcardRegExp, escapeToPattern, timeToMSSinceMidnight } 
+	from "../src/scripts/background/utils"
 
 const testObject = { test: { test: [{}, 42, "test"] } }
 
