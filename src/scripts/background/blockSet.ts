@@ -6,14 +6,11 @@ import { BlockSetData, BlockRuleYt, plainToBlockSetData, createDefaultBlockSet }
 import { escapeToWildcardRegExp } from "./utils"
 
 export enum ListType {
-	Blacklist,
-	Whitelist,
+	Blacklist = "blacklist",
+	Whitelist = "whitelist",
 }
 
-interface CompiledRules {
-	blacklist: RegExp[],
-	whitelist:  RegExp[],
-}
+type CompiledRules = Record<ListType, RegExp[]>
 
 export class BlockSet {
 	private data: BlockSetData
@@ -43,10 +40,10 @@ export class BlockSet {
 	 * @param rulesType whitelist or blacklist (if not set, do both)
 	 * 
 	 */
-	private compileRules(rulesType?: "whitelist" | "blacklist"): void {
+	private compileRules(rulesType?: ListType): void {
 		if (!rulesType) {
-			this.compileRules("whitelist")
-			this.compileRules("blacklist")
+			this.compileRules(ListType.Whitelist)
+			this.compileRules(ListType.Blacklist)
 			return
 		}
 		this.compiledUrlRules[rulesType] = [
@@ -78,15 +75,15 @@ export class BlockSet {
 		return !!this.data.activeDays[weekdayNumber]
 	}
 
-	getUrlRules(rulesType: "whitelist" | "blacklist"): RegExp[] { 
+	getUrlRules(rulesType: ListType): RegExp[] { 
 		return this.compiledUrlRules[rulesType]
 	}
 
-	getYtChannelRules(rulesType: "whitelist" | "blacklist"): BlockRuleYt[] { 
+	getYTChannelRules(rulesType: ListType): BlockRuleYt[] { 
 		return this.data[rulesType].ytChannels
 	}
 
-	getYtCategoryRules(rulesType: "whitelist" | "blacklist"): BlockRuleYt[] { 
+	getYTCategoryRules(rulesType: ListType): BlockRuleYt[] { 
 		return this.data[rulesType].ytCategories
 	}
 }
