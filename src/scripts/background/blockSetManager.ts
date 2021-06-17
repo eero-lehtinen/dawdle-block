@@ -78,4 +78,22 @@ export class BlockSetManager {
 	getBlockSets(): (BlockSet | undefined)[] {
 		return this.blockSets
 	}
+
+	/**
+	 * Return a list of block sets that want to block this url.
+	 * @param url url to check against
+	 */
+	/*blockedBy(url: string): Promise<number[]> {
+		for (const id of this.blockSetIds) {
+		// if today is not an active day | or not in active hours
+			if (!blocksetDatas[id].activeDays[currentWeekDay] || !isInActiveTime(now, id)) 
+				continue
+
+			if (!wlRegEx[id].some((regEx) => regEx.test(url) === true)) { // if not in whitelist
+				if (blRegEx[id].some((regEx) => regEx.test(url) === true)) { // if is in blacklist
+					blocksetIdList.push(id)
+				}
+			}
+		}
+	}*/
 }

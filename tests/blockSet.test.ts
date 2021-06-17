@@ -1,5 +1,5 @@
-import { BlockSet, BlockSet } from "../src/scripts/background/blockSet"
-import { msSinceMidnight } from "./utils"
+import { BlockSet } from "../src/scripts/background/blockSet"
+import { timeToMSSinceMidnight } from "../src/scripts/background/utils"
 
 describe("test BlockSet construction parameters", () => {
 	const defaultBlockSetData = new BlockSet().getData()
@@ -107,7 +107,7 @@ describe("test BlockSet methods", () => {
 
 	const testIsInActiveTimes = (blockSet: BlockSet, dateResultPairs: Array<{date: Date, result: boolean}>) => {
 		for (const { date, result } of dateResultPairs) {
-			expect(blockSet.isInActiveTime(msSinceMidnight(date))).toBe(result)
+			expect(blockSet.isInActiveTime(timeToMSSinceMidnight(date))).toBe(result)
 		}
 	}
 	
