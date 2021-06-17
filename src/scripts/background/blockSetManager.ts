@@ -75,7 +75,7 @@ export class BlockSetManager {
 		return this.blockSetTimesElapsed
 	}
 
-	getBSs(): (BlockSet | undefined)[] {
+	getBlockSets(): (BlockSet | undefined)[] {
 		return this.blockSets
 	}
 }

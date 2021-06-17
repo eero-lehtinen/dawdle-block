@@ -32,7 +32,7 @@ describe("test BlockSetManager with browser api mocking", () => {
 		const bsManager = await BlockSetManager.create()
 		expect(bsManager.getBSIds()).toStrictEqual([0])
 		expect(bsManager.getBSTimesElapsed()).toStrictEqual([0])
-		expect(bsManager.getBSs()).toMatchObject([new BlockSet()])
+		expect(bsManager.getBlockSets()).toMatchObject([new BlockSet()])
 	})
 
 	it("can handle non continous ids", async() => {
@@ -43,7 +43,7 @@ describe("test BlockSetManager with browser api mocking", () => {
 		const bsManager = await BlockSetManager.create()
 		expect(bsManager.getBSIds()).toStrictEqual([3, 2])
 		expect(bsManager.getBSTimesElapsed()).toMatchObject([undefined, undefined, 0, 0])
-		expect(bsManager.getBSs()).toMatchObject([undefined, undefined, new BlockSet(), new BlockSet()])
+		expect(bsManager.getBlockSets()).toMatchObject([undefined, undefined, new BlockSet(), new BlockSet()])
 	})
 })
 
