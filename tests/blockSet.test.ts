@@ -1,4 +1,5 @@
-import { BlockSet } from "../src/scripts/background/blockSet"
+import { BlockSet, BlockSet } from "../src/scripts/background/blockSet"
+import { msSinceMidnight } from "./utils"
 
 describe("test BlockSet construction parameters", () => {
 	const defaultBlockSetData = new BlockSet().getData()
@@ -104,27 +105,43 @@ describe("test BlockSet construction parameters", () => {
 
 describe("test BlockSet methods", () => {
 
+	const testIsInActiveTimes = (blockSet: BlockSet, dateResultPairs: Array<{date: Date, result: boolean}>) => {
+		for (const { date, result } of dateResultPairs) {
+			expect(blockSet.isInActiveTime(msSinceMidnight(date))).toBe(result)
+		}
+	}
+	
+
 	it("isInActiveTime returns always true, if activeTime from and to are the same", () => {
 		const blockSet = new BlockSet({ activeTime: { from: 0, to: 0 } })
-		expect(blockSet.isInActiveTime(new Date(0))).toBe(true)
-		expect(blockSet.isInActiveTime(new Date(42))).toBe(true)
-		expect(blockSet.isInActiveTime(new Date())).toBe(true)
+		const dateResultPairs = [
+			{ date: new Date(0), result: true },
+			{ date: new Date(42), result: true },
+			{ date: new Date(), result: true },
+		]
+		testIsInActiveTimes(blockSet, dateResultPairs)
 	})
 
 	it("isInActiveTime returns true, if today's time is between from and to", () => {
 		const blockSet = new BlockSet({ activeTime: { from: 0, to: 1 * 60 * 60 * 1000 } })
-		expect(blockSet.isInActiveTime(new Date("2000-01-01T00:00:00"))).toBe(false)
-		expect(blockSet.isInActiveTime(new Date("2000-01-01T00:30:00"))).toBe(true)
-		expect(blockSet.isInActiveTime(new Date("2000-01-01T01:00:00"))).toBe(false)
-		expect(blockSet.isInActiveTime(new Date("2000-01-01T06:00:00"))).toBe(false)
+		const dateResultPairs = [
+			{ date: new Date("2000-01-01T00:00:00"), result: false },
+			{ date: new Date("2000-01-01T00:30:00"), result: true },
+			{ date: new Date("2000-01-01T01:00:00"), result: false },
+			{ date: new Date("2000-01-01T06:00:00"), result: false },
+		]
+		testIsInActiveTimes(blockSet, dateResultPairs)
 	})
 
 	it("if to is less than to, calculation of being in between wraps around midnight instead", () => {
 		const blockSet = new BlockSet({ activeTime: { from: 1 * 60 * 60 * 1000, to: 0 } })
-		expect(blockSet.isInActiveTime(new Date("2000-01-01T00:00:00"))).toBe(false)
-		expect(blockSet.isInActiveTime(new Date("2000-01-01T00:30:00"))).toBe(false)
-		expect(blockSet.isInActiveTime(new Date("2000-01-01T01:00:00"))).toBe(false)
-		expect(blockSet.isInActiveTime(new Date("2000-01-01T06:00:00"))).toBe(true)
+		const dateResultPairs = [
+			{ date: new Date("2000-01-01T00:00:00"), result: false },
+			{ date: new Date("2000-01-01T00:30:00"), result: false },
+			{ date: new Date("2000-01-01T01:00:00"), result: false },
+			{ date: new Date("2000-01-01T06:00:00"), result: true },
+		]
+		testIsInActiveTimes(blockSet, dateResultPairs)
 	})
 
 

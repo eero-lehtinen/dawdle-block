@@ -3,7 +3,7 @@
  */
 
 import { BlockSetData, BlockRuleYt, plainToBlockSetData, createDefaultBlockSet } from "./blockSetParser"
-import { escapeToWildcardRegExp, timeToMSSinceMidnight } from "./utils"
+import { escapeToWildcardRegExp } from "./utils"
 
 export enum ListType {
 	Blacklist,
@@ -59,8 +59,7 @@ export class BlockSet {
 		return this.data
 	}
 
-	isInActiveTime(time: Date): boolean {
-		const msSinceMidnight = timeToMSSinceMidnight(time)
+	isInActiveTime(msSinceMidnight: number): boolean {
 		const from = this.data.activeTime.from
 		const to = this.data.activeTime.to
 
