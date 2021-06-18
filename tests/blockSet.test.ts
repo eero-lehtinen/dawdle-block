@@ -159,3 +159,21 @@ describe("test BlockSet methods", () => {
 		expect(blockSet.isInActiveWeekday(42)).toBe(false)
 	})
 })
+
+describe("test BlockSet url matching", () => {
+	it.todo("returns Blacklisted when url is contained in black list")
+
+	it.todo("returns Whitelisted when url is contained in white list")
+
+	it.todo("whitelisting overrides blacklisting")
+
+	it.todo("returns Ignored when url is not contained in whole block set")
+
+	it.todo("rules with wildcards work")
+
+	it.todo("rules with RegExps work")
+
+	it.todo("youTube channel rules work")
+
+	it.todo("youTube category rules work")
+})
