@@ -54,7 +54,7 @@ describe("test BlockSet construction parameters", () => {
 				{ type: "urlSuffix", value: "test" },
 				{ type: "urlRegexp", value: "test" },
 				{ type: "ytChannel", value: { id: "channelid", name: "testchannel" } },
-				{ type: "ytCategory", value: { id: "categoryid", name: "testcategory" } },
+				{ type: "ytCategory", value: { id: 42, name: "testcategory" } },
 			],
 		}
 
@@ -73,7 +73,7 @@ describe("test BlockSet construction parameters", () => {
 					{ id: "channelid", name: "testchannel" },
 				],
 				ytCategories: [
-					{ id: "categoryid", name: "testcategory" },
+					{ id: 42, name: "testcategory" },
 				],
 			},
 		}

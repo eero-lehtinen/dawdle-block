@@ -4,6 +4,7 @@
  */
 
 import { z } from "zod"
+import { escapeToPattern } from "./utils"
 
 const zBlockSetIds = z.array(z.number().int().nonnegative())
 export type BlockSetIds = z.infer<typeof zBlockSetIds>
@@ -28,20 +29,30 @@ const zActiveTime = z.object({
 	to: z.number().int().default(0),
 }).default({})
 
-const zBlockRuleYtV0 = z.object({
-	type: z.enum(["ytChannel", "ytCategory"]),
+const zBlockRuleYTChannelV0 = z.object({
+	type: z.literal("ytChannel"),
 	value: z.object({
 		name: z.string(),
 		id: z.string(),
 	}),
 })
 
+
+const zBlockRuleYTCategoryV0 = z.object({
+	type: z.literal("ytCategory"),
+	value: z.object({
+		name: z.string(),
+		id: z.number().int().nonnegative(),
+	}),
+})
+
+
 const zBlockRuleUrlV0 = z.object({
 	type: z.enum(["urlEquals", "urlContains", "urlPrefix", "urlSuffix", "urlRegexp"]),
 	value: z.string(),
 })
 
-const zBlockRuleV0 = z.union([zBlockRuleYtV0, zBlockRuleUrlV0])
+const zBlockRuleV0 = z.union([zBlockRuleYTChannelV0, zBlockRuleYTCategoryV0, zBlockRuleUrlV0])
 
 // Original blockset options data structure
 const zBlockSetDataV0 = z.object({
@@ -61,18 +72,21 @@ const zBlockSetDataV0 = z.object({
 
 const zBlockRuleUrlV1 = z.string()
 
-const zBlockRuleYtV1 = z.object({
+const zBlockRuleYTChannelV1 = z.object({
 	id: z.string(),
 	name: z.string(),
 })
 
-export type BlockRuleYt = z.infer<typeof zBlockRuleYtV1>
+const zBlockRuleYTCategoryV1 = z.object({
+	id: z.number().int().nonnegative(),
+	name: z.string(),
+})
 
 const zBlockListV1 = z.object({
 	urlPatterns: z.array(zBlockRuleUrlV1).default([]),
 	urlRegExps: z.array(zBlockRuleUrlV1).default([]),
-	ytChannels: z.array(zBlockRuleYtV1).default([]),
-	ytCategories: z.array(zBlockRuleYtV1).default([]),
+	ytChannels: z.array(zBlockRuleYTChannelV1).default([]),
+	ytCategories: z.array(zBlockRuleYTCategoryV1).default([]),
 }).default({})
 
 // Most recent blockset options data structure version with 
@@ -143,8 +157,8 @@ const convertV0toV1 = (blockSet: any) => {
 		for (const blockRule of blockSet[list]) {
 
 			// Escape *-characters, because they are used as wildcards in v1
-			if (!blockRule.type.startsWith("yt")) {
-				blockRule.value = blockRule.value.replace(/\*/g, "\\*")
+			if (["urlEquals", "urlContains", "urlPrefix", "urlSuffix"].includes(blockRule.type)) {
+				blockRule.value = escapeToPattern(blockRule.value)
 			}
 
 			// Switch from old block list structure to new.
