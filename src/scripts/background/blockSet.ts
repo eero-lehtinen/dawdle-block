@@ -81,6 +81,25 @@ export class BlockSet {
 		return !!this.data.activeDays[weekdayNumber]
 	}
 
+	addPattern(listType: ListType, pattern: string): void {
+		this.data[listType].urlPatterns.push(pattern)
+		this.compiledUrlRules[listType].push(new RegExp(escapeToWildcardRegExp(pattern)))
+	}
+
+	addRegExp(listType: ListType, regExp: string): void {
+		this.data[listType].urlRegExps.push(regExp)
+		this.compiledUrlRules[listType].push(new RegExp(regExp))
+	}
+
+	async addYTChannel(_listType: ListType, _channelId: string): Promise<void> {
+		// TODO: check channel validity from google api
+	}
+
+	async addYTCategory(_listType: ListType, _categoryId: number): Promise<void> {
+		// TODO: check category validity from google api
+	}
+
+
 	test(url: string, channelId: string | undefined, categoryId: number | undefined): BlockTestRes {
 		if (this.testList(ListType.Whitelist, url, channelId, categoryId)) {
 			return BlockTestRes.Whitelisted
