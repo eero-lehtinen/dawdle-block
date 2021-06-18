@@ -43,18 +43,18 @@ export class BlockSet {
 
 	/**
 	 * Compile user written block rules into machine friendly regular expressions.
-	 * @param rulesType whitelist or blacklist (if not set, do both)
+	 * @param listType whitelist or blacklist (if not set, do both)
 	 * 
 	 */
-	private compileRules(rulesType?: ListType): void {
-		if (!rulesType) {
+	private compileRules(listType?: ListType): void {
+		if (!listType) {
 			this.compileRules(ListType.Whitelist)
 			this.compileRules(ListType.Blacklist)
 			return
 		}
-		this.compiledUrlRules[rulesType] = [
-			...this.data[rulesType].urlRegExps.map((value: string) => new RegExp(value)),
-			...this.data[rulesType].urlPatterns.map((value: string) => new RegExp(escapeToWildcardRegExp(value))),
+		this.compiledUrlRules[listType] = [
+			...this.data[listType].urlRegExps.map((value: string) => new RegExp(value)),
+			...this.data[listType].urlPatterns.map((value: string) => new RegExp(escapeToWildcardRegExp(value))),
 		]
 	}
 
@@ -62,6 +62,13 @@ export class BlockSet {
 		return this.data
 	}
 
+	/**
+	 * If from is less than to, returns true when msSinceMidnight is between user defined active time to and from.
+	 * If from is greater than to, active time is effectively over night eg. from 22.00 at night to 7.00 in the morning
+	 * and returns are reversed.
+	 * @param msSinceMidnight milliseconds starting from today 00:00 o'clock
+	 * @returns true if in active time, false otherwise
+	 */
 	isInActiveTime(msSinceMidnight: number): boolean {
 		const from = this.data.activeTime.from
 		const to = this.data.activeTime.to
@@ -77,6 +84,10 @@ export class BlockSet {
 		}
 	}
 
+	/**
+	 * @param weekdayNumber numbers 0 to 6
+	 * @returns true if supplied weekdayNumber is set to active, false otherwise
+	 */
 	isInActiveWeekday(weekdayNumber: number): boolean {
 		return !!this.data.activeDays[weekdayNumber]
 	}

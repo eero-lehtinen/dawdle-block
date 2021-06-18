@@ -41,6 +41,7 @@ export const escapeToWildcardRegExp = (string: string): string =>
 
 /**
  * Escape characters reserved for patterns. Currently only *.
+ * Useful when converting raw urls (that may contain reserved characters) into patterns.
  * @param string string to escape
  * @returns escaped string safe to use as pattern
  */
