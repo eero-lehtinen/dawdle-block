@@ -3,8 +3,9 @@
  */
 
 import { browser } from "webextension-polyfill-ts"
-import { BlockSet } from "./blockSet"
+import { BlockSet, BlockTestRes } from "./blockSet"
 import { BlockSetIds, plainToBlockSetIds, plainToBlockSetTimesElapsed } from "./blockSetParser"
+import { decompress, timeToMSSinceMidnight } from "./utils"
 
 export const bsIdsSaveKey = "blocksetIds"
 export const bsTimesElapsedSaveKey = "blocksetTimesElapsed"
@@ -63,7 +64,12 @@ export class BlockSetManager {
 		const blockSetRes = await browser.storage.sync.get(blockSetQuery)
 
 		for(const id of this.blockSetIds) {
-			this.blockSets[id] = new BlockSet(blockSetRes[id])
+			if (typeof blockSetRes[id] === "string") {
+				this.blockSets[id] = new BlockSet(decompress(blockSetRes[id]))
+			}
+			else {
+				this.blockSets[id] = new BlockSet(blockSetRes[id])
+			}
 		}
 	}
 
@@ -80,20 +86,31 @@ export class BlockSetManager {
 	}
 
 	/**
-	 * Return a list of block sets that want to block this url.
+	 * Return a list of block set ids that want to block this url.
 	 * @param url url to check against
 	 */
-	/*blockedBy(url: string): Promise<number[]> {
+	async blockedBy(url: string): Promise<number[]> {
+		const blockingBSIds : number[] = []
+
+		const now = new Date()
+		const msSinceMidnight = timeToMSSinceMidnight(now)
+		const weekDay = now.getDay()
 		for (const id of this.blockSetIds) {
-		// if today is not an active day | or not in active hours
-			if (!blocksetDatas[id].activeDays[currentWeekDay] || !isInActiveTime(now, id)) 
+			const blockSet = this.blockSets[id]
+			if (!blockSet) {
+				throw new Error("BlockSets and BlockSetIds not in sync!!")
+			}
+
+			// if today is not an active day | or not in active hours
+			if (!blockSet.isInActiveWeekday(weekDay) || !blockSet.isInActiveTime(msSinceMidnight)) 
 				continue
 
-			if (!wlRegEx[id].some((regEx) => regEx.test(url) === true)) { // if not in whitelist
-				if (blRegEx[id].some((regEx) => regEx.test(url) === true)) { // if is in blacklist
-					blocksetIdList.push(id)
-				}
+			const blockResult = blockSet.test(url, undefined, undefined)
+
+			if (blockResult === BlockTestRes.Blacklisted) {
+				blockingBSIds.push(id)
 			}
 		}
-	}*/
+		return Promise.resolve(blockingBSIds)
+	}
 }

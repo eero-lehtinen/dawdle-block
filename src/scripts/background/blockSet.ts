@@ -2,12 +2,18 @@
  * @file Contains BlockSet class implementation.
  */
 
-import { BlockSetData, BlockRuleYt, plainToBlockSetData, createDefaultBlockSet } from "./blockSetParser"
+import { BlockSetData, plainToBlockSetData, createDefaultBlockSet } from "./blockSetParser"
 import { escapeToWildcardRegExp } from "./utils"
 
 export enum ListType {
 	Blacklist = "blacklist",
 	Whitelist = "whitelist",
+}
+
+export enum BlockTestRes {
+	Blacklisted,
+	Whitelisted,
+	Ignored
 }
 
 type CompiledRules = Record<ListType, RegExp[]>
@@ -75,15 +81,22 @@ export class BlockSet {
 		return !!this.data.activeDays[weekdayNumber]
 	}
 
-	getUrlRules(rulesType: ListType): RegExp[] { 
-		return this.compiledUrlRules[rulesType]
+	test(url: string, channelId: string | undefined, categoryId: number | undefined): BlockTestRes {
+		if (this.testList(ListType.Whitelist, url, channelId, categoryId)) {
+			return BlockTestRes.Whitelisted
+		}
+
+		if (this.testList(ListType.Blacklist, url, channelId, categoryId)) {
+			return BlockTestRes.Whitelisted
+		}
+		
+		return BlockTestRes.Ignored
 	}
 
-	getYTChannelRules(rulesType: ListType): BlockRuleYt[] { 
-		return this.data[rulesType].ytChannels
-	}
-
-	getYTCategoryRules(rulesType: ListType): BlockRuleYt[] { 
-		return this.data[rulesType].ytCategories
+	private testList(listType: ListType, url: string, channelId: string | undefined, 
+		categoryId: number | undefined): boolean {
+		return this.compiledUrlRules[listType].some((regExp) => regExp.test(url)) ||
+			channelId ? this.data[listType].ytChannels.some(({ id }) => id === channelId) : false ||
+			categoryId ? this.data[listType].ytCategories.some(({ id }) => id === categoryId) : false
 	}
 }
