@@ -120,7 +120,7 @@ export const plainToBlockSetData =
 	throw new Error("Can't parse to block set")
 }
 
-export const createDefaultBlockSet = () : BlockSetData => {
+export const createDefaultBlockSet = (): BlockSetData => {
 	return zBlockSetDataV1.parse({ v: 1 })
 }
 

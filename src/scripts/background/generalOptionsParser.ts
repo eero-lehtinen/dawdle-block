@@ -26,6 +26,6 @@ export const plainToGeneralOptions =
 	return zGeneralOptionsV1.parse(obj)
 }
 
-export const createDefaultGeneralOptions = () : GeneralOptions => {
+export const createDefaultGeneralOptions = (): GeneralOptions => {
 	return zGeneralOptionsV1.parse({ v: 1 })
 }

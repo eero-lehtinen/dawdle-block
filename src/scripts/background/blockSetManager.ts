@@ -90,7 +90,7 @@ export class BlockSetManager {
 	 * @param url url to check against
 	 */
 	async blockedBy(url: string): Promise<number[]> {
-		const blockingBSIds : number[] = []
+		const blockingBSIds: number[] = []
 
 		const now = new Date()
 		const msSinceMidnight = timeToMSSinceMidnight(now)
