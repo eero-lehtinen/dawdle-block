@@ -111,7 +111,7 @@ export class BlockSet {
 	}
 
 
-	test(url: string, channelId: string | undefined, categoryId: number | undefined): BlockTestRes {
+	test(url: string, channelId: string | undefined, categoryId: string | undefined): BlockTestRes {
 		if (this.testList(ListType.Whitelist, url, channelId, categoryId)) {
 			return BlockTestRes.Whitelisted
 		}
@@ -124,7 +124,7 @@ export class BlockSet {
 	}
 
 	private testList(listType: ListType, url: string, channelId: string | undefined, 
-		categoryId: number | undefined): boolean {
+		categoryId: string | undefined): boolean {
 		return this.compiledUrlRules[listType].some((regExp) => regExp.test(url)) ||
 			channelId ? this.data[listType].ytChannels.some(({ id }) => id === channelId) : false ||
 			categoryId ? this.data[listType].ytCategories.some(({ id }) => id === categoryId) : false

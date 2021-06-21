@@ -29,20 +29,11 @@ const zActiveTime = z.object({
 	to: z.number().int().default(0),
 }).default({})
 
-const zBlockRuleYTChannelV0 = z.object({
-	type: z.literal("ytChannel"),
+const zBlockRuleYTV0 = z.object({
+	type: z.enum(["ytChannel", "ytCategory"]),
 	value: z.object({
 		name: z.string(),
 		id: z.string(),
-	}),
-})
-
-
-const zBlockRuleYTCategoryV0 = z.object({
-	type: z.literal("ytCategory"),
-	value: z.object({
-		name: z.string(),
-		id: z.number().int().nonnegative(),
 	}),
 })
 
@@ -52,7 +43,7 @@ const zBlockRuleUrlV0 = z.object({
 	value: z.string(),
 })
 
-const zBlockRuleV0 = z.union([zBlockRuleYTChannelV0, zBlockRuleYTCategoryV0, zBlockRuleUrlV0])
+const zBlockRuleV0 = z.union([zBlockRuleYTV0, zBlockRuleUrlV0])
 
 // Original blockset options data structure
 const zBlockSetDataV0 = z.object({
@@ -72,21 +63,16 @@ const zBlockSetDataV0 = z.object({
 
 const zBlockRuleUrlV1 = z.string()
 
-const zBlockRuleYTChannelV1 = z.object({
+const zBlockRuleYTV1 = z.object({
 	id: z.string(),
-	name: z.string(),
-})
-
-const zBlockRuleYTCategoryV1 = z.object({
-	id: z.number().int().nonnegative(),
 	name: z.string(),
 })
 
 const zBlockListV1 = z.object({
 	urlPatterns: z.array(zBlockRuleUrlV1).default([]),
 	urlRegExps: z.array(zBlockRuleUrlV1).default([]),
-	ytChannels: z.array(zBlockRuleYTChannelV1).default([]),
-	ytCategories: z.array(zBlockRuleYTCategoryV1).default([]),
+	ytChannels: z.array(zBlockRuleYTV1).default([]),
+	ytCategories: z.array(zBlockRuleYTV1).default([]),
 }).default({})
 
 // Most recent blockset options data structure version with 
