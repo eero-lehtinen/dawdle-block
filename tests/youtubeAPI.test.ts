@@ -10,9 +10,9 @@ describe("test youtube api fetching", () => {
 	it("returns correct results with a valid id", async() => {
 		mockedFetch.mockResolvedValue({
 			status: 200, 
-			json: async() => Promise.resolve({
-				items: [{ snippet: { channelId: "UC_x5XG1OV2P6uZZ5FSM9Ttw", categoryId: "22" } }],
-			}), 
+			json: async() => {
+				return { items: [{ snippet: { channelId: "UC_x5XG1OV2P6uZZ5FSM9Ttw", categoryId: "22" } }] }
+			}, 
 		} as Response)
 		
 		const res = await fetchYtVideoInfo("ylLzyHk54Z0")
@@ -23,9 +23,7 @@ describe("test youtube api fetching", () => {
 	it("throws 'Video not found' error when id is invalid", async() => {
 		mockedFetch.mockResolvedValue({
 			status: 200, 
-			json: async() => Promise.resolve({
-				items: [],
-			}),	
+			json: async() => {return { items: [] }},	
 		} as Response)
 
 		await expect(fetchYtVideoInfo("")).rejects.toThrowError("Video not found")
