@@ -37,9 +37,6 @@ export const ytCategoryNamesById = {
 	44: "Trailers",
 }
 
-export const ytApiKey = 
-	"A%49%7a%61%53y%42O%4f%6e%39%79%2dbx%42%38%4c%48k%2d%35%51%36%4e%44tq%63y9%5f%46%48%6a%35R%484"
-
 export const typingTestWords = [
 	"of",
 	"to",
