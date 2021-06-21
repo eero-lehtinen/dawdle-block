@@ -8,7 +8,7 @@ jest.mock("webextension-polyfill-ts", () => ({ browser }))
 import { BlockSetManager, bsIdsSaveKey, bsTimesElapsedSaveKey } from "../src/scripts/background/blockSetManager"
 import { BlockSet } from "../src/scripts/background/blockSet"
 import { BlockSetIds, BlockSetTimesElapsed } from "../src/scripts/background/blockSetParser"
-import { compress } from "../src/scripts/background/utils"
+import { compress } from "../src/scripts/background/compression"
 
 
 const setUpMockStorage = ({ idReturn, elapsedReturn }: 

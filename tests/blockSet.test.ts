@@ -1,5 +1,5 @@
 import { BlockSet } from "../src/scripts/background/blockSet"
-import { timeToMSSinceMidnight } from "../src/scripts/background/utils"
+import { timeToMSSinceMidnight } from "../src/scripts/background/timeUtils"
 
 describe("test BlockSet construction parameters", () => {
 	const defaultBlockSetData = new BlockSet().getData()
@@ -157,6 +157,27 @@ describe("test BlockSet methods", () => {
 		const blockSet = new BlockSet()
 		expect(blockSet.isInActiveWeekday(-1000)).toBe(false)
 		expect(blockSet.isInActiveWeekday(42)).toBe(false)
+	})
+})
+
+describe("test wildcarded pattern escaping", () => {
+	it("can escape a basic example", () => {
+		expect(BlockSet.patternToRegExp("[.*\\*+?^${}()|[]\\]äö❤"))
+			.toStrictEqual(String.raw`\[\..*\*\+\?\^\$\{\}\(\)\|\[\]\\\]äö❤`)
+	})
+
+	it("replaces wildcards(*) with regexp wildcards(.*)", () => {
+		expect(BlockSet.patternToRegExp("a*b*")).toStrictEqual("a.*b.*")
+	})
+
+	it("does not replace already escaped wildcards(*)", () => {
+		expect(BlockSet.patternToRegExp(String.raw`a\*b\*`)).toStrictEqual(String.raw`a\*b\*`)
+	})
+})
+
+describe("test pattern escaping", () => {
+	it("escapes *-characters", () => {
+		expect(BlockSet.urlToPattern("**a*-.0/{")).toStrictEqual("\\*\\*a\\*-.0/{")
 	})
 })
 

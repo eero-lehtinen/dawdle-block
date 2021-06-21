@@ -4,7 +4,7 @@
  */
 
 import { z } from "zod"
-import { escapeToPattern } from "./utils"
+import { BlockSet } from "./blockSet"
 
 const zBlockSetIds = z.array(z.number().int().nonnegative())
 export type BlockSetIds = z.infer<typeof zBlockSetIds>
@@ -144,7 +144,7 @@ const convertV0toV1 = (blockSet: any) => {
 
 			// Escape *-characters, because they are used as wildcards in v1
 			if (["urlEquals", "urlContains", "urlPrefix", "urlSuffix"].includes(blockRule.type)) {
-				blockRule.value = escapeToPattern(blockRule.value)
+				blockRule.value = BlockSet.urlToPattern(blockRule.value)
 			}
 
 			// Switch from old block list structure to new.

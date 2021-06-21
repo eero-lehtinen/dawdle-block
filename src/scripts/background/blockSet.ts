@@ -3,7 +3,6 @@
  */
 
 import { BlockSetData, plainToBlockSetData, createDefaultBlockSet } from "./blockSetParser"
-import { escapeToWildcardRegExp } from "./utils"
 
 export enum ListType {
 	Blacklist = "blacklist",
@@ -54,7 +53,7 @@ export class BlockSet {
 		}
 		this.compiledUrlRules[listType] = [
 			...this.data[listType].urlRegExps.map((value: string) => new RegExp(value)),
-			...this.data[listType].urlPatterns.map((value: string) => new RegExp(escapeToWildcardRegExp(value))),
+			...this.data[listType].urlPatterns.map((value: string) => new RegExp(BlockSet.patternToRegExp(value))),
 		]
 	}
 
@@ -94,7 +93,7 @@ export class BlockSet {
 
 	addPattern(listType: ListType, pattern: string): void {
 		this.data[listType].urlPatterns.push(pattern)
-		this.compiledUrlRules[listType].push(new RegExp(escapeToWildcardRegExp(pattern)))
+		this.compiledUrlRules[listType].push(new RegExp(BlockSet.patternToRegExp(pattern)))
 	}
 
 	addRegExp(listType: ListType, regExp: string): void {
@@ -128,5 +127,38 @@ export class BlockSet {
 		return this.compiledUrlRules[listType].some((regExp) => regExp.test(url)) ||
 			channelId ? this.data[listType].ytChannels.some(({ id }) => id === channelId) : false ||
 			categoryId ? this.data[listType].ytCategories.some(({ id }) => id === categoryId) : false
+	}
+
+	/**
+	 * Escape user defined strings to be used in regular expressions for exact matching with wildcards.
+	 * Part of regular expression copied from MDN 
+	 * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#escaping.
+	 * @param string string to escape
+	 * @returns escaped string
+	 */
+	static patternToRegExp(string: string): string {
+		return string.replace(/(\\\*)|(\*)|([.+?^${}()|[\]\\])/g, 
+			(_, p1, p2, p3): string => {
+			// If we found an escaped wildcard, just return it
+				if (p1)
+					return p1
+
+				// If we found an unescaped wildcard, replace it with a regular expression wildcard
+				if (p2)
+					return ".*"
+			
+				// Otherwise just escape the forbidden character
+				return `\\${p3}`
+			})
+	}
+
+	/**
+	 * Escape characters reserved for patterns. Currently only *.
+	 * Useful when converting raw urls (that may contain reserved characters) into patterns.
+	 * @param string string to escape
+	 * @returns escaped string safe to use as pattern
+	 */
+	static urlToPattern(string: string): string {
+		return string.replace(/\*/g, String.raw`\*`)
 	}
 }
