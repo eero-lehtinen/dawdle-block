@@ -9,37 +9,41 @@ const mockedFetch = mocked(fetch, true)
 const getLatestFetchParams = () => mockedFetch.mock.calls[mockedFetch.mock.calls.length - 1]
 
 describe("test YouTube API error states", () => {
+	const nullResult = { channelId: null, categoryId: null }
+
 	it("returns null values when YouTube isn't in the beginning of the url", async() => {
-		await expect(getYtBlockingInfo("asd")).resolves.toStrictEqual({ channelId: null, categoryId: null })
-		await expect(getYtBlockingInfo("asdwww.youtube.com")).resolves.toStrictEqual({ channelId: null, categoryId: null })
+		await expect(getYtBlockingInfo("asd")).resolves.toStrictEqual(nullResult)
+		await expect(getYtBlockingInfo("asdwww.youtube.com")).resolves.toStrictEqual(nullResult)
 	})
 
 	it("returns null values when YouTube is not on channel, playlist or video page", async() => {
-		await expect(getYtBlockingInfo("www.youtube.com/feed/subscriptions"))
-			.resolves.toStrictEqual({ channelId: null, categoryId: null })
+		await expect(getYtBlockingInfo("www.youtube.com/feed/subscriptions")).resolves.toStrictEqual(nullResult)
 	})
 
 	it("returns null values when YouTube is on a valid page but id can't be located in url", async() => {
 		// No "v=" included, which we use to locate the id
-		await expect(getYtBlockingInfo("www.youtube.com/watch?asdfasdf&t=42"))
-			.resolves.toStrictEqual({ channelId: null, categoryId: null })
+		await expect(getYtBlockingInfo("www.youtube.com/watch?asdfasdf&t=42")).resolves.toStrictEqual(nullResult)
 	})
-	
-	it("throws 'Response is empty' error when channel with this id isn't found", async() => {
+
+	it("return null values and logs error when channel with this id isn't found", async() => {
+		const warnSpy = jest.spyOn(console, "warn")
 		mockedFetch.mockResolvedValueOnce({
 			status: 200, 
 			json: async() => {return { items: [] }},	
 		} as Response)
 
-		await expect(getYtBlockingInfo("www.youtube.com/watch?v=asd")).rejects.toThrowError("Response is empty")
+		await expect(getYtBlockingInfo("www.youtube.com/watch?v=asd")).resolves.toStrictEqual(nullResult)
+		expect(warnSpy).toHaveBeenLastCalledWith("Response is empty")
 	})
 
-	it("throws 'Request failed' error when request status is not 200", async() => {
+	it("return null values and logs error when request status is not 200", async() => {
+		const warnSpy = jest.spyOn(console, "warn")
 		mockedFetch.mockResolvedValueOnce({
 			status: 404, 
 		} as Response)
 		
-		await expect(getYtBlockingInfo("www.youtube.com/watch?v=asd")).rejects.toThrowError("Request failed")
+		await expect(getYtBlockingInfo("www.youtube.com/watch?v=asd")).resolves.toStrictEqual(nullResult)
+		expect(warnSpy).toHaveBeenLastCalledWith("Request failed")
 	})
 })
 

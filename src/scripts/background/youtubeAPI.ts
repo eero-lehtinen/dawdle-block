@@ -19,32 +19,35 @@ interface YtBlockingInfo {
  * Returns null for both if url is not a channel, video or playlist.
  * @param url URL with no protocols (e.g. "https://")
  * @returns blocking results
- * @throws "Request failed" when YouTube data API is unavailable or returns an error
- * @throws "Response is empty" when ids are not in found in YouTube databases
  */
 export const getYtBlockingInfo = async(url: string): Promise<YtBlockingInfo> => {
 	if (!url.startsWith(ytUrl)) {
 		return { channelId: null, categoryId: null }
 	}
-	
-	const videoId = findVideoId(url)
-	if (videoId) {
-		return await fetchVideoBlockingInfo(videoId)
-	}
 
-	const channelId = findChannelId(url)
-	if (channelId) {
-		return { channelId: channelId, categoryId: null }
-	}
+	try {
+		const videoId = findVideoId(url)
+		if (videoId) {
+			return await fetchVideoBlockingInfo(videoId)
+		}
 
-	const channelUsername = findChannelUsername(url)
-	if (channelUsername) {
-		return await fetchChannelBlockingInfo(channelUsername)
-	}
+		const channelId = findChannelId(url)
+		if (channelId) {
+			return { channelId: channelId, categoryId: null }
+		}
 
-	const playlistId = findPlaylistId(url)
-	if (playlistId && !url.includes("playnext=1")) {
-		return await fetchPlaylistBlockingInfo(playlistId)
+		const channelUsername = findChannelUsername(url)
+		if (channelUsername) {
+			return await fetchChannelBlockingInfo(channelUsername)
+		}
+
+		const playlistId = findPlaylistId(url)
+		if (playlistId && !url.includes("playnext=1")) {
+			return await fetchPlaylistBlockingInfo(playlistId)
+		}
+	}
+	catch (err) {
+		console.warn(err.message)
 	}
 
 	return { channelId: null, categoryId: null }
