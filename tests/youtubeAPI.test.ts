@@ -26,7 +26,7 @@ describe("test YouTube API error states", () => {
 	})
 
 	it("return null values and logs error when channel with this id isn't found", async() => {
-		const warnSpy = jest.spyOn(console, "warn")
+		const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {/* do nothing */})
 		mockedFetch.mockResolvedValueOnce({
 			status: 200, 
 			json: async() => {return { items: [] }},	
@@ -37,7 +37,7 @@ describe("test YouTube API error states", () => {
 	})
 
 	it("return null values and logs error when request status is not 200", async() => {
-		const warnSpy = jest.spyOn(console, "warn")
+		const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {/* do nothing */})
 		mockedFetch.mockResolvedValueOnce({
 			status: 404, 
 		} as Response)
