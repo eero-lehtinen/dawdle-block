@@ -13,9 +13,9 @@ export const bsTimesElapsedSaveKey = "blocksetTimesElapsed"
 
 export class BlockSetManager {
 
-	private blockSetIds: BlockSetIds = [];
-	private blockSetTimesElapsed: (number | undefined)[] = [];
-	private blockSets: (BlockSet | undefined)[] = [];
+	private blockSetIds: BlockSetIds = []
+	private blockSetTimesElapsed: (number | undefined)[] = []
+	private blockSets: (BlockSet | undefined)[] = []
 
 	private constructor() {}
 

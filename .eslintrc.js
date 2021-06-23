@@ -76,6 +76,8 @@ module.exports = {
 				"@typescript-eslint/no-empty-function": ["error", {
 					"allow": ["private-constructors"] }],
 				"@typescript-eslint/type-annotation-spacing": "error",
+				"semi": "off",
+				"@typescript-eslint/semi": ["error", "never"],
 			},
 		},
 	],
