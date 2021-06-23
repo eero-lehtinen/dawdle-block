@@ -91,9 +91,11 @@ export class BlockSet {
 		return !!this.data.activeDays[weekdayNumber]
 	}
 
-	addPattern(listType: ListType, pattern: string): void {
+	addPattern(listType: ListType, pattern: string): boolean {
+		if (this.data[listType].urlPatterns.includes(pattern)) return false
 		this.data[listType].urlPatterns.push(pattern)
 		this.compiledUrlRules[listType].push(BlockSet.patternToRegExp(pattern))
+		return true
 	}
 
 	removePattern(listType: ListType, pattern: string): void {
@@ -102,10 +104,12 @@ export class BlockSet {
 		this.data[listType].urlPatterns = this.data[listType].urlPatterns.filter((p) => p !== pattern)
 	}	
 
-	addRegExp(listType: ListType, regExp: string): void {
+	addRegExp(listType: ListType, regExp: string): boolean {
+		if (this.data[listType].urlRegExps.includes(regExp)) return false
 		const compiledRegExp = new RegExp(regExp)
 		this.data[listType].urlRegExps.push(regExp)
 		this.compiledUrlRules[listType].push(compiledRegExp)
+		return true
 	}
 	
 	removeRegExp(listType: ListType, regExp: string): void {

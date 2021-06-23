@@ -189,10 +189,18 @@ describe("test pattern escaping", () => {
 	})
 })
 
-describe("test BlockSet url matching", () => {
+describe("test BlockSet rule matching", () => {
 	let blockSet: BlockSet
 	beforeEach(() => {
 		blockSet = new BlockSet()
+	})
+
+	it("can't add duplicate rules", () => {
+		expect(blockSet.addPattern(ListType.Whitelist, "a")).toStrictEqual(true)
+		expect(blockSet.addPattern(ListType.Whitelist, "a")).toStrictEqual(false)
+
+		expect(blockSet.addRegExp(ListType.Whitelist, "a")).toStrictEqual(true)
+		expect(blockSet.addRegExp(ListType.Whitelist, "a")).toStrictEqual(false)
 	})
 
 	it("returns Blacklisted when url is contained in black list", () => {
