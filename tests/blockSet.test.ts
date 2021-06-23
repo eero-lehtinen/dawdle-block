@@ -163,15 +163,15 @@ describe("test BlockSet methods", () => {
 describe("test wildcarded pattern escaping", () => {
 	it("can escape a basic example", () => {
 		expect(BlockSet.patternToRegExp("[.*\\*+?^${}()|[]\\]äö❤"))
-			.toStrictEqual(String.raw`\[\..*\*\+\?\^\$\{\}\(\)\|\[\]\\\]äö❤`)
+			.toStrictEqual(new RegExp(String.raw`\[\..*\*\+\?\^\$\{\}\(\)\|\[\]\\\]äö❤`))
 	})
 
 	it("replaces wildcards(*) with regexp wildcards(.*)", () => {
-		expect(BlockSet.patternToRegExp("a*b*")).toStrictEqual("a.*b.*")
+		expect(BlockSet.patternToRegExp("a*b*")).toStrictEqual(new RegExp("a.*b.*"))
 	})
 
 	it("does not replace already escaped wildcards(*)", () => {
-		expect(BlockSet.patternToRegExp(String.raw`a\*b\*`)).toStrictEqual(String.raw`a\*b\*`)
+		expect(BlockSet.patternToRegExp(String.raw`a\*b\*`)).toStrictEqual(new RegExp(String.raw`a\*b\*`))
 	})
 })
 

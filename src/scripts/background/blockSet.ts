@@ -53,7 +53,7 @@ export class BlockSet {
 		}
 		this.compiledUrlRules[listType] = [
 			...this.data[listType].urlRegExps.map((value: string) => new RegExp(value)),
-			...this.data[listType].urlPatterns.map((value: string) => new RegExp(BlockSet.patternToRegExp(value))),
+			...this.data[listType].urlPatterns.map((value: string) => BlockSet.patternToRegExp(value)),
 		]
 	}
 
@@ -136,20 +136,21 @@ export class BlockSet {
 	 * @param string string to escape
 	 * @returns escaped string
 	 */
-	static patternToRegExp(string: string): string {
-		return string.replace(/(\\\*)|(\*)|([.+?^${}()|[\]\\])/g, 
-			(_, p1, p2, p3): string => {
-			// If we found an escaped wildcard, just return it
-				if (p1)
-					return p1
+	static patternToRegExp(string: string): RegExp {
+		return new RegExp(
+			string.replace(/(\\\*)|(\*)|([.+?^${}()|[\]\\])/g, 
+				(_, p1, p2, p3): string => {
+					// If we found an escaped wildcard, just return it
+					if (p1)
+						return p1
 
-				// If we found an unescaped wildcard, replace it with a regular expression wildcard
-				if (p2)
-					return ".*"
+					// If we found an unescaped wildcard, replace it with a regular expression wildcard
+					if (p2)
+						return ".*"
 			
-				// Otherwise just escape the forbidden character
-				return `\\${p3}`
-			})
+					// Otherwise just escape the forbidden character
+					return `\\${p3}`
+				}))
 	}
 
 	/**
