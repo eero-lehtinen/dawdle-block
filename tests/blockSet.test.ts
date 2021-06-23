@@ -196,11 +196,20 @@ describe("test BlockSet rule matching", () => {
 	})
 
 	it("can't add duplicate rules", () => {
-		expect(blockSet.addPattern(ListType.Whitelist, "a")).toStrictEqual(true)
-		expect(blockSet.addPattern(ListType.Whitelist, "a")).toStrictEqual(false)
+		blockSet.addPattern(ListType.Whitelist, "a")
+		expect(() => blockSet.addPattern(ListType.Whitelist, "a")).toThrowError("Can't add duplicate")
 
-		expect(blockSet.addRegExp(ListType.Whitelist, "a")).toStrictEqual(true)
-		expect(blockSet.addRegExp(ListType.Whitelist, "a")).toStrictEqual(false)
+		blockSet.addRegExp(ListType.Whitelist, "a")
+		expect(() => blockSet.addRegExp(ListType.Whitelist, "a")).toThrowError("Can't add duplicate")
+
+		blockSet.addYTCategory(ListType.Whitelist, "10")
+		expect(() => blockSet.addYTCategory(ListType.Whitelist, "10")).toThrowError("Can't add duplicate")
+	})
+
+	it("can't add invalid YouTube categories", () => {
+		blockSet.addYTCategory(ListType.Whitelist, "10")
+		expect(() => blockSet.addYTCategory(ListType.Whitelist, "a")).toThrowError("Invalid YouTube category id")
+		expect(() => blockSet.addYTCategory(ListType.Whitelist, "100")).toThrowError("Invalid YouTube category id")
 	})
 
 	it("returns Blacklisted when url is contained in black list", () => {
@@ -235,7 +244,7 @@ describe("test BlockSet rule matching", () => {
 		expect(blockSet.test("test", null, null)).toStrictEqual(BlockTestRes.Ignored)
 	})
 
-	it("can test rules with RegExps", () => {
+	it("can test RegExp rules", () => {
 		blockSet.addRegExp(ListType.Blacklist, "^test\\w*$")
 		blockSet.addRegExp(ListType.Whitelist, "^test$")
 		expect(blockSet.test("testwithwords", null, null)).toStrictEqual(BlockTestRes.Blacklisted)
@@ -245,6 +254,18 @@ describe("test BlockSet rule matching", () => {
 		blockSet.removeRegExp(ListType.Whitelist, "^test$")
 		expect(blockSet.test("testwithwords", null, null)).toStrictEqual(BlockTestRes.Ignored)
 		expect(blockSet.test("test", null, null)).toStrictEqual(BlockTestRes.Ignored)
+	})
+
+	it("can test YouTube channel rules", () => {
+		blockSet.addYTCategory(ListType.Blacklist, "1")
+		blockSet.addYTCategory(ListType.Whitelist, "10")
+		expect(blockSet.test("", null, "1")).toStrictEqual(BlockTestRes.Blacklisted)
+		expect(blockSet.test("", null, "10")).toStrictEqual(BlockTestRes.Whitelisted)
+
+		blockSet.removeYTCategory(ListType.Blacklist, "1")
+		blockSet.removeYTCategory(ListType.Whitelist, "10")
+		expect(blockSet.test("", null, "1")).toStrictEqual(BlockTestRes.Ignored)
+		expect(blockSet.test("", null, "10")).toStrictEqual(BlockTestRes.Ignored)
 	})
 
 	it.todo("youTube channel rules can be tested")

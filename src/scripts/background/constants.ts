@@ -2,7 +2,7 @@
  * @file General constant values
  */
 
-export const ytCategoryNamesById = {
+export const ytCategoryNamesById: Record<string, string> = {
 	1: "Film & Animation",
 	2: "Autos & Vehicles",
 	10: "Music",

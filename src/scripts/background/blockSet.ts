@@ -3,6 +3,7 @@
  */
 
 import { BlockSetData, plainToBlockSetData, createDefaultBlockSet, BlockList } from "./blockSetParser"
+import { ytCategoryNamesById } from "./constants"
 
 export enum ListType {
 	Blacklist = "blacklist",
@@ -99,13 +100,12 @@ export class BlockSet {
 	 * Add pattern to block set.
 	 * @param listType whitelist or blacklist
 	 * @param pattern pattern to add
-	 * @returns true if successful, false otherwise
+	 * @throws "Can't add duplicate" if the rule already exists
 	 */
-	addPattern(listType: ListType, pattern: string): boolean {
-		if (this.data[listType].urlPatterns.includes(pattern)) return false
+	addPattern(listType: ListType, pattern: string): void {
+		if (this.data[listType].urlPatterns.includes(pattern)) throw new Error("Can't add duplicate")
 		this.data[listType].urlPatterns.push(pattern)
 		this.compiledUrlRules[listType].push(BlockSet.patternToRegExp(pattern))
-		return true
 	}
 
 	/**
@@ -123,14 +123,13 @@ export class BlockSet {
 	 * Add regular expession to block set
 	 * @param listType whitelist or blacklist
 	 * @param regExp regular expression to add
-	 * @returns true if successful, false otherwise
+	 * @throws "Can't add duplicate" if the rule already exists
 	 */
-	addRegExp(listType: ListType, regExp: string): boolean {
-		if (this.data[listType].urlRegExps.includes(regExp)) return false
+	addRegExp(listType: ListType, regExp: string): void {
+		if (this.data[listType].urlRegExps.includes(regExp)) throw new Error("Can't add duplicate")
 		const compiledRegExp = new RegExp(regExp)
 		this.data[listType].urlRegExps.push(regExp)
 		this.compiledUrlRules[listType].push(compiledRegExp)
-		return true
 	}
 	
 	/**
@@ -143,16 +142,40 @@ export class BlockSet {
 		this.data[listType].urlRegExps = this.data[listType].urlRegExps.filter((r) => r !== regExp)
 	}
 
-	getBlockList(listType: ListType): BlockList {
-		return this.data[listType]
-	}
-
 	async addYTChannel(_listType: ListType, _channelId: string): Promise<void> {
 		// TODO: check channel validity from google api
 	}
 
-	async addYTCategory(_listType: ListType, _categoryId: number): Promise<void> {
-		// TODO: check category validity from google api
+	/**
+	 * Add YouTube category to block set
+	 * @param listType whitelist or blacklist
+	 * @param categoryId category id to add
+	 * @throws "Invalid YouTube category id" if category isn't found in constant ytCategoryNamesById
+	 * @throws "Can't add duplicate" if the rule already exists
+	 */
+	addYTCategory(listType: ListType, categoryId: string): void {
+		if (!(categoryId in ytCategoryNamesById)) {
+			throw new Error("Invalid YouTube category id")
+		}
+
+		if (this.data[listType].ytCategories.find((category) => category.id === categoryId)) {
+			throw new Error("Can't add duplicate")
+		}
+
+		this.data[listType].ytCategories.push({ name: ytCategoryNamesById[categoryId] as string, id: categoryId })
+	}
+
+	/**
+	 * Remove YouTube category from block set.
+	 * @param listType whitelist or blacklist
+	 * @param categoryId category id to remove
+	 */
+	removeYTCategory(listType: ListType, categoryId: string): void {
+		this.data[listType].ytCategories = this.data[listType].ytCategories.filter(({ id }) => id !== categoryId)
+	}
+	
+	getBlockList(listType: ListType): BlockList {
+		return this.data[listType]
 	}
 
 	/**
