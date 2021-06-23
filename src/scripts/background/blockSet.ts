@@ -57,6 +57,10 @@ export class BlockSet {
 		]
 	}
 
+	/**
+	 * Get internal state of data for saving purposes.
+	 * @returns js object
+	 */
 	getData(): BlockSetData {
 		return this.data
 	}
@@ -91,6 +95,12 @@ export class BlockSet {
 		return !!this.data.activeDays[weekdayNumber]
 	}
 
+	/**
+	 * Add pattern to block set.
+	 * @param listType whitelist or blacklist
+	 * @param pattern pattern to add
+	 * @returns true if successful, false otherwise
+	 */
 	addPattern(listType: ListType, pattern: string): boolean {
 		if (this.data[listType].urlPatterns.includes(pattern)) return false
 		this.data[listType].urlPatterns.push(pattern)
@@ -98,12 +108,23 @@ export class BlockSet {
 		return true
 	}
 
+	/**
+	 * Remove pattern from block set.
+	 * @param listType whitelist or blacklist
+	 * @param pattern pattern to remove
+	 */
 	removePattern(listType: ListType, pattern: string): void {
 		const compiled = BlockSet.patternToRegExp(pattern as string)
 		this.compiledUrlRules[listType] = this.compiledUrlRules[listType].filter((c) => c.source !== compiled.source)
 		this.data[listType].urlPatterns = this.data[listType].urlPatterns.filter((p) => p !== pattern)
 	}	
 
+	/**
+	 * Add regular expession to block set
+	 * @param listType whitelist or blacklist
+	 * @param regExp regular expression to add
+	 * @returns true if successful, false otherwise
+	 */
 	addRegExp(listType: ListType, regExp: string): boolean {
 		if (this.data[listType].urlRegExps.includes(regExp)) return false
 		const compiledRegExp = new RegExp(regExp)
@@ -112,6 +133,11 @@ export class BlockSet {
 		return true
 	}
 	
+	/**
+	 * Remove regular expession from block set.
+	 * @param listType whitelist or blacklist
+	 * @param regExp regular expression to remove
+	 */
 	removeRegExp(listType: ListType, regExp: string): void {
 		this.compiledUrlRules[listType] = this.compiledUrlRules[listType].filter((c) => c.source !== regExp)
 		this.data[listType].urlRegExps = this.data[listType].urlRegExps.filter((r) => r !== regExp)
@@ -129,7 +155,13 @@ export class BlockSet {
 		// TODO: check category validity from google api
 	}
 
-
+	/**
+	 * Test if url, channelId or categoryId matches with any whitelist or blacklist.
+	 * @param url url to test (protocol not allowed in url)
+	 * @param channelId channel id to test against
+	 * @param categoryId category id to test against
+	 * @returns 
+	 */
 	test(url: string, channelId: string | null, categoryId: string | null): BlockTestRes {
 		if (this.testList(ListType.Whitelist, url, channelId, categoryId)) {
 			return BlockTestRes.Whitelisted
@@ -142,6 +174,9 @@ export class BlockSet {
 		return BlockTestRes.Ignored
 	}
 
+	/**
+	 * Helper function for testing both whitelist and blacklist.
+	 */
 	private testList(listType: ListType, url: string, channelId: string | null, 
 		categoryId: string | null): boolean {
 		return this.compiledUrlRules[listType].some((regExp) => regExp.test(url)) ||
