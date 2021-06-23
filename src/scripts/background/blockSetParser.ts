@@ -75,6 +75,8 @@ const zBlockListV1 = z.object({
 	ytCategories: z.array(zBlockRuleYTV1).default([]),
 }).default({})
 
+export type BlockList = z.infer<typeof zBlockListV1>
+
 // Most recent blockset options data structure version with 
 // updated block rule structure. Extends block set version 0.
 const zBlockSetDataV1 = zBlockSetDataV0.extend({

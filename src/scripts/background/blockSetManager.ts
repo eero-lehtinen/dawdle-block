@@ -106,7 +106,7 @@ export class BlockSetManager {
 			if (!blockSet.isInActiveWeekday(weekDay) || !blockSet.isInActiveTime(msSinceMidnight)) 
 				continue
 
-			const blockResult = blockSet.test(url, undefined, undefined)
+			const blockResult = blockSet.test(url, null, null)
 
 			if (blockResult === BlockTestRes.Blacklisted) {
 				blockingBSIds.push(id)

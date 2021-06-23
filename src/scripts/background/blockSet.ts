@@ -2,7 +2,7 @@
  * @file Contains BlockSet class implementation.
  */
 
-import { BlockSetData, plainToBlockSetData, createDefaultBlockSet } from "./blockSetParser"
+import { BlockSetData, plainToBlockSetData, createDefaultBlockSet, BlockList } from "./blockSetParser"
 
 export enum ListType {
 	Blacklist = "blacklist",
@@ -93,12 +93,29 @@ export class BlockSet {
 
 	addPattern(listType: ListType, pattern: string): void {
 		this.data[listType].urlPatterns.push(pattern)
-		this.compiledUrlRules[listType].push(new RegExp(BlockSet.patternToRegExp(pattern)))
+		this.compiledUrlRules[listType].push(BlockSet.patternToRegExp(pattern))
 	}
 
+	removePattern(listType: ListType, pattern: string): void {
+		const compiled = BlockSet.patternToRegExp(pattern as string)
+		this.compiledUrlRules[listType] = this.compiledUrlRules[listType].filter((c) => c !== compiled)
+		this.data[listType].urlPatterns = this.data[listType].urlPatterns.filter((p) => p !== pattern)
+	}	
+
 	addRegExp(listType: ListType, regExp: string): void {
+		const compiledRegExp = new RegExp(regExp)
 		this.data[listType].urlRegExps.push(regExp)
-		this.compiledUrlRules[listType].push(new RegExp(regExp))
+		this.compiledUrlRules[listType].push(compiledRegExp)
+	}
+	
+	removeRegExp(listType: ListType, regExp: string): void {
+		const compiled = new RegExp(regExp)
+		this.compiledUrlRules[listType] = this.compiledUrlRules[listType].filter((c) => c !== compiled)
+		this.data[listType].urlRegExps = this.data[listType].urlRegExps.filter((r) => r !== regExp)
+	}
+
+	getBlockList(listType: ListType): BlockList {
+		return this.data[listType]
 	}
 
 	async addYTChannel(_listType: ListType, _channelId: string): Promise<void> {
@@ -110,23 +127,23 @@ export class BlockSet {
 	}
 
 
-	test(url: string, channelId: string | undefined, categoryId: string | undefined): BlockTestRes {
+	test(url: string, channelId: string | null, categoryId: string | null): BlockTestRes {
 		if (this.testList(ListType.Whitelist, url, channelId, categoryId)) {
 			return BlockTestRes.Whitelisted
 		}
 
 		if (this.testList(ListType.Blacklist, url, channelId, categoryId)) {
-			return BlockTestRes.Whitelisted
+			return BlockTestRes.Blacklisted
 		}
 		
 		return BlockTestRes.Ignored
 	}
 
-	private testList(listType: ListType, url: string, channelId: string | undefined, 
-		categoryId: string | undefined): boolean {
+	private testList(listType: ListType, url: string, channelId: string | null, 
+		categoryId: string | null): boolean {
 		return this.compiledUrlRules[listType].some((regExp) => regExp.test(url)) ||
-			channelId ? this.data[listType].ytChannels.some(({ id }) => id === channelId) : false ||
-			categoryId ? this.data[listType].ytCategories.some(({ id }) => id === categoryId) : false
+			(channelId ? this.data[listType].ytChannels.some(({ id }) => id === channelId) : false) ||
+			(categoryId ? this.data[listType].ytCategories.some(({ id }) => id === categoryId) : false)
 	}
 
 	/**
@@ -137,20 +154,28 @@ export class BlockSet {
 	 * @returns escaped string
 	 */
 	static patternToRegExp(string: string): RegExp {
-		return new RegExp(
-			string.replace(/(\\\*)|(\*)|([.+?^${}()|[\]\\])/g, 
-				(_, p1, p2, p3): string => {
-					// If we found an escaped wildcard, just return it
-					if (p1)
-						return p1
+		string = string.replace(/(\\\*)|(\*)|([.+?^${}()|[\]\\])/g, 
+			(_, g1, g2, g3): string => {
+				// If we found an escaped wildcard, just return it
+				if (g1)
+					return g1
 
-					// If we found an unescaped wildcard, replace it with a regular expression wildcard
-					if (p2)
-						return ".*"
+				// If we found an unescaped wildcard, replace it with a regular expression wildcard
+				if (g2)
+					return ".*"
 			
-					// Otherwise just escape the forbidden character
-					return `\\${p3}`
-				}))
+				// Otherwise just escape the forbidden character
+				return `\\${g3}`
+			})
+
+		if (!string.startsWith(".*")) {
+			string = "^" + string
+		}
+		if (!string.endsWith(".*")) {
+			string = string + "$"
+		}
+
+		return new RegExp(string)
 	}
 
 	/**

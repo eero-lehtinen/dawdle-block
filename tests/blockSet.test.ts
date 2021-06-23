@@ -1,4 +1,4 @@
-import { BlockSet } from "../src/scripts/background/blockSet"
+import { BlockSet, BlockTestRes, ListType } from "../src/scripts/background/blockSet"
 import { timeToMSSinceMidnight } from "../src/scripts/background/timeUtils"
 
 describe("test BlockSet construction parameters", () => {
@@ -161,17 +161,25 @@ describe("test BlockSet methods", () => {
 })
 
 describe("test wildcarded pattern escaping", () => {
-	it("can escape a basic example", () => {
+	it("adds ^ to beginning if pattern doesn't start with a wildcard", () => {
+		expect(BlockSet.patternToRegExp("a").source.startsWith("^")).toBe(true)
+	})
+
+	it("adds $ to end if pattern doesn't end with a wildcard", () => {
+		expect(BlockSet.patternToRegExp("a").source.endsWith("$")).toBe(true)
+	})
+
+	it("escapes regex reserved characters", () => {
 		expect(BlockSet.patternToRegExp("[.*\\*+?^${}()|[]\\]äö❤"))
-			.toStrictEqual(new RegExp(String.raw`\[\..*\*\+\?\^\$\{\}\(\)\|\[\]\\\]äö❤`))
+			.toStrictEqual(new RegExp(String.raw`^\[\..*\*\+\?\^\$\{\}\(\)\|\[\]\\\]äö❤$`))
 	})
 
 	it("replaces wildcards(*) with regexp wildcards(.*)", () => {
-		expect(BlockSet.patternToRegExp("a*b*")).toStrictEqual(new RegExp("a.*b.*"))
+		expect(BlockSet.patternToRegExp("a*b*c")).toStrictEqual(new RegExp("^a.*b.*c$"))
 	})
 
-	it("does not replace already escaped wildcards(*)", () => {
-		expect(BlockSet.patternToRegExp(String.raw`a\*b\*`)).toStrictEqual(new RegExp(String.raw`a\*b\*`))
+	it("does not replace already escaped wildcards(\\*)", () => {
+		expect(BlockSet.patternToRegExp(String.raw`a\*b\*`)).toStrictEqual(new RegExp(String.raw`^a\*b\*$`))
 	})
 })
 
@@ -182,19 +190,46 @@ describe("test pattern escaping", () => {
 })
 
 describe("test BlockSet url matching", () => {
-	it.todo("returns Blacklisted when url is contained in black list")
+	let blockSet: BlockSet
+	beforeEach(() => {
+		blockSet = new BlockSet()
+	})
 
-	it.todo("returns Whitelisted when url is contained in white list")
+	it("returns Blacklisted when url is contained in black list", () => {
+		blockSet.addPattern(ListType.Blacklist, "test")
+		expect(blockSet.test("test", null, null)).toStrictEqual(BlockTestRes.Blacklisted)
+	})
 
-	it.todo("whitelisting overrides blacklisting")
+	it("returns Whitelisted when url is contained in white list", () => {
+		blockSet.addPattern(ListType.Whitelist, "test")
+		expect(blockSet.test("test", null, null)).toStrictEqual(BlockTestRes.Whitelisted)
+	})
 
-	it.todo("returns Ignored when url is not contained in whole block set")
+	it("whitelisting overrides blacklisting", () => {
+		blockSet.addPattern(ListType.Blacklist, "test")
+		blockSet.addPattern(ListType.Whitelist, "test")
+		expect(blockSet.test("test", null, null)).toStrictEqual(BlockTestRes.Whitelisted)
+	})
 
-	it.todo("rules with wildcards work")
+	it("returns Ignored when url is not contained in whole block set", () => {
+		expect(blockSet.test("test", null, null)).toStrictEqual(BlockTestRes.Ignored)
+	})
 
-	it.todo("rules with RegExps work")
+	it("can test rules with wildcards", () => {
+		blockSet.addPattern(ListType.Blacklist, "*test*")
+		blockSet.addPattern(ListType.Whitelist, "test")
+		expect(blockSet.test("asdtestasd", null, null)).toStrictEqual(BlockTestRes.Blacklisted)
+		expect(blockSet.test("test", null, null)).toStrictEqual(BlockTestRes.Whitelisted)
+	})
 
-	it.todo("youTube channel rules work")
+	it("can test rules with RegExps", () => {
+		blockSet.addRegExp(ListType.Blacklist, "^test\\w*$")
+		blockSet.addRegExp(ListType.Whitelist, "^test$")
+		expect(blockSet.test("testwithwords", null, null)).toStrictEqual(BlockTestRes.Blacklisted)
+		expect(blockSet.test("test", null, null)).toStrictEqual(BlockTestRes.Whitelisted)
+	})
 
-	it.todo("youTube category rules work")
+	it.todo("youTube channel rules can be tested")
+
+	it.todo("youTube category rules can be tested")
 })
