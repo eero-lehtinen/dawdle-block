@@ -102,7 +102,7 @@ export class BlockSetManager {
 				throw new Error("BlockSets and BlockSetIds not in sync!!")
 			}
 
-			// if today is not an active day | or not in active hours
+			// if today is not an active day or not in active hours
 			if (!blockSet.isInActiveWeekday(weekDay) || !blockSet.isInActiveTime(msSinceMidnight)) 
 				continue
 
@@ -112,6 +112,6 @@ export class BlockSetManager {
 				blockingBSIds.push(id)
 			}
 		}
-		return Promise.resolve(blockingBSIds)
+		return blockingBSIds
 	}
 }
