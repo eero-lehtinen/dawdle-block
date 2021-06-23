@@ -98,7 +98,7 @@ export class BlockSet {
 
 	removePattern(listType: ListType, pattern: string): void {
 		const compiled = BlockSet.patternToRegExp(pattern as string)
-		this.compiledUrlRules[listType] = this.compiledUrlRules[listType].filter((c) => c !== compiled)
+		this.compiledUrlRules[listType] = this.compiledUrlRules[listType].filter((c) => c.source !== compiled.source)
 		this.data[listType].urlPatterns = this.data[listType].urlPatterns.filter((p) => p !== pattern)
 	}	
 
@@ -109,8 +109,7 @@ export class BlockSet {
 	}
 	
 	removeRegExp(listType: ListType, regExp: string): void {
-		const compiled = new RegExp(regExp)
-		this.compiledUrlRules[listType] = this.compiledUrlRules[listType].filter((c) => c !== compiled)
+		this.compiledUrlRules[listType] = this.compiledUrlRules[listType].filter((c) => c.source !== regExp)
 		this.data[listType].urlRegExps = this.data[listType].urlRegExps.filter((r) => r !== regExp)
 	}
 

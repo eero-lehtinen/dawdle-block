@@ -220,6 +220,11 @@ describe("test BlockSet url matching", () => {
 		blockSet.addPattern(ListType.Whitelist, "test")
 		expect(blockSet.test("asdtestasd", null, null)).toStrictEqual(BlockTestRes.Blacklisted)
 		expect(blockSet.test("test", null, null)).toStrictEqual(BlockTestRes.Whitelisted)
+
+		blockSet.removePattern(ListType.Blacklist, "*test*")
+		blockSet.removePattern(ListType.Whitelist, "test")
+		expect(blockSet.test("asdtestasd", null, null)).toStrictEqual(BlockTestRes.Ignored)
+		expect(blockSet.test("test", null, null)).toStrictEqual(BlockTestRes.Ignored)
 	})
 
 	it("can test rules with RegExps", () => {
@@ -227,6 +232,11 @@ describe("test BlockSet url matching", () => {
 		blockSet.addRegExp(ListType.Whitelist, "^test$")
 		expect(blockSet.test("testwithwords", null, null)).toStrictEqual(BlockTestRes.Blacklisted)
 		expect(blockSet.test("test", null, null)).toStrictEqual(BlockTestRes.Whitelisted)
+
+		blockSet.removeRegExp(ListType.Blacklist, "^test\\w*$")
+		blockSet.removeRegExp(ListType.Whitelist, "^test$")
+		expect(blockSet.test("testwithwords", null, null)).toStrictEqual(BlockTestRes.Ignored)
+		expect(blockSet.test("test", null, null)).toStrictEqual(BlockTestRes.Ignored)
 	})
 
 	it.todo("youTube channel rules can be tested")
