@@ -4,6 +4,7 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin")
 const CopyWebpackPlugin = require("copy-webpack-plugin")
 const HtmlWebpackPlugin = require("html-webpack-plugin")
 const WebextensionPlugin = require("webpack-webextension-plugin")
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin
 const targetBrowser = process.env.TARGET_BROWSER
 const PACKAGE = require("./package.json")
 
@@ -76,6 +77,7 @@ module.exports = {
 			cleanOnceBeforeBuildPatterns: [
 				path.resolve(__dirname, `./dist/${targetBrowser}/**/*`),
 				path.resolve(__dirname, `./dist/${targetBrowser}*.zip`),
+				path.resolve(__dirname, `./dist/${targetBrowser}_report.html`),
 			],
 			cleanStaleWebpackAssets: false,
 			verbose: false,
@@ -103,6 +105,10 @@ module.exports = {
 			manifestDefaults: {
 				version: PACKAGE.version,
 			},
+		}),
+		new BundleAnalyzerPlugin({
+			analyzerMode: "static",
+			reportFilename: `../${targetBrowser}_report.html`,
 		}),
 	],
 }
