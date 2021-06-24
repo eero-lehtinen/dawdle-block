@@ -7,8 +7,20 @@ const WebextensionPlugin = require("webpack-webextension-plugin")
 const targetBrowser = process.env.TARGET_BROWSER
 const PACKAGE = require("./package.json")
 
+const getTargets = () => {
+	if (targetBrowser === "chrome") {
+		return "last 3 chrome version, last 3 edge version, last 3 opera version"
+	}
+	else if (targetBrowser === "firefox") {
+		return "last 3 firefox version, last 3 and_ff version"
+	}
+	throw new Error("No target browser specified")
+}
+
+
 module.exports = {
 	entry: {
+		manifest: "./manifest.json",
 		background: path.join(__dirname, "src/scripts/background/index.ts"),
 		popup: path.join(__dirname, "src/scripts/popup/index.ts"),
 	},
@@ -21,7 +33,21 @@ module.exports = {
 			{
 				exclude: /node_modules/,
 				test: /\.tsx?$/,
-				use: "ts-loader",
+				use: [
+					{ loader: "babel-loader",
+						options: {
+							cacheDirectory: true,
+							presets: [
+								["@babel/preset-env", { 
+									useBuiltIns: "entry",
+									corejs: { version: "3.15", proposals: true },
+									targets: getTargets(), 
+								}],
+								"@babel/preset-typescript",
+							] }, 
+					},
+					{ loader: "ts-loader" },
+				],
 			},
 			{
 				exclude: /node_modules/,
