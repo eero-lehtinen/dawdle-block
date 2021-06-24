@@ -20,7 +20,6 @@ const getTargets = () => {
 
 module.exports = {
 	entry: {
-		manifest: "./manifest.json",
 		background: path.join(__dirname, "src/scripts/background/index.ts"),
 		popup: path.join(__dirname, "src/scripts/popup/index.ts"),
 	},
