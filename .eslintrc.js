@@ -21,24 +21,10 @@ module.exports = {
 		amd: true,
 		es2021: true,
 	},
-	
 	rules: {
-		indent: [
-			"error",
-			"tab",
-		],
+		indent: ["error", "tab"],
 		"linebreak-style": ["error", "unix"],
 		quotes: ["error", "double"],
-		semi: [
-			"error",
-			"never",
-		],
-		"no-unused-vars": [
-			"error",
-			{
-				varsIgnorePattern: "^_",
-			},
-		],
 		"key-spacing": ["error", { 
 			beforeColon: false,
 			afterColon: true,
@@ -69,14 +55,11 @@ module.exports = {
 			plugins: ["@typescript-eslint"],
 			extends: ["plugin:@typescript-eslint/recommended"],
 			rules: {
-				"no-unused-vars": "off",
 				"@typescript-eslint/no-unused-vars": ["error",
 					{ varsIgnorePattern: "^_", argsIgnorePattern: "^_"	}],
-				"no-empty-function": "off",
 				"@typescript-eslint/no-empty-function": ["error", {
 					"allow": ["private-constructors"] }],
 				"@typescript-eslint/type-annotation-spacing": "error",
-				"semi": "off",
 				"@typescript-eslint/semi": ["error", "never"],
 			},
 		},
