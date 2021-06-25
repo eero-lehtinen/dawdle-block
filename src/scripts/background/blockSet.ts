@@ -4,6 +4,7 @@
 
 import { BlockSetData, plainToBlockSetData, createDefaultBlockSet, BlockList } from "./blockSetParser"
 import { ytCategoryNamesById } from "./constants"
+import { fetchChannelTitle } from "./youtubeAPI"
 
 export enum ListType {
 	Blacklist = "blacklist",
@@ -161,10 +162,7 @@ export class BlockSet {
 		this.data[listType].ytCategoryIds.push(categoryId)
 	}
 
-	async addYTChannel(_listType: ListType, _channelId: string): Promise<void> {
-		// TODO: check channel validity from google api
-	}
-
+	
 	/**
 	 * Remove YouTube category from block set.
 	 * @param listType whitelist or blacklist
@@ -172,6 +170,41 @@ export class BlockSet {
 	 */
 	removeYTCategory(listType: ListType, categoryId: string): void {
 		this.data[listType].ytCategoryIds = this.data[listType].ytCategoryIds.filter((id) => id !== categoryId)
+	}
+
+	/**
+	 * Add YouTube channel to block set. Validates channelId when channelTitle in unset.
+	 * Only set channelTitle when it comes from a trusted source.
+	 * @param listType whitelist or blacklist
+	 * @param channelId channel id to add
+	 * @param channelTitle trusted channel title
+	 * @throws "YouTube channel with id not found" if channel id does not exist in google servers
+	 * @throws "Can't add duplicate" if the channel already exists in rules
+	 */
+	async addYTChannel(listType: ListType, channelId: string, channelTitle?: string): Promise<void> {
+		if (this.data[listType].ytChannels.find(({ id }) => id === channelId)) {
+			throw new Error("Can't add duplicate")
+		}
+
+		if (!channelTitle) {
+			try {
+				channelTitle = await fetchChannelTitle(channelId)
+			}
+			catch (err) {
+				throw new Error("YouTube channel with id not found")
+			}
+		}
+
+		this.data[listType].ytChannels.push({ id: channelId, title: channelTitle })
+	}
+
+	/**
+	 * Remove YouTube channel from block set.
+	 * @param listType whitelist or blacklist
+	 * @param channelId channel id to remove
+	 */
+	removeYTChannel(listType: ListType, channelId: string): void {
+		this.data[listType].ytChannels = this.data[listType].ytChannels.filter(({ id }) => id !== channelId)
 	}
 	
 	getBlockList(listType: ListType): BlockList {

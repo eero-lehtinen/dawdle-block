@@ -195,7 +195,7 @@ describe("test BlockSet rule matching", () => {
 		blockSet = new BlockSet()
 	})
 
-	it("can't add duplicate rules", () => {
+	it("can't add duplicate rules", async() => {
 		blockSet.addPattern(ListType.Whitelist, "a")
 		expect(() => blockSet.addPattern(ListType.Whitelist, "a")).toThrowError("Can't add duplicate")
 
@@ -204,12 +204,20 @@ describe("test BlockSet rule matching", () => {
 
 		blockSet.addYTCategory(ListType.Whitelist, "10")
 		expect(() => blockSet.addYTCategory(ListType.Whitelist, "10")).toThrowError("Can't add duplicate")
+		
+		blockSet.addYTChannel(ListType.Whitelist, "a", "title")
+		await expect(() => blockSet.addYTChannel(ListType.Whitelist, "a", "title2"))
+			.rejects.toThrowError("Can't add duplicate")
 	})
 
 	it("can't add invalid YouTube categories", () => {
-		blockSet.addYTCategory(ListType.Whitelist, "10")
 		expect(() => blockSet.addYTCategory(ListType.Whitelist, "a")).toThrowError("Invalid YouTube category id")
 		expect(() => blockSet.addYTCategory(ListType.Whitelist, "100")).toThrowError("Invalid YouTube category id")
+	})
+
+	it("can't add invalid YouTube channels", async() => {
+		await expect(blockSet.addYTChannel(ListType.Whitelist, "asd"))
+			.rejects.toThrowError("YouTube channel with id not found")
 	})
 
 	it("returns Blacklisted when url is contained in black list", () => {
@@ -256,7 +264,7 @@ describe("test BlockSet rule matching", () => {
 		expect(blockSet.test("test", null, null)).toStrictEqual(BlockTestRes.Ignored)
 	})
 
-	it("can test YouTube channel rules", () => {
+	it("can test YouTube category rules", () => {
 		blockSet.addYTCategory(ListType.Blacklist, "1")
 		blockSet.addYTCategory(ListType.Whitelist, "10")
 		expect(blockSet.test("", null, "1")).toStrictEqual(BlockTestRes.Blacklisted)
@@ -266,6 +274,18 @@ describe("test BlockSet rule matching", () => {
 		blockSet.removeYTCategory(ListType.Whitelist, "10")
 		expect(blockSet.test("", null, "1")).toStrictEqual(BlockTestRes.Ignored)
 		expect(blockSet.test("", null, "10")).toStrictEqual(BlockTestRes.Ignored)
+	})
+
+	it("can test YouTube channel rules", () => {
+		blockSet.addYTChannel(ListType.Blacklist, "ID1", "TITLE1")
+		blockSet.addYTChannel(ListType.Whitelist, "ID2", "TITLE2")
+		expect(blockSet.test("", "ID1", null)).toStrictEqual(BlockTestRes.Blacklisted)
+		expect(blockSet.test("", "ID2", null)).toStrictEqual(BlockTestRes.Whitelisted)
+
+		blockSet.removeYTChannel(ListType.Blacklist, "ID1")
+		blockSet.removeYTChannel(ListType.Whitelist, "ID2")
+		expect(blockSet.test("", "ID1", null)).toStrictEqual(BlockTestRes.Ignored)
+		expect(blockSet.test("", "ID2", null)).toStrictEqual(BlockTestRes.Ignored)
 	})
 
 	it.todo("youTube channel rules can be tested")
