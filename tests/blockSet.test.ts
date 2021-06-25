@@ -70,10 +70,10 @@ describe("test BlockSet construction parameters", () => {
 					"test",
 				],
 				ytChannels: [
-					{ id: "channelid", name: "testchannel" },
+					{ id: "channelid", title: "testchannel" },
 				],
-				ytCategories: [
-					{ id: "42", name: "testcategory" },
+				ytCategoryIds: [
+					"42",
 				],
 			},
 		}

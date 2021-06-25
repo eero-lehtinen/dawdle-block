@@ -7,9 +7,20 @@ const APIBaseUrl = "https://youtube.googleapis.com/youtube/v3"
 
 const ytUrl = "www.youtube.com"
 
-interface YtBlockingInfo { 
+interface YTInfo {
 	channelId: string | null
+	channelTitle: string | null
 	categoryId: number | null
+}
+
+type YTChannelInfo = Omit<YTInfo, "categoryId">
+
+const nullYTInfo = (): YTInfo => {
+	return {
+		channelId: null, 
+		channelTitle: null, 
+		categoryId: null,
+	}
 }
 
 /**
@@ -20,37 +31,40 @@ interface YtBlockingInfo {
  * @param url URL with no protocols (e.g. "https://")
  * @returns blocking results
  */
-export const getYtBlockingInfo = async(url: string): Promise<YtBlockingInfo> => {
+export const getYtInfo = async(url: string): Promise<YTInfo> => {
 	if (!url.startsWith(ytUrl)) {
-		return { channelId: null, categoryId: null }
+		return nullYTInfo()
 	}
 
 	try {
 		const videoId = findVideoId(url)
 		if (videoId) {
-			return await fetchVideoBlockingInfo(videoId)
+			return await fetchVideoInfo(videoId)
 		}
 
 		const channelId = findChannelId(url)
 		if (channelId) {
-			return { channelId: channelId, categoryId: null }
+			const channelTitle = await fetchChannelTitle(channelId)
+			return { ...nullYTInfo(), channelId, channelTitle }
 		}
 
 		const channelUsername = findChannelUsername(url)
 		if (channelUsername) {
-			return { channelId: await fetchChannelId(channelUsername), categoryId: null }
+			const channelInfo = await fetchUsernameChannelInfo(channelUsername)
+			return { ...nullYTInfo(), ...channelInfo }
 		}
 
 		const playlistId = findPlaylistId(url)
 		if (playlistId && !url.includes("playnext=1")) {
-			return { channelId: await fetchPlaylistChannelId(playlistId), categoryId: null }
+			const channelInfo = await fetchPlaylistChannelInfo(playlistId)
+			return { ...nullYTInfo(), ...channelInfo }
 		}
 	}
 	catch (err) {
 		console.warn(err.message)
 	}
 
-	return { channelId: null, categoryId: null }
+	return nullYTInfo()
 }
 
 interface FindBetween {
@@ -162,20 +176,19 @@ async(response: Response): Promise<any> => {
  * @param videoId video id found in the url
  * @returns channel id and category id
  */
-const fetchVideoBlockingInfo = async(videoId: string): Promise<YtBlockingInfo> => {
-	const videoInfoField = "items(snippet(categoryId,channelId))"
+const fetchVideoInfo = async(videoId: string): Promise<YTInfo> => {
 	const response = await fetch(
 		`${APIBaseUrl}/videos?part=snippet` +
 		`&id=${videoId}` + 
-		`&field=${videoInfoField}` +
+		"&field=items/snippet(categoryId,channelId,channelTitle)" +
 		`&key=${APIKey}`,
 	)
 
 	const item = await getItemFromResponse(response)
-
 	return {
 		channelId: item.snippet.channelId, 
-		categoryId: item.snippet.categoryId, 
+		channelTitle: item.snippet.channelTitle,
+		categoryId: item.snippet.categoryId,
 	}
 }
 
@@ -184,30 +197,52 @@ const fetchVideoBlockingInfo = async(videoId: string): Promise<YtBlockingInfo> =
  * @param playlistId playlist id found in the url
  * @returns channel id
  */
-const fetchPlaylistChannelId = async(playlistId: string): Promise<string> => {
-	const playlistInfoField = "items/snippet/channelId"
+const fetchPlaylistChannelInfo = async(playlistId: string): Promise<YTChannelInfo> => {
 	const response = await fetch(
 		`${APIBaseUrl}/playlists?part=snippet` +
 		`&id=${playlistId}` + 
-		`&field=${playlistInfoField}` +
+		"&field=items/snippet(channelId,channelTitle)" +
 		`&key=${APIKey}`,
 	)
 
 	const item = await getItemFromResponse(response)
-	return item.snippet.channelId
+	return { 
+		channelId: item.snippet.channelId, 
+		channelTitle: item.snippet.channelTitle, 
+	} 
 }
 
 /**
- * Fetches channel id associated with this username,
+ * Fetches channel id and title associated with this username,
  * @param username username found in the url
- * @returns channel id
+ * @returns channel id and title
  */
-const fetchChannelId = async(username: string): Promise<string> => {
+const fetchUsernameChannelInfo = async(username: string): Promise<YTChannelInfo> => {
 	const response = await fetch(
-		`${APIBaseUrl}/channels?part=id` +
+		`${APIBaseUrl}/channels?part=snippet` +
 		`&forUsername=${username}` +
+		"&field=items(id,snippet(title))" +
 		`&key=${APIKey}`,
 	)
 	const item = await getItemFromResponse(response)
-	return item.id
+	return { 
+		channelId: item.id, 
+		channelTitle: item.snippet.title, 
+	}
+}
+
+/**
+ * Fetches channel title associated with this channel id.
+ * @param channelId channel id
+ * @returns channel title
+ */
+const fetchChannelTitle = async(channelId: string): Promise<string> => {
+	const response = await fetch(
+		`${APIBaseUrl}/channels?part=snippet` +
+		`&id=${channelId}` +
+		"&field=items/snippet(title)" +
+		`&key=${APIKey}`,
+	)
+	const item = await getItemFromResponse(response)
+	return item.snippet.title
 }

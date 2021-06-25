@@ -142,10 +142,6 @@ export class BlockSet {
 		this.data[listType].urlRegExps = this.data[listType].urlRegExps.filter((r) => r !== regExp)
 	}
 
-	async addYTChannel(_listType: ListType, _channelId: string): Promise<void> {
-		// TODO: check channel validity from google api
-	}
-
 	/**
 	 * Add YouTube category to block set
 	 * @param listType whitelist or blacklist
@@ -158,11 +154,15 @@ export class BlockSet {
 			throw new Error("Invalid YouTube category id")
 		}
 
-		if (this.data[listType].ytCategories.find((category) => category.id === categoryId)) {
+		if (this.data[listType].ytCategoryIds.find((id) => id === categoryId)) {
 			throw new Error("Can't add duplicate")
 		}
 
-		this.data[listType].ytCategories.push({ name: ytCategoryNamesById[categoryId] as string, id: categoryId })
+		this.data[listType].ytCategoryIds.push(categoryId)
+	}
+
+	async addYTChannel(_listType: ListType, _channelId: string): Promise<void> {
+		// TODO: check channel validity from google api
 	}
 
 	/**
@@ -171,7 +171,7 @@ export class BlockSet {
 	 * @param categoryId category id to remove
 	 */
 	removeYTCategory(listType: ListType, categoryId: string): void {
-		this.data[listType].ytCategories = this.data[listType].ytCategories.filter(({ id }) => id !== categoryId)
+		this.data[listType].ytCategoryIds = this.data[listType].ytCategoryIds.filter((id) => id !== categoryId)
 	}
 	
 	getBlockList(listType: ListType): BlockList {
@@ -204,7 +204,7 @@ export class BlockSet {
 		categoryId: string | null): boolean {
 		return this.compiledUrlRules[listType].some((regExp) => regExp.test(url)) ||
 			(channelId ? this.data[listType].ytChannels.some(({ id }) => id === channelId) : false) ||
-			(categoryId ? this.data[listType].ytCategories.some(({ id }) => id === categoryId) : false)
+			(categoryId ? this.data[listType].ytCategoryIds.some((id) => id === categoryId) : false)
 	}
 
 	/**

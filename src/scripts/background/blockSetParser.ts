@@ -63,16 +63,18 @@ const zBlockSetDataV0 = z.object({
 
 const zBlockRuleUrlV1 = z.string()
 
-const zBlockRuleYTV1 = z.object({
+const zBlockRuleYTChannelV1 = z.object({
 	id: z.string(),
-	name: z.string(),
+	title: z.string(),
 })
+
+const zBlockRuleYTCategoryV1 = z.string()
 
 const zBlockListV1 = z.object({
 	urlPatterns: z.array(zBlockRuleUrlV1).default([]),
 	urlRegExps: z.array(zBlockRuleUrlV1).default([]),
-	ytChannels: z.array(zBlockRuleYTV1).default([]),
-	ytCategories: z.array(zBlockRuleYTV1).default([]),
+	ytChannels: z.array(zBlockRuleYTChannelV1).default([]),
+	ytCategoryIds: z.array(zBlockRuleYTCategoryV1).default([]),
 }).default({})
 
 export type BlockList = z.infer<typeof zBlockListV1>
@@ -168,10 +170,10 @@ const convertV0toV1 = (blockSet: any) => {
 				newBlockList.urlRegExps.push(blockRule.value)
 				break
 			case "ytChannel":
-				newBlockList.ytChannels.push(blockRule.value)
+				newBlockList.ytChannels.push({ id: blockRule.value.id, title: blockRule.value.name })
 				break
 			case "ytCategory":
-				newBlockList.ytCategories.push(blockRule.value)
+				newBlockList.ytCategoryIds.push(blockRule.value.id)
 				break
 			}
 		}
