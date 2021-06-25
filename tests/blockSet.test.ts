@@ -105,7 +105,8 @@ describe("test BlockSet construction parameters", () => {
 
 describe("test BlockSet methods", () => {
 
-	const testIsInActiveTimes = (blockSet: BlockSet, dateResultPairs: Array<{date: Date, result: boolean}>) => {
+	const testIsInActiveTimes = (blockSet: BlockSet, 
+		dateResultPairs: Array<{date: Date, result: boolean}>) => {
 		for (const { date, result } of dateResultPairs) {
 			expect(blockSet.isInActiveTime(timeToMSSinceMidnight(date))).toBe(result)
 		}
@@ -179,7 +180,8 @@ describe("test wildcarded pattern escaping", () => {
 	})
 
 	it("does not replace already escaped wildcards(\\*)", () => {
-		expect(BlockSet.patternToRegExp(String.raw`a\*b\*`)).toStrictEqual(new RegExp(String.raw`^a\*b\*$`))
+		expect(BlockSet.patternToRegExp(String.raw`a\*b\*`))
+			.toStrictEqual(new RegExp(String.raw`^a\*b\*$`))
 	})
 })
 
@@ -203,7 +205,8 @@ describe("test BlockSet rule matching", () => {
 		expect(() => blockSet.addRegExp(ListType.Whitelist, "a")).toThrowError("Can't add duplicate")
 
 		blockSet.addYTCategory(ListType.Whitelist, "10")
-		expect(() => blockSet.addYTCategory(ListType.Whitelist, "10")).toThrowError("Can't add duplicate")
+		expect(() => blockSet.addYTCategory(ListType.Whitelist, "10"))
+			.toThrowError("Can't add duplicate")
 		
 		blockSet.addYTChannel(ListType.Whitelist, "a", "title")
 		await expect(() => blockSet.addYTChannel(ListType.Whitelist, "a", "title2"))
@@ -211,8 +214,10 @@ describe("test BlockSet rule matching", () => {
 	})
 
 	it("can't add invalid YouTube categories", () => {
-		expect(() => blockSet.addYTCategory(ListType.Whitelist, "a")).toThrowError("Invalid YouTube category id")
-		expect(() => blockSet.addYTCategory(ListType.Whitelist, "100")).toThrowError("Invalid YouTube category id")
+		expect(() => blockSet.addYTCategory(ListType.Whitelist, "a"))
+			.toThrowError("Invalid YouTube category id")
+		expect(() => blockSet.addYTCategory(ListType.Whitelist, "100"))
+			.toThrowError("Invalid YouTube category id")
 	})
 
 	it("can't add invalid YouTube channels", async() => {

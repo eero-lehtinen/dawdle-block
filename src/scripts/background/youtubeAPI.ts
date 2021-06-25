@@ -80,7 +80,8 @@ interface FindBetween {
  * @param startPos start search of start from this index
  * @returns string between start and end
  */
-const getPartBetween = (source: string, { start, end }: FindBetween, startPos = 0): string | null =>  {
+const getPartBetween = (source: string, 
+	{ start, end }: FindBetween, startPos = 0): string | null =>  {
 	const iA = source.indexOf(start, startPos)
 	if (iA === -1)
 		return null

@@ -48,7 +48,7 @@ module.exports = {
 		eqeqeq: ["error",	"always"],
 		camelcase: "error",
 		"brace-style": ["error",	"stroustrup", { allowSingleLine: true	}],
-		"max-len": ["error",	{ code: 120,	tabWidth: 2 }],
+		"max-len": ["error",	{ code: 100,	tabWidth: 2, ignorePattern: "^\\s*// eslint-.*$" }],
 		"space-before-blocks": "error",
 		"space-before-function-paren": ["error",	"never"],
 		"space-in-parens": ["error", "never"],

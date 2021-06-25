@@ -2,7 +2,8 @@
  * @file Contains BlockSet class implementation.
  */
 
-import { BlockSetData, plainToBlockSetData, createDefaultBlockSet, BlockList } from "./blockSetParser"
+import { BlockSetData, plainToBlockSetData, createDefaultBlockSet, BlockList } 
+	from "./blockSetParser"
 import { ytCategoryNamesById } from "./constants"
 import { fetchChannelTitle } from "./youtubeAPI"
 
@@ -68,9 +69,10 @@ export class BlockSet {
 	}
 
 	/**
-	 * If from is less than to, returns true when msSinceMidnight is between user defined active time to and from.
-	 * If from is greater than to, active time is effectively over night eg. from 22.00 at night to 7.00 in the morning
-	 * and returns are reversed.
+	 * If from is less than to, returns true when msSinceMidnight is between user 
+	 * defined active time to and from.
+	 * If from is greater than to, active time is effectively over night 
+	 * eg. from 22.00 at night to 7.00 in the morning and returns are reversed.
 	 * @param msSinceMidnight milliseconds starting from today 00:00 o'clock
 	 * @returns true if in active time, false otherwise
 	 */
@@ -116,7 +118,8 @@ export class BlockSet {
 	 */
 	removePattern(listType: ListType, pattern: string): void {
 		const compiled = BlockSet.patternToRegExp(pattern as string)
-		this.compiledUrlRules[listType] = this.compiledUrlRules[listType].filter((c) => c.source !== compiled.source)
+		this.compiledUrlRules[listType] = this.compiledUrlRules[listType]
+			.filter((c) => c.source !== compiled.source)
 		this.data[listType].urlPatterns = this.data[listType].urlPatterns.filter((p) => p !== pattern)
 	}	
 
@@ -139,7 +142,8 @@ export class BlockSet {
 	 * @param regExp regular expression to remove
 	 */
 	removeRegExp(listType: ListType, regExp: string): void {
-		this.compiledUrlRules[listType] = this.compiledUrlRules[listType].filter((c) => c.source !== regExp)
+		this.compiledUrlRules[listType] = this.compiledUrlRules[listType]
+			.filter((c) => c.source !== regExp)
 		this.data[listType].urlRegExps = this.data[listType].urlRegExps.filter((r) => r !== regExp)
 	}
 
@@ -169,7 +173,8 @@ export class BlockSet {
 	 * @param categoryId category id to remove
 	 */
 	removeYTCategory(listType: ListType, categoryId: string): void {
-		this.data[listType].ytCategoryIds = this.data[listType].ytCategoryIds.filter((id) => id !== categoryId)
+		this.data[listType].ytCategoryIds = this.data[listType].ytCategoryIds
+			.filter((id) => id !== categoryId)
 	}
 
 	/**
@@ -204,7 +209,8 @@ export class BlockSet {
 	 * @param channelId channel id to remove
 	 */
 	removeYTChannel(listType: ListType, channelId: string): void {
-		this.data[listType].ytChannels = this.data[listType].ytChannels.filter(({ id }) => id !== channelId)
+		this.data[listType].ytChannels = this.data[listType].ytChannels
+			.filter(({ id }) => id !== channelId)
 	}
 	
 	getBlockList(listType: ListType): BlockList {
@@ -241,8 +247,8 @@ export class BlockSet {
 	}
 
 	/**
-	 * Escape user defined strings to be used in regular expressions for exact matching with wildcards.
-	 * Part of regular expression copied from MDN 
+	 * Escape user defined strings to be used in regular expressions for exact matching with 
+	 * wildcards. Part of regular expression copied from MDN 
 	 * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#escaping.
 	 * @param string string to escape
 	 * @returns escaped string

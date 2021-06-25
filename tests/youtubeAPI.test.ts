@@ -21,9 +21,11 @@ describe("test YouTube API error states", () => {
 		await expect(getYtInfo("www.youtube.com/feed/subscriptions")).resolves.toStrictEqual(nullYTInfo)
 	})
 
-	it("returns null values when YouTube is on a valid page but id can't be located in url", async() => {
+	it("returns null values when YouTube is on a " +
+		"valid page but id can't be located in url", async() => {
 		// No "v=" included, which we use to locate the id
-		await expect(getYtInfo("www.youtube.com/watch?asdfasdf&t=42")).resolves.toStrictEqual(nullYTInfo)
+		await expect(getYtInfo("www.youtube.com/watch?asdfasdf&t=42"))
+			.resolves.toStrictEqual(nullYTInfo)
 	})
 
 	it("return null values and logs error when channel with this id isn't found", async() => {
@@ -120,7 +122,9 @@ describe("test YouTube API blocking info for playlist urls", () => {
 		mockedFetch.mockResolvedValueOnce({
 			status: 200, 
 			json: async() => {
-				return { items: [{ snippet: { channelTitle: "Google Developers",  channelId: "UC_x5XG1OV2P6uZZ5FSM9Ttw" } }] }
+				return { items: [{ snippet: { 
+					channelTitle: "Google Developers",  
+					channelId: "UC_x5XG1OV2P6uZZ5FSM9Ttw" } }] }
 			}, 
 		} as Response)
 
