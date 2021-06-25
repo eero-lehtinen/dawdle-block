@@ -1,5 +1,5 @@
 import { BlockSet } from "./blockSet"
 
-console.log(new BlockSet())
+console.log(new BlockSet(0))
 
 

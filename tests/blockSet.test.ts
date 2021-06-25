@@ -2,13 +2,13 @@ import { BlockSet, BlockTestRes, ListType } from "../src/scripts/background/bloc
 import { timeToMSSinceMidnight } from "../src/scripts/background/timeUtils"
 
 describe("test BlockSet construction parameters", () => {
-	const defaultBlockSetData = new BlockSet().getData()
+	const defaultBlockSetData = new BlockSet(0).getData()
 
 	it("non-objects throw", () => {
-		expect(() => { new BlockSet("string") }).toThrow()
-		expect(() => { new BlockSet(42) }).toThrow()
-		expect(() => { new BlockSet(() => {return 0}) }).toThrow()
-		expect(() => { new BlockSet(null)}).toThrow()
+		expect(() => { new BlockSet(0, "string") }).toThrow()
+		expect(() => { new BlockSet(0, 42) }).toThrow()
+		expect(() => { new BlockSet(0, () => {return 0}) }).toThrow()
+		expect(() => { new BlockSet(0, null)}).toThrow()
 	})
 
 	it("objects with members of invalid types throw", () => {
@@ -19,15 +19,15 @@ describe("test BlockSet construction parameters", () => {
 			activeDays: undefined,
 		}
 
-		expect(() => { new BlockSet(testBlockSetObj)}).toThrow()
+		expect(() => { new BlockSet(0, testBlockSetObj)}).toThrow()
 	})
 
 	it("incomplete objects get filled with defaults", () => {
-		expect(new BlockSet({}).getData()).toStrictEqual(defaultBlockSetData)
+		expect(new BlockSet(0, {}).getData()).toStrictEqual(defaultBlockSetData)
 	})
 
 	it("undefined creates a default block set", () => {
-		expect(new BlockSet(undefined).getData()).toStrictEqual(defaultBlockSetData)
+		expect(new BlockSet(0, undefined).getData()).toStrictEqual(defaultBlockSetData)
 	})
 
 	it("objects retain their valid property names and lose invalid ones", () => {
@@ -38,7 +38,7 @@ describe("test BlockSet construction parameters", () => {
 			loseMe: "lost",
 		}
 
-		const blockSetData = new BlockSet(testBlockSetObj).getData()
+		const blockSetData = new BlockSet(0, testBlockSetObj).getData()
 
 		expect(blockSetData).toHaveProperty("name")
 		expect(blockSetData).not.toHaveProperty("loseMe")
@@ -78,7 +78,7 @@ describe("test BlockSet construction parameters", () => {
 			},
 		}
 
-		expect(new BlockSet(testBlockSetObj).getData()).toMatchObject(testBlockSetObjResult)
+		expect(new BlockSet(0, testBlockSetObj).getData()).toMatchObject(testBlockSetObjResult)
 	})
 
 	it("V0 \"*\"-characters get escaped when converting to V1", () => {
@@ -99,7 +99,7 @@ describe("test BlockSet construction parameters", () => {
 			},
 		}
 
-		expect(new BlockSet(testBlockSetObj).getData()).toMatchObject(testBlockSetObjResult)
+		expect(new BlockSet(0, testBlockSetObj).getData()).toMatchObject(testBlockSetObjResult)
 	})
 })
 
@@ -114,7 +114,7 @@ describe("test BlockSet methods", () => {
 	
 
 	it("isInActiveTime returns always true, if activeTime from and to are the same", () => {
-		const blockSet = new BlockSet({ activeTime: { from: 0, to: 0 } })
+		const blockSet = new BlockSet(0, { activeTime: { from: 0, to: 0 } })
 		const dateResultPairs = [
 			{ date: new Date(0), result: true },
 			{ date: new Date(42), result: true },
@@ -124,7 +124,7 @@ describe("test BlockSet methods", () => {
 	})
 
 	it("isInActiveTime returns true, if today's time is between from and to", () => {
-		const blockSet = new BlockSet({ activeTime: { from: 0, to: 1 * 60 * 60 * 1000 } })
+		const blockSet = new BlockSet(0, { activeTime: { from: 0, to: 1 * 60 * 60 * 1000 } })
 		const dateResultPairs = [
 			{ date: new Date("2000-01-01T00:00:00"), result: false },
 			{ date: new Date("2000-01-01T00:30:00"), result: true },
@@ -135,7 +135,7 @@ describe("test BlockSet methods", () => {
 	})
 
 	it("if to is less than to, calculation of being in between wraps around midnight instead", () => {
-		const blockSet = new BlockSet({ activeTime: { from: 1 * 60 * 60 * 1000, to: 0 } })
+		const blockSet = new BlockSet(0, { activeTime: { from: 1 * 60 * 60 * 1000, to: 0 } })
 		const dateResultPairs = [
 			{ date: new Date("2000-01-01T00:00:00"), result: false },
 			{ date: new Date("2000-01-01T00:30:00"), result: false },
@@ -148,14 +148,14 @@ describe("test BlockSet methods", () => {
 
 	it("active weekday detection returns values of activeDays for values between 0 and 6", () => {
 		const activeDays = [false, true, false, false, true, false, false]
-		const blockSet = new BlockSet({ activeDays })
+		const blockSet = new BlockSet(0, { activeDays })
 		for (let i = 0; i < activeDays.length; i++) {
 			expect(blockSet.isInActiveWeekday(i)).toBe(activeDays[i])
 		}
 	})
 
 	it("active weekday detection returns false for all numbers that aren't between 0 and 6", () => {
-		const blockSet = new BlockSet()
+		const blockSet = new BlockSet(0)
 		expect(blockSet.isInActiveWeekday(-1000)).toBe(false)
 		expect(blockSet.isInActiveWeekday(42)).toBe(false)
 	})
@@ -194,7 +194,7 @@ describe("test pattern escaping", () => {
 describe("test BlockSet rule matching", () => {
 	let blockSet: BlockSet
 	beforeEach(() => {
-		blockSet = new BlockSet()
+		blockSet = new BlockSet(0)
 	})
 
 	it("can't add duplicate rules", async() => {

@@ -31,9 +31,7 @@ describe("test BlockSetManager with browser api mocking", () => {
 			.andResolve({ "0": undefined })
 
 		const bsManager = await BlockSetManager.create()
-		expect(bsManager.getBSIds()).toStrictEqual([0])
-		expect(bsManager.getBSTimesElapsed()).toStrictEqual([0])
-		expect(bsManager.getBlockSets()).toMatchObject([new BlockSet()])
+		expect(bsManager.getBlockSets()).toMatchObject([new BlockSet(0)])
 	})
 
 	it("can load compressed blocksets from sync storage", async() => {
@@ -42,19 +40,17 @@ describe("test BlockSetManager with browser api mocking", () => {
 			.andResolve({ "0": compress({}) })
 
 		const bsManager = await BlockSetManager.create()
-		expect(bsManager.getBlockSets()).toMatchObject([new BlockSet()])
+		expect(bsManager.getBlockSets()).toMatchObject([new BlockSet(0)])
 	})
 
 	it("can handle non continous ids", async() => {
-		setUpMockStorage({ idReturn: [3, 2], elapsedReturn: [undefined, undefined, 0, 0] })
+		setUpMockStorage({ idReturn: [3, 2], elapsedReturn: [undefined, undefined, 0, 50] })
 		mockBrowser.storage.sync.get.expect({ 3: undefined, 2: undefined })
 			.andResolve({ 3: undefined, 2: undefined })
 
 		const bsManager = await BlockSetManager.create()
-		expect(bsManager.getBSIds()).toStrictEqual([3, 2])
-		expect(bsManager.getBSTimesElapsed()).toMatchObject([undefined, undefined, 0, 0])
 		expect(bsManager.getBlockSets()).toMatchObject(
-			[undefined, undefined, new BlockSet(), new BlockSet()])
+			[new BlockSet(3, {}, 50), new BlockSet(2)])
 	})
 })
 

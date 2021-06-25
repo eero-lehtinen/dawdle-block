@@ -22,6 +22,15 @@ type CompiledRules = Record<ListType, RegExp[]>
 
 export class BlockSet {
 	private data: BlockSetData
+	private id: number
+	getId(): number {
+		return this.id
+	}
+
+	private timeElapsed: number
+	getTimeElapsed(): number {
+		return this.timeElapsed
+	}
 
 	// Blocking rules compiled to regular expressions (doesn't include yt rules)
 	private compiledUrlRules: CompiledRules = { 
@@ -30,15 +39,23 @@ export class BlockSet {
 	}
 
 	/**
+	 * Requires an unique (enforce outside of this class) id.
 	 * Parses blocksetPlanObject and initializes internal state to match that.
+	 * timeElapsed isn't stored in plain object, so we need to supply it seperately.
 	 * @throws {Error} if object is not parseable
+	 * @param id unique id
 	 * @param blocksetPlanObject 
+	 * @param timeElapsed blocking time elapsed
 	 */
-	constructor(blocksetPlanObject?: unknown) {
+	constructor(id: number, blocksetPlanObject?: unknown, timeElapsed?: number) {
+		this.id = id
+
 		if (blocksetPlanObject === undefined)
 			this.data = createDefaultBlockSet()
 		else 
 			this.data = plainToBlockSetData(blocksetPlanObject)
+
+		this.timeElapsed = timeElapsed ?? 0
 
 		this.compileRules()
 	}
