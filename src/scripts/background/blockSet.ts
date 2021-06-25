@@ -154,7 +154,7 @@ export class BlockSet {
 			throw new Error("Invalid YouTube category id")
 		}
 
-		if (this.data[listType].ytCategoryIds.find((id) => id === categoryId)) {
+		if (this.data[listType].ytCategoryIds.includes(categoryId)) {
 			throw new Error("Can't add duplicate")
 		}
 
