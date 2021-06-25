@@ -30,7 +30,7 @@ describe("test YouTube API error states", () => {
 		const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {/* do nothing */})
 		mockedFetch.mockResolvedValueOnce({
 			status: 200, 
-			json: async() => {return { items: [] }},	
+			json: async() => {return {}},	
 		} as Response)
 
 		await expect(getYtInfo("www.youtube.com/watch?v=asd")).resolves.toStrictEqual(nullYTInfo)

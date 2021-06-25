@@ -164,7 +164,7 @@ async(response: Response): Promise<any> => {
 		throw new Error("Request failed")
 	}
 	const body = await response.json()
-	if (body.items.length === 0) {
+	if (!body.items || body.items.length === 0) {
 		throw new Error("Response is empty")
 	}
 
@@ -236,7 +236,7 @@ const fetchUsernameChannelInfo = async(username: string): Promise<YTChannelInfo>
  * @param channelId channel id
  * @returns channel title
  */
-const fetchChannelTitle = async(channelId: string): Promise<string> => {
+export const fetchChannelTitle = async(channelId: string): Promise<string> => {
 	const response = await fetch(
 		`${APIBaseUrl}/channels?part=snippet` +
 		`&id=${channelId}` +
