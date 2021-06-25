@@ -38,12 +38,12 @@ export const getYtBlockingInfo = async(url: string): Promise<YtBlockingInfo> => 
 
 		const channelUsername = findChannelUsername(url)
 		if (channelUsername) {
-			return await fetchChannelBlockingInfo(channelUsername)
+			return { channelId: await fetchChannelId(channelUsername), categoryId: null }
 		}
 
 		const playlistId = findPlaylistId(url)
 		if (playlistId && !url.includes("playnext=1")) {
-			return await fetchPlaylistBlockingInfo(playlistId)
+			return { channelId: await fetchPlaylistChannelId(playlistId), categoryId: null }
 		}
 	}
 	catch (err) {
@@ -184,7 +184,7 @@ const fetchVideoBlockingInfo = async(videoId: string): Promise<YtBlockingInfo> =
  * @param playlistId playlist id found in the url
  * @returns channel id
  */
-const fetchPlaylistBlockingInfo = async(playlistId: string): Promise<YtBlockingInfo> => {
+const fetchPlaylistChannelId = async(playlistId: string): Promise<string> => {
 	const playlistInfoField = "items/snippet/channelId"
 	const response = await fetch(
 		`${APIBaseUrl}/playlists?part=snippet` +
@@ -194,11 +194,7 @@ const fetchPlaylistBlockingInfo = async(playlistId: string): Promise<YtBlockingI
 	)
 
 	const item = await getItemFromResponse(response)
-
-	return {
-		channelId: item.snippet.channelId,
-		categoryId: null, 
-	}
+	return item.snippet.channelId
 }
 
 /**
@@ -206,17 +202,12 @@ const fetchPlaylistBlockingInfo = async(playlistId: string): Promise<YtBlockingI
  * @param username username found in the url
  * @returns channel id
  */
-const fetchChannelBlockingInfo = async(username: string): Promise<YtBlockingInfo> => {
+const fetchChannelId = async(username: string): Promise<string> => {
 	const response = await fetch(
 		`${APIBaseUrl}/channels?part=id` +
 		`&forUsername=${username}` +
 		`&key=${APIKey}`,
 	)
-
 	const item = await getItemFromResponse(response)
-
-	return {
-		channelId: item.id,
-		categoryId: null, 
-	}
+	return item.id
 }
