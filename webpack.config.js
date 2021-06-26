@@ -164,7 +164,7 @@ module.exports = (env) => {
 	}
 
 	if (mode === "development") {
-		config.devtool = "eval-cheap-source-map"
+		config.devtool = "inline-cheap-source-map"
 		config.plugins = [
 			...config.plugins,
 			new ZipPlugin({
