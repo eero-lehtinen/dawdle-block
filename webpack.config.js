@@ -7,6 +7,7 @@ const WebextensionPlugin = require("webpack-webextension-plugin")
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin")
 const ZipPlugin = require("zip-webpack-plugin")
+const TerserPlugin = require("terser-webpack-plugin");
 const PACKAGE = require("./package.json")
 
 const getTargetsBrowserlist = (targetBrowser) => {
@@ -147,6 +148,19 @@ module.exports = (env) => {
 			// type checking and eslint checking
 			new ForkTsCheckerWebpackPlugin(),
 		],
+		optimization: {
+			minimize: true,
+			minimizer: [
+				new TerserPlugin({
+					terserOptions: {
+						format: {
+							comments: false,
+						},
+					},
+					extractComments: false,
+				}),
+			],
+		},
 	}
 
 	if (mode === "development") {
