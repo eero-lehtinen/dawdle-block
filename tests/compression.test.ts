@@ -1,5 +1,5 @@
 
-import { compress, decompress } from "../src/scripts/background/compression"
+import { compress, decompress } from "../src/background/compression"
 
 const testObject = { test: { test: [{}, 42, "test"] } }
 

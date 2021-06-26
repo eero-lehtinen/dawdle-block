@@ -1,3 +1,4 @@
+// Only used in testing. Build configuration is in webpack.config.js.
 module.exports = {
 	env: {
 		test: {

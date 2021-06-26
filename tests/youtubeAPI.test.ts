@@ -1,6 +1,6 @@
 import { mocked } from "ts-jest/utils"
 import fetch from "cross-fetch"
-import { getYtInfo } from "../src/scripts/background/youtubeAPI"
+import { getYtInfo } from "../src/background/youtubeAPI"
 
 jest.mock("cross-fetch")
 

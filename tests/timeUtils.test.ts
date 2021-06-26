@@ -1,5 +1,5 @@
 
-import { timeToMSSinceMidnight } from "../src/scripts/background/timeUtils"
+import { timeToMSSinceMidnight } from "../src/background/timeUtils"
 
 describe("test time to ms since midnight", () => {
 	it("converts basic examples correctly", () => {
