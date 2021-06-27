@@ -15,7 +15,7 @@ const getTargetsBrowserlist = (targetBrowser) => {
 		return "last 3 chrome version, last 3 edge version, last 3 opera version"
 	}
 	else if (targetBrowser === "firefox") {
-		return "last 3 firefox version, last 3 and_ff version"
+		return "last 3 firefox version"
 	}
 	throw new Error("browser argument not specified")
 }
