@@ -164,7 +164,7 @@ module.exports = (env) => {
 	}
 	
 	if (mode === "development") {
-		config.devtool = "inline-cheap-source-map"
+		config.devtool = "inline-source-map"
 	}
 
 	if (mode === "production") {
