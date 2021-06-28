@@ -174,6 +174,10 @@ module.exports = (env) => {
 				path: "../",
 				filename: `${targetBrowser}_v${PACKAGE.version}.zip`,
 			}),
+			new BundleAnalyzerPlugin({
+				analyzerMode: "static",
+				reportFilename: `../${targetBrowser}_report.html`,
+			}),
 		]
 	}
 
