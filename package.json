@@ -45,7 +45,7 @@
 	},
 	"scripts": {
 		"validate": "yarn lint && yarn test && yarn build",
-		"lint": "eslint",
+		"lint": "eslint .",
 		"test": "jest",
 		"build:chrome": "webpack --env chrome --env prod",
 		"build:firefox": "webpack --env firefox --env prod",
