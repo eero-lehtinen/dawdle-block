@@ -141,12 +141,15 @@ module.exports = (env) => {
 					version: PACKAGE.version,
 				},
 			}),
-			new BundleAnalyzerPlugin({
-				analyzerMode: "static",
-				reportFilename: `../${targetBrowser}_report.html`,
+			// type checking
+			new ForkTsCheckerWebpackPlugin({
+				typescript: {
+					diagnosticOptions: {
+						semantic: true,
+						syntactic: true,
+					},
+				},
 			}),
-			// type checking and eslint checking
-			new ForkTsCheckerWebpackPlugin(),
 		],
 		optimization: {
 			minimize: true,
