@@ -292,8 +292,4 @@ describe("test BlockSet rule matching", () => {
 		expect(blockSet.test("", "ID1", null)).toStrictEqual(BlockTestRes.Ignored)
 		expect(blockSet.test("", "ID2", null)).toStrictEqual(BlockTestRes.Ignored)
 	})
-
-	it.todo("youTube channel rules can be tested")
-
-	it.todo("youTube category rules can be tested")
 })
