@@ -236,17 +236,17 @@ export class BlockSet {
 
 	/**
 	 * Test if url, channelId or categoryId matches with any whitelist or blacklist.
-	 * @param url url to test (protocol not allowed in url)
+	 * @param urlNoProtocol url to test (protocol not allowed)
 	 * @param channelId channel id to test against
 	 * @param categoryId category id to test against
 	 * @returns 
 	 */
-	test(url: string, channelId: string | null, categoryId: string | null): BlockTestRes {
-		if (this.testList(ListType.Whitelist, url, channelId, categoryId)) {
+	test(urlNoProtocol: string, channelId: string | null, categoryId: string | null): BlockTestRes {
+		if (this.testList(ListType.Whitelist, urlNoProtocol, channelId, categoryId)) {
 			return BlockTestRes.Whitelisted
 		}
 
-		if (this.testList(ListType.Blacklist, url, channelId, categoryId)) {
+		if (this.testList(ListType.Blacklist, urlNoProtocol, channelId, categoryId)) {
 			return BlockTestRes.Blacklisted
 		}
 		

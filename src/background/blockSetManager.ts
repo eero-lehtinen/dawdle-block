@@ -64,9 +64,12 @@ export class BlockSetManager {
 
 	/**
 	 * Return a list of block set ids that want to block this url.
-	 * @param url url to check against
+	 * @param urlNoProtocol url to check against (no protocol allowed)
+	 * @param channelId channel id to check against
+	 * @param categoryId category id to check against
 	 */
-	async blockedBy(url: string): Promise<number[]> {
+	async blockedBy(urlNoProtocol: string, channelId: string | null, categoryId: string | null):
+		Promise<number[]> {
 		const blockingBSIds: number[] = []
 
 		const now = new Date()
@@ -77,7 +80,7 @@ export class BlockSetManager {
 			if (!blockSet.isInActiveWeekday(weekDay) || !blockSet.isInActiveTime(msSinceMidnight)) 
 				continue
 
-			const blockResult = blockSet.test(url, null, null)
+			const blockResult = blockSet.test(urlNoProtocol, channelId, categoryId)
 
 			if (blockResult === BlockTestRes.Blacklisted) {
 				blockingBSIds.push(blockSet.getId())
