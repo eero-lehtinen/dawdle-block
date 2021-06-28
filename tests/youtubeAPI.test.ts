@@ -13,18 +13,20 @@ const nullYTInfo = { channelId: null, channelTitle: null, categoryId: null }
 describe("test YouTube API error states", () => {
 
 	it("returns null values when YouTube isn't in the beginning of the url", async() => {
-		await expect(getYtInfo("asd")).resolves.toStrictEqual(nullYTInfo)
-		await expect(getYtInfo("asdwww.youtube.com")).resolves.toStrictEqual(nullYTInfo)
+		await expect(getYtInfo(new URL("file:///asd"))).resolves.toStrictEqual(nullYTInfo)
+		await expect(getYtInfo(new URL("https://asdwww.youtube.com")))
+			.resolves.toStrictEqual(nullYTInfo)
 	})
 
 	it("returns null values when YouTube is not on channel, playlist or video page", async() => {
-		await expect(getYtInfo("www.youtube.com/feed/subscriptions")).resolves.toStrictEqual(nullYTInfo)
+		await expect(getYtInfo(new URL("https://www.youtube.com/feed/subscriptions")))
+			.resolves.toStrictEqual(nullYTInfo)
 	})
 
 	it("returns null values when YouTube is on a " +
 		"valid page but id can't be located in url", async() => {
 		// No "v=" included, which we use to locate the id
-		await expect(getYtInfo("www.youtube.com/watch?asdfasdf&t=42"))
+		await expect(getYtInfo(new URL("https://www.youtube.com/watch?asd&t=42")))
 			.resolves.toStrictEqual(nullYTInfo)
 	})
 
@@ -35,7 +37,8 @@ describe("test YouTube API error states", () => {
 			json: async() => {return {}},	
 		} as Response)
 
-		await expect(getYtInfo("www.youtube.com/watch?v=asd")).resolves.toStrictEqual(nullYTInfo)
+		await expect(getYtInfo(new URL("https://www.youtube.com/watch?v=asd")))
+			.resolves.toStrictEqual(nullYTInfo)
 		expect(warnSpy).toHaveBeenLastCalledWith("Response is empty")
 	})
 
@@ -45,7 +48,8 @@ describe("test YouTube API error states", () => {
 			status: 404, 
 		} as Response)
 		
-		await expect(getYtInfo("www.youtube.com/watch?v=asd")).resolves.toStrictEqual(nullYTInfo)
+		await expect(getYtInfo(new URL("https://www.youtube.com/watch?v=asd")))
+			.resolves.toStrictEqual(nullYTInfo)
 		expect(warnSpy).toHaveBeenLastCalledWith("Request failed")
 	})
 })
@@ -59,7 +63,7 @@ describe("test YouTube API blocking info for video urls", () => {
 			}, 
 		} as Response)
 		
-		const res = await getYtInfo("www.youtube.com/watch?v=ylLzyHk54Z0&t=42")
+		const res = await getYtInfo(new URL("https://www.youtube.com/watch?v=ylLzyHk54Z0&t=42"))
 		expect(getLatestFetchParams()?.[0]).toContain("videos")
 		expect(getLatestFetchParams()?.[0]).toContain("part=snippet")
 		expect(getLatestFetchParams()?.[0]).toContain("id=ylLzyHk54Z0")
@@ -79,7 +83,7 @@ describe("test YouTube API blocking info for channel urls", () => {
 			}, 
 		} as Response)
 
-		const res = await getYtInfo("www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw")
+		const res = await getYtInfo(new URL("https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw"))
 		expect(res).toStrictEqual({ 
 			...nullYTInfo, 
 			channelTitle: "Google Developers", 
@@ -87,7 +91,7 @@ describe("test YouTube API blocking info for channel urls", () => {
 		})
 	})
 
-	const testUsername = async(url: string) => {
+	const testUsername = async(url: URL) => {
 		mockedFetch.mockResolvedValueOnce({
 			status: 200, 
 			json: async() => {
@@ -109,11 +113,11 @@ describe("test YouTube API blocking info for channel urls", () => {
 	}
 
 	it("returns correct results with a valid username", async() => {
-		await testUsername("www.youtube.com/c/google")
+		await testUsername(new URL("https://www.youtube.com/c/google"))
 	})
 
 	it("returns correct results with a valid legacy username", async() => {
-		await testUsername("www.youtube.com/user/google")
+		await testUsername(new URL("https://www.youtube.com/user/google"))
 	})
 })
 
@@ -128,7 +132,8 @@ describe("test YouTube API blocking info for playlist urls", () => {
 			}, 
 		} as Response)
 
-		const res = await getYtInfo("www.youtube.com/playlist?list=PLOU2XLYxmsIJs-bCAsrT21mTgen_DklG1")
+		const res = await getYtInfo(
+			new URL("https://www.youtube.com/playlist?list=PLOU2XLYxmsIJs-bCAsrT21mTgen_DklG1"))
 
 		expect(getLatestFetchParams()?.[0]).toContain("playlists")
 		expect(getLatestFetchParams()?.[0]).toContain("part=snippet")
@@ -139,8 +144,8 @@ describe("test YouTube API blocking info for playlist urls", () => {
 		})
 	})
 
-	it("returns empty results when url contains 'playnext=1'", async() => {
-		const res = await getYtInfo("www.youtube.com/playlist?list=asd&playnext=1")
+	it("returns empty results when url contains parameter 'playnext=1'", async() => {
+		const res = await getYtInfo(new URL("https://www.youtube.com/playlist?list=asd&playnext=1"))
 		expect(res).toStrictEqual(nullYTInfo)
 	})
 })

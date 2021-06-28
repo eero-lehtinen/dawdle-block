@@ -23,16 +23,43 @@ const nullYTInfo = (): YTInfo => {
 	}
 }
 
+interface FindBetween {
+	start: string
+	end: string
+}
+
+
+/**
+ * Returns string between first occurrance of start and end.
+ * If end cannot be found, returns the rest of the source after start.
+ * @param source input string
+ * @param findBetween start and end
+ * @param startPos start search of start from this index
+ * @returns string between start and end
+ */
+const getPartBetween = (source: string, 
+	{ start, end }: FindBetween, startPos = 0): string | null =>  {
+	const iA = source.indexOf(start, startPos)
+	if (iA === -1)
+		return null
+
+	let iB = source.indexOf(end, iA + start.length)
+	if (iB === -1)
+		iB = source.length
+
+	return source.substring(iA + start.length, iB)
+}
+
 /**
  * If url is a page of YouTube channel, video or playlist,
  * fetch channelId and categoryId associated with it from YouTube data API.
  * Returns null for categoryId if it can't be determined (e.g. playlist doesn't have a category)
  * Returns null for both if url is not a channel, video or playlist.
- * @param url URL with no protocols (e.g. "https://")
- * @returns blocking results
+ * @param url url find info about
+ * @returns fetched youtube information
  */
-export const getYtInfo = async(url: string): Promise<YTInfo> => {
-	if (!url.startsWith(ytUrl)) {
+export const getYtInfo = async(url: URL): Promise<YTInfo> => {
+	if (url.hostname !== ytUrl) {
 		return nullYTInfo()
 	}
 
@@ -55,7 +82,7 @@ export const getYtInfo = async(url: string): Promise<YTInfo> => {
 		}
 
 		const playlistId = findPlaylistId(url)
-		if (playlistId && !url.includes("playnext=1")) {
+		if (playlistId && url.searchParams.get("playnext") !== "1") {
 			const channelInfo = await fetchPlaylistChannelInfo(playlistId)
 			return { ...nullYTInfo(), ...channelInfo }
 		}
@@ -67,88 +94,60 @@ export const getYtInfo = async(url: string): Promise<YTInfo> => {
 	return nullYTInfo()
 }
 
-interface FindBetween {
-	start: string
-	end: string
-}
-
 /**
- * Returns string between first occurrance of start and end.
- * If end cannot be found, returns the rest of the source after start.
- * @param source input string
- * @param findBetween start and end
- * @param startPos start search of start from this index
- * @returns string between start and end
- */
-const getPartBetween = (source: string, 
-	{ start, end }: FindBetween, startPos: number): string | null =>  {
-	const iA = source.indexOf(start, startPos)
-	if (iA === -1)
-		return null
-
-	let iB = source.indexOf(end, iA + start.length)
-	if (iB === -1)
-		iB = source.length
-
-	return source.substring(iA + start.length, iB)
-}
-
-/**
- * Tests if path is after the www.youtube.com part. 
- * Then tries to find string between start and end.
- * Useful when trying to extract e.g. ids from urls.
+ * Tries to find video id from YouTube url if it exists.
+ * E.g. finds "asd" from https://www.youtube.com/watch?v=asd&t=10
  * @param url YouTube url
- * @param path relevant path (e.g. "/watch?")
- * @param findBetween start and end, (e.g. for url parameters "param=" and "&")
- * @returns Identifier found between start and end. Null if identifier can't be found.
+ * @returns video id if it exists, null otherwise
  */
-const findYtUrlIdentifier = (url: string, path: string, { start, end }: FindBetween) => {
-	if (url.startsWith(path, ytUrl.length)) {
-		return getPartBetween(url, { start, end }, ytUrl.length)
+const findVideoId = (url: URL): string | null => {
+	if (url.pathname === "/watch") return url.searchParams.get("v")
+	return null
+}
+
+/**
+ * Tries to find channel id from YouTube url if it exists
+ * E.g. finds "asd" from https://www.youtube.com/channel/asd/videos
+ * @param url YouTube url
+ * @returns channel id if it exists, null otherwise
+ */
+const findChannelId = (url: URL): string | null => {
+	if (url.pathname.startsWith("/channel/")) {
+		return getPartBetween(url.pathname, { start: "/channel/", end: "/" })
 	}
 	return null
 }
 
 /**
- * Tries to find video id from YouTube url if it exists.
- * @param url YouTube url
- * @returns video id if it exists, null otherwise
- */
-const findVideoId = (url: string): string | null => {
-	return findYtUrlIdentifier(url, "/watch?", { start: "v=", end: "&" })
-}
-
-/**
- * Tries to find channel id from YouTube url if it exists
- * @param url YouTube url
- * @returns channel id if it exists, null otherwise
- */
-const findChannelId = (url: string): string | null => {
-	return findYtUrlIdentifier(url, "/channel/", { start: "/channel/", end: "/" })
-}
-
-/**
  * Tries to find channel username from YouTube url if it exists
  * Supports /c/username and legacy /user/username.
+ * E.g. finds "asd" from https://www.youtube.com/c/asd/videos
  * Sometimes usernames are weirdly included in the url (e.g. www.youtube.com/googlecode).
  * These usernames aren't found with this function. They seem to be very rare 
  * (maybe only google themselves has them).
  * @param url YouTube url
  * @returns channel id if it exists, null otherwise
  */
-const findChannelUsername = (url: string): string | null => {
-	return findYtUrlIdentifier(url, "/c/", { start: "/c/", end: "/" }) || 
-		findYtUrlIdentifier(url, "/user/", { start: "/user/", end: "/" })
+const findChannelUsername = (url: URL): string | null => {
+	if (url.pathname.startsWith("/c/")) {
+		return getPartBetween(url.pathname, { start: "/c/", end: "/" })
+	}
+	if (url.pathname.startsWith("/user/")) {
+		return getPartBetween(url.pathname, { start: "/user/", end: "/" })
+	}
+	return null
 }
 
 
 /**
  * Tries to find playlist id from YouTube url if it exists
+ * E.g. finds "asd" from https://www.youtube.com/playlist?list=asd
  * @param url YouTube url
  * @returns playlist id if it exists, null otherwise
  */
-const findPlaylistId = (url: string): string | null => {
-	return findYtUrlIdentifier(url, "/playlist?", { start: "list=", end: "&" })
+const findPlaylistId = (url: URL): string | null => {
+	if (url.pathname === "/playlist") return url.searchParams.get("list")
+	return null
 }
 
 
