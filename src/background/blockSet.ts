@@ -113,7 +113,7 @@ export class BlockSet {
 	 * @returns true if supplied weekdayNumber is set to active, false otherwise
 	 */
 	isInActiveWeekday(weekdayNumber: number): boolean {
-		return !!this.data.activeDays[weekdayNumber]
+		return this.data.activeDays[weekdayNumber] ?? false
 	}
 
 	/**
@@ -208,7 +208,7 @@ export class BlockSet {
 			throw new Error("Can't add duplicate")
 		}
 
-		if (!channelTitle) {
+		if (channelTitle === undefined) {
 			try {
 				channelTitle = await fetchChannelTitle(channelId)
 			}
@@ -258,9 +258,14 @@ export class BlockSet {
 	 */
 	private testList(listType: ListType, url: string, channelId: string | null, 
 		categoryId: string | null): boolean {
-		return this.compiledUrlRules[listType].some((regExp) => regExp.test(url)) ||
-			(channelId ? this.data[listType].ytChannels.some(({ id }) => id === channelId) : false) ||
-			(categoryId ? this.data[listType].ytCategoryIds.some((id) => id === categoryId) : false)
+		if (this.compiledUrlRules[listType].some((regExp) => regExp.test(url)))
+			return true
+		if (channelId !== null && this.data[listType].ytChannels.some(({ id }) => id === channelId))
+			return true
+		if (categoryId !== null && this.data[listType].ytCategoryIds.some((id) => id === categoryId))
+			return true
+		
+		return false
 	}
 
 	/**
@@ -274,11 +279,11 @@ export class BlockSet {
 		string = string.replace(/(\\\*)|(\*)|([.+?^${}()|[\]\\])/g, 
 			(_, g1, g2, g3): string => {
 				// If we found an escaped wildcard, just return it
-				if (g1)
+				if (g1 !== undefined)
 					return g1
 
 				// If we found an unescaped wildcard, replace it with a regular expression wildcard
-				if (g2)
+				if (g2 !== undefined)
 					return ".*"
 			
 				// Otherwise just escape the forbidden character

@@ -61,6 +61,8 @@ module.exports = {
 					"allow": ["private-constructors"] }],
 				"@typescript-eslint/type-annotation-spacing": "error",
 				"@typescript-eslint/semi": ["error", "never"],
+				"@typescript-eslint/prefer-nullish-coalescing": "error",
+				"@typescript-eslint/strict-boolean-expressions": "error",
 			},
 		},
 	],

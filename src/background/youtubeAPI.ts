@@ -65,24 +65,24 @@ export const getYtInfo = async(url: URL): Promise<YTInfo> => {
 
 	try {
 		const videoId = findVideoId(url)
-		if (videoId) {
+		if (videoId !== null) {
 			return await fetchVideoInfo(videoId)
 		}
 
 		const channelId = findChannelId(url)
-		if (channelId) {
+		if (channelId !== null) {
 			const channelTitle = await fetchChannelTitle(channelId)
 			return { ...nullYTInfo(), channelId, channelTitle }
 		}
 
 		const channelUsername = findChannelUsername(url)
-		if (channelUsername) {
+		if (channelUsername !== null) {
 			const channelInfo = await fetchUsernameChannelInfo(channelUsername)
 			return { ...nullYTInfo(), ...channelInfo }
 		}
 
 		const playlistId = findPlaylistId(url)
-		if (playlistId && url.searchParams.get("playnext") !== "1") {
+		if (playlistId !== null && url.searchParams.get("playnext") !== "1") {
 			const channelInfo = await fetchPlaylistChannelInfo(playlistId)
 			return { ...nullYTInfo(), ...channelInfo }
 		}
@@ -164,7 +164,7 @@ async(response: Response): Promise<any> => {
 		throw new Error("Request failed")
 	}
 	const body = await response.json()
-	if (!body.items || body.items.length === 0) {
+	if (body.items === undefined || body.items.length === 0) {
 		throw new Error("Response is empty")
 	}
 
