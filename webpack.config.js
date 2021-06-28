@@ -40,6 +40,17 @@ const getMode = (env) => {
 	throw new Error("invalid mode argument")
 }
 
+const getBrowserSpecificSettings = (targetBrowser, mode) => {
+	if (targetBrowser === "firefox" && mode === "development") {
+		return (
+			{ "gecko": {
+				"id": "dawdle_block@eerolehtinen.fi",
+				"strict_min_version": "42.0",
+			} })
+	}
+	return undefined
+}
+
 
 module.exports = (env) => {
 	const targetBrowser = getTargetBrowser(env)
@@ -139,6 +150,7 @@ module.exports = (env) => {
 				autoreload: false,
 				manifestDefaults: {
 					version: PACKAGE.version,
+					"browser_specific_settings": getBrowserSpecificSettings(targetBrowser, mode),
 				},
 			}),
 			// type checking
