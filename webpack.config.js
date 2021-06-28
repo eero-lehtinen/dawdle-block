@@ -162,9 +162,12 @@ module.exports = (env) => {
 			],
 		},
 	}
-
+	
 	if (mode === "development") {
 		config.devtool = "inline-cheap-source-map"
+	}
+
+	if (mode === "production") {
 		config.plugins = [
 			...config.plugins,
 			new ZipPlugin({
