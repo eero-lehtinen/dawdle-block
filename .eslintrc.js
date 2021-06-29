@@ -55,11 +55,14 @@ module.exports = {
 			plugins: ["@typescript-eslint"],
 			extends: ["plugin:@typescript-eslint/recommended"],
 			rules: {
+				"no-unused-vars": "off",
 				"@typescript-eslint/no-unused-vars": ["error",
 					{ varsIgnorePattern: "^_", argsIgnorePattern: "^_"	}],
+				"no-empty-function": "off",
 				"@typescript-eslint/no-empty-function": ["error", {
 					"allow": ["private-constructors"] }],
 				"@typescript-eslint/type-annotation-spacing": "error",
+				"semi": "off",
 				"@typescript-eslint/semi": ["error", "never"],
 				"@typescript-eslint/prefer-nullish-coalescing": "error",
 				"@typescript-eslint/strict-boolean-expressions": "error",
