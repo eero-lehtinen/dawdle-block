@@ -25,9 +25,14 @@ export class TabManager {
 	private windowInfos: Record<number, WindowInfo> = {}
 	private tabInfos: Record<number, TabInfo> = {}
 
-	isActive(tabId: number): boolean {
-		const windowInfo = this.windowInfos[this.tabInfos[tabId]?.windowId ?? -1]
-		return !!windowInfo && !windowInfo.minimized && windowInfo.activeTabId === tabId
+	getActiveTabIds(): number[] {
+		return Object.values(this.windowInfos)
+			.map(({ activeTabId }) => activeTabId)
+			.filter((val): val is number => val !== null)
+	}
+
+	getTabs(): TabInfo[] {
+		return Object.values(this.tabInfos)
 	}
 
 	private constructor() {}
@@ -88,25 +93,31 @@ export class TabManager {
 		return windowInfo
 	}
 
+	private unregisterWindow(windowId: number | undefined) {
+		if (this.isValidWindowId(windowId) && this.windowInfos[windowId]) {
+			delete this.windowInfos[windowId]
+		}
+	}
+
 	private registerTab(tab: Tabs.Tab): TabInfo | null {
 		if (!this.isValidWindowId(tab.windowId)) return null
 
-		const window = this.windowInfos[tab.windowId]
-		if (!window) return null
+		const windowInfo = this.windowInfos[tab.windowId]
+		if (!windowInfo) return null
 
 		if (!this.isValidTabId(tab.id)) return null
-		const newTab = { id: tab.id, url: tab.url ?? null, windowId: window.id }
+		const newTab = { id: tab.id, url: tab.url ?? null, windowId: windowInfo.id }
 		this.tabInfos = { ...this.tabInfos, [newTab.id]: newTab }
+		if (tab.active) {
+			windowInfo.activeTabId = newTab.id
+		}
 		return newTab
 	}
 
 	private unregisterTab(tabId: number | undefined) {
-		if (!this.isValidTabId(tabId)) return
-
-		const tabInfo = this.tabInfos[tabId]
-		if (!tabInfo) return
-
-		delete this.tabInfos[tabId]
+		if (this.isValidTabId(tabId) && this.tabInfos[tabId]) {
+			delete this.tabInfos[tabId]
+		}
 	}
 
 	private onTabUpdated = (tabId: number, 
@@ -156,15 +167,11 @@ export class TabManager {
 	}
 
 	private onWindowCreated(window: Windows.Window) {
-		if (this.isValidWindowId(window.id) && !this.windowInfos[window.id]) {
-			this.registerWindow(window)
-		}
+		this.registerWindow(window)
 	}
 
 	private onWindowRemoved(windowId: number) {
-		if (this.isValidWindowId(windowId) && this.windowInfos[windowId]) {
-			delete this.windowInfos[windowId]
-		}
+		this.unregisterWindow(windowId)
 	}
 
 	private tabLoadedObserver = new Observer<TabLoadedEvent>()

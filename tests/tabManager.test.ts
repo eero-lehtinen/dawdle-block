@@ -14,8 +14,9 @@ import { TabLoadedEvent, TabManager } from "../src/background/tabManager"
 
 describe("test tabManager events", () => {
 	let onUpdated: MockzillaEventOf<typeof mockBrowser.tabs.onUpdated>
+	let tabManager: TabManager
 
-	beforeEach(() => {
+	beforeEach(async() => {
 		mockBrowserNode.enable()
 		mockBrowser.tabs.onActivated.addListener.expect
 		mockBrowser.tabs.onRemoved.addListener.expect
@@ -23,23 +24,33 @@ describe("test tabManager events", () => {
 		mockBrowser.windows.onCreated.addListener.expect
 		mockBrowser.windows.onRemoved.addListener.expect
 		onUpdated = mockEvent(mockBrowser.tabs.onUpdated)
+
+		mockBrowser.windows.getAll.expect
+			.andResolve([{ id: 1, state: "normal",
+				tabs: [
+					{ id: 1, windowId: 1, active: true, url: "asd" }, 
+					{ id: 2, windowId: 1, active: false }] } as Windows.Window])
+		
+		tabManager = await TabManager.create()
+		
 	})
 	afterEach(() => mockBrowserNode.verifyAndDisable())
 
-	it.todo("can get a list of 'active' tabs in minimal example")
+	it("can get a list of 'active' tab ids in minimal example", async() => {
+		expect(tabManager.getActiveTabIds()).toStrictEqual([1])
+	})
+
+	it("can get a list of all tabs in minimal example", async() => {
+		const tabs = tabManager.getTabs()
+		expect(tabs).toContainEqual({ id: 1, windowId: 1, url: "asd" })
+		expect(tabs).toContainEqual({ id: 2, windowId: 1, url: null })
+	})
+
 	it.todo("can get a list of 'active' tabs after multiple tab and window operations")
-	it.todo("can get a list of all tabs")
+
 	it.todo("can get a list of all tabs tabs after multiple tab and window operations")
 
 	it("can receive event when a tab has finished loading", async() => {
-		mockBrowser.windows.getAll
-			.expect({ populate: true })
-			.andResolve([{ id: 1, state: "normal", tabs: [{ id: 1, windowId: 1 }] } as Windows.Window])
-
-		onUpdated.emit(1, { status: "loading" }, { id: 1, windowId: 1, url: undefined } as Tabs.Tab)
-		
-		const tabManager = await TabManager.create()
-
 		const listener: Listener<TabLoadedEvent> = jest.fn()
 		const unsubscribe = tabManager.onTabLoaded(listener)
 
