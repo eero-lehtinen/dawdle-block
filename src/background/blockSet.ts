@@ -47,7 +47,7 @@ export class BlockSet {
 	 * @param blocksetPlanObject 
 	 * @param timeElapsed blocking time elapsed
 	 */
-	constructor(id: number, blocksetPlanObject?: unknown, timeElapsed?: number) {
+	constructor(id: number, blocksetPlanObject?: unknown, timeElapsed = 0) {
 		this.id = id
 
 		if (blocksetPlanObject === undefined)
@@ -55,7 +55,7 @@ export class BlockSet {
 		else 
 			this.data = plainToBlockSetData(blocksetPlanObject)
 
-		this.timeElapsed = timeElapsed ?? 0
+		this.timeElapsed = timeElapsed
 
 		this.compileRules()
 	}

@@ -5,15 +5,15 @@ describe("test BlockSet construction parameters", () => {
 	const defaultBlockSetData = new BlockSet(0).getData()
 
 	it("non-objects throw", () => {
-		expect(() => { new BlockSet(0, "string") }).toThrow()
-		expect(() => { new BlockSet(0, 42) }).toThrow()
-		expect(() => { new BlockSet(0, () => {return 0}) }).toThrow()
-		expect(() => { new BlockSet(0, null)}).toThrow()
-		expect(() => { new BlockSet(0, [])}).toThrow()
+		jest.spyOn(console, "error").mockImplementation(() => {/*do nothing*/})
+		expect(() => new BlockSet(0, "string")).toThrow()
+		expect(() => new BlockSet(0, 42)).toThrow()
+		expect(() => new BlockSet(0, () => {return 0})).toThrow()
+		expect(() => new BlockSet(0, [])).toThrow()
+		expect(() => new BlockSet(0, null)).toThrow()
 	})
 
 	it("objects with members of invalid types throw", () => {
-
 		const testBlockSetObj = {
 			v: 1,
 			requireActive: "string", 
@@ -29,10 +29,9 @@ describe("test BlockSet construction parameters", () => {
 
 	it("undefined creates a default block set", () => {
 		expect(new BlockSet(0, undefined).getData()).toStrictEqual(defaultBlockSetData)
+		expect(new BlockSet(0).getData()).toStrictEqual(defaultBlockSetData)
 	})
-
 	it("objects retain their valid property names and lose invalid ones", () => {
-
 		const testBlockSetObj = {
 			v: 1,
 			name: "retained", 

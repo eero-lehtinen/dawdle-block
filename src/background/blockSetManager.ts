@@ -32,7 +32,7 @@ export class BlockSetManager {
 	 * Fetches block set ids from sync storage.
 	 */
 	private async fetchIds(): Promise<number[]> {
-		const idRes = await browser.storage.sync.get({ [bsIdsSaveKey]: [0] })
+		const idRes = await browser.storage.sync.get({ [bsIdsSaveKey]: [] })
 		return plainToBlockSetIds(idRes[bsIdsSaveKey])
 	}
 
@@ -41,20 +41,20 @@ export class BlockSetManager {
 	 */
 	private async loadBlockSets(blockSetIds: number[]): Promise<void> {
 		const elapsedTimeRes = await browser.storage.sync.get(
-			{ [bsTimesElapsedSaveKey]: [0] })
+			{ [bsTimesElapsedSaveKey]: [] })
 		const timesElapsed = plainToBlockSetTimesElapsed(elapsedTimeRes[bsTimesElapsedSaveKey])
 
-		const blockSetQuery: { [s: string]: undefined } = {}
+		const blockSetQuery: { [s: string]: unknown } = {}
 		for (const id of blockSetIds) {
-			blockSetQuery[id] = undefined
+			blockSetQuery[id] = null
 		}
 		const blockSetRes = await browser.storage.sync.get(blockSetQuery)
 
 		for(const id of blockSetIds) {
-			if (typeof blockSetRes[id] === "string") {
-				blockSetRes[id] = decompress(blockSetRes[id])
-			}
 			try {
+				if (typeof blockSetRes[id] === "string") {
+					blockSetRes[id] = decompress(blockSetRes[id])
+				}
 				this.blockSets.push(new BlockSet(id, blockSetRes[id], timesElapsed[id]))
 			}
 			catch (err) {

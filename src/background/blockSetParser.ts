@@ -99,12 +99,14 @@ export const plainToBlockSetData =
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
 (obj: any): BlockSetData => {
 	
-	if (parseableV0(obj)) {
-		const parsedBlockSet = zBlockSetDataV0.parse(obj)
-		return zBlockSetDataV1.parse(convertV0toV1(parsedBlockSet))
-	}
-	else if (parseableV1(obj)) {
-		return zBlockSetDataV1.parse(obj)
+	if (obj !== null && obj !== undefined) {
+		if (parseableV0(obj)) {
+			const parsedBlockSet = zBlockSetDataV0.parse(obj)
+			return zBlockSetDataV1.parse(convertV0toV1(parsedBlockSet))
+		}
+		else if (parseableV1(obj)) {
+			return zBlockSetDataV1.parse(obj)
+		}
 	}
 
 	throw new Error("Can't parse to block set")
@@ -122,8 +124,7 @@ export const createDefaultBlockSet = (): BlockSetData => {
  * @returns 
  */
 const parseableV0 = (obj: any) => {
-	return obj !== undefined && obj !== null && 
-		typeof obj === "object" && (!("v" in obj) || obj.v < 1)
+	return typeof obj === "object" && (!("v" in obj) || obj.v < 1)
 }
 
 /**
@@ -132,8 +133,7 @@ const parseableV0 = (obj: any) => {
  * @returns 
  */
 const parseableV1 = (obj: any) => {
-	return obj !== undefined && obj !== null &&
-		typeof obj === "object" && "v" in obj && obj.v === 1
+	return typeof obj === "object" && "v" in obj && obj.v === 1
 }
 
 /**
