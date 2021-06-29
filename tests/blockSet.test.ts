@@ -9,6 +9,7 @@ describe("test BlockSet construction parameters", () => {
 		expect(() => { new BlockSet(0, 42) }).toThrow()
 		expect(() => { new BlockSet(0, () => {return 0}) }).toThrow()
 		expect(() => { new BlockSet(0, null)}).toThrow()
+		expect(() => { new BlockSet(0, [])}).toThrow()
 	})
 
 	it("objects with members of invalid types throw", () => {
