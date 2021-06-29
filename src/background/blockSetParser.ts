@@ -122,7 +122,7 @@ export const createDefaultBlockSet = (): BlockSetData => {
  * @returns 
  */
 const parseableV0 = (obj: any) => {
-	return !!obj && typeof obj === "object" && (!("v" in obj) || obj.v < 1)
+	return obj !== undefined && typeof obj === "object" && (!("v" in obj) || obj.v < 1)
 }
 
 /**
@@ -131,7 +131,7 @@ const parseableV0 = (obj: any) => {
  * @returns 
  */
 const parseableV1 = (obj: any) => {
-	return !!obj && typeof obj === "object" && "v" in obj && obj.v === 1
+	return obj !== undefined && typeof obj === "object" && "v" in obj && obj.v === 1
 }
 
 /**
