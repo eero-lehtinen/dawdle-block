@@ -1,7 +1,6 @@
   
 const path = require("path")
 const { CleanWebpackPlugin } = require("clean-webpack-plugin")
-const CopyWebpackPlugin = require("copy-webpack-plugin")
 const HtmlWebpackPlugin = require("html-webpack-plugin")
 const WebextensionPlugin = require("webpack-webextension-plugin")
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer")
@@ -71,6 +70,7 @@ module.exports = (env) => {
 		module: {
 			rules: [
 				{
+					// Transpile and polyfill preact tsx
 					exclude: /node_modules/,
 					test: /\.tsx?$/,
 					use: [
@@ -81,6 +81,7 @@ module.exports = (env) => {
 									["@babel/preset-env", { 
 										useBuiltIns: "entry",
 										corejs: { version: "3.15", proposals: true },
+										// Use targets based on our selected browser
 										targets: browserlist, 
 									}],
 									["@babel/typescript", { jsxPragma: "h" }],
@@ -107,15 +108,20 @@ module.exports = (env) => {
 			],
 		},
 		resolve: {
+			
 			extensions: [".ts", ".tsx", ".js", ".jsx"],
 			alias: {
+				// Add src alias
 				"@src": path.resolve(__dirname, "src/"),
+
+				// Resolve preact compatibility layer to react
 				"react": "preact/compat",
 				"react-dom/test-utils": "preact/test-utils",
 				"react-dom": "preact/compat",
 			},
 		},
 		plugins: [
+			// Clean old builds
 			new CleanWebpackPlugin({
 				cleanOnceBeforeBuildPatterns: [
 					path.resolve(__dirname, `./dist/${targetBrowser}/**/*`),
@@ -125,6 +131,7 @@ module.exports = (env) => {
 				cleanStaleWebpackAssets: false,
 				verbose: false,
 			}),
+			// Copy views to dist and inject assosiated js files
 			new HtmlWebpackPlugin({
 				template: "static/views/popup.html",
 				inject: "body",
@@ -137,9 +144,8 @@ module.exports = (env) => {
 				chunks: ["options"],
 				filename: "options.html",
 			}),
-			new CopyWebpackPlugin({
-				patterns: [{ from: "static/images", to: "images" }],
-			}),
+			
+			// Parse manifest.json and apply browser specific settings
 			new WebextensionPlugin({
 				vendor: targetBrowser,
 				autoreload: false,
@@ -148,7 +154,7 @@ module.exports = (env) => {
 					...getFirefoxDebugSettings(targetBrowser, mode),
 				},
 			}),
-			// type checking
+			// Do type checking
 			new ForkTsCheckerWebpackPlugin({
 				typescript: {
 					diagnosticOptions: {
@@ -161,6 +167,7 @@ module.exports = (env) => {
 		optimization: {
 			minimize: true,
 			minimizer: [
+				// Disable all comments in output
 				new TerserPlugin({
 					terserOptions: {
 						format: {
@@ -177,6 +184,7 @@ module.exports = (env) => {
 		config.devtool = "inline-source-map"
 	}
 
+	// Zip and analyze bundle only when mode is production
 	if (mode === "production") {
 		config.plugins = [
 			...config.plugins,
