@@ -52,6 +52,15 @@ describe("test BlockSetManager with browser api mocking", () => {
 		expect(bsManager.getBlockSets()).toMatchObject(
 			[new BlockSet(3, {}, 50), new BlockSet(2)])
 	})
+
+	it("ignores invalid saves", async() => {
+		setUpMockStorage({ idReturn: [0, 1, 2], elapsedReturn: [0, 0, 0] })
+		mockBrowser.storage.sync.get.expect({ 0: undefined, 1: undefined })
+			.andResolve({ 0: null, 1: [], 2: 42 })
+
+		const bsManager = await BlockSetManager.create()
+		expect(bsManager.getBlockSets()).toStrictEqual([])
+	})
 })
 
 

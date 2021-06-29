@@ -54,7 +54,13 @@ export class BlockSetManager {
 			if (typeof blockSetRes[id] === "string") {
 				blockSetRes[id] = decompress(blockSetRes[id])
 			}
-			this.blockSets.push(new BlockSet(id, blockSetRes[id], timesElapsed[id]))	
+			try {
+				this.blockSets.push(new BlockSet(id, blockSetRes[id], timesElapsed[id]))
+			}
+			catch (err) {
+				console.error("Couldn't parse blockset with id " + id)
+				console.error(err)
+			}
 		}
 	}
 
