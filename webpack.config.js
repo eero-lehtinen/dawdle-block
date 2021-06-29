@@ -11,7 +11,7 @@ const TerserPlugin = require("terser-webpack-plugin");
 const PACKAGE = require("./package.json")
 
 const getTargetsBrowserlist = (targetBrowser) => {
-	if (targetBrowser === "chrome") {
+	if (targetBrowser === "chromium") {
 		return "last 3 chrome version, last 3 edge version, last 3 opera version"
 	}
 	else if (targetBrowser === "firefox") {
@@ -21,8 +21,8 @@ const getTargetsBrowserlist = (targetBrowser) => {
 }
 
 const getTargetBrowser = (env) => {
-	if (env.chrome) {
-		return "chrome"
+	if (env.chromium) {
+		return "chromium"
 	}
 	else if (env.firefox) {
 		return "firefox"
@@ -40,13 +40,14 @@ const getMode = (env) => {
 	throw new Error("invalid mode argument")
 }
 
-const getBrowserSpecificSettings = (targetBrowser, mode) => {
+const getFirefoxDebugSettings = (targetBrowser, mode) => {
 	if (targetBrowser === "firefox" && mode === "development") {
-		return (
-			{ "gecko": {
-				"id": "dawdle_block@eerolehtinen.fi",
-				"strict_min_version": "42.0",
-			} })
+		return ({
+			"browser_specific_settings": { 
+				"gecko": {
+					"id": "dawdle_block@eerolehtinen.fi",
+					"strict_min_version": "42.0",
+				} } })
 	}
 	return undefined
 }
@@ -150,7 +151,7 @@ module.exports = (env) => {
 				autoreload: false,
 				manifestDefaults: {
 					version: PACKAGE.version,
-					"browser_specific_settings": getBrowserSpecificSettings(targetBrowser, mode),
+					...getFirefoxDebugSettings(targetBrowser, mode),
 				},
 			}),
 			// type checking

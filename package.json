@@ -47,11 +47,11 @@
 		"validate": "yarn lint && yarn test && yarn build",
 		"lint": "eslint .",
 		"test": "jest",
-		"build:chrome": "webpack --env chrome --env prod",
+		"build:chromium": "webpack --env chromium --env prod",
 		"build:firefox": "webpack --env firefox --env prod",
-		"dev:chrome": "webpack --watch --env chrome --env dev",
+		"dev:chromium": "webpack --watch --env chromium --env dev",
 		"dev:firefox": "webpack --watch --env firefox --env dev",
-		"build": "yarn build:chrome && yarn build:firefox"
+		"build": "yarn build:chromium && yarn build:firefox"
 	},
 	"repository": {
 		"type": "git",
