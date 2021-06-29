@@ -21,22 +21,37 @@ export interface WindowInfo {
 const TAB_ID_NONE  = browser.tabs.TAB_ID_NONE
 const WINDOW_ID_NONE = browser.windows.WINDOW_ID_NONE
 
+/**
+ * Maintains up to date information about all tabs in browser.
+ * Listeners can be registered to listen for relevant events (e.g. tab finishing loading).
+ * Active tabs can be queried at any time.
+ */
 export class TabManager {
 	private windowInfos: Record<number, WindowInfo> = {}
 	private tabInfos: Record<number, TabInfo> = {}
 
+	/**
+	 * Returns tabs that are the current active tab in any window 
+	 * and the window is not minimized.
+	 */
 	getActiveTabIds(): number[] {
 		return Object.values(this.windowInfos)
 			.map(({ activeTabId }) => activeTabId)
 			.filter((val): val is number => val !== null)
 	}
 
+	/**
+	 * Returns a list of all tabs.
+	 */
 	getTabs(): TabInfo[] {
 		return Object.values(this.tabInfos)
 	}
 
 	private constructor() {}
 
+	/**
+	 * Initializes TabManager for usage and returns it.
+	 */
 	static async create(): Promise<TabManager> {
 		const tabManager = new TabManager()
 		tabManager.subscribeToAllEvents()
@@ -44,6 +59,9 @@ export class TabManager {
 		return tabManager
 	}
 
+	/**
+	 * Subscribes to all relevant browser events.
+	 */
 	private subscribeToAllEvents() {
 		try {
 			// Try first if browser allows filters (FireFox onUpdated event is fired on all 
@@ -62,6 +80,9 @@ export class TabManager {
 		browser.windows.onRemoved.addListener(this.onWindowRemoved.bind(this))
 	}
 
+	/**
+	 * Registers all windows and tabs from the browser.
+	 */
 	private async loadAllTabs() {
 		const windows = await browser.windows.getAll({ populate: true })
 		for (const window of windows) {
@@ -72,14 +93,26 @@ export class TabManager {
 		}
 	}
 
+	/**
+	 * Checks if this windowId is valid. (defined and not explicit none)
+	 * @param windowId 
+	 */
 	private isValidWindowId(windowId: number | undefined): windowId is number {
 		return windowId !== undefined && windowId !== WINDOW_ID_NONE
 	}
 	
+	/**
+	 * Checks if this tabId is valid. (defined and not explicit none)
+	 * @param tabId 
+	 */
 	private isValidTabId(tabId: number | undefined): tabId is number {
 		return tabId !== undefined && tabId !== TAB_ID_NONE
 	}
 
+	/**
+	 * Registers window to internal state if it's valid.
+	 * @param window
+	 */
 	private registerWindow(window: Windows.Window): WindowInfo | null {
 		if (!this.isValidWindowId(window.id)) return null
 
@@ -93,12 +126,21 @@ export class TabManager {
 		return windowInfo
 	}
 
+	/**
+	 * Removes window with windowId from internal state if window exists and is valid.
+	 * @param windowId 
+	 */
 	private unregisterWindow(windowId: number | undefined) {
 		if (this.isValidWindowId(windowId) && this.windowInfos[windowId]) {
 			delete this.windowInfos[windowId]
 		}
 	}
 
+	/**
+	 * Registers tab to internal state if it's valid.
+	 * Updates associated window's active tab if relevant.
+	 * @param tab
+	 */
 	private registerTab(tab: Tabs.Tab): TabInfo | null {
 		if (!this.isValidWindowId(tab.windowId)) return null
 
@@ -114,12 +156,25 @@ export class TabManager {
 		return newTab
 	}
 
+	
+	/**
+	 * Removes window with windowId from internal state if window exists and is valid.
+	 * @param windowId 
+	 */
 	private unregisterTab(tabId: number | undefined) {
 		if (this.isValidTabId(tabId) && this.tabInfos[tabId]) {
 			delete this.tabInfos[tabId]
 		}
 	}
 
+	/**
+	 * Event handler for tabs.onUpdated.
+	 * Registers tab if it isn't accounted for.
+	 * Notifies listeners if tab has completed loading.
+	 * @param tabId 
+	 * @param changeInfo 
+	 * @param tab 
+	 */
 	private onTabUpdated = (tabId: number, 
 		changeInfo: Tabs.OnUpdatedChangeInfoType, tab: Tabs.Tab) => {
 		if (changeInfo?.status !== "complete") return
@@ -141,6 +196,11 @@ export class TabManager {
 			this.tabLoadedObserver.publish({ id: tabInfo.id, url: tabInfo.url })
 	}
 
+	/**
+	 * Event handler for tab.onActivated.
+	 * Changes activeTabId of window if relevant.
+	 * @param activeInfo 
+	 */
 	private onTabActivated = (activeInfo: Tabs.OnActivatedActiveInfoType) => {
 		const windowInfo = this.windowInfos[activeInfo.windowId]
 		if (!windowInfo) return
@@ -151,10 +211,22 @@ export class TabManager {
 			tabInfo.windowId = activeInfo.windowId
 	}
 
+	
+	/**
+	 * Event handler for tab.onRemoved.
+	 * Unregisters tab.
+	 * @param activeInfo 
+	 */
 	private onTabRemoved = (tabId: number, _removeInfo: Tabs.OnRemovedRemoveInfoType) => {
 		this.unregisterTab(tabId)
 	}
 	
+	/**
+	 * Event handler for window.onFocusChanged.
+	 * This gets fired when user minimizes window (among other focus changes),
+	 * so we need to check if any window has been minimized.
+	 * @param _windowId 
+	 */
 	private onWindowFocusChanged = async(_windowId: number) => {
 		const windows = await browser.windows.getAll()
 
@@ -166,16 +238,31 @@ export class TabManager {
 		}
 	}
 
+	/**
+	 * Event handler for window.onCreated.
+	 * Registers the new window.
+	 * @param window 
+	 */
 	private onWindowCreated(window: Windows.Window) {
 		this.registerWindow(window)
 	}
 
+	/**
+	 * Event handler for window.onRemoved.
+	 * Unregisters the window.
+	 * @param windowId 
+	 */
 	private onWindowRemoved(windowId: number) {
 		this.unregisterWindow(windowId)
 	}
 
 	private tabLoadedObserver = new Observer<TabLoadedEvent>()
 
+	/**
+	 * Registers listener for TabLoadedEvent.
+	 * @param listener 
+	 * @returns unsubscribe function
+	 */
 	onTabLoaded(listener: Listener<TabLoadedEvent>): () => void {
 		return this.tabLoadedObserver.subscribe(listener)
 	}

@@ -1,7 +1,3 @@
-/**
- * @file Contains BlockSetManager class for loading, updating and saving block sets.
- */
-
 import { browser } from "webextension-polyfill-ts"
 import { BlockSet, BlockTestRes } from "./blockSet"
 import { plainToBlockSetIds, plainToBlockSetTimesElapsed } from "./blockSetParser"
@@ -11,9 +7,17 @@ import { timeToMSSinceMidnight } from "./timeUtils"
 export const bsIdsSaveKey = "blocksetIds"
 export const bsTimesElapsedSaveKey = "blocksetTimesElapsed"
 
+/**
+ * Loads blocksets from sync storage, maintains synchronization when modified. 
+ * Has helper function for testing an url against all block sets simultaneously.
+ */
 export class BlockSetManager {
 
-	private blockSets: BlockSet[] = []
+	private _blockSets: BlockSet[] = []
+
+	get blockSets(): BlockSet[] {
+		return this._blockSets
+	}
 
 	private constructor() {}
 
@@ -38,6 +42,7 @@ export class BlockSetManager {
 
 	/**
 	 * Loads all block sets from sync storage based on blockSetIds.
+	 * @param blockSetIds
 	 */
 	private async loadBlockSets(blockSetIds: number[]): Promise<void> {
 		const elapsedTimeRes = await browser.storage.sync.get(
@@ -55,17 +60,13 @@ export class BlockSetManager {
 				if (typeof blockSetRes[id] === "string") {
 					blockSetRes[id] = decompress(blockSetRes[id])
 				}
-				this.blockSets.push(new BlockSet(id, blockSetRes[id], timesElapsed[id]))
+				this._blockSets.push(new BlockSet(id, blockSetRes[id], timesElapsed[id]))
 			}
 			catch (err) {
 				console.error("Couldn't parse blockset with id " + id)
 				console.error(err)
 			}
 		}
-	}
-
-	getBlockSets(): BlockSet[] {
-		return this.blockSets
 	}
 
 	/**
@@ -81,7 +82,7 @@ export class BlockSetManager {
 		const now = new Date()
 		const msSinceMidnight = timeToMSSinceMidnight(now)
 		const weekDay = now.getDay()
-		for (const blockSet of this.blockSets) {
+		for (const blockSet of this._blockSets) {
 			// if today is not an active day or not in active hours
 			if (!blockSet.isInActiveWeekday(weekDay) || !blockSet.isInActiveTime(msSinceMidnight)) 
 				continue
@@ -89,7 +90,7 @@ export class BlockSetManager {
 			const blockResult = blockSet.test(urlNoProtocol, channelId, categoryId)
 
 			if (blockResult === BlockTestRes.Blacklisted) {
-				blockingBSIds.push(blockSet.getId())
+				blockingBSIds.push(blockSet.id)
 			}
 		}
 		return blockingBSIds

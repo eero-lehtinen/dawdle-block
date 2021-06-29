@@ -1,7 +1,3 @@
-/**
- * @file Contains BlockSet class implementation.
- */
-
 import { BlockSetData, plainToBlockSetData, createDefaultBlockSet, BlockList } 
 	from "./blockSetParser"
 import { ytCategoryNamesById } from "./constants"
@@ -20,10 +16,15 @@ export enum BlockTestRes {
 
 type CompiledRules = Record<ListType, RegExp[]>
 
+/**
+ * Contains all configuration for website blocking. 
+ * Instances should be managed with the BlockSetManager.
+ * Has function for testing a URL against all rules.
+ */
 export class BlockSet {
-	private data: BlockSetData
-	private id: number
-	private timeElapsed: number
+	private _data: BlockSetData
+	private _id: number
+	private _timeElapsed: number
 
 	// Blocking rules compiled to regular expressions (doesn't include yt rules)
 	private compiledUrlRules: CompiledRules = { 
@@ -34,21 +35,21 @@ export class BlockSet {
 	/**
 	 * Requires an unique (enforce outside of this class) id.
 	 * Parses blocksetPlanObject and initializes internal state to match that.
-	 * timeElapsed isn't stored in plain object, so we need to supply it seperately.
+	 * timeElapsed isn't stored in plain object, so we need to supply it separately.
 	 * @throws {Error} if object is not parseable
 	 * @param id unique id
 	 * @param blocksetPlanObject 
 	 * @param timeElapsed blocking time elapsed
 	 */
 	constructor(id: number, blocksetPlanObject?: unknown, timeElapsed = 0) {
-		this.id = id
+		this._id = id
 
 		if (blocksetPlanObject === undefined)
-			this.data = createDefaultBlockSet()
+			this._data = createDefaultBlockSet()
 		else 
-			this.data = plainToBlockSetData(blocksetPlanObject)
+			this._data = plainToBlockSetData(blocksetPlanObject)
 
-		this.timeElapsed = timeElapsed
+		this._timeElapsed = timeElapsed
 
 		this.compileRules()
 	}
@@ -65,8 +66,8 @@ export class BlockSet {
 			return
 		}
 		this.compiledUrlRules[listType] = [
-			...this.data[listType].urlRegExps.map((value: string) => new RegExp(value)),
-			...this.data[listType].urlPatterns.map((value: string) => BlockSet.patternToRegExp(value)),
+			...this._data[listType].urlRegExps.map((value: string) => new RegExp(value)),
+			...this._data[listType].urlPatterns.map((value: string) => BlockSet.patternToRegExp(value)),
 		]
 	}
 
@@ -74,16 +75,16 @@ export class BlockSet {
 	 * Get internal state of data for saving purposes.
 	 * @returns js object
 	 */
-	getData(): BlockSetData {
-		return this.data
+	get data(): BlockSetData {
+		return this._data
 	}
 
-	getId(): number {
-		return this.id
+	get id(): number {
+		return this._id
 	}
 
-	getTimeElapsed(): number {
-		return this.timeElapsed
+	get timeElapsed(): number {
+		return this._timeElapsed
 	}
 
 	/**
@@ -95,8 +96,8 @@ export class BlockSet {
 	 * @returns true if in active time, false otherwise
 	 */
 	isInActiveTime(msSinceMidnight: number): boolean {
-		const from = this.data.activeTime.from
-		const to = this.data.activeTime.to
+		const from = this._data.activeTime.from
+		const to = this._data.activeTime.to
 
 		if (from === to) {
 			return true
@@ -114,7 +115,7 @@ export class BlockSet {
 	 * @returns true if supplied weekdayNumber is set to active, false otherwise
 	 */
 	isInActiveWeekday(weekdayNumber: number): boolean {
-		return this.data.activeDays[weekdayNumber] ?? false
+		return this._data.activeDays[weekdayNumber] ?? false
 	}
 
 	/**
@@ -124,8 +125,8 @@ export class BlockSet {
 	 * @throws "Can't add duplicate" if the rule already exists
 	 */
 	addPattern(listType: ListType, pattern: string): void {
-		if (this.data[listType].urlPatterns.includes(pattern)) throw new Error("Can't add duplicate")
-		this.data[listType].urlPatterns.push(pattern)
+		if (this._data[listType].urlPatterns.includes(pattern)) throw new Error("Can't add duplicate")
+		this._data[listType].urlPatterns.push(pattern)
 		this.compiledUrlRules[listType].push(BlockSet.patternToRegExp(pattern))
 	}
 
@@ -138,31 +139,31 @@ export class BlockSet {
 		const compiled = BlockSet.patternToRegExp(pattern as string)
 		this.compiledUrlRules[listType] = this.compiledUrlRules[listType]
 			.filter((c) => c.source !== compiled.source)
-		this.data[listType].urlPatterns = this.data[listType].urlPatterns.filter((p) => p !== pattern)
+		this._data[listType].urlPatterns = this._data[listType].urlPatterns.filter((p) => p !== pattern)
 	}	
 
 	/**
-	 * Add regular expession to block set
+	 * Add regular expression to block set
 	 * @param listType whitelist or blacklist
 	 * @param regExp regular expression to add
 	 * @throws "Can't add duplicate" if the rule already exists
 	 */
 	addRegExp(listType: ListType, regExp: string): void {
-		if (this.data[listType].urlRegExps.includes(regExp)) throw new Error("Can't add duplicate")
+		if (this._data[listType].urlRegExps.includes(regExp)) throw new Error("Can't add duplicate")
 		const compiledRegExp = new RegExp(regExp)
-		this.data[listType].urlRegExps.push(regExp)
+		this._data[listType].urlRegExps.push(regExp)
 		this.compiledUrlRules[listType].push(compiledRegExp)
 	}
 	
 	/**
-	 * Remove regular expession from block set.
+	 * Remove regular expression from block set.
 	 * @param listType whitelist or blacklist
 	 * @param regExp regular expression to remove
 	 */
 	removeRegExp(listType: ListType, regExp: string): void {
 		this.compiledUrlRules[listType] = this.compiledUrlRules[listType]
 			.filter((c) => c.source !== regExp)
-		this.data[listType].urlRegExps = this.data[listType].urlRegExps.filter((r) => r !== regExp)
+		this._data[listType].urlRegExps = this._data[listType].urlRegExps.filter((r) => r !== regExp)
 	}
 
 	/**
@@ -177,11 +178,11 @@ export class BlockSet {
 			throw new Error("Invalid YouTube category id")
 		}
 
-		if (this.data[listType].ytCategoryIds.includes(categoryId)) {
+		if (this._data[listType].ytCategoryIds.includes(categoryId)) {
 			throw new Error("Can't add duplicate")
 		}
 
-		this.data[listType].ytCategoryIds.push(categoryId)
+		this._data[listType].ytCategoryIds.push(categoryId)
 	}
 
 	
@@ -191,7 +192,7 @@ export class BlockSet {
 	 * @param categoryId category id to remove
 	 */
 	removeYTCategory(listType: ListType, categoryId: string): void {
-		this.data[listType].ytCategoryIds = this.data[listType].ytCategoryIds
+		this._data[listType].ytCategoryIds = this._data[listType].ytCategoryIds
 			.filter((id) => id !== categoryId)
 	}
 
@@ -205,7 +206,7 @@ export class BlockSet {
 	 * @throws "Can't add duplicate" if the channel already exists in rules
 	 */
 	async addYTChannel(listType: ListType, channelId: string, channelTitle?: string): Promise<void> {
-		if (this.data[listType].ytChannels.find(({ id }) => id === channelId)) {
+		if (this._data[listType].ytChannels.find(({ id }) => id === channelId)) {
 			throw new Error("Can't add duplicate")
 		}
 
@@ -218,7 +219,7 @@ export class BlockSet {
 			}
 		}
 
-		this.data[listType].ytChannels.push({ id: channelId, title: channelTitle })
+		this._data[listType].ytChannels.push({ id: channelId, title: channelTitle })
 	}
 
 	/**
@@ -227,12 +228,17 @@ export class BlockSet {
 	 * @param channelId channel id to remove
 	 */
 	removeYTChannel(listType: ListType, channelId: string): void {
-		this.data[listType].ytChannels = this.data[listType].ytChannels
+		this._data[listType].ytChannels = this._data[listType].ytChannels
 			.filter(({ id }) => id !== channelId)
 	}
 	
+	/**
+	 * Get all blockrules based on list type
+	 * @param listType whitelist or blacklist
+	 * @returns 
+	 */
 	getBlockList(listType: ListType): BlockList {
-		return this.data[listType]
+		return this._data[listType]
 	}
 
 	/**
@@ -261,9 +267,9 @@ export class BlockSet {
 		categoryId: string | null): boolean {
 		if (this.compiledUrlRules[listType].some((regExp) => regExp.test(url)))
 			return true
-		if (channelId !== null && this.data[listType].ytChannels.some(({ id }) => id === channelId))
+		if (channelId !== null && this._data[listType].ytChannels.some(({ id }) => id === channelId))
 			return true
-		if (categoryId !== null && this.data[listType].ytCategoryIds.some((id) => id === categoryId))
+		if (categoryId !== null && this._data[listType].ytCategoryIds.some((id) => id === categoryId))
 			return true
 		
 		return false

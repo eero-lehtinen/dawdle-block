@@ -52,8 +52,10 @@ module.exports = {
 				"*.tsx",
 			],
 			parser: "@typescript-eslint/parser",
-			plugins: ["@typescript-eslint"],
-			extends: ["plugin:@typescript-eslint/recommended"],
+			plugins: ["@typescript-eslint", "jsdoc"],
+			extends: [
+				"plugin:@typescript-eslint/recommended",
+			],
 			rules: {
 				"no-unused-vars": "off",
 				"@typescript-eslint/no-unused-vars": ["error",
@@ -66,6 +68,17 @@ module.exports = {
 				"@typescript-eslint/semi": ["error", "never"],
 				"@typescript-eslint/prefer-nullish-coalescing": "error",
 				"@typescript-eslint/strict-boolean-expressions": "error",
+				"jsdoc/require-jsdoc": ["warn", {
+					exemptEmptyFunctions: true,
+					require: {
+						"ClassDeclaration": true, 
+						"FunctionDeclaration": true, 
+						"MethodDefinition": true,
+					},
+					enableFixer: false,
+					checkGetters: false,
+					checkSetters: false,
+				}],
 			},
 		},
 	],

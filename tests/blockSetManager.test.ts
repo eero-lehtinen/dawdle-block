@@ -31,7 +31,7 @@ describe("test BlockSetManager with browser api mocking", () => {
 			.andResolve({ "0": {} })
 
 		const bsManager = await BlockSetManager.create()
-		expect(bsManager.getBlockSets()).toMatchObject([new BlockSet(0)])
+		expect(bsManager.blockSets).toMatchObject([new BlockSet(0)])
 	})
 
 	it.todo("creates a default block set when storage is empty")
@@ -42,16 +42,16 @@ describe("test BlockSetManager with browser api mocking", () => {
 			.andResolve({ "0": compress({}) })
 
 		const bsManager = await BlockSetManager.create()
-		expect(bsManager.getBlockSets()).toMatchObject([new BlockSet(0)])
+		expect(bsManager.blockSets).toMatchObject([new BlockSet(0)])
 	})
 
-	it("can handle non continous ids", async() => {
+	it("can handle non continuous ids", async() => {
 		setUpMockStorage({ idReturn: [3, 2], elapsedReturn: [undefined, undefined, 0, 50] })
 		mockBrowser.storage.sync.get.expect({ 3: null, 2: null })
 			.andResolve({ 3: {}, 2: {} })
 
 		const bsManager = await BlockSetManager.create()
-		expect(bsManager.getBlockSets()).toMatchObject(
+		expect(bsManager.blockSets).toMatchObject(
 			[new BlockSet(3, {}, 50), new BlockSet(2)])
 	})
 
@@ -62,7 +62,7 @@ describe("test BlockSetManager with browser api mocking", () => {
 			.andResolve({ 0: "asd", 1: [], 2: 42 }) // "asd" is an invalid compressed value
 
 		const bsManager = await BlockSetManager.create()
-		expect(bsManager.getBlockSets()).toStrictEqual([])
+		expect(bsManager.blockSets).toStrictEqual([])
 	})
 })
 

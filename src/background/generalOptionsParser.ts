@@ -1,8 +1,3 @@
-/**
- * @file Contains types for representing general options save data. 
- * Has parsing functions for converting a plain js object to it.
- */
-
 import { z } from "zod"
 
 

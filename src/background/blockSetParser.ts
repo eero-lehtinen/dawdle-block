@@ -1,8 +1,3 @@
-/**
- * @file Contains types for representing block set save data. 
- * Has parsing functions for converting plain js objects to them.
- */
-
 import { z } from "zod"
 import { BlockSet } from "./blockSet"
 

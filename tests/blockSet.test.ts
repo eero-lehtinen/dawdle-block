@@ -2,7 +2,7 @@ import { BlockSet, BlockTestRes, ListType } from "../src/background/blockSet"
 import { timeToMSSinceMidnight } from "../src/background/timeUtils"
 
 describe("test BlockSet construction parameters", () => {
-	const defaultBlockSetData = new BlockSet(0).getData()
+	const defaultBlockSetData = new BlockSet(0).data
 
 	it("non-objects throw", () => {
 		jest.spyOn(console, "error").mockImplementation(() => {/*do nothing*/})
@@ -24,12 +24,12 @@ describe("test BlockSet construction parameters", () => {
 	})
 
 	it("incomplete objects get filled with defaults", () => {
-		expect(new BlockSet(0, {}).getData()).toStrictEqual(defaultBlockSetData)
+		expect(new BlockSet(0, {}).data).toStrictEqual(defaultBlockSetData)
 	})
 
 	it("undefined creates a default block set", () => {
-		expect(new BlockSet(0, undefined).getData()).toStrictEqual(defaultBlockSetData)
-		expect(new BlockSet(0).getData()).toStrictEqual(defaultBlockSetData)
+		expect(new BlockSet(0, undefined).data).toStrictEqual(defaultBlockSetData)
+		expect(new BlockSet(0).data).toStrictEqual(defaultBlockSetData)
 	})
 	it("objects retain their valid property names and lose invalid ones", () => {
 		const testBlockSetObj = {
@@ -38,7 +38,7 @@ describe("test BlockSet construction parameters", () => {
 			loseMe: "lost",
 		}
 
-		const blockSetData = new BlockSet(0, testBlockSetObj).getData()
+		const blockSetData = new BlockSet(0, testBlockSetObj).data
 
 		expect(blockSetData).toHaveProperty("name")
 		expect(blockSetData).not.toHaveProperty("loseMe")
@@ -78,7 +78,7 @@ describe("test BlockSet construction parameters", () => {
 			},
 		}
 
-		expect(new BlockSet(0, testBlockSetObj).getData()).toMatchObject(testBlockSetObjResult)
+		expect(new BlockSet(0, testBlockSetObj).data).toMatchObject(testBlockSetObjResult)
 	})
 
 	it("V0 \"*\"-characters get escaped when converting to V1", () => {
@@ -99,7 +99,7 @@ describe("test BlockSet construction parameters", () => {
 			},
 		}
 
-		expect(new BlockSet(0, testBlockSetObj).getData()).toMatchObject(testBlockSetObjResult)
+		expect(new BlockSet(0, testBlockSetObj).data).toMatchObject(testBlockSetObjResult)
 	})
 })
 
