@@ -23,14 +23,7 @@ type CompiledRules = Record<ListType, RegExp[]>
 export class BlockSet {
 	private data: BlockSetData
 	private id: number
-	getId(): number {
-		return this.id
-	}
-
 	private timeElapsed: number
-	getTimeElapsed(): number {
-		return this.timeElapsed
-	}
 
 	// Blocking rules compiled to regular expressions (doesn't include yt rules)
 	private compiledUrlRules: CompiledRules = { 
@@ -83,6 +76,14 @@ export class BlockSet {
 	 */
 	getData(): BlockSetData {
 		return this.data
+	}
+
+	getId(): number {
+		return this.id
+	}
+
+	getTimeElapsed(): number {
+		return this.timeElapsed
 	}
 
 	/**
