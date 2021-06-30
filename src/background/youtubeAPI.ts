@@ -23,31 +23,21 @@ const nullYTInfo = (): YTInfo => {
 	}
 }
 
-interface FindBetween {
-	start: string
-	end: string
-}
-
 
 /**
- * Returns string between first occurrance of start and end.
- * If end cannot be found, returns the rest of the source after start.
+ * Returns string between start pos and end delimiter.
+ * If end delimeter cannot be found, returns the rest of the source after start pos.
  * @param source input string
- * @param findBetween start and end
- * @param startPos start search of start from this index
+ * @param endDelimiter end delimiter string
+ * @param startPos index of first character of returned string
  * @returns string between start and end
  */
-const getPartBetween = (source: string, 
-	{ start, end }: FindBetween, startPos = 0): string | null =>  {
-	const iA = source.indexOf(start, startPos)
-	if (iA === -1)
-		return null
-
-	let iB = source.indexOf(end, iA + start.length)
-	if (iB === -1)
-		iB = source.length
-
-	return source.substring(iA + start.length, iB)
+const getPartBefore = (source: string, 
+	endDelimiter: string, startPos: number): string | null =>  {
+	const end = source.indexOf(endDelimiter, startPos)
+	if (end === -1)
+		return source.substring(startPos)
+	return source.substring(startPos, end)
 }
 
 /**
@@ -113,7 +103,7 @@ const findVideoId = (url: URL): string | null => {
  */
 const findChannelId = (url: URL): string | null => {
 	if (url.pathname.startsWith("/channel/")) {
-		return getPartBetween(url.pathname, { start: "/channel/", end: "/" })
+		return getPartBefore(url.pathname, "/", "/channel/".length)
 	}
 	return null
 }
@@ -130,10 +120,10 @@ const findChannelId = (url: URL): string | null => {
  */
 const findChannelUsername = (url: URL): string | null => {
 	if (url.pathname.startsWith("/c/")) {
-		return getPartBetween(url.pathname, { start: "/c/", end: "/" })
+		return getPartBefore(url.pathname,  "/", "/c/".length)
 	}
 	if (url.pathname.startsWith("/user/")) {
-		return getPartBetween(url.pathname, { start: "/user/", end: "/" })
+		return getPartBefore(url.pathname, "/", "/user/".length)
 	}
 	return null
 }

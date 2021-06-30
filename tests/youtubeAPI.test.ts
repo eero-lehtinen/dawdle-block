@@ -115,6 +115,10 @@ describe("test YouTube API blocking info for channel urls", () => {
 	it("returns correct results with a valid legacy username", async() => {
 		await testUsername(new URL("https://www.youtube.com/user/google"))
 	})
+	
+	it("returns correct results with a username isn't last part of URL", async() => {
+		await testUsername(new URL("https://www.youtube.com/c/google/videos"))
+	})
 })
 
 describe("test YouTube API blocking info for playlist urls", () => {
