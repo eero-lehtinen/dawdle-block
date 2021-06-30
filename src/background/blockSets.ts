@@ -11,7 +11,7 @@ export const bsTimesElapsedSaveKey = "blocksetTimesElapsed"
  * Loads blocksets from sync storage, maintains synchronization when modified. 
  * Has helper function for testing an url against all block sets simultaneously.
  */
-export class BlockSetManager {
+export class BlockSets {
 
 	private _blockSets: BlockSet[] = []
 
@@ -26,10 +26,10 @@ export class BlockSetManager {
 	 * Loads setting from sync storage.
 	 * @returns new instance of BlockSetManager
 	 */
-	static async create(): Promise<BlockSetManager> {
-		const bsManager = new BlockSetManager()
-		await bsManager.loadBlockSets(await bsManager.fetchIds())
-		return bsManager
+	static async create(): Promise<BlockSets> {
+		const instance = new BlockSets()
+		await instance.loadBlockSets(await instance.fetchIds())
+		return instance
 	}
 
 	/**

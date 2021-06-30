@@ -5,8 +5,8 @@ const [browser, mockBrowser, mockBrowserNode] = deepMock<Browser>("browser", fal
 
 jest.mock("webextension-polyfill-ts", () => ({ browser }))
 
-import { BlockSetManager, bsIdsSaveKey, bsTimesElapsedSaveKey } 
-	from "../src/background/blockSetManager"
+import { BlockSets, bsIdsSaveKey, bsTimesElapsedSaveKey } 
+	from "../src/background/blockSets"
 import { BlockSet } from "../src/background/blockSet"
 import { BlockSetIds, BlockSetTimesElapsed } from "../src/background/blockSetParser"
 import { compress } from "../src/background/compression"
@@ -30,8 +30,8 @@ describe("test BlockSetManager with browser api mocking", () => {
 		mockBrowser.storage.sync.get.expect({ "0": null })
 			.andResolve({ "0": {} })
 
-		const bsManager = await BlockSetManager.create()
-		expect(bsManager.blockSets).toMatchObject([new BlockSet(0)])
+		const blockSets = await BlockSets.create()
+		expect(blockSets.blockSets).toMatchObject([new BlockSet(0)])
 	})
 
 	it.todo("creates a default block set when storage is empty")
@@ -41,8 +41,8 @@ describe("test BlockSetManager with browser api mocking", () => {
 		mockBrowser.storage.sync.get.expect({ "0": null })
 			.andResolve({ "0": compress({}) })
 
-		const bsManager = await BlockSetManager.create()
-		expect(bsManager.blockSets).toMatchObject([new BlockSet(0)])
+		const blockSets = await BlockSets.create()
+		expect(blockSets.blockSets).toMatchObject([new BlockSet(0)])
 	})
 
 	it("can handle non continuous ids", async() => {
@@ -50,8 +50,8 @@ describe("test BlockSetManager with browser api mocking", () => {
 		mockBrowser.storage.sync.get.expect({ 3: null, 2: null })
 			.andResolve({ 3: {}, 2: {} })
 
-		const bsManager = await BlockSetManager.create()
-		expect(bsManager.blockSets).toMatchObject(
+		const blockSets = await BlockSets.create()
+		expect(blockSets.blockSets).toMatchObject(
 			[new BlockSet(3, {}, 50), new BlockSet(2)])
 	})
 
@@ -61,8 +61,8 @@ describe("test BlockSetManager with browser api mocking", () => {
 		mockBrowser.storage.sync.get.expect({ 0: null, 1: null, 2: null })
 			.andResolve({ 0: "asd", 1: [], 2: 42 }) // "asd" is an invalid compressed value
 
-		const bsManager = await BlockSetManager.create()
-		expect(bsManager.blockSets).toStrictEqual([])
+		const blockSets = await BlockSets.create()
+		expect(blockSets.blockSets).toStrictEqual([])
 	})
 })
 
