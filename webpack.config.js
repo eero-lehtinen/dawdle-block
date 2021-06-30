@@ -62,6 +62,7 @@ module.exports = (env) => {
 		mode,
 		entry: {
 			background: path.join(__dirname, "src/background/index.ts"),
+			options: path.join(__dirname, "src/options/index.tsx"),
 			popup: path.join(__dirname, "src/popup/index.tsx"),
 		},
 		output: {
