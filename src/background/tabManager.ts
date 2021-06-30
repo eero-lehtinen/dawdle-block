@@ -27,7 +27,13 @@ const WINDOW_ID_NONE = browser.windows.WINDOW_ID_NONE
  * Active tabs can be queried at any time.
  */
 export class TabManager {
+
+	// Holds internal state of windows
+	// Main usage is holding active tab id and minimized-status
 	private windowInfos: Record<number, WindowInfo> = {}
+
+	// Holds internal state of tabs
+	// Main usage is holding url
 	private tabInfos: Record<number, TabInfo> = {}
 
 	/**
@@ -36,8 +42,8 @@ export class TabManager {
 	 */
 	getActiveTabIds(): number[] {
 		return Object.values(this.windowInfos)
-			.map(({ activeTabId }) => activeTabId)
-			.filter((val): val is number => val !== null)
+			.filter(w => w.activeTabId !== null && w.minimized === false)
+			.map(w => w.activeTabId as number)
 	}
 
 	/**
@@ -86,9 +92,9 @@ export class TabManager {
 	private async loadAllTabs() {
 		const windows = await browser.windows.getAll({ populate: true })
 		for (const window of windows) {
-			this.registerWindow(window)
+			this.registerWindow(window.id, window.state)
 			for (const tab of window.tabs ?? []) {
-				this.registerTab(tab)
+				this.registerTab(tab.id, tab.windowId, tab.url, tab.active)
 			}
 		}
 	}
@@ -111,16 +117,17 @@ export class TabManager {
 
 	/**
 	 * Registers window to internal state if it's valid.
+	 * Can be used to update old window infos.
 	 * @param window
 	 */
-	private registerWindow(window: Windows.Window): WindowInfo | null {
-		if (!this.isValidWindowId(window.id)) return null
-
-		const windowInfo = { 
-			id: window.id, 
-			minimized: window.state === "minimized", 
-			activeTabId: null, 
-			tabIds: [], 
+	private registerWindow(windowId: number | undefined, 
+		state: string | undefined): WindowInfo | null {
+		if (!this.isValidWindowId(windowId)) return null
+			
+		const windowInfo: WindowInfo = { 
+			id: windowId, 
+			minimized: state === "minimized",
+			activeTabId: this.windowInfos[windowId]?.activeTabId ?? null,
 		}
 		this.windowInfos = { ...this.windowInfos, [windowInfo.id]: windowInfo }
 		return windowInfo
@@ -138,22 +145,35 @@ export class TabManager {
 
 	/**
 	 * Registers tab to internal state if it's valid.
+	 * Can be used to update old tab infos. Just set url undefined to leave it unchanged.
 	 * Updates associated window's active tab if relevant.
-	 * @param tab
+	 * @param tabId id of tab
+	 * @param windowId id of parent window
+	 * @param url url of tab, set to undefined to preserve old value
+	 * @param active is this tab the active tab of its window
+	 * @returns null if register was unsuccessful (bc tabId or windowId were invalid)
 	 */
-	private registerTab(tab: Tabs.Tab): TabInfo | null {
-		if (!this.isValidWindowId(tab.windowId)) return null
+	private registerTab(tabId: number| undefined, windowId: number | undefined,
+		url: string | undefined, active: boolean): TabInfo | null {
+		
+		if (!this.isValidWindowId(windowId)) return null
 
-		const windowInfo = this.windowInfos[tab.windowId]
+		const windowInfo = this.windowInfos[windowId]
 		if (!windowInfo) return null
 
-		if (!this.isValidTabId(tab.id)) return null
-		const newTab = { id: tab.id, url: tab.url ?? null, windowId: windowInfo.id }
-		this.tabInfos = { ...this.tabInfos, [newTab.id]: newTab }
-		if (tab.active) {
-			windowInfo.activeTabId = newTab.id
+		if (!this.isValidTabId(tabId)) return null
+		
+		const tabInfo: TabInfo = { 
+			id: tabId, 
+			url: url ?? this.tabInfos[tabId]?.url ?? null, 
+			windowId: windowInfo.id, 
 		}
-		return newTab
+		this.tabInfos = { ...this.tabInfos, [tabInfo.id]: tabInfo }
+		
+		if (active) {
+			windowInfo.activeTabId = tabInfo.id
+		}
+		return tabInfo
 	}
 
 	
@@ -175,21 +195,11 @@ export class TabManager {
 	 * @param changeInfo 
 	 * @param tab 
 	 */
-	private onTabUpdated = (tabId: number, 
+	private onTabUpdated = (_tabId: number, 
 		changeInfo: Tabs.OnUpdatedChangeInfoType, tab: Tabs.Tab) => {
 		if (changeInfo?.status !== "complete") return
 
-		let tabInfo = this.tabInfos[tabId] ?? null
-		// If exits already, update its values
-		if (tabInfo) {
-			tabInfo.url = tab.url ?? null
-			if (tab.windowId !== undefined && this.windowInfos[tab.windowId])
-				tabInfo.windowId = tab.windowId
-		}
-		// else just create a new one
-		else {
-			tabInfo = this.registerTab(tab)
-		}
+		const tabInfo = this.registerTab(tab.id, tab.windowId, tab.url, tab.active)
 
 		// Publish results to listeners only we actually found an url in a valid tab
 		if (tabInfo && tabInfo.url !== null) 
@@ -202,13 +212,7 @@ export class TabManager {
 	 * @param activeInfo 
 	 */
 	private onTabActivated = (activeInfo: Tabs.OnActivatedActiveInfoType) => {
-		const windowInfo = this.windowInfos[activeInfo.windowId]
-		if (!windowInfo) return
-		windowInfo.activeTabId = activeInfo.tabId
-
-		const tabInfo = this.tabInfos[activeInfo.tabId]
-		if (tabInfo) 
-			tabInfo.windowId = activeInfo.windowId
+		this.registerTab(activeInfo.tabId, activeInfo.windowId, undefined, true)
 	}
 
 	
@@ -231,10 +235,7 @@ export class TabManager {
 		const windows = await browser.windows.getAll()
 
 		for (const window of windows) {
-			const windowInfo = this.windowInfos[window.id ?? -1] ?? this.registerWindow(window)
-			if (windowInfo) {
-				windowInfo.minimized = window.state === "minimized"
-			}
+			this.registerWindow(window.id, window.state)
 		}
 	}
 
@@ -244,7 +245,7 @@ export class TabManager {
 	 * @param window 
 	 */
 	private onWindowCreated(window: Windows.Window) {
-		this.registerWindow(window)
+		this.registerWindow(window.id, window.state)
 	}
 
 	/**
