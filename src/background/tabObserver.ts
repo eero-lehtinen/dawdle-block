@@ -26,7 +26,7 @@ const WINDOW_ID_NONE = browser.windows.WINDOW_ID_NONE
  * Listeners can be registered to listen for relevant events (e.g. tab finishing loading).
  * Active tabs can be queried at any time.
  */
-export class TabManager {
+export class TabObserver {
 
 	// Holds internal state of windows
 	// Main usage is holding active tab id and minimized-status
@@ -56,13 +56,13 @@ export class TabManager {
 	private constructor() {}
 
 	/**
-	 * Initializes TabManager for usage and returns it.
+	 * Initializes TabObserver for usage and returns it.
 	 */
-	static async create(): Promise<TabManager> {
-		const tabManager = new TabManager()
-		tabManager.subscribeToAllEvents()
-		await tabManager.loadAllTabs()
-		return tabManager
+	static async create(): Promise<TabObserver> {
+		const instance = new TabObserver()
+		instance.subscribeToAllEvents()
+		await instance.loadAllTabs()
+		return instance
 	}
 
 	/**

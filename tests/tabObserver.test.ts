@@ -13,16 +13,16 @@ const flushPromises = () => new Promise(setImmediate)
 
 
 import { Listener } from "../src/background/observer"
-import { TabLoadedEvent, TabManager } from "../src/background/tabManager"
+import { TabLoadedEvent, TabObserver } from "../src/background/tabObserver"
 
-describe("test tabManager events", () => {
+describe("test tabObserver events", () => {
 	let onUpdated: MockzillaEventOf<typeof mockBrowser.tabs.onUpdated>
 	let onTabRemoved: MockzillaEventOf<typeof mockBrowser.tabs.onRemoved>
 	let onActivated: MockzillaEventOf<typeof mockBrowser.tabs.onActivated>
 	let onWindowRemoved: MockzillaEventOf<typeof mockBrowser.windows.onRemoved>
 	let onWindowCreated: MockzillaEventOf<typeof mockBrowser.windows.onCreated>
 	let onFocusChanged: MockzillaEventOf<typeof mockBrowser.windows.onFocusChanged>
-	let tabManager: TabManager
+	let tabObserver: TabObserver
 
 	const initialActiveTabIds = [1]
 	const initialTabs = [{ id: 1, windowId: 1, url: "asd" }, 
@@ -44,35 +44,35 @@ describe("test tabManager events", () => {
 					{ id: 1, windowId: 1, active: true, url: "asd" }, 
 					{ id: 2, windowId: 1, active: false }] } as Windows.Window])
 		
-		tabManager = await TabManager.create()
+		tabObserver = await TabObserver.create()
 		
 	})
 	afterEach(() => mockBrowserNode.verifyAndDisable())
 
 	it("can get a list of 'active' tab ids in minimal example", () => {
-		expect(tabManager.getActiveTabIds()).toStrictEqual(initialActiveTabIds)
+		expect(tabObserver.getActiveTabIds()).toStrictEqual(initialActiveTabIds)
 	})
 
 	it("can get a list of all tabs in minimal example", () => {
-		expect(tabManager.getTabs()).toStrictEqual(initialTabs)
+		expect(tabObserver.getTabs()).toStrictEqual(initialTabs)
 	})
 
 	it("tab gets removed when tabs.onRemoved event is fired", () => {
 		onTabRemoved.emit(2, {} as Tabs.OnRemovedRemoveInfoType)
-		expect(tabManager.getTabs()).toHaveLength(1)
-		expect(tabManager.getTabs()).not.toContainEqual({ id: 2, windowId: 1, url: null })
+		expect(tabObserver.getTabs()).toHaveLength(1)
+		expect(tabObserver.getTabs()).not.toContainEqual({ id: 2, windowId: 1, url: null })
 	})
 
 	it("after windows.onRemoved event is fired, its active tab is removed", () => {
 		onWindowRemoved.emit(1)
-		expect(tabManager.getActiveTabIds()).toHaveLength(0)
+		expect(tabObserver.getActiveTabIds()).toHaveLength(0)
 	})
 
 	it("a new tab on new window is registered after loading is complete", () => {
 		onWindowCreated.emit({ id: 2, state: "normal" } as Windows.Window)
 		onUpdated.emit(3, { status: "loading" }, { id: 3, windowId: 2, url: undefined } as Tabs.Tab)
 		onUpdated.emit(3, { status: "complete" }, { id: 3, windowId: 2, url: "asd" } as Tabs.Tab)
-		expect(tabManager.getTabs()).toContainEqual({ id: 3, windowId: 2, url: "asd" })
+		expect(tabObserver.getTabs()).toContainEqual({ id: 3, windowId: 2, url: "asd" })
 	})
 
 	it("active tab of window is no longer active, if window gets minimized", async() => {
@@ -81,17 +81,17 @@ describe("test tabManager events", () => {
 
 		onFocusChanged.emit(-1)
 		await flushPromises()
-		expect(tabManager.getActiveTabIds()).toHaveLength(0)
+		expect(tabObserver.getActiveTabIds()).toHaveLength(0)
 	})
 
 	it("after tabs.onActiveChanged event is fired, active tab changes", () => {
 		onActivated.emit({ tabId: 2, windowId: 1 })
-		expect(tabManager.getActiveTabIds()).toStrictEqual([2])
+		expect(tabObserver.getActiveTabIds()).toStrictEqual([2])
 	})
 
 	it("can receive event when a tab has finished loading", () => {
 		const listener: Listener<TabLoadedEvent> = jest.fn()
-		const _unsubscribe = tabManager.onTabLoaded(listener)
+		const _unsubscribe = tabObserver.onTabLoaded(listener)
 
 		onUpdated.emit(0, { status: "loading" }, { id: 1, windowId: 1, url: undefined } as Tabs.Tab)
 		expect(listener).toBeCalledTimes(0)
@@ -103,8 +103,8 @@ describe("test tabManager events", () => {
 	describe("test invalid events", () => {
 
 		afterEach(() => {
-			expect(tabManager.getTabs()).toStrictEqual(initialTabs)
-			expect(tabManager.getActiveTabIds()).toStrictEqual(initialActiveTabIds)
+			expect(tabObserver.getTabs()).toStrictEqual(initialTabs)
+			expect(tabObserver.getActiveTabIds()).toStrictEqual(initialActiveTabIds)
 		})
 
 		it("window creation with invalid ids does nothing", () => {
