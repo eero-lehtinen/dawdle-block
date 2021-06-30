@@ -55,7 +55,7 @@ export class TabManager {
 	static async create(): Promise<TabManager> {
 		const tabManager = new TabManager()
 		tabManager.subscribeToAllEvents()
-		tabManager.loadAllTabs()
+		await tabManager.loadAllTabs()
 		return tabManager
 	}
 

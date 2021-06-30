@@ -34,7 +34,7 @@ describe("test YouTube API error states", () => {
 		const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {/* do nothing */})
 		mockedFetch.mockResolvedValueOnce({
 			status: 200, 
-			json: async() => {return {}},	
+			json: async() => Promise.resolve({}),	
 		} as Response)
 
 		await expect(getYtInfo(new URL("https://www.youtube.com/watch?v=asd")))
@@ -58,9 +58,8 @@ describe("test YouTube API blocking info for video urls", () => {
 	it("returns correct results with a valid id", async() => {
 		mockedFetch.mockResolvedValueOnce({
 			status: 200, 
-			json: async() => {
-				return { items: [{ snippet: { channelId: "UC_x5XG1OV2P6uZZ5FSM9Ttw", categoryId: "22" } }] }
-			}, 
+			json: async() => Promise.resolve({ 
+				items: [{ snippet: { channelId: "UC_x5XG1OV2P6uZZ5FSM9Ttw", categoryId: "22" } }] }), 
 		} as Response)
 		
 		const res = await getYtInfo(new URL("https://www.youtube.com/watch?v=ylLzyHk54Z0&t=42"))
@@ -78,9 +77,7 @@ describe("test YouTube API blocking info for channel urls", () => {
 	it("returns correct results with a valid id", async() => {
 		mockedFetch.mockResolvedValueOnce({
 			status: 200, 
-			json: async() => {
-				return { items: [{ snippet: { title: "Google Developers" } }] }
-			}, 
+			json: () => Promise.resolve({ items: [{ snippet: { title: "Google Developers" } }] }), 
 		} as Response)
 
 		const res = await getYtInfo(new URL("https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw"))
@@ -94,11 +91,10 @@ describe("test YouTube API blocking info for channel urls", () => {
 	const testUsername = async(url: URL) => {
 		mockedFetch.mockResolvedValueOnce({
 			status: 200, 
-			json: async() => {
-				return { items: [{ 
+			json: async() => 
+				Promise.resolve({ items: [{ 
 					id: "UC_x5XG1OV2P6uZZ5FSM9Ttw", 
-					snippet: { title: "Google Developers" } }] }
-			}, 
+					snippet: { title: "Google Developers" } }] }),
 		} as Response)
 
 		const res = await getYtInfo(url)
@@ -125,11 +121,10 @@ describe("test YouTube API blocking info for playlist urls", () => {
 	it("returns correct results with a valid id", async() => {
 		mockedFetch.mockResolvedValueOnce({
 			status: 200, 
-			json: async() => {
-				return { items: [{ snippet: { 
+			json: () => Promise.resolve(
+				{ items: [{ snippet: { 
 					channelTitle: "Google Developers",  
-					channelId: "UC_x5XG1OV2P6uZZ5FSM9Ttw" } }] }
-			}, 
+					channelId: "UC_x5XG1OV2P6uZZ5FSM9Ttw" } }] }), 
 		} as Response)
 
 		const res = await getYtInfo(

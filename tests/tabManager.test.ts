@@ -36,11 +36,11 @@ describe("test tabManager events", () => {
 	})
 	afterEach(() => mockBrowserNode.verifyAndDisable())
 
-	it("can get a list of 'active' tab ids in minimal example", async() => {
+	it("can get a list of 'active' tab ids in minimal example", () => {
 		expect(tabManager.getActiveTabIds()).toStrictEqual([1])
 	})
 
-	it("can get a list of all tabs in minimal example", async() => {
+	it("can get a list of all tabs in minimal example", () => {
 		const tabs = tabManager.getTabs()
 		expect(tabs).toContainEqual({ id: 1, windowId: 1, url: "asd" })
 		expect(tabs).toContainEqual({ id: 2, windowId: 1, url: null })
@@ -50,7 +50,7 @@ describe("test tabManager events", () => {
 
 	it.todo("can get a list of all tabs tabs after multiple tab and window operations")
 
-	it("can receive event when a tab has finished loading", async() => {
+	it("can receive event when a tab has finished loading", () => {
 		const listener: Listener<TabLoadedEvent> = jest.fn()
 		const unsubscribe = tabManager.onTabLoaded(listener)
 

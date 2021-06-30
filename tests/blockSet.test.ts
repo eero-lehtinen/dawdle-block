@@ -208,7 +208,7 @@ describe("test BlockSet rule matching", () => {
 		expect(() => blockSet.addYTCategory(ListType.Whitelist, "10"))
 			.toThrowError("Can't add duplicate")
 		
-		blockSet.addYTChannel(ListType.Whitelist, "a", "title")
+		await blockSet.addYTChannel(ListType.Whitelist, "a", "title")
 		await expect(() => blockSet.addYTChannel(ListType.Whitelist, "a", "title2"))
 			.rejects.toThrowError("Can't add duplicate")
 	})
@@ -281,9 +281,9 @@ describe("test BlockSet rule matching", () => {
 		expect(blockSet.test("", null, "10")).toStrictEqual(BlockTestRes.Ignored)
 	})
 
-	it("can test YouTube channel rules", () => {
-		blockSet.addYTChannel(ListType.Blacklist, "ID1", "TITLE1")
-		blockSet.addYTChannel(ListType.Whitelist, "ID2", "TITLE2")
+	it("can test YouTube channel rules", async() => {
+		await blockSet.addYTChannel(ListType.Blacklist, "ID1", "TITLE1")
+		await blockSet.addYTChannel(ListType.Whitelist, "ID2", "TITLE2")
 		expect(blockSet.test("", "ID1", null)).toStrictEqual(BlockTestRes.Blacklisted)
 		expect(blockSet.test("", "ID2", null)).toStrictEqual(BlockTestRes.Whitelisted)
 

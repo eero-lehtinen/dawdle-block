@@ -75,8 +75,7 @@ export class BlockSetManager {
 	 * @param channelId channel id to check against
 	 * @param categoryId category id to check against
 	 */
-	async blockedBy(urlNoProtocol: string, channelId: string | null, categoryId: string | null):
-		Promise<number[]> {
+	blockedBy(urlNoProtocol: string, channelId: string | null, categoryId: string | null): number[] {
 		const blockingBSIds: number[] = []
 
 		const now = new Date()
