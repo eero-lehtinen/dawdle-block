@@ -23,3 +23,13 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
       - name: Build
         run: yarn build
+      - name: Upload chromium build artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: chromium-build
+          path: dist/chromium_*.zip
+      - name: Upload firefox build artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: firefox-build
+          path: dist/firefox_*.zip
