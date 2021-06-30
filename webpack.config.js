@@ -7,6 +7,7 @@ const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer")
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin")
 const ZipPlugin = require("zip-webpack-plugin")
 const TerserPlugin = require("terser-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin")
 const PACKAGE = require("./package.json")
 
 const getTargetsBrowserlist = (targetBrowser) => {
@@ -140,6 +141,10 @@ module.exports = (env) => {
 				inject: "body",
 				chunks: ["options"],
 				filename: "options.html",
+			}),
+
+			new CopyWebpackPlugin({
+				patterns: [{ from: "static/images", to: "images" }],
 			}),
 			
 			// Parse manifest.json and apply browser specific settings
