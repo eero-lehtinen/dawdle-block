@@ -25,14 +25,15 @@ jobs:
         run: yarn build
       - name: Set version variable
         run: |
-          node -e "console.log('version='+JSON.parse(require('fs').readFileSync('package.json')).version)" >> $GITHUB_ENV
+          node -e "console.log('version='+JSON.parse(require('fs').readFileSync('package.json')).version)" >> $GITHUB_ENV;
+          echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
       - name: Upload Chromium build artifact
         uses: actions/upload-artifact@v2
         with:
-          name: chromium_v${{ env.version }}_${{ github.sha }}
+          name: chromium_v${{ env.version }}_${{ env.short_sha }}
           path: dist/chromium
       - name: Upload Firefox build artifact
         uses: actions/upload-artifact@v2
         with:
-          name: firefox_v${{ env.version }}_${{ github.sha }}
+          name: firefox_v${{ env.version }}_${{ env.short_sha }}
           path: dist/firefox
