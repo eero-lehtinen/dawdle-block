@@ -9,9 +9,8 @@ module.exports = {
 		sourceType: "module",
 	},
 	ignorePatterns: [
-		"libraries/**/*",
+		"legacy/**/*",
 		"dist/**/*",
-		"js/**/*",
 	],
 	env: {
 		webextensions: true,
