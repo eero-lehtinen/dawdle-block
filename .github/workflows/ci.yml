@@ -23,13 +23,16 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
       - name: Build
         run: yarn build
-      - name: Upload chromium build artifact
+      - name: Set version variable
+        run: |
+          node -e "console.log('version='+JSON.parse(require('fs').readFileSync('package.json')).version)" >> $GITHUB_ENV
+      - name: Upload Chromium build artifact
         uses: actions/upload-artifact@v2
         with:
-          name: chromium-build
-          path: dist/chromium_*.zip
-      - name: Upload firefox build artifact
+          name: chromium_v${{ env.version }}_${{ github.sha }}
+          path: dist/chromium
+      - name: Upload Firefox build artifact
         uses: actions/upload-artifact@v2
         with:
-          name: firefox-build
-          path: dist/firefox_*.zip
+          name: firefox_v${{ env.version }}_${{ github.sha }}
+          path: dist/firefox
