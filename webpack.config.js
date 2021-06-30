@@ -111,9 +111,6 @@ module.exports = (env) => {
 			
 			extensions: [".ts", ".tsx", ".js", ".jsx"],
 			alias: {
-				// Add src alias
-				"@src": path.resolve(__dirname, "src/"),
-
 				// Resolve preact compatibility layer to react
 				"react": "preact/compat",
 				"react-dom/test-utils": "preact/test-utils",
@@ -131,7 +128,7 @@ module.exports = (env) => {
 				cleanStaleWebpackAssets: false,
 				verbose: false,
 			}),
-			// Copy views to dist and inject assosiated js files
+			// Copy views to dist and inject associated js files
 			new HtmlWebpackPlugin({
 				template: "static/views/popup.html",
 				inject: "body",
