@@ -1,4 +1,4 @@
-import { BlockSetData, plainToBlockSetData, createDefaultBlockSet, BlockList } 
+import { BlockSetData, plainToBlockSetData, createDefaultBlockSetData, BlockList } 
 	from "./blockSetParser"
 import { ytCategoryNamesById } from "./constants"
 import { fetchChannelTitle } from "./youtubeAPI"
@@ -45,7 +45,7 @@ export class BlockSet {
 		this._id = id
 
 		if (blocksetPlanObject === undefined)
-			this._data = createDefaultBlockSet()
+			this._data = createDefaultBlockSetData()
 		else 
 			this._data = plainToBlockSetData(blocksetPlanObject)
 

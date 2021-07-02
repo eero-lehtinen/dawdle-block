@@ -40,6 +40,8 @@ const zBlockRuleUrlV0 = z.object({
 
 const zBlockRuleV0 = z.union([zBlockRuleYTV0, zBlockRuleUrlV0])
 
+const zBlockListV0 = z.array(zBlockRuleV0).default([])
+
 // Original blockset options data structure
 const zBlockSetDataV0 = z.object({
 	v: z.union([z.undefined(), z.literal(0)]).transform((): 0 => 0),
@@ -51,10 +53,13 @@ const zBlockSetDataV0 = z.object({
 	lastReset: z.number().int().default(0),
 	activeDays: z.array(z.boolean()).length(7).default(new Array(7).fill(false)),
 	activeTime: zActiveTime,
-	blacklist: z.array(zBlockRuleV0).default([]),
-	whitelist: z.array(zBlockRuleV0).default([]),
+	blacklist: zBlockListV0,
+	whitelist: zBlockListV0,
 })
 
+type BlockListV0 = z.infer<typeof zBlockListV0>
+
+type BlockSetDataV0 = z.infer<typeof zBlockSetDataV0>
 
 const zBlockRuleUrlV1 = z.string()
 
@@ -72,17 +77,21 @@ const zBlockListV1 = z.object({
 	ytCategoryIds: z.array(zBlockRuleYTCategoryV1).default([]),
 }).default({})
 
-export type BlockList = z.infer<typeof zBlockListV1>
+type BlockListV1 = z.infer<typeof zBlockListV1>
+
+export type BlockList = BlockListV1
 
 // Most recent blockset options data structure version with 
 // updated block rule structure. Extends block set version 0.
 const zBlockSetDataV1 = zBlockSetDataV0.extend({
-	v: z.literal(1).default(1),
+	v: z.literal(1),
 	blacklist: zBlockListV1,
 	whitelist: zBlockListV1,
 })
 
-export type BlockSetData = z.infer<typeof zBlockSetDataV1>
+type BlockSetDataV1 = z.infer<typeof zBlockSetDataV1>
+
+export type BlockSetData = BlockSetDataV1
 
 /**
  * Converts plain js object into a BlockSet with type validation
@@ -96,8 +105,8 @@ export const plainToBlockSetData =
 	
 	if (obj !== null && obj !== undefined) {
 		if (parseableV0(obj)) {
-			const parsedBlockSet = zBlockSetDataV0.parse(obj)
-			return zBlockSetDataV1.parse(convertV0toV1(parsedBlockSet))
+			const parsedBlockSetV0 = zBlockSetDataV0.parse(obj)
+			return convertV0toV1(parsedBlockSetV0)
 		}
 		else if (parseableV1(obj)) {
 			return zBlockSetDataV1.parse(obj)
@@ -107,28 +116,8 @@ export const plainToBlockSetData =
 	throw new Error("Can't parse to block set")
 }
 
-export const createDefaultBlockSet = (): BlockSetData => {
+export const createDefaultBlockSetData = (): BlockSetData => {
 	return zBlockSetDataV1.parse({ v: 1 })
-}
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-/**
- * Checks if passed object should be parsed with v0 block set parser
- * @param obj 
- * @returns 
- */
-const parseableV0 = (obj: any) => {
-	return typeof obj === "object" && (!("v" in obj) || obj.v < 1)
-}
-
-/**
- * Checks if passed object should be parsed with v1 block set parser
- * @param obj 
- * @returns 
- */
-const parseableV1 = (obj: any) => {
-	return typeof obj === "object" && "v" in obj && obj.v === 1
 }
 
 /**
@@ -137,17 +126,22 @@ const parseableV1 = (obj: any) => {
  * @param blockSet 
  * @returns 
  */
-const convertV0toV1 = (blockSet: any) => {
-	for (const list of ["blacklist", "whitelist"]) {
-		const newBlockList = zBlockListV1.parse({})
+const convertV0toV1 = (blockSet: BlockSetDataV0): BlockSetDataV1 => {
+	const convertList = (blockList: BlockListV0): BlockListV1 => {
+		const newBlockList: BlockListV1 = {
+			urlPatterns: [],
+			urlRegExps: [],
+			ytChannels: [],
+			ytCategoryIds: [],
+		}
 
-		for (const blockRule of blockSet[list]) {
-
+		for (const blockRule of blockList) {
 			// Escape *-characters, because they are used as wildcards in v1
-			if (["urlEquals", "urlContains", "urlPrefix", "urlSuffix"].includes(blockRule.type)) {
+			if (blockRule.type === "urlEquals" || blockRule.type === "urlContains" ||
+				blockRule.type === "urlPrefix" || blockRule.type === "urlSuffix") {
 				blockRule.value = BlockSet.urlToPattern(blockRule.value)
 			}
-
+			
 			// Switch from old block list structure to new.
 			// Also switch from "urlEquals", "urlContains", etc. to simpler wildcard system.
 			switch (blockRule.type) {
@@ -174,10 +168,34 @@ const convertV0toV1 = (blockSet: any) => {
 				break
 			}
 		}
-
-		blockSet[list] = newBlockList
+		return newBlockList
 	}
 
-	blockSet.v = 1
-	return blockSet
+	const { whitelist, blacklist, ...sharedParams } = blockSet
+	return {
+		...sharedParams,
+		v: 1,
+		whitelist: convertList(whitelist),
+		blacklist: convertList(blacklist),
+	}
+}
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+/**
+ * Checks if passed object should be parsed with v0 block set parser
+ * @param obj 
+ * @returns 
+ */
+const parseableV0 = (obj: any) => {
+	return typeof obj === "object" && (!("v" in obj) || obj.v < 1)
+}
+
+/**
+ * Checks if passed object should be parsed with v1 block set parser
+ * @param obj 
+ * @returns 
+ */
+const parseableV1 = (obj: any) => {
+	return typeof obj === "object" && "v" in obj && obj.v === 1
 }

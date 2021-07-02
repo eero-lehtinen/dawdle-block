@@ -1,4 +1,5 @@
 import { BlockSet, BlockTestRes, ListType } from "../src/background/blockSet"
+import { BlockSetData } from "../src/background/blockSetParser"
 import { timeToMSSinceMidnight } from "../src/background/timeUtils"
 
 describe("test BlockSet construction parameters", () => {
@@ -31,6 +32,7 @@ describe("test BlockSet construction parameters", () => {
 		expect(new BlockSet(0, undefined).data).toStrictEqual(defaultBlockSetData)
 		expect(new BlockSet(0).data).toStrictEqual(defaultBlockSetData)
 	})
+
 	it("objects retain their valid property names and lose invalid ones", () => {
 		const testBlockSetObj = {
 			v: 1,
@@ -58,7 +60,8 @@ describe("test BlockSet construction parameters", () => {
 			],
 		}
 
-		const testBlockSetObjResult = {
+		const testBlockSetObjResult: BlockSetData = {
+			...defaultBlockSetData,
 			blacklist: {
 				urlPatterns: [
 					"test",
@@ -78,7 +81,7 @@ describe("test BlockSet construction parameters", () => {
 			},
 		}
 
-		expect(new BlockSet(0, testBlockSetObj).data).toMatchObject(testBlockSetObjResult)
+		expect(new BlockSet(0, testBlockSetObj).data).toStrictEqual(testBlockSetObjResult)
 	})
 
 	it("V0 \"*\"-characters get escaped when converting to V1", () => {
