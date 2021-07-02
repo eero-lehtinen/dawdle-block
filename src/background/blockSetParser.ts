@@ -4,6 +4,12 @@ import { BlockSet } from "./blockSet"
 const zBlockSetIds = z.array(z.number().int().nonnegative())
 export type BlockSetIds = z.infer<typeof zBlockSetIds>
 
+/**
+ * Converts plain js object into type BlockSetIds with type validation.
+ * @param obj plain js object
+ * @throws {Error} if object is not parseable
+ * @returns BlockSetIds
+ */
 export const plainToBlockSetIds = 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
 (obj: any): BlockSetIds => {
@@ -13,6 +19,12 @@ export const plainToBlockSetIds =
 const zBlockSetTimesElapsed = z.array(z.number().int().optional())
 export type BlockSetTimesElapsed = z.infer<typeof zBlockSetTimesElapsed>
 
+/**
+ * Converts plain js object into type BlockSetTimesElapsed with type validation.
+ * @param obj plain js object
+ * @throws {Error} if object is not parseable
+ * @returns BlockSetTimesElapsed
+ */
 export const plainToBlockSetTimesElapsed = 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
 (obj: any): BlockSetTimesElapsed => {
@@ -94,7 +106,7 @@ type BlockSetDataV1 = z.infer<typeof zBlockSetDataV1>
 export type BlockSetData = BlockSetDataV1
 
 /**
- * Converts plain js object into a BlockSet with type validation
+ * Converts plain js object into a BlockSet with type validation.
  * @throws {Error} if object is not parseable
  * @param obj 
  * @returns 
@@ -116,6 +128,10 @@ export const plainToBlockSetData =
 	throw new Error("Can't parse to block set")
 }
 
+/**
+ * Creates a default object of type BlockSetData of the latest version.
+ * @returns default BlockSetData
+ */
 export const createDefaultBlockSetData = (): BlockSetData => {
 	return zBlockSetDataV1.parse({ v: 1 })
 }
@@ -127,6 +143,7 @@ export const createDefaultBlockSetData = (): BlockSetData => {
  * @returns 
  */
 const convertV0toV1 = (blockSet: BlockSetDataV0): BlockSetDataV1 => {
+
 	const convertList = (blockList: BlockListV0): BlockListV1 => {
 		const newBlockList: BlockListV1 = {
 			urlPatterns: [],

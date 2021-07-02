@@ -15,6 +15,7 @@ interface YTInfo {
 
 type YTChannelInfo = Omit<YTInfo, "categoryId">
 
+/** Returns a copy of YTInfo with all values set to null */
 const nullYTInfo = (): YTInfo => {
 	return {
 		channelId: null, 

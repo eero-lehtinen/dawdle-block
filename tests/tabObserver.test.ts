@@ -9,8 +9,8 @@ jest.mock("webextension-polyfill-ts", () => ({ browser }))
 mockBrowser.tabs.TAB_ID_NONE.mock(-1)
 mockBrowser.windows.WINDOW_ID_NONE.mock(-1)
 
+/** Makes sure than all async functions currently waiting for execution are executed now. */
 const flushPromises = () => new Promise(setImmediate)
-
 
 import { Listener } from "../src/background/observer"
 import { TabLoadedEvent, TabObserver } from "../src/background/tabObserver"

@@ -29,7 +29,7 @@ type GeneralOptionsDataV1 = z.infer<typeof zGeneralOptionsDataV1>
 export type GeneralOptionsData = GeneralOptionsDataV1
 
 /**
- * Converts plain js object into GeneralOptions with type validation
+ * Converts plain js object into GeneralOptionsData with type validation.
  * @throws {Error} if object is not parseable
  * @param obj
  * @returns 
@@ -49,6 +49,10 @@ export const plainToGeneralOptionsData =
 	throw new Error("Can't parse to general options")
 }
 
+/**
+ * Creates a default object of type GeneralOptionsData of the latest version.
+ * @returns default GeneralOptionsData
+ */
 export const createDefaultGeneralOptionsData = (): GeneralOptionsData => {
 	return zGeneralOptionsDataV1.parse({ v: 1 })
 }

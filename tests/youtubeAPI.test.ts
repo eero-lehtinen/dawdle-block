@@ -6,6 +6,7 @@ jest.mock("cross-fetch")
 
 const mockedFetch = mocked(fetch, true)
 
+/** Returns latest function parameters of globally mocked fetch function. */
 const getLatestFetchParams = () => mockedFetch.mock.calls[mockedFetch.mock.calls.length - 1]
 
 const nullYTInfo = { channelId: null, channelTitle: null, categoryId: null }
