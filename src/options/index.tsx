@@ -1,5 +1,4 @@
 import { render } from "preact"
+import { Options } from "./options"
 
-const App = <div>Hello World</div>
-
-render(App, document.body)
+render(Options, document.body)
