@@ -57,8 +57,11 @@ module.exports = {
 			],
 			rules: {
 				"no-unused-vars": "off",
-				"@typescript-eslint/no-unused-vars": ["error",
-					{ varsIgnorePattern: "^_", argsIgnorePattern: "^_"	}],
+				"@typescript-eslint/no-unused-vars": ["error", { 
+					varsIgnorePattern: "^_", 
+					argsIgnorePattern: "^_", 
+					ignoreRestSiblings: true, 
+				}],
 				"no-empty-function": "off",
 				"@typescript-eslint/no-empty-function": ["error", {
 					"allow": ["private-constructors"] }],
