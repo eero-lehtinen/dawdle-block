@@ -6,3 +6,13 @@
 export const timeToMSSinceMidnight = (time: Date): number =>
 	time.getMilliseconds() + time.getSeconds() * 1000 + 
 		time.getMinutes() * 60000 + time.getHours() * 3600000
+
+
+/**
+ * Waits for milliseconds, then resolves
+ * @param ms 
+ * @returns 
+ */
+export const sleep = (ms: number): Promise<void> => {
+	return new Promise(resolve => setTimeout(resolve, ms))
+}

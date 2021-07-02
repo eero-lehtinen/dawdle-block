@@ -1,5 +1,5 @@
 
-import { timeToMSSinceMidnight } from "../src/background/timeUtils"
+import { timeToMSSinceMidnight, sleep } from "../src/shared/utils"
 
 describe("test time to ms since midnight", () => {
 	it("converts basic examples correctly", () => {
@@ -9,4 +9,3 @@ describe("test time to ms since midnight", () => {
 		expect(timeToMSSinceMidnight(new Date("2000-01-01T05:00:00"))).toStrictEqual(5 * 3600000)
 	})
 })
-

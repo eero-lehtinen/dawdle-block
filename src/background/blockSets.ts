@@ -2,7 +2,7 @@ import { browser } from "webextension-polyfill-ts"
 import { BlockSet, BlockTestRes } from "./blockSet"
 import { plainToBlockSetIds, plainToBlockSetTimesElapsed } from "./blockSetParser"
 import { decompress } from "./compression"
-import { timeToMSSinceMidnight } from "./timeUtils"
+import { timeToMSSinceMidnight } from "../shared/utils"
 
 export const bsIdsSaveKey = "blocksetIds"
 export const bsTimesElapsedSaveKey = "blocksetTimesElapsed"

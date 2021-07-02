@@ -1,6 +1,6 @@
 import { BlockSet, BlockTestRes, ListType } from "../src/background/blockSet"
 import { BlockSetData } from "../src/background/blockSetParser"
-import { timeToMSSinceMidnight } from "../src/background/timeUtils"
+import { timeToMSSinceMidnight } from "../src/shared/utils"
 
 describe("test BlockSet construction parameters", () => {
 	const defaultBlockSetData = new BlockSet(0).data
