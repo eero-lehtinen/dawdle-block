@@ -73,6 +73,8 @@ module.exports = {
 						"ClassDeclaration": true, 
 						"FunctionDeclaration": true, 
 						"MethodDefinition": true,
+						"ArrowFunctionExpression": true,
+						"FunctionExpression": true,
 					},
 					enableFixer: false,
 					checkGetters: false,
