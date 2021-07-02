@@ -73,8 +73,10 @@ module.exports = {
 				"jsdoc/require-jsdoc": ["warn", {
 					// Require top level function comments	
 					contexts: [
-						"Program > VariableDeclaration > VariableDeclarator > ArrowFunctionExpression", 
-						"Program > FunctionDeclaration",
+						"Program > ExportNamedDeclaration > VariableDeclaration" +
+						" > VariableDeclarator > ArrowFunctionExpression", 
+						"Program > VariableDeclaration" +
+						" > VariableDeclarator > ArrowFunctionExpression", 
 					],
 					// Require class declaration and method comments					
 					require: {
