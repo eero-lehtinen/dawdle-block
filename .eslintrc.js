@@ -71,14 +71,18 @@ module.exports = {
 				"@typescript-eslint/prefer-nullish-coalescing": "error",
 				"@typescript-eslint/strict-boolean-expressions": "error",
 				"jsdoc/require-jsdoc": ["warn", {
-					exemptEmptyFunctions: true,
+					// Require top level function comments	
+					contexts: [
+						"Program > VariableDeclaration > VariableDeclarator > ArrowFunctionExpression", 
+						"Program > FunctionDeclaration",
+					],
+					// Require class declaration and method comments					
 					require: {
 						"ClassDeclaration": true, 
-						"FunctionDeclaration": true, 
 						"MethodDefinition": true,
-						"ArrowFunctionExpression": true,
-						"FunctionExpression": true,
 					},
+					publicOnly: false,
+					exemptEmptyFunctions: true,
 					enableFixer: false,
 					checkGetters: false,
 					checkSetters: false,
