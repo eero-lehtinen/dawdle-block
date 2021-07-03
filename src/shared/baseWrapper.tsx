@@ -27,7 +27,7 @@ const InnerWrapper: FunctionComponent = ({ children }) => {
 
 	const scrollbarColors = {
 		track: theme.palette.background.default, 
-		thumb: "#121212"
+		thumb: "#121212",
 	}
 
 	return (
@@ -39,12 +39,12 @@ const InnerWrapper: FunctionComponent = ({ children }) => {
 					"::-webkit-scrollbar": { color: "#FFF", width: "10px" }, 
 					"::-webkit-scrollbar-track": { backgroundColor: scrollbarColors.track },
 					"::-webkit-scrollbar-thumb:hover, ::-webkit-scrollbar-thumb": 
-						{ backgroundColor: scrollbarColors.thumb , borderRadius: 10 },
+						{ backgroundColor: scrollbarColors.thumb, borderRadius: 10 },
 					// Firefox
 					"*": {
-						"scrollbar-color": `${scrollbarColors.thumb} ${scrollbarColors.track}` ,
+						"scrollbar-color": `${scrollbarColors.thumb} ${scrollbarColors.track}`,
 						"scrollbar-width": "thin",
-					}
+					},
 				}} 
 				/>
 				<BackgroundBox>
