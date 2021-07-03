@@ -1,7 +1,6 @@
-import { createContext } from "preact"
+import { createContext, FunctionComponent } from "preact"
 import { useEffect, useState, useContext } from "preact/hooks"
 import { Background } from"../background/background"
-import { FunctionComponent  } from "preact"
 import { browser } from "webextension-polyfill-ts"
 import { sleep } from "./utils"
 

@@ -1,5 +1,5 @@
 import { FunctionComponent } from "preact"
-import { CssBaseline } from "@material-ui/core"
+import { CssBaseline, GlobalStyles } from "@material-ui/core"
 import { ThemeProvider } from "@material-ui/core/styles"
 import { createGlobalTheme } from "./globalTheme"
 import { useBGScript } from "./bgScriptProvider"
@@ -25,8 +25,14 @@ const InnerWrapper: FunctionComponent = ({ children }) => {
 
 	return (
 		<>
-			<CssBaseline />
 			<ThemeProvider theme={createGlobalTheme("dark")} >
+				<CssBaseline /> 
+				<GlobalStyles styles={{ 
+					"::-webkit-scrollbar-track": { backgroundColor: "white" },
+					"::-webkit-scrollbar-thumb:hover, ::-webkit-scrollbar-thumb": 
+						{ backgroundColor: "black" },
+				}} 
+				/>
 				<BackgroundBox>
 					{ bg !== null && children }
 				</BackgroundBox>

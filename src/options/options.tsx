@@ -7,10 +7,11 @@ import { NavDrawer } from "./navDrawer"
  */
 export const Options = (): JSX.Element =>
 	<BaseWrapper>
-		<NavDrawer />
-		<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-			<Container maxWidth="lg">
-			</Container>
-		</Box>
+		<Container maxWidth="lg" sx={{ display: "flex" }}>
+			<NavDrawer />
+			<Box component="main" sx={{ flexGrow: 1, p: 3, bgcolor: "darkread" }}>
+				{}
+			</Box>
+		</Container>
 	</BaseWrapper>
 

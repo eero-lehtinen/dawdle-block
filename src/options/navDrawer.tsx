@@ -1,4 +1,4 @@
-import { Drawer, Toolbar, Divider, List, ListItem, ListItemText, ListItemIcon } 
+import { Drawer, Toolbar, Divider, List, ListItem, ListItemText, ListItemIcon, ListSubheader } 
 	from "@material-ui/core"
 import { SettingsRounded } from "@material-ui/icons"
 
@@ -19,27 +19,33 @@ export const NavDrawer = (): JSX.Element => {
 				"& .MuiDrawer-paper": {
 					width: drawerWidth,
 					boxSizing: "border-box",
+					left: "initial",
 				},
 			}}
 		>
 			<Toolbar />
-			<Divider />
+			<Divider sx={{ marginRight: 3, marginLeft: 3 }} />
 			<List sx={{ p: 1 }}>
 
-				<ListItem button sx={{ borderRadius: 1.5 }}>
+				<ListSubheader>GENERAL</ListSubheader>
+
+				<ListItem button sx={{ borderRadius: 1.5, marginBottom: 1 }}>
 					<ListItemIcon>
 						<SettingsRounded />
 					</ListItemIcon>
 					<ListItemText primary="Settings" />
 				</ListItem>
 
-				<ListItem button sx={{ borderRadius: 1.5 }}>
-					<ListItemIcon>
-						<SettingsRounded />
-					</ListItemIcon>
-					<ListItemText primary="Block Sets" />
-				</ListItem>
-
+				{
+					[...Array(30)].map((v, i) => (
+						<ListItem key={i} button sx={{ borderRadius: 1.5, marginBottom: 1 }}>
+							<ListItemIcon>
+								<SettingsRounded />
+							</ListItemIcon>
+							<ListItemText primary="Block Sets" />
+						</ListItem>
+					))
+				}
 			</List>
 		</Drawer>
 	)
