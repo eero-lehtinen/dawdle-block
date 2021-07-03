@@ -36,10 +36,13 @@ const InnerWrapper: FunctionComponent = ({ children }) => {
 				<CssBaseline /> 
 				<GlobalStyles styles={{ 
 					// Chromium
-					"::-webkit-scrollbar": { color: "#FFF", width: "10px" }, 
+					"::-webkit-scrollbar": { color: "#FFF", width: "16px" }, 
 					"::-webkit-scrollbar-track": { backgroundColor: scrollbarColors.track },
-					"::-webkit-scrollbar-thumb:hover, ::-webkit-scrollbar-thumb": 
-						{ backgroundColor: scrollbarColors.thumb, borderRadius: 10 },
+					"::-webkit-scrollbar-thumb:hover, ::-webkit-scrollbar-thumb": { 
+						backgroundColor: scrollbarColors.thumb, 
+						borderRadius: 8, 
+						border: `4px solid ${scrollbarColors.track}`, 
+					},
 					// Firefox
 					"*": {
 						"scrollbar-color": `${scrollbarColors.thumb} ${scrollbarColors.track}`,
