@@ -22,15 +22,29 @@ export const BaseWrapper: FunctionComponent = ({ children }) =>
  */
 const InnerWrapper: FunctionComponent = ({ children }) => {
 	const bg = useBGScript()
+	const mode = "dark"
+	const theme = createGlobalTheme(mode)
+
+	const scrollbarColors = {
+		track: theme.palette.background.default, 
+		thumb: "#121212"
+	}
 
 	return (
 		<>
-			<ThemeProvider theme={createGlobalTheme("dark")} >
+			<ThemeProvider theme={theme} >
 				<CssBaseline /> 
 				<GlobalStyles styles={{ 
-					"::-webkit-scrollbar-track": { backgroundColor: "white" },
+					// Chromium
+					"::-webkit-scrollbar": { color: "#FFF", width: "10px" }, 
+					"::-webkit-scrollbar-track": { backgroundColor: scrollbarColors.track },
 					"::-webkit-scrollbar-thumb:hover, ::-webkit-scrollbar-thumb": 
-						{ backgroundColor: "black" },
+						{ backgroundColor: scrollbarColors.thumb , borderRadius: 10 },
+					// Firefox
+					"*": {
+						"scrollbar-color": `${scrollbarColors.thumb} ${scrollbarColors.track}` ,
+						"scrollbar-width": "thin",
+					}
 				}} 
 				/>
 				<BackgroundBox>

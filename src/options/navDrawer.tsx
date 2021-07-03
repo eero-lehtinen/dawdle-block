@@ -25,7 +25,7 @@ export const NavDrawer = (): JSX.Element => {
 		>
 			<Toolbar />
 			<Divider sx={{ marginRight: 3, marginLeft: 3 }} />
-			<List sx={{ p: 1 }}>
+			<List sx={{ paddingLeft: 1, paddingRight: 1 }}>
 
 				<ListSubheader>GENERAL</ListSubheader>
 
