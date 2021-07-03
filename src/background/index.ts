@@ -3,9 +3,11 @@ import { Background } from "./background"
 import { BlockSets } from "./blockSets"
 import { TabObserver } from "./tabObserver"
 
-// export bg variable for usage in options and popup
-var bg 
-void (async() => {
-	bg = new Background(await TabObserver.create(), await BlockSets.create())
-})()
+// export background variable for usage in options and popup
+declare global {
+    interface Window { background: Background | undefined }
+}
 
+void (async() => {
+	window.background = new Background(await TabObserver.create(), await BlockSets.create())
+})()

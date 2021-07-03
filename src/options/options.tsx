@@ -1,10 +1,16 @@
-import { Button } from "@material-ui/core"
-import { HomeRounded } from "@material-ui/icons"
-import { ThemeProvider } from "@material-ui/core/styles"
-import { globalTheme } from "../shared/globalTheme"
+import { Box, Container } from "@material-ui/core"
+import { BaseWrapper } from "../shared/baseWrapper"
+import { NavDrawer } from "./navDrawer"
 
-export const Options = 
-	<ThemeProvider theme={globalTheme} >
-		<HomeRounded/>
-		<Button>Hello World</ Button>
-	</ThemeProvider>
+/**
+ * Main function for rendering options menu.
+ */
+export const Options = (): JSX.Element =>
+	<BaseWrapper>
+		<NavDrawer />
+		<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+			<Container maxWidth="lg">
+			</Container>
+		</Box>
+	</BaseWrapper>
+
