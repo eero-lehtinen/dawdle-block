@@ -20,17 +20,15 @@ export const BGScriptProvider: FunctionComponent = ({ children }): JSX.Element =
 		void (async() => {
 			try {
 				const page = await browser.runtime.getBackgroundPage()
-				if (page.background !== undefined) {
-					setBGScript(page.background)
+				if (page.background === undefined) {
+					throw new Error("Undefined background")
 				}
-				else {
-					console.error("Undefined background, trying again...")
-					await sleep(retryIntervalMS)
-					setRetries(retries + 1)
-				}
+				setBGScript(page.background)
 			}
 			catch(err) {
-				console.error(err.message)
+				console.error(err.message, `retrying in ${retryIntervalMS / 1000} seconds...`)
+				await sleep(retryIntervalMS)
+				setRetries(retries + 1)
 			}
 		})()
 	}, [retries])
