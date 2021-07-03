@@ -20,6 +20,9 @@ module.exports = {
 		amd: true,
 		es2021: true,
 	},
+	globals: {
+		JSX: "readonly",
+	},
 	rules: {
 		indent: ["error", "tab"],
 		"linebreak-style": ["error", "unix"],
@@ -93,6 +96,13 @@ module.exports = {
 				"@typescript-eslint/require-await": "error",
 				"@typescript-eslint/no-floating-promises": "error",
 			},
+		},
+		{ 
+			files: ["*.tsx"],
+			parser: "@typescript-eslint/parser",
+			extends: [
+				"preact",
+			],
 		},
 	],
 }
