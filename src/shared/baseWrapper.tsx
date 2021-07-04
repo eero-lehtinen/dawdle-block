@@ -1,4 +1,5 @@
-import { FunctionComponent } from "preact"
+import { FunctionComponent} from "preact"
+import { useMemo } from "preact/hooks"
 import { CssBaseline, GlobalStyles } from "@material-ui/core"
 import { ThemeProvider } from "@material-ui/core/styles"
 import { createGlobalTheme } from "./globalTheme"
@@ -23,7 +24,7 @@ export const BaseWrapper: FunctionComponent = ({ children }) =>
 const InnerWrapper: FunctionComponent = ({ children }) => {
 	const bg = useBGScript()
 	const mode = "dark"
-	const theme = createGlobalTheme(mode)
+	const theme = useMemo(() => createGlobalTheme(mode), [mode])
 
 	const scrollbarColors = {
 		track: theme.palette.background.default, 
