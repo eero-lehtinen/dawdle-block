@@ -1,6 +1,12 @@
+import { mocked } from "ts-jest/utils"
 import { BlockSet, BlockTestRes, ListType } from "../src/background/blockSet"
 import { BlockSetData } from "../src/background/blockSetParser"
 import { timeToMSSinceMidnight } from "../src/shared/utils"
+
+// Mock needed for a single test
+import{ fetchChannelTitle } from "../src/background/youtubeAPI"
+jest.mock("../src/background/youtubeAPI")
+const mockedFetchChannelTitle = mocked(fetchChannelTitle)
 
 describe("test BlockSet construction parameters", () => {
 	const defaultBlockSetData = new BlockSet(0).data
@@ -224,6 +230,8 @@ describe("test BlockSet rule matching", () => {
 	})
 
 	it("can't add invalid YouTube channels", async() => {
+		mockedFetchChannelTitle.mockImplementation(() => {throw "YouTube channel with id not found"})
+
 		await expect(blockSet.addYTChannel(ListType.Whitelist, "asd"))
 			.rejects.toThrowError("YouTube channel with id not found")
 	})
