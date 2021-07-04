@@ -24,12 +24,12 @@ export const NavDrawer = (): JSX.Element => {
 			}}
 		>
 			<Toolbar />
-			<Divider sx={{ marginRight: 3, marginLeft: 3 }} />
-			<List sx={{ paddingLeft: 1, paddingRight: 1 }}>
+			<Divider sx={{ mr: 3, ml: 3 }} />
+			<List sx={{ pr: 1, pl: 1 }}>
 
 				<ListSubheader>GENERAL</ListSubheader>
 
-				<ListItem button sx={{ borderRadius: 1.5, marginBottom: 1 }}>
+				<ListItem button sx={{ borderRadius: 1.5, mb: 0.5 }}>
 					<ListItemIcon>
 						<SettingsRounded />
 					</ListItemIcon>
@@ -38,7 +38,7 @@ export const NavDrawer = (): JSX.Element => {
 
 				{
 					[...Array(30)].map((v, i) => (
-						<ListItem key={i} button sx={{ borderRadius: 1.5, marginBottom: 1 }}>
+						<ListItem key={i} button sx={{ borderRadius: 1.5, mb: 0.5 }}>
 							<ListItemIcon>
 								<SettingsRounded />
 							</ListItemIcon>
