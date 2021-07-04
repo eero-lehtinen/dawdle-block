@@ -38,7 +38,7 @@ const InnerWrapper: FunctionComponent = ({ children }) => {
 					// Chromium
 					"::-webkit-scrollbar": { color: "#FFF", width: "16px" }, 
 					"::-webkit-scrollbar-track": { backgroundColor: scrollbarColors.track },
-					"::-webkit-scrollbar-thumb:hover, ::-webkit-scrollbar-thumb": { 
+					"::-webkit-scrollbar-thumb": {
 						backgroundColor: scrollbarColors.thumb, 
 						borderRadius: 8, 
 						border: `4px solid ${scrollbarColors.track}`, 
