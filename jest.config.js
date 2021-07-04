@@ -5,4 +5,9 @@ module.exports = {
 	maxWorkers: 1,
 	collectCoverageFrom: ["./src/**/*.ts"],
 	setupFilesAfterEnv: ["./tests/setup.ts"],
+	globals: {
+		"ts-jest": {
+			isolatedModules: true,
+		},
+	},
 }
