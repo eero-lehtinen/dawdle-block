@@ -53,62 +53,73 @@ describe("test BlockSet construction parameters", () => {
 	})
 
 	it("V0 block sets get converted to V1", () => {
-
-		const testBlockSetObj = {
-			blacklist: [
-				{ type: "urlEquals", value: "test" },
-				{ type: "urlContains", value: "test" },
-				{ type: "urlPrefix", value: "test" },
-				{ type: "urlSuffix", value: "test" },
-				{ type: "urlRegexp", value: "test" },
-				{ type: "ytChannel", value: { id: "channelid", name: "testchannel" } },
-				{ type: "ytCategory", value: { id: "42", name: "testcategory" } },
+		const listV0 = [
+			{ type: "urlEquals", value: "test" },
+			{ type: "urlContains", value: "test" },
+			{ type: "urlPrefix", value: "test" },
+			{ type: "urlSuffix", value: "test" },
+			{ type: "urlRegexp", value: "test" },
+			{ type: "ytChannel", value: { id: "channelid", name: "testchannel" } },
+			{ type: "ytCategory", value: { id: "42", name: "testcategory" } },
+		]
+		const listV1Expected = {
+			urlPatterns: [
+				"test",
+				"*test*",
+				"test*",
+				"*test",
+			],
+			urlRegExps: [
+				"test",
+			],
+			ytChannels: [
+				{ id: "channelid", title: "testchannel" },
+			],
+			ytCategoryIds: [
+				"42",
 			],
 		}
 
-		const testBlockSetObjResult: BlockSetData = {
+		const testBlockSetObj = {
+			blacklist: listV0,
+			whitelist: listV0,
+		}
+		const testBlockSetObjExpected: BlockSetData = {
 			...defaultBlockSetData,
-			blacklist: {
-				urlPatterns: [
-					"test",
-					"*test*",
-					"test*",
-					"*test",
-				],
-				urlRegExps: [
-					"test",
-				],
-				ytChannels: [
-					{ id: "channelid", title: "testchannel" },
-				],
-				ytCategoryIds: [
-					"42",
-				],
-			},
+			blacklist: listV1Expected,
+			whitelist: listV1Expected,
 		}
 
-		expect(new BlockSet(0, testBlockSetObj).data).toStrictEqual(testBlockSetObjResult)
+		expect(new BlockSet(0, testBlockSetObj).data).toStrictEqual(testBlockSetObjExpected)
 	})
 
 	it("V0 \"*\"-characters get escaped when converting to V1", () => {
+		const listV0 = [
+			{ type: "urlEquals", value: "*te*st*" },
+			{ type: "urlContains", value: "*te*st*" },
+		]
+		const listV1Expected = {
+			urlPatterns: [
+				String.raw`\*te\*st\*`,
+				String.raw`*\*te\*st\**`,
+			],
+			urlRegExps: [],
+			ytChannels: [],
+			ytCategoryIds: [],
+		}
 
 		const testBlockSetObj = {
-			whitelist: [
-				{ type: "urlEquals", value: "*te*st*" },
-				{ type: "urlContains", value: "*te*st*" },
-			],
+			blacklist: listV0,
+			whitelist: listV0,
 		}
 
-		const testBlockSetObjResult = {
-			whitelist: {
-				urlPatterns: [
-					String.raw`\*te\*st\*`,
-					String.raw`*\*te\*st\**`,
-				],
-			},
+		const testBlockSetObjExpected = {
+			...defaultBlockSetData,
+			blacklist: listV1Expected,
+			whitelist: listV1Expected,
 		}
 
-		expect(new BlockSet(0, testBlockSetObj).data).toMatchObject(testBlockSetObjResult)
+		expect(new BlockSet(0, testBlockSetObj).data).toStrictEqual(testBlockSetObjExpected)
 	})
 })
 
