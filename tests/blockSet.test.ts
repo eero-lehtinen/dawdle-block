@@ -1,6 +1,6 @@
 import { mocked } from "ts-jest/utils"
-import { BlockSet, BlockTestRes, ListType } from "../src/background/blockSet"
-import { BlockSetData } from "../src/background/blockSetParser"
+import { BlockSet, BlockTestRes, ChangedEvent, ListType } from "../src/background/blockSet"
+import { BlockSetData, ActiveTime, ActiveDays } from "../src/background/blockSetParser"
 import { timeToMSSinceMidnight } from "../src/shared/utils"
 
 // Mock needed for a single test
@@ -313,5 +313,31 @@ describe("test BlockSet rule matching", () => {
 		blockSet.removeYTChannel(ListType.Whitelist, "ID2")
 		expect(blockSet.test("", "ID1", null)).toStrictEqual(BlockTestRes.Ignored)
 		expect(blockSet.test("", "ID2", null)).toStrictEqual(BlockTestRes.Ignored)
+	})
+})
+
+describe("test BlockSet change listening", () => {
+	const changedEventOf = <T>(value: T): ChangedEvent<T> => ({ newValue: value })
+
+	let blockSet: BlockSet
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let listener: jest.Mock<any, any>
+	beforeEach(() => {
+		blockSet = new BlockSet(0)
+		listener = jest.fn()
+	})
+
+	it("notifies on active time changes", () => {
+		blockSet.subscribeActiveTimeChanged(listener)
+		const testActiveTime: ActiveTime = { from: 0, to: 1 }
+		blockSet.activeTime = testActiveTime
+		expect(listener).toBeCalledWith(changedEventOf(testActiveTime))
+	})
+
+	it("notifies on active day changes", () => {
+		blockSet.subscribeActiveDaysChanged(listener)
+		const testActiveDays: ActiveDays = [true, true, true, true, true, false, false]
+		blockSet.activeDays = testActiveDays
+		expect(listener).toBeCalledWith(changedEventOf(testActiveDays))
 	})
 })

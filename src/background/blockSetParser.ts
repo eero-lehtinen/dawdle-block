@@ -36,6 +36,8 @@ const zActiveTime = z.object({
 	to: z.number().int().default(0),
 }).default({})
 
+export type ActiveTime = z.infer<typeof zActiveTime>
+
 const zBlockRuleYTV0 = z.object({
 	type: z.enum(["ytChannel", "ytCategory"]),
 	value: z.object({
@@ -44,6 +46,9 @@ const zBlockRuleYTV0 = z.object({
 	}),
 })
 
+const zActiveDays = z.array(z.boolean()).length(7).default(new Array(7).fill(false))
+
+export type ActiveDays = z.infer<typeof zActiveDays>
 
 const zBlockRuleUrlV0 = z.object({
 	type: z.enum(["urlEquals", "urlContains", "urlPrefix", "urlSuffix", "urlRegexp"]),

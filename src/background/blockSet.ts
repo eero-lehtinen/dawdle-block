@@ -1,7 +1,10 @@
-import { BlockSetData, plainToBlockSetData, createDefaultBlockSetData, BlockList } 
-	from "./blockSetParser"
+import { 
+	BlockSetData, plainToBlockSetData, createDefaultBlockSetData, 
+	BlockList, ActiveTime, ActiveDays, 
+} from "./blockSetParser"
 import { ytCategoryNamesById } from "./constants"
 import { fetchChannelTitle } from "./youtubeAPI"
+import { Listener, Observer } from "./observer"
 
 export enum ListType {
 	Blacklist = "blacklist",
@@ -15,6 +18,10 @@ export enum BlockTestRes {
 }
 
 type CompiledRules = Record<ListType, RegExp[]>
+
+export type ChangedEvent<T> = {
+	newValue: T
+}
 
 /**
  * Contains all configuration for website blocking. 
@@ -85,6 +92,16 @@ export class BlockSet {
 
 	get timeElapsed(): number {
 		return this._timeElapsed
+	}
+
+	set activeTime(newValue: ActiveTime) {
+		this._data.activeTime = newValue
+		this.activeTimeChangedObserver.publish({ newValue })
+	}
+
+	set activeDays(newValue: ActiveDays) {
+		this._data.activeDays = newValue
+		this.activeDaysChangedObserver.publish({ newValue })
 	}
 
 	/**
@@ -315,5 +332,28 @@ export class BlockSet {
 	 */
 	static urlToPattern(string: string): string {
 		return string.replace(/\*/g, String.raw`\*`)
+	}
+
+
+	private activeTimeChangedObserver = new Observer<ChangedEvent<ActiveTime>>()
+
+	/**
+	 * Registers listener for active time changes.
+	 * @param listener 
+	 * @returns unsubscribe function
+	 */
+	subscribeActiveTimeChanged(listener: Listener<ChangedEvent<ActiveTime>>): () => void {
+		return this.activeTimeChangedObserver.subscribe(listener)
+	}
+
+	private activeDaysChangedObserver = new Observer<ChangedEvent<ActiveDays>>()
+
+	/**
+	 * Registers listener for active days changes.
+	 * @param listener 
+	 * @returns unsubscribe function
+	 */
+	subscribeActiveDaysChanged(listener: Listener<ChangedEvent<ActiveDays>>): () => void {
+		return this.activeDaysChangedObserver.subscribe(listener)
 	}
 }
