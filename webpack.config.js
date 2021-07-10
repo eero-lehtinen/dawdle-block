@@ -72,7 +72,6 @@ module.exports = (env) => {
 		module: {
 			rules: [
 				{
-					// Transpile and polyfill preact tsx
 					exclude: /node_modules/,
 					test: /\.tsx?$/,
 					use: [
@@ -80,32 +79,14 @@ module.exports = (env) => {
 							options: {
 								cacheDirectory: true,
 								presets: [
+									// Overrides default preset-env in babel.config.js
 									["@babel/preset-env", { 
 										useBuiltIns: "entry",
 										corejs: { version: "3.15", proposals: true },
 										// Use targets based on our selected browser
 										targets: browserlist, 
 									}],
-									["@babel/typescript", { jsxPragma: "h" }],
 								],
-								plugins: [
-									["@babel/transform-react-jsx", {
-										"runtime": "automatic",
-										"importSource": "preact",
-									}],
-									// Optimize material ui bundle
-									["babel-plugin-transform-imports", {
-										"@material-ui/core": {
-											transform: "@material-ui/core/${member}",
-											preventFullImport: true,
-										},
-										"@material-ui/icons": {
-											transform: "@material-ui/icons/${member}",
-											preventFullImport: true,
-										},
-									}],
-									"@emotion",
-								], 
 							}, 
 						},
 					],

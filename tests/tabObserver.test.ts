@@ -4,7 +4,7 @@ import { mockEvent, MockzillaEventOf } from "mockzilla-webextension"
 
 const [browser, mockBrowser, mockBrowserNode] = deepMock<Browser>("browser", false)
 
-jest.mock("webextension-polyfill-ts", () => ({ browser }))
+jest.doMock("webextension-polyfill-ts", () => ({ browser }))
 
 mockBrowser.tabs.TAB_ID_NONE.mock(-1)
 mockBrowser.windows.WINDOW_ID_NONE.mock(-1)
