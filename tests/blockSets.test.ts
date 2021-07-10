@@ -26,7 +26,7 @@ const setUpMockStorage = ({ idResolve, elapsedResolve }:
 		.andResolve({ [bsTimesElapsedSaveKey]: elapsedResolve })
 }
 
-describe("test BlockSetManager with browser api mocking", () => {
+describe("test BlockSets with browser api mocking", () => {
 	beforeEach(() => mockBrowserNode.enable())
 	afterEach(() => mockBrowserNode.verifyAndDisable())
 
@@ -72,7 +72,7 @@ describe("test BlockSetManager with browser api mocking", () => {
 })
 
 
-describe("test BlockSetManager url checking", () => {
+describe("test BlockSets url checking", () => {
 	beforeEach(() => mockBrowserNode.enable())
 	afterEach(() => mockBrowserNode.verifyAndDisable())
 	it.todo("returns ids of each matching block sets")
