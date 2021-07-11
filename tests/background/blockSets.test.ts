@@ -6,10 +6,10 @@ const [browser, mockBrowser, mockBrowserNode] = deepMock<Browser>("browser", fal
 jest.doMock("webextension-polyfill-ts", () => ({ browser }))
 
 import { BlockSets, bsIdsSaveKey, bsTimesElapsedSaveKey } 
-	from "../src/background/blockSets"
-import { BlockSet } from "../src/background/blockSet"
-import { BlockSetIds, BlockSetTimesElapsed } from "../src/background/blockSetParser"
-import { compress } from "../src/background/compression"
+	from "@src/background/blockSets"
+import { BlockSet } from "@src/background/blockSet"
+import { BlockSetIds, BlockSetTimesElapsed } from "@src/background/blockSetParser"
+import { compress } from "@src/background/compression"
 
 
 /**

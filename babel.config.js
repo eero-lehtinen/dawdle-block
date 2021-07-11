@@ -8,6 +8,14 @@ module.exports = {
 			"runtime": "automatic",
 			"importSource": "preact",
 		}],
+
+		["module-resolver", {
+			"root": ["./"],
+			"alias": {
+				"@src": "./src",
+			},
+		}],
+
 		// Optimize material ui bundle
 		["babel-plugin-transform-imports", {
 			"@material-ui/core": {

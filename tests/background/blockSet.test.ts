@@ -1,11 +1,11 @@
 import { mocked } from "ts-jest/utils"
-import { BlockSet, BlockTestRes, ChangedEvent, ListType } from "../src/background/blockSet"
-import { BlockSetData, ActiveTime, ActiveDays } from "../src/background/blockSetParser"
-import { timeToMSSinceMidnight } from "../src/shared/utils"
+import { BlockSet, BlockTestRes, ChangedEvent, ListType } from "@src/background/blockSet"
+import { BlockSetData, ActiveTime, ActiveDays } from "@src/background/blockSetParser"
+import { timeToMSSinceMidnight } from "@src/shared/utils"
 
 // Mock needed for a single test
-import{ fetchChannelTitle } from "../src/background/youtubeAPI"
-jest.mock("../src/background/youtubeAPI")
+import{ fetchChannelTitle } from "@src/background/youtubeAPI"
+jest.mock("@src/background/youtubeAPI")
 const mockedFetchChannelTitle = mocked(fetchChannelTitle)
 
 describe("test BlockSet construction parameters", () => {

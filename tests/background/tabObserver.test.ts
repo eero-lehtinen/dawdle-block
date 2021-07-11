@@ -12,8 +12,8 @@ mockBrowser.windows.WINDOW_ID_NONE.mock(-1)
 /** Makes sure than all async functions currently waiting for execution are executed now. */
 const flushPromises = () => new Promise(setImmediate)
 
-import { Listener } from "../src/background/observer"
-import { TabLoadedEvent, TabObserver } from "../src/background/tabObserver"
+import { Listener } from "@src/background/observer"
+import { TabLoadedEvent, TabObserver } from "@src/background/tabObserver"
 
 describe("test tabObserver events", () => {
 	let onUpdated: MockzillaEventOf<typeof mockBrowser.tabs.onUpdated>

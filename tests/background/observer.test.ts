@@ -1,4 +1,4 @@
-import { Observer, Listener } from "../src/background/observer"
+import { Observer, Listener } from "@src/background/observer"
 
 describe("test observer", () => {
 	it("can subscribe, receive events and unsubscribe", () => {

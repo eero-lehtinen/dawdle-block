@@ -1,5 +1,5 @@
 
-import { timeToMSSinceMidnight, sleep } from "../src/shared/utils"
+import { timeToMSSinceMidnight, sleep } from "@src/shared/utils"
 
 describe("test time to ms since midnight", () => {
 	it("converts basic examples correctly", () => {
