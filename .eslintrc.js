@@ -48,6 +48,13 @@ module.exports = {
 		"space-infix-ops": "error",
 	},
 	overrides: [
+		{ 
+			files: ["*.tsx"],
+			parser: "@typescript-eslint/parser",
+			extends: [
+				"preact",
+			],
+		},
 		{
 			files: [
 				"*.ts",
@@ -96,13 +103,6 @@ module.exports = {
 				"@typescript-eslint/require-await": "error",
 				"@typescript-eslint/no-floating-promises": "error",
 			},
-		},
-		{ 
-			files: ["*.tsx"],
-			parser: "@typescript-eslint/parser",
-			extends: [
-				"preact",
-			],
 		},
 	],
 }
