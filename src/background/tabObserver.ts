@@ -264,7 +264,7 @@ export class TabObserver {
 	 * @param listener 
 	 * @returns unsubscribe function
 	 */
-	onTabLoaded(listener: Listener<TabLoadedEvent>): () => void {
+	subscribeTabLoaded(listener: Listener<TabLoadedEvent>): () => void {
 		return this.tabLoadedObserver.subscribe(listener)
 	}
 }

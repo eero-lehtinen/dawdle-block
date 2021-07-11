@@ -91,7 +91,7 @@ describe("test tabObserver events", () => {
 
 	it("can receive event when a tab has finished loading", () => {
 		const listener: Listener<TabLoadedEvent> = jest.fn()
-		const _unsubscribe = tabObserver.onTabLoaded(listener)
+		const _unsubscribe = tabObserver.subscribeTabLoaded(listener)
 
 		onUpdated.emit(0, { status: "loading" }, { id: 1, windowId: 1, url: undefined } as Tabs.Tab)
 		expect(listener).toBeCalledTimes(0)
