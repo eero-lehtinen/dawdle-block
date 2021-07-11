@@ -7,9 +7,6 @@ const [browser, mockBrowser, mockBrowserNode] = deepMock<Browser>("browser", fal
 
 jest.doMock("webextension-polyfill-ts", () => ({ browser }))
 
-mockBrowser.tabs.TAB_ID_NONE.mock(-1)
-mockBrowser.windows.WINDOW_ID_NONE.mock(-1)
-
 import { Listener } from "@src/background/observer"
 import { TabLoadedEvent, TabObserver } from "@src/background/tabObserver"
 
@@ -29,6 +26,9 @@ describe("test tabObserver events", () => {
 	beforeEach(async() => {
 		mockBrowserNode.enable()
 		
+		mockBrowser.tabs.TAB_ID_NONE.mock(-1)
+		mockBrowser.windows.WINDOW_ID_NONE.mock(-1)
+
 		onUpdated = mockEvent(mockBrowser.tabs.onUpdated)
 		onTabRemoved = mockEvent(mockBrowser.tabs.onRemoved)
 		onActivated = mockEvent(mockBrowser.tabs.onActivated)
