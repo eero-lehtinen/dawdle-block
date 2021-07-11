@@ -8,6 +8,8 @@ import { BackgroundBox } from "./backgroundBox"
 import { BGScriptProvider } from "../shared/bgScriptProvider"
 
 
+
+
 /**
  * Contains common shared wrappers for theming and state management with background script.
  */
@@ -22,7 +24,7 @@ export const BaseWrapper: FunctionComponent = ({ children }) =>
  * Inner wrapper is used to get bg script context.
  */
 const InnerWrapper: FunctionComponent = ({ children }) => {
-	const bg = useBGScript()
+	const _bg = useBGScript()
 	const mode = "dark"
 	const theme = useMemo(() => createGlobalTheme(mode), [mode])
 
@@ -52,7 +54,7 @@ const InnerWrapper: FunctionComponent = ({ children }) => {
 				}} 
 				/>
 				<BackgroundBox>
-					{ bg !== null && children }
+					{ children }
 				</BackgroundBox>
 			</ThemeProvider>
 		</>
