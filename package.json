@@ -10,6 +10,7 @@
 		"@material-ui/core": "^5.0.0-beta.0",
 		"@material-ui/icons": "^5.0.0-beta.0",
 		"@material-ui/lab": "^5.0.0-alpha.39",
+		"core-js": "^3.15.2",
 		"cross-fetch": "^3.1.4",
 		"fflate": "^0.7.1",
 		"js-base64": "^3.6.1",
