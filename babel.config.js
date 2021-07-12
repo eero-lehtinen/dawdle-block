@@ -5,13 +5,13 @@ module.exports = {
 	],
 	plugins: [
 		["@babel/transform-react-jsx", {
-			"runtime": "automatic",
-			"importSource": "preact",
+			runtime: "automatic",
+			importSource: "preact",
 		}],
 
 		["module-resolver", {
-			"root": ["./"],
-			"alias": {
+			root: ["./"],
+			alias: {
 				"@src": "./src",
 			},
 		}],

@@ -125,7 +125,7 @@ describe("test BlockSet construction parameters", () => {
 
 describe("test BlockSet methods", () => {
 
-	const testIsInActiveTimes = (blockSet: BlockSet, 
+	const expectIsInActiveTimes = (blockSet: BlockSet, 
 		dateResultPairs: Array<{date: Date, result: boolean}>) => {
 		for (const { date, result } of dateResultPairs) {
 			expect(blockSet.isInActiveTime(timeToMSSinceMidnight(date))).toBe(result)
@@ -140,7 +140,7 @@ describe("test BlockSet methods", () => {
 			{ date: new Date(42), result: true },
 			{ date: new Date(), result: true },
 		]
-		testIsInActiveTimes(blockSet, dateResultPairs)
+		expectIsInActiveTimes(blockSet, dateResultPairs)
 	})
 
 	it("isInActiveTime returns true, if today's time is between from and to", () => {
@@ -151,7 +151,7 @@ describe("test BlockSet methods", () => {
 			{ date: new Date("2000-01-01T01:00:00"), result: false },
 			{ date: new Date("2000-01-01T06:00:00"), result: false },
 		]
-		testIsInActiveTimes(blockSet, dateResultPairs)
+		expectIsInActiveTimes(blockSet, dateResultPairs)
 	})
 
 	it("if to is less than to, calculation of being in between wraps around midnight instead", () => {
@@ -162,7 +162,7 @@ describe("test BlockSet methods", () => {
 			{ date: new Date("2000-01-01T01:00:00"), result: false },
 			{ date: new Date("2000-01-01T06:00:00"), result: true },
 		]
-		testIsInActiveTimes(blockSet, dateResultPairs)
+		expectIsInActiveTimes(blockSet, dateResultPairs)
 	})
 
 

@@ -2,6 +2,7 @@ module.exports = {
 	plugins: [],
 	extends: [
 		"eslint:recommended",
+		"preact",
 	],
 	parserOptions: {
 		project: "./tsconfig.json",
@@ -43,18 +44,13 @@ module.exports = {
 		"arrow-spacing": "error",
 		"object-curly-spacing": ["error", "always"],
 		"array-bracket-spacing": ["error", "never"],
-		"comma-spacing": ["error", { "before": false, "after": true }],
+		"comma-spacing": ["error", { before: false, after: true }],
 		"comma-dangle": ["error", "always-multiline"],
 		"space-infix-ops": "error",
+		"jest/expect-expect": ["error", {	assertFunctionNames: ["expect*"] },
+		],
 	},
 	overrides: [
-		{ 
-			files: ["*.tsx"],
-			parser: "@typescript-eslint/parser",
-			extends: [
-				"preact",
-			],
-		},
 		{
 			files: [
 				"*.ts",
@@ -74,9 +70,9 @@ module.exports = {
 				}],
 				"no-empty-function": "off",
 				"@typescript-eslint/no-empty-function": ["error", {
-					"allow": ["private-constructors"] }],
+					allow: ["private-constructors"] }],
 				"@typescript-eslint/type-annotation-spacing": "error",
-				"semi": "off",
+				semi: "off",
 				"@typescript-eslint/semi": ["error", "never"],
 				"@typescript-eslint/prefer-nullish-coalescing": "error",
 				"@typescript-eslint/strict-boolean-expressions": "error",
@@ -90,8 +86,8 @@ module.exports = {
 					],
 					// Require class declaration and method comments					
 					require: {
-						"ClassDeclaration": true, 
-						"MethodDefinition": true,
+						ClassDeclaration: true, 
+						MethodDefinition: true,
 					},
 					publicOnly: false,
 					exemptEmptyFunctions: true,
@@ -102,6 +98,8 @@ module.exports = {
 				"require-await": "off",
 				"@typescript-eslint/require-await": "error",
 				"@typescript-eslint/no-floating-promises": "error",
+				"no-useless-constructor": "off",
+				"@typescript-eslint/no-useless-constructor": ["error"],
 			},
 		},
 	],

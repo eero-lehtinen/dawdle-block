@@ -89,7 +89,7 @@ describe("test YouTube API blocking info for channel urls", () => {
 		})
 	})
 
-	const testUsername = async(url: URL) => {
+	const expectUsername = async(url: URL) => {
 		mockedFetch.mockResolvedValueOnce({
 			status: 200, 
 			json: async() => 
@@ -110,15 +110,15 @@ describe("test YouTube API blocking info for channel urls", () => {
 	}
 
 	it("returns correct results with a valid username", async() => {
-		await testUsername(new URL("https://www.youtube.com/c/google"))
+		await expectUsername(new URL("https://www.youtube.com/c/google"))
 	})
 
 	it("returns correct results with a valid legacy username", async() => {
-		await testUsername(new URL("https://www.youtube.com/user/google"))
+		await expectUsername(new URL("https://www.youtube.com/user/google"))
 	})
 	
 	it("returns correct results with a username isn't last part of URL", async() => {
-		await testUsername(new URL("https://www.youtube.com/c/google/videos"))
+		await expectUsername(new URL("https://www.youtube.com/c/google/videos"))
 	})
 })
 

@@ -122,9 +122,7 @@ export class BlockSet {
 		else if (from < to) {
 			return (msSinceMidnight > from && msSinceMidnight < to)
 		}
-		else {
-			return (msSinceMidnight > from || msSinceMidnight < to)
-		}
+		return (msSinceMidnight > from || msSinceMidnight < to)
 	}
 
 	/**
@@ -315,10 +313,10 @@ export class BlockSet {
 			})
 
 		if (!string.startsWith(".*")) {
-			string = "^" + string
+			string = `^${  string}`
 		}
 		if (!string.endsWith(".*")) {
-			string = string + "$"
+			string = `${string  }$`
 		}
 
 		return new RegExp(string)

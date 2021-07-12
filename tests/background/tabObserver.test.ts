@@ -100,39 +100,44 @@ describe("test tabObserver events", () => {
 
 	describe("test invalid events", () => {
 
-		afterEach(() => {
+		const expectToBeUnchanged = (tabObserver: TabObserver) => {
 			expect(tabObserver.getTabs()).toStrictEqual(initialTabs)
 			expect(tabObserver.getActiveTabIds()).toStrictEqual(initialActiveTabIds)
-		})
+		}
 
 		it("window creation with invalid ids does nothing", () => {
 			onWindowCreated.emit({ id: -1, state: "normal" } as Windows.Window)
 			onWindowCreated.emit({ id: undefined, state: "normal" } as Windows.Window)
+			expectToBeUnchanged(tabObserver)
 		})
 
 		it("window removal with invalid ids does nothing", () => {
 			onWindowRemoved.emit(-1)
 			onWindowRemoved.emit(100)
+			expectToBeUnchanged(tabObserver)
 		})
 
 		it("tab updating with invalid ids does nothing", () => {
 			// invalid ids
 			onUpdated.emit(0, { status: "complete" }, { id: -1, windowId: 1, url: "a" } as Tabs.Tab)
 			onUpdated.emit(0, { status: "complete" }, { id: 1, windowId: -1, url: "a" } as Tabs.Tab)
-
 			// nonexistant window id
 			onUpdated.emit(0, { status: "complete" }, { id: 1, windowId: 100, url: "a" } as Tabs.Tab)
+
+			expectToBeUnchanged(tabObserver)
 		})
 
 		it("tab removal with invalid or nonexistant ids does nothing", () => {
 			onTabRemoved.emit(-1, {} as Tabs.OnRemovedRemoveInfoType)
 			onTabRemoved.emit(100, {} as Tabs.OnRemovedRemoveInfoType)
+			expectToBeUnchanged(tabObserver)
 		})
 
 		it("tab activation with invalid or nonexistant ids does nothing", () => {
 			onActivated.emit({ tabId: -1, windowId: 1 })
 			onActivated.emit({ tabId: 2, windowId: -1 })
 			onActivated.emit({ tabId: 2, windowId: 100 })
+			expectToBeUnchanged(tabObserver)
 		})
 	})
 })

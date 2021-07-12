@@ -52,11 +52,6 @@ describe("test GeneralOptions parsing", () => {
 		expect(generalOptions).not.toHaveProperty("loseMe")
 	})
 
-	
-	it("incomplete objects get filled with defaults", () => {
-		expect(plainToGeneralOptionsData({})).toStrictEqual(defaultGeneralOptions)
-	})
-
 	it("V0 default theme (darkTheme=false) gets converted to default theme in V1", () => {
 		const testBlockSetObj = {
 			darkTheme: false,

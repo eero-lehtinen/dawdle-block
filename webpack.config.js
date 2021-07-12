@@ -1,4 +1,4 @@
-  
+
 const path = require("path")
 const { CleanWebpackPlugin } = require("clean-webpack-plugin")
 const HtmlWebpackPlugin = require("html-webpack-plugin")
@@ -40,17 +40,23 @@ const getMode = (env) => {
 	throw new Error("invalid mode argument")
 }
 
+
 const getFirefoxDebugSettings = (targetBrowser, mode) => {
 	if (targetBrowser === "firefox" && mode === "development") {
+		/* eslint-disable camelcase */
 		return ({
-			"browser_specific_settings": { 
-				"gecko": {
-					"id": "dawdle_block@eerolehtinen.fi",
-					"strict_min_version": "42.0",
-				} } })
+			browser_specific_settings: { 
+				gecko: {
+					id: "dawdle_block@eerolehtinen.fi",
+					strict_min_version: "42.0",
+				}, 
+			}, 
+		})
+		/* eslint-disable camelcase */
 	}
 	return undefined
 }
+
 
 
 module.exports = (env) => {
@@ -103,11 +109,10 @@ module.exports = (env) => {
 			],
 		},
 		resolve: {
-			
 			extensions: [".ts", ".tsx", ".js", ".jsx"],
 			alias: {
 				// Resolve preact compatibility layer to react
-				"react": "preact/compat",
+				react: "preact/compat",
 				"react-dom/test-utils": "preact/test-utils",
 				"react-dom": "preact/compat",
 			},

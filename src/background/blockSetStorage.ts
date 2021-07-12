@@ -71,7 +71,7 @@ export class BlockSetStorage {
 				results.push(new BlockSet(id, blockSetRes[id], timesElapsed[id]))
 			}
 			catch (err) {
-				console.error("Couldn't parse blockset with id " + id)
+				console.error(`Couldn't parse blockset with id ${id}`)
 				console.error(err)
 			}
 		}

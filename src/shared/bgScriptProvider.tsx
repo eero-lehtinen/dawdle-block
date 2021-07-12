@@ -23,7 +23,7 @@ const WaitBox = () =>
 		<Typography variant="h4" sx={{ color: "white", mr: 2 }}>
 			Waiting for background to finish loading
 		</Typography>
-		 <CircularProgress sx={{ color: "white"}} />
+		 <CircularProgress sx={{ color: "white" }} />
 	</Box> 
 
 /** Provides context for useBGScript hook. */
@@ -50,7 +50,7 @@ export const BGScriptProvider: FunctionComponent = ({ children }): JSX.Element =
 
 	return (
 		<BGScriptContext.Provider value={bgScript}>
-			{ bgScript === null ? <WaitBox /> : children}
+			{ bgScript === null ? <WaitBox /> : children }
 		</BGScriptContext.Provider>
 	)
 }

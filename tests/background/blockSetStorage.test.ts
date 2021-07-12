@@ -43,16 +43,16 @@ describe("test BlockSetStorage with browser api mocking", () => {
 
 	it("can load block set ids, blocksets, and elapsed times from sync storage", async() => {
 		setUpMockStorage({ idResolve: [0], elapsedResolve: [0] })
-		mockBrowser.storage.sync.get.expect({ "0": null })
-			.andResolve({ "0": {} })
+		mockBrowser.storage.sync.get.expect({ 0: null })
+			.andResolve({ 0: {} })
 
 		expect(await blockSetStorage.loadBlockSets()).toMatchObject([new BlockSet(0)])
 	})
 
 	it("can load compressed blocksets from sync storage", async() => {
 		setUpMockStorage({ idResolve: [0], elapsedResolve: [0] })
-		mockBrowser.storage.sync.get.expect({ "0": null })
-			.andResolve({ "0": compress({}) })
+		mockBrowser.storage.sync.get.expect({ 0: null })
+			.andResolve({ 0: compress({}) })
 
 		expect(await blockSetStorage.loadBlockSets()).toMatchObject([new BlockSet(0)])
 	})
@@ -85,8 +85,8 @@ describe("test BlockSetStorage local storage with browser api mocking", () => {
 			.andResolve({ [bsIdsSaveKey]: [0] })
 		mockBrowser.storage.local.get.expect({ [bsTimesElapsedSaveKey]: [] })
 			.andResolve({ [bsTimesElapsedSaveKey]: [0] })
-		mockBrowser.storage.local.get.expect({ "0": null })
-			.andResolve({ "0": {} })
+		mockBrowser.storage.local.get.expect({ 0: null })
+			.andResolve({ 0: {} })
 
 		expect(await blockSetStorage.loadBlockSets()).toMatchObject([new BlockSet(0)])
 	})
