@@ -21,7 +21,7 @@ const WaitBox = () =>
 		alignItems: "center",
 	}}>
 		<Typography variant="h4" sx={{ color: "white", mr: 2 }}>
-			Loading options
+			Waiting for background to finish loading
 		</Typography>
 		 <CircularProgress sx={{ color: "white"}} />
 	</Box> 
