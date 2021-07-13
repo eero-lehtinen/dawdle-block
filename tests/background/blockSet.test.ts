@@ -154,7 +154,8 @@ describe("test BlockSet methods", () => {
 		expectIsInActiveTimes(blockSet, dateResultPairs)
 	})
 
-	it("if to is less than to, calculation of being in between wraps around midnight instead", () => {
+	it("if to is less than from, calculation of being in between wraps around " + 
+	"midnight instead", () => {
 		const blockSet = new BlockSet(0, { activeTime: { from: 1 * 60 * 60 * 1000, to: 0 } })
 		const dateResultPairs = [
 			{ date: new Date("2000-01-01T00:00:00"), result: false },
