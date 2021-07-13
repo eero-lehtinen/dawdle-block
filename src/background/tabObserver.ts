@@ -12,6 +12,10 @@ export interface TabLoadedEvent {
 	url: string
 }
 
+export interface TabRemovedEvent {
+	id: number
+}
+
 export interface WindowInfo {
 	id: number
 	minimized: boolean
@@ -223,6 +227,8 @@ export class TabObserver {
 	 */
 	private onTabRemoved = (tabId: number, _removeInfo: Tabs.OnRemovedRemoveInfoType) => {
 		this.unregisterTab(tabId)
+		if (this.isValidTabId(tabId))
+			this.tabRemovedObserver.publish({ id: tabId })
 	}
 	
 	/**
@@ -266,5 +272,16 @@ export class TabObserver {
 	 */
 	subscribeTabLoaded(listener: Listener<TabLoadedEvent>): () => void {
 		return this.tabLoadedObserver.subscribe(listener)
+	}
+
+	private tabRemovedObserver = new Observer<TabRemovedEvent>()
+
+	/**
+	 * Registers listener for TabLoadedEvent.
+	 * @param listener 
+	 * @returns unsubscribe function
+	 */
+	subscribeTabRemoved(listener: Listener<TabRemovedEvent>): () => void {
+		return this.tabRemovedObserver.subscribe(listener)
 	}
 }

@@ -1,5 +1,24 @@
-describe("test background", () => {
-	
+import { Background } from "@src/background/background"
+import { BlockSets } from "@src/background/blockSets"
+import { BrowserStorage } from "@src/background/browserStorage"
+import { TabObserver } from "@src/background/tabObserver"
+
+jest.mock("@src/background/tabObserver")
+jest.mock("@src/background/blockSets")
+jest.mock("@src/background/browserStorage")
+
+describe("test Background", () => {
+	let browserStorage: BrowserStorage
+	let tabObserver: TabObserver
+	let blockSets: BlockSets
+	let _background: Background
+	beforeEach(async() => {
+		browserStorage = new BrowserStorage({ preferSync: true })
+		tabObserver = await TabObserver.create()
+		blockSets = await BlockSets.create(browserStorage)
+		_background = new Background(browserStorage, tabObserver, blockSets)
+	})
+
 	it.todo("increments time elapsed on blockset every second, when blacklisted tab is loaded")
 
 	// Block set may be configured to be disabled on certain week days, 

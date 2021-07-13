@@ -7,10 +7,10 @@ const APIBaseUrl = "https://youtube.googleapis.com/youtube/v3"
 
 const ytUrl = "www.youtube.com"
 
-interface YTInfo {
+export interface YTInfo {
 	channelId: string | null
 	channelTitle: string | null
-	categoryId: number | null
+	categoryId: string | null
 }
 
 type YTChannelInfo = Omit<YTInfo, "categoryId">

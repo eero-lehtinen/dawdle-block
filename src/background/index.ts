@@ -1,5 +1,8 @@
 /* eslint-disable no-var, @typescript-eslint/no-unused-vars*/
 import { Background } from "./background"
+import { BlockSets } from "./blockSets"
+import { BrowserStorage } from "./browserStorage"
+import { TabObserver } from "./tabObserver"
 
 // export background variable for usage in options and popup
 declare global {
@@ -7,5 +10,10 @@ declare global {
 }
 
 void (async() => {
-	window.background = await Background.create()
+	const browserStorage = new BrowserStorage({ preferSync: true })
+	window.background = new Background(
+		browserStorage,
+		await TabObserver.create(), 
+		await BlockSets.create(browserStorage),
+	)
 })()

@@ -8,7 +8,7 @@ const [browser, mockBrowser, mockBrowserNode] = deepMock<Browser>("browser", fal
 jest.doMock("webextension-polyfill-ts", () => ({ browser }))
 
 import { Listener } from "@src/background/observer"
-import { TabLoadedEvent, TabObserver } from "@src/background/tabObserver"
+import { TabLoadedEvent, TabObserver, TabRemovedEvent } from "@src/background/tabObserver"
 
 describe("test tabObserver events", () => {
 	let onUpdated: MockzillaEventOf<typeof mockBrowser.tabs.onUpdated>
@@ -96,6 +96,15 @@ describe("test tabObserver events", () => {
 		
 		onUpdated.emit(0, { status: "complete" }, { id: 1, windowId: 1, url: "url" } as Tabs.Tab)
 		expect(listener).toBeCalledWith({ id: 1, url: "url" })
+	})
+
+	it("can receive event when a tab is removed", () => {
+		const listener: Listener<TabRemovedEvent> = jest.fn()
+		const _unsubscribe = tabObserver.subscribeTabRemoved(listener)
+
+		onTabRemoved.emit(0, {} as Tabs.OnRemovedRemoveInfoType)
+		expect(listener).toBeCalledTimes(1)
+		expect(listener).toBeCalledWith({ id: 0 })
 	})
 
 	describe("test invalid events", () => {
