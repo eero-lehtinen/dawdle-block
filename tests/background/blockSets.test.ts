@@ -128,11 +128,12 @@ describe("test BlockSets blockedBy method", () => {
 
 	/* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-	it("checks block set active times with correct values", () => {
+	it("block set methods are called with correct arguments", () => {
 		const currentDate = new Date(2020, 1, 1, 8, 0, 0)
 		jest.useFakeTimers("modern")
 		jest.setSystemTime(currentDate)
-		blockSets.blockedBy("", null, null)
+		blockSets.blockedBy("testUrl", "testCategoryId", "testChannelId")
+		expect(blockSets.list[0]!.test).toBeCalledWith("testUrl", "testCategoryId", "testChannelId")
 		expect(blockSets.list[0]!.isInActiveTime).toBeCalledWith(timeToMSSinceMidnight(currentDate))
 		expect(blockSets.list[0]!.isInActiveWeekday).toBeCalledWith(currentDate.getDay())
 	})
