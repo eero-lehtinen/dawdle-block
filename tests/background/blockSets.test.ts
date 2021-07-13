@@ -1,6 +1,7 @@
 import { BlockSet, BlockTestRes } from "@src/background/blockSet"
 import { BlockSets } from "@src/background/blockSets"
 import { BrowserStorage } from "@src/background/browserStorage"
+import { timeToMSSinceMidnight } from "@src/shared/utils"
 import { mocked } from "ts-jest/utils"
 
 jest.mock("@src/background/browserStorage")
@@ -125,11 +126,20 @@ describe("test BlockSets blockedBy method", () => {
 		}
 	})
 
+	/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
+	it("checks block set active times with correct values", () => {
+		const currentDate = new Date(2020, 1, 1, 8, 0, 0)
+		jest.useFakeTimers("modern")
+		jest.setSystemTime(currentDate)
+		blockSets.blockedBy("", null, null)
+		expect(blockSets.list[0]!.isInActiveTime).toBeCalledWith(timeToMSSinceMidnight(currentDate))
+		expect(blockSets.list[0]!.isInActiveWeekday).toBeCalledWith(currentDate.getDay())
+	})
+
 	it("returns ids of each block set returning Blacklisted", () => {
 		expect(blockSets.blockedBy("", null, null)).toStrictEqual(blockSets.getIds())
 	})
-
-	/* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 	it("Ignores ids of each block set returning Whitelisted or Ignored", () => {
 		blockSets.list[0]!.test = jest.fn().mockImplementation(() => BlockTestRes.Whitelisted)
@@ -142,6 +152,7 @@ describe("test BlockSets blockedBy method", () => {
 		blockSets.list[1]!.isInActiveWeekday = jest.fn().mockImplementation(() => false)
 		blockSets.list[2]!.isInActiveTime = jest.fn().mockImplementation(() => false)
 		blockSets.list[2]!.isInActiveWeekday = jest.fn().mockImplementation(() => false)
+
 		expect(blockSets.blockedBy("", null, null)).toStrictEqual([])
 	})
 })
