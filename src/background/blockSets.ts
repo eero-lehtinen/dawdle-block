@@ -11,17 +11,18 @@ export class BlockSets {
 	private _list: BlockSet[] = []
 	private browserStorage: BrowserStorage
 
-	private constructor() {
-		this.browserStorage = new BrowserStorage({ preferSync: true })
+	/** Assigns browser storage */
+	private constructor(browserStorage: BrowserStorage) {
+		this.browserStorage = browserStorage
 	}
 
 	/**
-	 * Creates and initializes a BlockSetManager.
-	 * Loads setting from sync storage.
-	 * @returns new instance of BlockSetManager
+	 * Creates and initializes a BlockSets with storage.
+	 * @param browserStorage
+	 * @returns new instance of BlockSets
 	 */
-	static async create(): Promise<BlockSets> {
-		const instance = new BlockSets()
+	static async create(browserStorage: BrowserStorage): Promise<BlockSets> {
+		const instance = new BlockSets(browserStorage)
 		instance._list = await instance.browserStorage.loadBlockSets()
 		// Create a single default block set if storage is empty
 		if (instance._list.length === 0) 

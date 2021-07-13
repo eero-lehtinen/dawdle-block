@@ -12,7 +12,7 @@ describe("test BlockSets construction", () => {
 		browserStorageMock.prototype.loadBlockSets
 			.mockImplementation(async() => Promise.resolve([new BlockSet(42)]))
 
-		const blockSets = await BlockSets.create()
+		const blockSets = await BlockSets.create(new BrowserStorage({ preferSync: true }))
 		expect(browserStorageMock).toBeCalledTimes(1)
 		expect(blockSets.list).toStrictEqual([new BlockSet(42)])
 	})
@@ -21,7 +21,7 @@ describe("test BlockSets construction", () => {
 		browserStorageMock.prototype.loadBlockSets
 			.mockImplementation(async() => Promise.resolve([]))
 		
-		const blockSets = await BlockSets.create()
+		const blockSets = await BlockSets.create(new BrowserStorage({ preferSync: true }))
 		expect(blockSets.list).toStrictEqual([new BlockSet(0)])
 	})
 })
@@ -31,7 +31,7 @@ describe("test BlockSets methods", () => {
 	beforeEach(async() => {
 		browserStorageMock.prototype.loadBlockSets
 			.mockImplementation(async() => Promise.resolve([new BlockSet(0, { name: "TEST" })]))
-		blockSets = await BlockSets.create()
+		blockSets = await BlockSets.create(new BrowserStorage({ preferSync: true }))
 	})
 
 	// New block sets should get saved to storage.
