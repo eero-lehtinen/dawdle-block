@@ -1,4 +1,4 @@
-import { BlockSet } from "@src/background/blockSet"
+import { BlockSet, BlockTestRes } from "@src/background/blockSet"
 import { BlockSets } from "@src/background/blockSets"
 import { BrowserStorage } from "@src/background/browserStorage"
 import { mocked } from "ts-jest/utils"
@@ -103,17 +103,45 @@ describe("test BlockSets methods", () => {
 		newBlockSet.name = "TEST (copy123x)"
 		newBlockSet = await blockSets.addBlockSetCopy(newBlockSet)
 		expect(newBlockSet.name).toStrictEqual(`${testBlockSet.name} (copy124x)`)
-		
 	})
 })
 
 
 
 describe("test BlockSets blockedBy method", () => {
-	beforeEach(() => {
+	let blockSets: BlockSets
+	beforeEach(async() => {
 		browserStorageMock.prototype.loadBlockSets
 			.mockImplementation(async() => Promise.resolve([]))
+		blockSets = await BlockSets.create(new BrowserStorage({ preferSync: true }))
+		await blockSets.addDefaultBlockSet()
+		await blockSets.addDefaultBlockSet()
+
+		const list = blockSets.list
+		for (const bs of list) {
+			bs.isInActiveTime = jest.fn().mockImplementation(() => true)
+			bs.isInActiveWeekday = jest.fn().mockImplementation(() => true)
+			bs.test = jest.fn().mockImplementation(() => BlockTestRes.Blacklisted)
+		}
 	})
 
-	it.todo("returns ids of each matching block set")
+	it("returns ids of each block set returning Blacklisted", () => {
+		expect(blockSets.blockedBy("", null, null)).toStrictEqual(blockSets.getIds())
+	})
+
+	/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
+	it("Ignores ids of each block set returning Whitelisted or Ignored", () => {
+		blockSets.list[0]!.test = jest.fn().mockImplementation(() => BlockTestRes.Whitelisted)
+		blockSets.list[1]!.test = jest.fn().mockImplementation(() => BlockTestRes.Ignored)
+		expect(blockSets.blockedBy("", null, null)).toStrictEqual([blockSets.list[2]!.id])
+	})
+
+	it("Ignores ids of each block set not being in active time or active day or both", () => {
+		blockSets.list[0]!.isInActiveTime = jest.fn().mockImplementation(() => false)
+		blockSets.list[1]!.isInActiveWeekday = jest.fn().mockImplementation(() => false)
+		blockSets.list[2]!.isInActiveTime = jest.fn().mockImplementation(() => false)
+		blockSets.list[2]!.isInActiveWeekday = jest.fn().mockImplementation(() => false)
+		expect(blockSets.blockedBy("", null, null)).toStrictEqual([])
+	})
 })
