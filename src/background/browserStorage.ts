@@ -6,7 +6,7 @@ import {
 	from "./blockSetParser"
 import { decompress, compress } from "./compression"
 
-interface BlockSetStorageOptions {
+interface BrowserStorageOptions {
 	preferSync: boolean
 }
 
@@ -20,7 +20,7 @@ export const bsTimesElapsedSaveKey = "blocksetTimesElapsed"
  * There is no way to detect if cloud sync has beed disabled by the browser.
  * In that case storage will silently be local.
  */
-export class BlockSetStorage {
+export class BrowserStorage {
 
 	private storage: Storage.StorageArea
 	private readonly maxItemSize = browser.storage.sync.QUOTA_BYTES_PER_ITEM
@@ -33,7 +33,7 @@ export class BlockSetStorage {
 	 * There is no way to detect if sync has beed disabled by the browser.
 	 * If false, always use local storage.
 	 */
-	constructor(opts: BlockSetStorageOptions) {
+	constructor(opts: BrowserStorageOptions) {
 		this.storage = opts.preferSync ? browser.storage.sync : browser.storage.local
 	}
 

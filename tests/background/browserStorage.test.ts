@@ -6,8 +6,8 @@ const [browser, mockBrowser, mockBrowserNode] = deepMock<Browser>("browser", fal
 
 jest.doMock("webextension-polyfill-ts", () => ({ browser }))
 
-import { BlockSetStorage, bsIdsSaveKey, bsTimesElapsedSaveKey } 
-	from "@src/background/blockSetStorage"
+import { BrowserStorage, bsIdsSaveKey, bsTimesElapsedSaveKey } 
+	from "@src/background/browserStorage"
 import { BlockSet } from "@src/background/blockSet"
 import { BlockSetIds, BlockSetTimesElapsed } from "@src/background/blockSetParser"
 import { compress } from "@src/background/compression"
@@ -33,19 +33,19 @@ const setUpMockStorage = ({ idResolve, elapsedResolve }:
 		.andResolve({ [bsTimesElapsedSaveKey]: elapsedResolve })
 }
 
-describe("test BlockSetStorage with browser api mocking", () => {
-	let blockSetStorage: BlockSetStorage
+describe("test BrowserStorage with browser api mocking", () => {
+	let browserStorage: BrowserStorage
 	let testBlockSet: BlockSet
 
 	beforeEach(() => {
 		mockBrowser.storage.sync.mockAllow()
-		blockSetStorage = new BlockSetStorage({ preferSync: true })
+		browserStorage = new BrowserStorage({ preferSync: true })
 		testBlockSet = new BlockSet(12, { name: "TEST" })
 	})
 
 	it("returns empty if storage is empty", async() => {
 		mockBrowser.storage.sync.get.expect.andResolve({ [bsIdsSaveKey]: [] })
-		expect(await blockSetStorage.loadBlockSets()).toMatchObject([])
+		expect(await browserStorage.loadBlockSets()).toMatchObject([])
 	})
 
 	it("can load block set ids, blocksets, and elapsed times from sync storage", async() => {
@@ -53,7 +53,7 @@ describe("test BlockSetStorage with browser api mocking", () => {
 		mockBrowser.storage.sync.get.expect({ 0: null })
 			.andResolve({ 0: {} })
 
-		expect(await blockSetStorage.loadBlockSets()).toMatchObject([new BlockSet(0)])
+		expect(await browserStorage.loadBlockSets()).toMatchObject([new BlockSet(0)])
 	})
 
 	it("can load compressed blocksets from sync storage", async() => {
@@ -61,7 +61,7 @@ describe("test BlockSetStorage with browser api mocking", () => {
 		mockBrowser.storage.sync.get.expect({ 0: null })
 			.andResolve({ 0: compress({}) })
 
-		expect(await blockSetStorage.loadBlockSets()).toMatchObject([new BlockSet(0)])
+		expect(await browserStorage.loadBlockSets()).toMatchObject([new BlockSet(0)])
 	})
 
 	it("can handle non continuous ids", async() => {
@@ -69,7 +69,7 @@ describe("test BlockSetStorage with browser api mocking", () => {
 		mockBrowser.storage.sync.get.expect({ 3: null, 2: null })
 			.andResolve({ 3: {}, 2: {} })
 
-		expect(await blockSetStorage.loadBlockSets()).toMatchObject(
+		expect(await browserStorage.loadBlockSets()).toMatchObject(
 			[new BlockSet(3, {}, 50), new BlockSet(2)])
 	})
 
@@ -80,39 +80,39 @@ describe("test BlockSetStorage with browser api mocking", () => {
 			.andResolve({ 0: "asd", 1: [], 2: 42 }) 
 		// "asd" is an invalid compressed value. [] and 42 are invalid in general
 
-		expect(await blockSetStorage.loadBlockSets()).toStrictEqual([])
+		expect(await browserStorage.loadBlockSets()).toStrictEqual([])
 	})
 
 	it("can save a new block set", async() => {
 		mockBrowser.storage.sync.set.expect(
 			{ [bsIdsSaveKey]: [12], 12: compress(testBlockSet.data) }).andResolve()
-		await blockSetStorage.saveNewBlockSet(testBlockSet, [12])
+		await browserStorage.saveNewBlockSet(testBlockSet, [12])
 	})
 
 	it("can save a new version of old block set", async() => {
 		mockBrowser.storage.sync.set.expect({ 12: compress(testBlockSet.data) }).andResolve()
-		await blockSetStorage.saveBlockSet(testBlockSet)
+		await browserStorage.saveBlockSet(testBlockSet)
 	})
 
 	it("saveBlockSet throws when object is too large to be saved", async() => {	
 		// 10k random bytes is too large to store even compressed
 		testBlockSet.name = randomBytes(10000).toString("hex") 
-		await expect(blockSetStorage.saveBlockSet(testBlockSet))
+		await expect(browserStorage.saveBlockSet(testBlockSet))
 			.rejects.toThrow("Can't save item, it is too large")
 	})
 
 	it("saveBlockSet throws when saves are done in too quick succession", async() => {	
 		mockBrowser.storage.sync.set.expect({ 12: compress(testBlockSet.data) })
 			.andReject(Error("WRITE_OPERATIONS"))
-		await expect(blockSetStorage.saveBlockSet(testBlockSet))
+		await expect(browserStorage.saveBlockSet(testBlockSet))
 			.rejects.toThrow("Can't save item, too many write operations")
 	})
 })
 
-describe("test BlockSetStorage local storage with browser api mocking", () => {
+describe("test BrowserStorage local storage with browser api mocking", () => {
 	it("uses storage.sync.local if preferSync is false", async() => {
 		mockBrowser.storage.local.mockAllow()
-		const blockSetStorage = new BlockSetStorage({ preferSync: false })
+		const browserStorage = new BrowserStorage({ preferSync: false })
 
 		mockBrowser.storage.local.get.expect({ [bsIdsSaveKey]: [] })
 			.andResolve({ [bsIdsSaveKey]: [0] })
@@ -121,6 +121,6 @@ describe("test BlockSetStorage local storage with browser api mocking", () => {
 		mockBrowser.storage.local.get.expect({ 0: null })
 			.andResolve({ 0: {} })
 
-		expect(await blockSetStorage.loadBlockSets()).toMatchObject([new BlockSet(0)])
+		expect(await browserStorage.loadBlockSets()).toMatchObject([new BlockSet(0)])
 	})
 })
