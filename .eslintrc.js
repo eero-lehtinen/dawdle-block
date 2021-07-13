@@ -47,7 +47,7 @@ module.exports = {
 		"comma-spacing": ["error", { before: false, after: true }],
 		"comma-dangle": ["error", "always-multiline"],
 		"space-infix-ops": "error",
-		"jest/expect-expect": ["error", {	assertFunctionNames: ["expect*"] },
+		"jest/expect-expect": ["error", {	assertFunctionNames: ["expect*", "**.expect"] },
 		],
 	},
 	overrides: [

@@ -94,6 +94,14 @@ export class BlockSet {
 		return this._timeElapsed
 	}
 
+	get name(): string {
+		return this._data.name
+	}
+	
+	set name(name: string) {
+		this._data.name = name
+	}
+
 	set activeTime(newValue: ActiveTime) {
 		this._data.activeTime = newValue
 		this.activeTimeChangedObserver.publish({ newValue })
