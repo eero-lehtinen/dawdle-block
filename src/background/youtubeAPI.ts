@@ -42,10 +42,10 @@ const getPartBefore = (source: string,
 }
 
 /**
- * If url is a page of YouTube channel, video or playlist,
- * fetch channelId and categoryId associated with it from YouTube data API.
+ * Fetch YTInfo associated with it from YouTube data API if url is a 
+ * page of YouTube channel, video or playlist.
  * Returns null for categoryId if it can't be determined (e.g. playlist doesn't have a category)
- * Returns null for both if url is not a channel, video or playlist.
+ * Returns null for all if web request throws.
  * @param url url find info about
  * @returns fetched youtube information
  */
@@ -79,7 +79,7 @@ export const getYtInfo = async(url: URL): Promise<YTInfo> => {
 		}
 	}
 	catch (err) {
-		console.warn(err.message)
+		console.warn(err)
 	}
 
 	return nullYTInfo()
