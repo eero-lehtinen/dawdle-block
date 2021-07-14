@@ -51,12 +51,12 @@ export class Background {
 			ytInfo.channelId, 
 			ytInfo.categoryId,
 		)
-		this.tabInfoCache.set(event.id, { url, ytInfo, blockedBy })
+		this.tabInfoCache.set(event.tabId, { url, ytInfo, blockedBy })
 	}
 
 	/** listener for tab removed event */
 	private onTabRemoved(event: TabRemovedEvent) {
-		this.tabInfoCache.delete(event.id)
+		this.tabInfoCache.delete(event.tabId)
 	}
 
 	private update() {

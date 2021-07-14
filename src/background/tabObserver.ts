@@ -8,12 +8,12 @@ export interface TabInfo {
 }
 
 export interface TabLoadedEvent {
-	id: number,
+	tabId: number,
 	url: string
 }
 
 export interface TabRemovedEvent {
-	id: number
+	tabId: number
 }
 
 export interface WindowInfo {
@@ -207,7 +207,7 @@ export class TabObserver {
 
 		// Publish results to listeners only we actually found an url in a valid tab
 		if (tabInfo && tabInfo.url !== null) 
-			this.tabLoadedObserver.publish({ id: tabInfo.id, url: tabInfo.url })
+			this.tabLoadedObserver.publish({ tabId: tabInfo.id, url: tabInfo.url })
 	}
 
 	/**
@@ -228,7 +228,7 @@ export class TabObserver {
 	private onTabRemoved = (tabId: number, _removeInfo: Tabs.OnRemovedRemoveInfoType) => {
 		this.unregisterTab(tabId)
 		if (this.isValidTabId(tabId))
-			this.tabRemovedObserver.publish({ id: tabId })
+			this.tabRemovedObserver.publish({ tabId })
 	}
 	
 	/**

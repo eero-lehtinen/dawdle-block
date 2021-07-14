@@ -95,7 +95,7 @@ describe("test tabObserver events", () => {
 		expect(listener).toBeCalledTimes(0)
 		
 		onUpdated.emit(0, { status: "complete" }, { id: 1, windowId: 1, url: "url" } as Tabs.Tab)
-		expect(listener).toBeCalledWith({ id: 1, url: "url" })
+		expect(listener).toBeCalledWith({ tabId: 1, url: "url" })
 	})
 
 	it("can receive event when a tab is removed", () => {
@@ -104,7 +104,7 @@ describe("test tabObserver events", () => {
 
 		onTabRemoved.emit(0, {} as Tabs.OnRemovedRemoveInfoType)
 		expect(listener).toBeCalledTimes(1)
-		expect(listener).toBeCalledWith({ id: 0 })
+		expect(listener).toBeCalledWith({ tabId: 0 })
 	})
 
 	describe("test invalid events", () => {
