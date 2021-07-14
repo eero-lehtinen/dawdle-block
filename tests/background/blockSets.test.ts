@@ -16,6 +16,7 @@ describe("test BlockSets construction", () => {
 		const blockSets = await BlockSets.create(new BrowserStorage({ preferSync: true }))
 		expect(browserStorageMock).toBeCalledTimes(1)
 		expect(blockSets.list).toStrictEqual([new BlockSet(42)])
+		expect(blockSets.map).toStrictEqual(new Map([[42, new BlockSet(42)]]))
 	})
 	
 	it("creates a default block set when storage is empty", async() => {
@@ -24,6 +25,7 @@ describe("test BlockSets construction", () => {
 		
 		const blockSets = await BlockSets.create(new BrowserStorage({ preferSync: true }))
 		expect(blockSets.list).toStrictEqual([new BlockSet(0)])
+		expect(blockSets.map).toStrictEqual(new Map([[0, new BlockSet(0)]]))
 	})
 })
 
@@ -51,6 +53,7 @@ describe("test BlockSets methods", () => {
 		expect(newBlockSet).toMatchObject(defaultBlockSet)
 
 		expect(blockSets.list).toContain(newBlockSet)
+		expect(blockSets.map.get(newBlockSet.id)).toStrictEqual(newBlockSet)
 		expect(browserStorageMock.prototype.saveNewBlockSet)
 			.toBeCalledWith(newBlockSet, blockSets.getIds())
 	})
@@ -83,6 +86,7 @@ describe("test BlockSets methods", () => {
 		expect(newBlockSet.timeElapsed).toStrictEqual(0)
 
 		expect(blockSets.list).toContain(newBlockSet)
+		expect(blockSets.map.get(newBlockSet.id)).toStrictEqual(newBlockSet)
 		expect(browserStorageMock.prototype.saveNewBlockSet)
 			.toBeCalledWith(newBlockSet, blockSets.getIds())
 	})

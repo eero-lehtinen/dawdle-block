@@ -9,6 +9,7 @@ import { BrowserStorage } from "./browserStorage"
 export class BlockSets {
 
 	private _list: BlockSet[] = []
+	private _map = new Map<number, BlockSet>()
 	private browserStorage: BrowserStorage
 
 	/** Assigns browser storage */
@@ -23,10 +24,13 @@ export class BlockSets {
 	 */
 	static async create(browserStorage: BrowserStorage): Promise<BlockSets> {
 		const instance = new BlockSets(browserStorage)
-		instance._list = await instance.browserStorage.loadBlockSets()
+		const list = await instance.browserStorage.loadBlockSets()
+		for (const blockSet of list)
+			instance.addBlockSet(blockSet)
+		
 		// Create a single default block set if storage is empty
 		if (instance._list.length === 0) 
-			instance._list = [new BlockSet(0)]
+			await instance.addDefaultBlockSet()
 		return instance
 	}
 
@@ -60,6 +64,10 @@ export class BlockSets {
 		return this._list
 	}
 
+	get map(): Map<number, BlockSet> {
+		return this._map
+	}
+
 	/** Returns list of block set ids in the order they should appear in UI */
 	getIds(): number[] {
 		return this._list.map((bs) => bs.id)
@@ -76,7 +84,7 @@ export class BlockSets {
 		const newBlockSet = new BlockSet(this.findNextSafeId())
 		newBlockSet.name = this.computeNewName()
 		await this.browserStorage.saveNewBlockSet(newBlockSet, [...this.getIds(), newBlockSet.id])
-		this._list.push(newBlockSet)
+		this.addBlockSet(newBlockSet)
 		return newBlockSet
 	}
 
@@ -93,8 +101,14 @@ export class BlockSets {
 		const newBlockSet = new BlockSet(this.findNextSafeId(), copyFrom.data)
 		newBlockSet.name = this.computeCopyName(copyFrom.name)
 		await this.browserStorage.saveNewBlockSet(newBlockSet, [...this.getIds(), newBlockSet.id])
-		this._list.push(newBlockSet)
+		this.addBlockSet(newBlockSet)
 		return newBlockSet
+	}
+
+	/** Adds block set to internal list and map. */
+	private addBlockSet(blockSet: BlockSet): void {
+		this._list.push(blockSet)
+		this._map.set(blockSet.id, blockSet)
 	}
 
 	/** Returns the smallest block set id that is >= 0 and unused. */
