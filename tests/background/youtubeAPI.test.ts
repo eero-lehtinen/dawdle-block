@@ -40,7 +40,7 @@ describe("test YouTube API error states", () => {
 
 		await expect(getYtInfo(new URL("https://www.youtube.com/watch?v=asd")))
 			.resolves.toStrictEqual(nullYTInfo)
-		expect(warnSpy).toHaveBeenLastCalledWith("Response is empty")
+		expect(warnSpy).toBeCalled()
 	})
 
 	it("return null values and logs error when request status is not 200", async() => {
@@ -51,7 +51,7 @@ describe("test YouTube API error states", () => {
 		
 		await expect(getYtInfo(new URL("https://www.youtube.com/watch?v=asd")))
 			.resolves.toStrictEqual(nullYTInfo)
-		expect(warnSpy).toHaveBeenLastCalledWith("Request failed")
+		expect(warnSpy).toBeCalled()
 	})
 })
 
