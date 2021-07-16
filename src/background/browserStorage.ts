@@ -86,13 +86,15 @@ export class BrowserStorage {
 	/**
 	 * Saves new block set to the *END* of the block set list.
 	 * @param blockSet block set to save
-	 * @param blockSetIds ordered list of block set ids with this new block set id added
+	 * @param blockSetList ordered list of all block sets with this new block set id added
 	 * @throws "Can't save item, it is too large" when size quota is exceeded
 	 * @throws "Can't save item, too many write operations" when write operations quota is exceeded
 	 */
-	async saveNewBlockSet(blockSet: BlockSet, blockSetIds: BlockSetIds): Promise<void> {
+	async saveNewBlockSet(blockSet: BlockSet, blockSetList: BlockSet[]): Promise<void> {
+		const [bsIds, timesElapsed] = this.generateIdsAndTimesElapsed(blockSetList)
 		await	this.storageSet({ 
-			[bsIdsSaveKey]: blockSetIds,
+			[bsIdsSaveKey]: bsIds,
+			[bsTimesElapsedSaveKey]: timesElapsed,
 			[blockSet.id]: blockSet.data,
 		})
 	}
@@ -108,6 +110,33 @@ export class BrowserStorage {
 	}
 
 	/**
+	 * Saves a new version of a block set that has already been saved.
+	 * @param blockSet block set to delete
+	 * @param blockSetList ordered list of all block sets with this block set id removed
+	 * @throws "Can't save item, too many write operations" when write operations quota is exceeded
+	 */
+	async deleteBlockSet(blockSet: BlockSet, blockSetList: BlockSet[]): Promise<void> {
+		const [bsIds, timesElapsed] = this.generateIdsAndTimesElapsed(blockSetList)
+		await	this.storageSet({ 
+			[bsIdsSaveKey]: bsIds,
+			[bsTimesElapsedSaveKey]: timesElapsed,
+			[blockSet.id]: null,
+		})
+	}
+
+	/** Generate saveable list of ids and elapsed times from raw list of block sets. */
+	private generateIdsAndTimesElapsed(blockSetList: BlockSet[]): 
+		[BlockSetIds, BlockSetTimesElapsed] {
+		const bsIds: BlockSetIds = []
+		const timesElapsed: BlockSetTimesElapsed = []
+		for (const blockSet of blockSetList) {
+			bsIds.push(blockSet.id)
+			timesElapsed[blockSet.id] = blockSet.timeElapsed
+		}
+		return [bsIds, timesElapsed]
+	}
+
+	/**
 	 * Saves items to browser storage with enhanced error messages.
 	 * If item is BlockSetData, apply compression.
 	 * @param items items to save
@@ -115,7 +144,7 @@ export class BrowserStorage {
 	 * @throws "Can't save item, too many write operations" when write operations quota is exceeded
 	 */
 	private async storageSet(
-		items: Record<string, string | BlockSetData | BlockSetIds | BlockSetTimesElapsed>) {
+		items: Record<string, null | string | BlockSetData | BlockSetIds | BlockSetTimesElapsed>) {
 		
 		for (const key in items) {
 			if (typeof items[key] === "object") {

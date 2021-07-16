@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { BlockSet, BlockTestRes } from "@src/background/blockSet"
 import { BlockSets } from "@src/background/blockSets"
 import { BrowserStorage } from "@src/background/browserStorage"
@@ -55,7 +56,7 @@ describe("test BlockSets methods", () => {
 		expect(blockSets.list).toContain(newBlockSet)
 		expect(blockSets.map.get(newBlockSet.id)).toStrictEqual(newBlockSet)
 		expect(browserStorageMock.prototype.saveNewBlockSet)
-			.toBeCalledWith(newBlockSet, blockSets.getIds())
+			.toBeCalledWith(newBlockSet, blockSets.list)
 	})
 
 	it("added new block set name is 'Block Set ${number}' with restrictions", async() => {
@@ -88,7 +89,7 @@ describe("test BlockSets methods", () => {
 		expect(blockSets.list).toContain(newBlockSet)
 		expect(blockSets.map.get(newBlockSet.id)).toStrictEqual(newBlockSet)
 		expect(browserStorageMock.prototype.saveNewBlockSet)
-			.toBeCalledWith(newBlockSet, blockSets.getIds())
+			.toBeCalledWith(newBlockSet, blockSets.list)
 	})
 
 	it("added new block set copy name is '${copyName} (copy${number}x)' " +
@@ -108,6 +109,16 @@ describe("test BlockSets methods", () => {
 		newBlockSet.name = "TEST (copy123x)"
 		newBlockSet = await blockSets.addBlockSetCopy(newBlockSet)
 		expect(newBlockSet.name).toStrictEqual(`${testBlockSet.name} (copy124x)`)
+	})
+
+	it("can remove block sets", async() => {
+		const testBlockSet = blockSets.list[0]!
+		await blockSets.deleteBlockSet(testBlockSet)
+
+		expect(blockSets.list).toStrictEqual([])
+		expect(blockSets.map.size).toStrictEqual(0)
+		expect(browserStorageMock.prototype.deleteBlockSet)
+			.toBeCalledWith(testBlockSet, [])
 	})
 })
 

@@ -40,7 +40,7 @@ describe("test BrowserStorage with browser api mocking", () => {
 	beforeEach(() => {
 		mockBrowser.storage.sync.mockAllow()
 		browserStorage = new BrowserStorage({ preferSync: true })
-		testBlockSet = new BlockSet(12, { name: "TEST" })
+		testBlockSet = new BlockSet(1, { name: "TEST" }, 42)
 	})
 
 	it("returns empty if storage is empty", async() => {
@@ -85,12 +85,14 @@ describe("test BrowserStorage with browser api mocking", () => {
 
 	it("can save a new block set", async() => {
 		mockBrowser.storage.sync.set.expect(
-			{ [bsIdsSaveKey]: [12], 12: compress(testBlockSet.data) }).andResolve()
-		await browserStorage.saveNewBlockSet(testBlockSet, [12])
+			{ [bsIdsSaveKey]: [1], 
+				[bsTimesElapsedSaveKey]: [undefined, 42], 
+				1: compress(testBlockSet.data) }).andResolve()
+		await browserStorage.saveNewBlockSet(testBlockSet, [testBlockSet])
 	})
 
 	it("can save a new version of old block set", async() => {
-		mockBrowser.storage.sync.set.expect({ 12: compress(testBlockSet.data) }).andResolve()
+		mockBrowser.storage.sync.set.expect({ 1: compress(testBlockSet.data) }).andResolve()
 		await browserStorage.saveBlockSet(testBlockSet)
 	})
 
@@ -102,10 +104,18 @@ describe("test BrowserStorage with browser api mocking", () => {
 	})
 
 	it("saveBlockSet throws when saves are done in too quick succession", async() => {	
-		mockBrowser.storage.sync.set.expect({ 12: compress(testBlockSet.data) })
+		mockBrowser.storage.sync.set.expect({ 1: compress(testBlockSet.data) })
 			.andReject(Error("WRITE_OPERATIONS"))
 		await expect(browserStorage.saveBlockSet(testBlockSet))
 			.rejects.toThrow("Can't save item, too many write operations")
+	})
+
+	it("can delete a block set", async() => {
+		mockBrowser.storage.sync.set.expect(
+			{ [bsIdsSaveKey]: [], 
+				[bsTimesElapsedSaveKey]: [], 
+				1: compress(testBlockSet.data) }).andResolve()
+		await browserStorage.deleteBlockSet(testBlockSet, [])
 	})
 })
 

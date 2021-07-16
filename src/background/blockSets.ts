@@ -83,8 +83,8 @@ export class BlockSets {
 	async addDefaultBlockSet(): Promise<BlockSet> {
 		const newBlockSet = new BlockSet(this.findNextSafeId())
 		newBlockSet.name = this.computeNewName()
-		await this.browserStorage.saveNewBlockSet(newBlockSet, [...this.getIds(), newBlockSet.id])
-		this.addBlockSet(newBlockSet)
+		await this.browserStorage.saveNewBlockSet(newBlockSet, [...this._list, newBlockSet])
+		this.addBlockSet(newBlockSet) 
 		return newBlockSet
 	}
 
@@ -100,7 +100,7 @@ export class BlockSets {
 	async addBlockSetCopy(copyFrom: BlockSet): Promise<BlockSet> {
 		const newBlockSet = new BlockSet(this.findNextSafeId(), copyFrom.data)
 		newBlockSet.name = this.computeCopyName(copyFrom.name)
-		await this.browserStorage.saveNewBlockSet(newBlockSet, [...this.getIds(), newBlockSet.id])
+		await this.browserStorage.saveNewBlockSet(newBlockSet, [...this._list, newBlockSet])
 		this.addBlockSet(newBlockSet)
 		return newBlockSet
 	}
@@ -158,5 +158,17 @@ export class BlockSets {
 		}
 
 		return `Block Set ${largestNumber + 1}`
+	}
+
+	/**
+	 * Deletes block set referenced by blockSet
+	 * @param blockSet reference to value to be deleted
+	 * @throws "Can't save item, too many write operations" when write operations quota is exceeded
+	 */
+	async deleteBlockSet(blockSet: BlockSet): Promise<void> {
+		const newList = this._list.filter(bs => bs !== blockSet)
+		await this.browserStorage.deleteBlockSet(blockSet, newList)
+		this._map.delete(blockSet.id)
+		this._list = newList
 	}
 }
