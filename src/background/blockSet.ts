@@ -23,6 +23,12 @@ export type ChangedEvent<T> = {
 	newValue: T
 }
 
+export enum BlockSetState {
+	TimeLeft,
+	Block,
+	OverTime,
+}
+
 /**
  * Contains all configuration for website blocking. 
  * Instances should be managed with the BlockSetManager.
@@ -76,40 +82,6 @@ export class BlockSet {
 			...this._data[listType].urlRegExps.map((value: string) => new RegExp(value)),
 			...this._data[listType].urlPatterns.map((value: string) => BlockSet.patternToRegExp(value)),
 		]
-	}
-
-	/**
-	 * Get internal state of data for saving purposes.
-	 * @returns js object
-	 */
-	get data(): BlockSetData {
-		return this._data
-	}
-
-	get id(): number {
-		return this._id
-	}
-
-	get timeElapsed(): number {
-		return this._timeElapsed
-	}
-
-	get name(): string {
-		return this._data.name
-	}
-	
-	set name(name: string) {
-		this._data.name = name
-	}
-
-	set activeTime(newValue: ActiveTime) {
-		this._data.activeTime = newValue
-		this.activeTimeChangedObserver.publish({ newValue })
-	}
-
-	set activeDays(newValue: ActiveDays) {
-		this._data.activeDays = newValue
-		this.activeDaysChangedObserver.publish({ newValue })
 	}
 
 	/**
@@ -283,6 +255,23 @@ export class BlockSet {
 		return BlockTestRes.Ignored
 	}
 
+	/** 
+	 * Get current blocking state of this block set. 
+	 * Has specialized behaviour when annoyMode is true.
+	 */
+	getState(): BlockSetState {
+		if (this.timeElapsed < this._data.timeAllowed) {
+			return BlockSetState.TimeLeft
+		}
+		if (this.timeElapsed === this._data.timeAllowed) {
+			if (this._data.annoyMode) {
+				return BlockSetState.TimeLeft
+			}
+			return BlockSetState.Block
+		}
+		return BlockSetState.OverTime
+	}
+
 	/**
 	 * Helper function for testing both whitelist and blacklist.
 	 */
@@ -338,6 +327,68 @@ export class BlockSet {
 	 */
 	static urlToPattern(string: string): string {
 		return string.replace(/\*/g, String.raw`\*`)
+	}
+
+	/**
+	 * Get internal state of data for saving purposes.
+	 * @returns js object
+	 */
+	get data(): BlockSetData {
+		return this._data
+	}
+
+	get id(): number {
+		return this._id
+	}
+
+	get timeElapsed(): number {
+		return this._timeElapsed
+	}
+
+	set timeElapsed(val: number) {
+		this._timeElapsed = val
+	}
+
+	get timeAllowed(): number {
+		return this._data.timeAllowed
+	}
+
+	set timeAllowed(val: number) {
+		this._data.timeAllowed = val
+	}
+
+	get name(): string {
+		return this._data.name
+	}
+	
+	set name(val: string) {
+		this._data.name = val
+	}
+
+	get requireActive(): boolean {
+		return this._data.requireActive
+	}
+
+	set requireActive(val: boolean) {
+		this._data.requireActive = val
+	}
+
+	get annoyMode(): boolean {
+		return this._data.annoyMode
+	}
+
+	set annoyMode(val: boolean) {
+		this._data.annoyMode = val
+	}
+
+	set activeTime(newValue: ActiveTime) {
+		this._data.activeTime = newValue
+		this.activeTimeChangedObserver.publish({ newValue })
+	}
+
+	set activeDays(newValue: ActiveDays) {
+		this._data.activeDays = newValue
+		this.activeDaysChangedObserver.publish({ newValue })
 	}
 
 

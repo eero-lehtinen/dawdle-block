@@ -68,7 +68,7 @@ const zBlockSetDataV0 = z.object({
 	timeAllowed: z.number().int().default(60_000),
 	resetTime: z.number().int().default(0),
 	lastReset: z.number().int().default(0),
-	activeDays: z.array(z.boolean()).length(7).default(new Array(7).fill(false)),
+	activeDays: z.array(z.boolean()).length(7).default(new Array(7).fill(true)),
 	activeTime: zActiveTime,
 	blacklist: zBlockListV0,
 	whitelist: zBlockListV0,

@@ -16,7 +16,7 @@ export interface YTInfo {
 type YTChannelInfo = Omit<YTInfo, "categoryId">
 
 /** Returns a copy of YTInfo with all values set to null */
-const nullYTInfo = (): YTInfo => {
+export const nullYTInfo = (): YTInfo => {
 	return {
 		channelId: null, 
 		channelTitle: null, 
@@ -49,7 +49,7 @@ const getPartBefore = (source: string,
  * @param url url find info about
  * @returns fetched youtube information
  */
-export const getYtInfo = async(url: URL): Promise<YTInfo> => {
+export const getYTInfo = async(url: URL): Promise<YTInfo> => {
 	if (url.hostname !== ytUrl) {
 		return nullYTInfo()
 	}

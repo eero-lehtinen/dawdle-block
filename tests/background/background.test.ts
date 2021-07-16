@@ -1,25 +1,139 @@
-import { Background } from "@src/background/background"
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { Background, updateInterval } from "@src/background/background"
+import { BlockTestRes } from "@src/background/blockSet"
 import { BlockSets } from "@src/background/blockSets"
+import * as blockTab from "@src/background/blockTab"
 import { BrowserStorage } from "@src/background/browserStorage"
-import { TabObserver } from "@src/background/tabObserver"
+import { Listener, Observer } from "@src/background/observer"
+import { TabLoadedEvent, TabObserver, TabRemovedEvent } from "@src/background/tabObserver"
+import { MockedObject } from "ts-jest/dist/utils/testing"
+import { mocked } from "ts-jest/utils"
 
 jest.mock("@src/background/tabObserver")
-jest.mock("@src/background/blockSets")
 jest.mock("@src/background/browserStorage")
+
+jest.useFakeTimers()
 
 describe("test Background", () => {
 	let browserStorage: BrowserStorage
-	let tabObserver: TabObserver
+	let tabObserver: MockedObject<TabObserver>
 	let blockSets: BlockSets
 	let _background: Background
+	let mockLoadTab: Observer<TabLoadedEvent>
+	let mockRemoveTab: Observer<TabRemovedEvent>
+	let mockedBlockTab: jest.SpyInstance
+
 	beforeEach(async() => {
+
 		browserStorage = new BrowserStorage({ preferSync: true })
-		tabObserver = await TabObserver.create()
+		browserStorage.loadBlockSets = jest.fn(async() => Promise.resolve([])) as jest.Mock
+
+		tabObserver = mocked(await TabObserver.create())
+
+		mockLoadTab = new Observer<TabLoadedEvent>()
+		tabObserver.subscribeTabLoaded = jest.fn((listener: Listener<TabLoadedEvent>) => {
+			return mockLoadTab.subscribe(listener)
+		}) as jest.Mock
+
+		mockRemoveTab = new Observer<TabRemovedEvent>()
+		tabObserver.subscribeTabRemoved = jest.fn((listener: Listener<TabRemovedEvent>) => {
+			return mockRemoveTab.subscribe(listener)
+		}) as jest.Mock
+
+		mockedBlockTab = jest.spyOn(blockTab, "blockTab").mockImplementation((tabId: number) => {
+			mockLoadTab.publish({ tabId, url: "block-page.html" })
+		})
+
 		blockSets = await BlockSets.create(browserStorage)
+		await blockSets.deleteBlockSet(blockSets.list[0]!) // Delete default block set
+
 		_background = new Background(browserStorage, tabObserver, blockSets)
 	})
 
-	it.todo("increments time elapsed on blockset every second, when blacklisted tab is loaded")
+	afterEach(() => {
+		jest.clearAllTimers()
+		jest.clearAllMocks()
+	})
+
+	// ra: requireActive, am: annoyMode, ta: timeAllowed in milliseconds
+	const initBlockSets = async(config: {ra: boolean, am: boolean, ta: number}[]) => {
+		for (const c of config) {
+			const blockSet = await blockSets.addDefaultBlockSet()
+			blockSet.requireActive = c.ra
+			blockSet.annoyMode = c.am
+			blockSet.timeAllowed = c.ta
+			blockSet.test = jest.fn().mockImplementation(() => BlockTestRes.Blacklisted)
+		}
+	}
+
+	const mockLoadTabs = (tabs: {tabId: number, active: boolean}[]) => {
+		tabObserver.getActiveTabIds = jest.fn(() => 
+			tabs.filter(({ active }) => active).map(({ tabId }) => tabId)) as jest.Mock
+		for (const tab of tabs) {
+			mockLoadTab.publish({ tabId: tab.tabId, url: "" })
+		}
+	}
+
+	describe("update function updates block sets appropriately (only once)", () => {
+		describe("when blockSet.requireActive is false", () => {
+			const timeAllowed = 2000
+			describe("and blockSet.annoyMode is false", () => {
+				beforeEach(async() => {
+					await initBlockSets([{ ra: false, am: false, ta: timeAllowed }])
+				})
+
+				it("existing non-active tabs increase blockSet.timeElapsed", () => {
+					mockLoadTabs([
+						{ tabId: 0, active: false },
+						{ tabId: 1, active: false }])
+					jest.advanceTimersByTime(updateInterval)
+					expect(blockSets.list[0]!.timeElapsed).toBe(updateInterval)
+					expect(mockedBlockTab).toBeCalledTimes(0)
+				})
+			
+				it("existing active tabs increase blockSet.timeElapsed", () => {
+					mockLoadTabs([
+						{ tabId: 0, active: true },
+						{ tabId: 1, active: true }])
+					jest.advanceTimersByTime(updateInterval)
+					expect(blockSets.list[0]!.timeElapsed).toBe(updateInterval)
+					expect(mockedBlockTab).toBeCalledTimes(0)
+				})
+				
+				it("existing non-active tabs get blocked when remaining time is zero", () => {
+					mockLoadTabs([
+						{ tabId: 0, active: false },
+						{ tabId: 1, active: false }])
+					jest.advanceTimersByTime(timeAllowed)
+					expect(blockSets.list[0]!.timeElapsed).toBe(timeAllowed)
+					expect(mockedBlockTab).toBeCalledWith(0)
+					expect(mockedBlockTab).toBeCalledWith(1)
+					expect(mockedBlockTab).toBeCalledTimes(2)
+				})
+
+				it("we don't get into a blocking loop after opening block tab", () => {				
+					mockLoadTabs([
+						{ tabId: 0, active: false },
+						{ tabId: 1, active: false }])
+					jest.advanceTimersByTime(timeAllowed)
+					expect(mockedBlockTab).toBeCalledTimes(2)
+					jest.advanceTimersByTime(updateInterval)
+					expect(mockedBlockTab).toBeCalledTimes(2)
+				})
+
+				it("timeElapsed does not overflow", () => {	
+					mockLoadTabs([
+						{ tabId: 0, active: false },
+						{ tabId: 1, active: false }])
+					jest.advanceTimersByTime(timeAllowed + updateInterval)
+					expect(blockSets.list[0]!.timeElapsed).toBe(timeAllowed)
+				})
+
+				it.todo("existing active tabs block page when remaining time is zero")
+			})
+		})
+	})
+	
 
 	// Block set may be configured to be disabled on certain week days, 
 	// e.g. off on weekends and on other days.
