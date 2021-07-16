@@ -1,6 +1,6 @@
 import { 
 	BlockSetData, plainToBlockSetData, createDefaultBlockSetData, 
-	BlockList, ActiveTime, ActiveDays, 
+	BlockList, ActiveTime, ActiveDays,
 } from "./blockSetParser"
 import { ytCategoryNamesById } from "./constants"
 import { fetchChannelTitle } from "./youtubeAPI"
@@ -341,76 +341,96 @@ export class BlockSet {
 		return this._id
 	}
 
-	get timeElapsed(): number {
-		return this._timeElapsed
-	}
+	/* eslint-disable jsdoc/require-jsdoc*/
 
+	private observerTimeElapsedChanged = new Observer<ChangedEvent<number>>()
+	subscribeTimeElapsedChanged(listener: Listener<ChangedEvent<number>>): () => void { 
+		return this.observerTimeElapsedChanged.subscribe(listener)
+	}
+	get timeElapsed(): number { return this._timeElapsed }
 	set timeElapsed(val: number) {
 		this._timeElapsed = val
+		this.observerTimeElapsedChanged.publish({ newValue: val })
 	}
 
-	get timeAllowed(): number {
-		return this._data.timeAllowed
+	private observerNameChanged = new Observer<ChangedEvent<string>>()
+	subscribeNameChanged(listener: Listener<ChangedEvent<string>>): () => void { 
+		return this.observerNameChanged.subscribe(listener)
 	}
-
-	set timeAllowed(val: number) {
-		this._data.timeAllowed = val
-	}
-
-	get name(): string {
-		return this._data.name
-	}
-	
-	set name(val: string) {
+	get name(): string { return this._data.name}
+	set name(val: string) { 
 		this._data.name = val
+		this.observerNameChanged.publish({ newValue: val })
 	}
 
-	get requireActive(): boolean {
-		return this._data.requireActive
+	private observerRequireActiveChanged = new Observer<ChangedEvent<boolean>>()
+	subscribeRequireActiveChanged(listener: Listener<ChangedEvent<boolean>>): () => void { 
+		return this.observerRequireActiveChanged.subscribe(listener)
 	}
-
-	set requireActive(val: boolean) {
+	get requireActive(): boolean { return this._data.requireActive}
+	set requireActive(val: boolean) { 
 		this._data.requireActive = val
+		this.observerRequireActiveChanged.publish({ newValue: val })
 	}
 
-	get annoyMode(): boolean {
-		return this._data.annoyMode
+	private observerAnnoyModeChanged = new Observer<ChangedEvent<boolean>>()
+	subscribeAnnoyModeChanged(listener: Listener<ChangedEvent<boolean>>): () => void { 
+		return this.observerAnnoyModeChanged.subscribe(listener)
 	}
-
-	set annoyMode(val: boolean) {
+	get annoyMode(): boolean { return this._data.annoyMode}
+	set annoyMode(val: boolean) { 
 		this._data.annoyMode = val
+		this.observerAnnoyModeChanged.publish({ newValue: val })
 	}
 
-	set activeTime(newValue: ActiveTime) {
-		this._data.activeTime = newValue
-		this.activeTimeChangedObserver.publish({ newValue })
+	private changeObserverTimeAllowed = new Observer<ChangedEvent<number>>()
+	subscribeTimeAllowedChanged(listener: Listener<ChangedEvent<number>>): () => void { 
+		return this.changeObserverTimeAllowed.subscribe(listener)
+	}
+	get timeAllowed(): number { return this._data.timeAllowed}
+	set timeAllowed(val: number) { 
+		this._data.timeAllowed = val
+		this.changeObserverTimeAllowed.publish({ newValue: val })
 	}
 
-	set activeDays(newValue: ActiveDays) {
-		this._data.activeDays = newValue
-		this.activeDaysChangedObserver.publish({ newValue })
+	private changeObserverResetTime = new Observer<ChangedEvent<number>>()
+	subscribeResetTimeChanged(listener: Listener<ChangedEvent<number>>): () => void { 
+		return this.changeObserverResetTime.subscribe(listener)
+	}
+	get resetTime(): number { return this._data.resetTime}
+	set resetTime(val: number) { 
+		this._data.resetTime = val
+		this.changeObserverResetTime.publish({ newValue: val })
 	}
 
-
-	private activeTimeChangedObserver = new Observer<ChangedEvent<ActiveTime>>()
-
-	/**
-	 * Registers listener for active time changes.
-	 * @param listener 
-	 * @returns unsubscribe function
-	 */
-	subscribeActiveTimeChanged(listener: Listener<ChangedEvent<ActiveTime>>): () => void {
-		return this.activeTimeChangedObserver.subscribe(listener)
+	private changeObserverLastReset = new Observer<ChangedEvent<number>>()
+	subscribeLastResetChanged(listener: Listener<ChangedEvent<number>>): () => void { 
+		return this.changeObserverLastReset.subscribe(listener)
+	}
+	get lastReset(): number { return this._data.lastReset}
+	set lastReset(val: number) { 
+		this._data.lastReset = val
+		this.changeObserverLastReset.publish({ newValue: val })
 	}
 
-	private activeDaysChangedObserver = new Observer<ChangedEvent<ActiveDays>>()
-
-	/**
-	 * Registers listener for active days changes.
-	 * @param listener 
-	 * @returns unsubscribe function
-	 */
-	subscribeActiveDaysChanged(listener: Listener<ChangedEvent<ActiveDays>>): () => void {
-		return this.activeDaysChangedObserver.subscribe(listener)
+	private changeObserverActiveDays = new Observer<ChangedEvent<ActiveDays>>()
+	subscribeActiveDaysChanged(listener: Listener<ChangedEvent<ActiveDays>>): () => void { 
+		return this.changeObserverActiveDays.subscribe(listener)
 	}
+	get activeDays(): ActiveDays { return this._data.activeDays}
+	set activeDays(val: ActiveDays) { 
+		this._data.activeDays = val
+		this.changeObserverActiveDays.publish({ newValue: val })
+	}
+
+	private changeObserverActiveTime = new Observer<ChangedEvent<ActiveTime>>()
+	subscribeActiveTimeChanged(listener: Listener<ChangedEvent<ActiveTime>>): () => void { 
+		return this.changeObserverActiveTime.subscribe(listener)
+	}
+	get activeTime(): ActiveTime { return this._data.activeTime}
+	set activeTime(val: ActiveTime) { 
+		this._data.activeTime = val
+		this.changeObserverActiveTime.publish({ newValue: val })
+	}
+
 }

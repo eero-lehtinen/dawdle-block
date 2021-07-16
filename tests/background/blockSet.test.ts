@@ -317,6 +317,41 @@ describe("test BlockSet rule matching", () => {
 	})
 })
 
+
+describe.each([
+	["timeElapsed", 1000],
+	["name", "TEST"],
+	["requireActive", true],
+	["annoyMode", true],
+	["timeAllowed", 1000],
+	["resetTime", 1000],
+	["lastReset", 1000],
+	["activeDays", [false, false, false, true, true, true, true]],
+	["activeTime", { from: 1, to: 2 }],
+])("test BlockSet change callback %s", (funcName, testValue) => {
+	const changedEventOf = <T>(value: T): ChangedEvent<T> => ({ newValue: value })
+	const capitalize = (s: string) => s[0]?.toUpperCase() + s.slice(1)
+
+	let blockSet: BlockSet
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let listener: jest.Mock<any, any>
+	beforeEach(() => {
+		blockSet = new BlockSet(0)
+		listener = jest.fn()
+	})
+
+	/* eslint-disable @typescript-eslint/ban-ts-comment */
+	it("notifies on changes", () => {
+		// ts does not like using bracket notation on classes, but use here for brevity
+		//@ts-ignore 
+		blockSet[`subscribe${capitalize(funcName as string)}Changed`](listener)
+		// @ts-ignore
+		blockSet[funcName] = testValue
+		expect(listener).toBeCalledWith(changedEventOf(testValue))
+	})
+
+})
+
 describe("test BlockSet change listening", () => {
 	const changedEventOf = <T>(value: T): ChangedEvent<T> => ({ newValue: value })
 
