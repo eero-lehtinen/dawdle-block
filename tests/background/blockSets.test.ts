@@ -4,20 +4,22 @@ import { BlockSets } from "@src/background/blockSets"
 import { BrowserStorage } from "@src/background/browserStorage"
 import { timeToMSSinceMidnight } from "@src/shared/utils"
 import { mocked } from "ts-jest/utils"
+import blockSetCmpObj from "../testHelpers/blockSetCmpObj"
 
 jest.mock("@src/background/browserStorage")
 
 const browserStorageMock = mocked(BrowserStorage, true)
 
 describe("test BlockSets construction", () => {
+	const testBlockSet = new BlockSet(42)
 	it("loads block sets from block set storage", async() => {
 		browserStorageMock.prototype.loadBlockSets
-			.mockImplementation(async() => Promise.resolve([new BlockSet(42)]))
+			.mockImplementation(async() => Promise.resolve([testBlockSet]))
 
 		const blockSets = await BlockSets.create(new BrowserStorage({ preferSync: true }))
 		expect(browserStorageMock).toBeCalledTimes(1)
-		expect(blockSets.list).toStrictEqual([new BlockSet(42)])
-		expect(blockSets.map).toStrictEqual(new Map([[42, new BlockSet(42)]]))
+		expect(blockSets.list).toStrictEqual([testBlockSet])
+		expect(blockSets.map).toStrictEqual(new Map([[42, testBlockSet]]))
 	})
 	
 	it("creates a default block set when storage is empty", async() => {
@@ -25,8 +27,8 @@ describe("test BlockSets construction", () => {
 			.mockImplementation(async() => Promise.resolve([]))
 		
 		const blockSets = await BlockSets.create(new BrowserStorage({ preferSync: true }))
-		expect(blockSets.list).toStrictEqual([new BlockSet(0)])
-		expect(blockSets.map).toStrictEqual(new Map([[0, new BlockSet(0)]]))
+		expect(blockSets.list).toStrictEqual([blockSetCmpObj(new BlockSet(0))])
+		expect(blockSets.map).toStrictEqual(new Map([[0, blockSetCmpObj(new BlockSet(0))]]))
 	})
 })
 
@@ -51,7 +53,7 @@ describe("test BlockSets methods", () => {
 		// Added block set is equal to default block set except from id and name
 		const defaultBlockSet = new BlockSet(newBlockSet.id)
 		defaultBlockSet.name = newBlockSet.name
-		expect(newBlockSet).toMatchObject(defaultBlockSet)
+		expect(newBlockSet).toStrictEqual(blockSetCmpObj(defaultBlockSet))
 
 		expect(blockSets.list).toContain(newBlockSet)
 		expect(blockSets.map.get(newBlockSet.id)).toStrictEqual(newBlockSet)

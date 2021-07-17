@@ -345,100 +345,104 @@ export class BlockSet {
 
 	/* eslint-disable jsdoc/require-jsdoc*/
 
-	private observerTimeElapsedChanged = new Observer<ChangedEvent<number>>()
+	private readonly changeObservers = {
+		timeElapsed: new Observer<ChangedEvent<number>>(),
+		name: new Observer<ChangedEvent<string>>(),
+		requireActive: new Observer<ChangedEvent<boolean>>(),
+		annoyMode: new Observer<ChangedEvent<boolean>>(),
+		timeAllowed: new Observer<ChangedEvent<number>>(),
+		resetTime: new Observer<ChangedEvent<number>>(),
+		lastReset: new Observer<ChangedEvent<number>>(),
+		activeDays: new Observer<ChangedEvent<ActiveDays>>(),
+		activeTime: new Observer<ChangedEvent<ActiveTime>>(),
+		any: new Observer<ChangedEvent<BlockSet>>(),
+	}
+
 	subscribeTimeElapsedChanged(listener: Listener<ChangedEvent<number>>): () => void { 
-		return this.observerTimeElapsedChanged.subscribe(listener)
+		return this.changeObservers.timeElapsed.subscribe(listener)
 	}
 	get timeElapsed(): number { return this._timeElapsed }
 	set timeElapsed(val: number) {
 		this._timeElapsed = val
-		this.observerTimeElapsedChanged.publish({ newValue: val })
+		this.changeObservers.timeElapsed.publish({ newValue: val })
 	}
 
-	private observerNameChanged = new Observer<ChangedEvent<string>>()
 	subscribeNameChanged(listener: Listener<ChangedEvent<string>>): () => void { 
-		return this.observerNameChanged.subscribe(listener)
+		return this.changeObservers.name.subscribe(listener)
 	}
 	get name(): string { return this._data.name}
 	set name(val: string) { 
 		this._data.name = val
-		this.observerNameChanged.publish({ newValue: val })
+		this.changeObservers.name.publish({ newValue: val })
 	}
 
-	private observerRequireActiveChanged = new Observer<ChangedEvent<boolean>>()
 	subscribeRequireActiveChanged(listener: Listener<ChangedEvent<boolean>>): () => void { 
-		return this.observerRequireActiveChanged.subscribe(listener)
+		return this.changeObservers.requireActive.subscribe(listener)
 	}
 	get requireActive(): boolean { return this._data.requireActive}
 	set requireActive(val: boolean) { 
 		this._data.requireActive = val
-		this.observerRequireActiveChanged.publish({ newValue: val })
+		this.changeObservers.requireActive.publish({ newValue: val })
 	}
 
-	private observerAnnoyModeChanged = new Observer<ChangedEvent<boolean>>()
 	subscribeAnnoyModeChanged(listener: Listener<ChangedEvent<boolean>>): () => void { 
-		return this.observerAnnoyModeChanged.subscribe(listener)
+		return this.changeObservers.annoyMode.subscribe(listener)
 	}
 	get annoyMode(): boolean { return this._data.annoyMode}
 	set annoyMode(val: boolean) { 
 		this._data.annoyMode = val
-		this.observerAnnoyModeChanged.publish({ newValue: val })
+		this.changeObservers.annoyMode.publish({ newValue: val })
 	}
 
-	private changeObserverTimeAllowed = new Observer<ChangedEvent<number>>()
 	subscribeTimeAllowedChanged(listener: Listener<ChangedEvent<number>>): () => void { 
-		return this.changeObserverTimeAllowed.subscribe(listener)
+		return this.changeObservers.timeAllowed.subscribe(listener)
 	}
 	get timeAllowed(): number { return this._data.timeAllowed}
 	set timeAllowed(val: number) { 
 		this._data.timeAllowed = val
-		this.changeObserverTimeAllowed.publish({ newValue: val })
+		this.changeObservers.timeAllowed.publish({ newValue: val })
 	}
 
-	private changeObserverResetTime = new Observer<ChangedEvent<number>>()
 	subscribeResetTimeChanged(listener: Listener<ChangedEvent<number>>): () => void { 
-		return this.changeObserverResetTime.subscribe(listener)
+		return this.changeObservers.resetTime.subscribe(listener)
 	}
 	get resetTime(): number { return this._data.resetTime}
 	set resetTime(val: number) { 
 		this._data.resetTime = val
-		this.changeObserverResetTime.publish({ newValue: val })
+		this.changeObservers.resetTime.publish({ newValue: val })
 	}
 
-	private changeObserverLastReset = new Observer<ChangedEvent<number>>()
 	subscribeLastResetChanged(listener: Listener<ChangedEvent<number>>): () => void { 
-		return this.changeObserverLastReset.subscribe(listener)
+		return this.changeObservers.lastReset.subscribe(listener)
 	}
 	get lastReset(): number { return this._data.lastReset}
 	set lastReset(val: number) { 
 		this._data.lastReset = val
-		this.changeObserverLastReset.publish({ newValue: val })
+		this.changeObservers.lastReset.publish({ newValue: val })
 	}
 
-	private changeObserverActiveDays = new Observer<ChangedEvent<ActiveDays>>()
 	subscribeActiveDaysChanged(listener: Listener<ChangedEvent<ActiveDays>>): () => void { 
-		return this.changeObserverActiveDays.subscribe(listener)
+		return this.changeObservers.activeDays.subscribe(listener)
 	}
 	get activeDays(): ActiveDays { return this._data.activeDays}
 	set activeDays(val: ActiveDays) { 
 		this._data.activeDays = val
-		this.changeObserverActiveDays.publish({ newValue: val })
+		this.changeObservers.activeDays.publish({ newValue: val })
 	}
 
-	private changeObserverActiveTime = new Observer<ChangedEvent<ActiveTime>>()
 	subscribeActiveTimeChanged(listener: Listener<ChangedEvent<ActiveTime>>): () => void { 
-		return this.changeObserverActiveTime.subscribe(listener)
+		return this.changeObservers.activeTime.subscribe(listener)
 	}
 	get activeTime(): ActiveTime { return this._data.activeTime}
 	set activeTime(val: ActiveTime) { 
 		this._data.activeTime = val
-		this.changeObserverActiveTime.publish({ newValue: val })
+		this.changeObservers.activeTime.publish({ newValue: val })
 	}
 
 	/** Connect any change observer to listen to all changes. 
 	 * Call this only once in constructor. */
 	private connectChangeObserverAny() {
-		const listener = () => this.changeObserverAny.publish({ newValue: this })
+		const listener = () => this.changeObservers.any.publish({ newValue: this })
 		this.subscribeTimeElapsedChanged(listener)
 		this.subscribeNameChanged(listener)
 		this.subscribeRequireActiveChanged(listener)
@@ -449,8 +453,7 @@ export class BlockSet {
 		this.subscribeActiveDaysChanged(listener)
 		this.subscribeActiveTimeChanged(listener)
 	}
-	private changeObserverAny = new Observer<ChangedEvent<BlockSet>>()
 	subscribeAnyChanged(listener: Listener<ChangedEvent<BlockSet>>): () => void { 
-		return this.changeObserverAny.subscribe(listener)
+		return this.changeObservers.any.subscribe(listener)
 	}
 }

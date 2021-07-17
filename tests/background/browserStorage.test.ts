@@ -1,6 +1,7 @@
 import type { Browser } from "webextension-polyfill-ts"
 import { deepMock } from "mockzilla"
 import { randomBytes } from "crypto"
+import blockSetCmpObj from "../testHelpers/blockSetCmpObj"
 
 const [browser, mockBrowser, mockBrowserNode] = deepMock<Browser>("browser", false)
 
@@ -45,7 +46,7 @@ describe("test BrowserStorage with browser api mocking", () => {
 
 	it("returns empty if storage is empty", async() => {
 		mockBrowser.storage.sync.get.expect.andResolve({ [bsIdsSaveKey]: [] })
-		expect(await browserStorage.loadBlockSets()).toMatchObject([])
+		expect(await browserStorage.loadBlockSets()).toEqual([])
 	})
 
 	it("can load block set ids, blocksets, and elapsed times from sync storage", async() => {
@@ -53,7 +54,7 @@ describe("test BrowserStorage with browser api mocking", () => {
 		mockBrowser.storage.sync.get.expect({ 0: null })
 			.andResolve({ 0: {} })
 
-		expect(await browserStorage.loadBlockSets()).toMatchObject([new BlockSet(0)])
+		expect(await browserStorage.loadBlockSets()).toEqual([blockSetCmpObj(new BlockSet(0))])
 	})
 
 	it("can load compressed blocksets from sync storage", async() => {
@@ -61,7 +62,8 @@ describe("test BrowserStorage with browser api mocking", () => {
 		mockBrowser.storage.sync.get.expect({ 0: null })
 			.andResolve({ 0: compress({}) })
 
-		expect(await browserStorage.loadBlockSets()).toMatchObject([new BlockSet(0)])
+		expect(await browserStorage.loadBlockSets())
+			.toEqual([blockSetCmpObj(new BlockSet(0))])
 	})
 
 	it("can handle non continuous ids", async() => {
@@ -69,8 +71,8 @@ describe("test BrowserStorage with browser api mocking", () => {
 		mockBrowser.storage.sync.get.expect({ 3: null, 2: null })
 			.andResolve({ 3: {}, 2: {} })
 
-		expect(await browserStorage.loadBlockSets()).toMatchObject(
-			[new BlockSet(3, {}, 50), new BlockSet(2)])
+		expect(await browserStorage.loadBlockSets()).toEqual(
+			[blockSetCmpObj(new BlockSet(3, {}, 50)), blockSetCmpObj(new BlockSet(2))])
 	})
 
 	it("ignores invalid saves", async() => {
@@ -131,6 +133,6 @@ describe("test BrowserStorage local storage with browser api mocking", () => {
 		mockBrowser.storage.local.get.expect({ 0: null })
 			.andResolve({ 0: {} })
 
-		expect(await browserStorage.loadBlockSets()).toMatchObject([new BlockSet(0)])
+		expect(await browserStorage.loadBlockSets()).toEqual([blockSetCmpObj(new BlockSet(0))])
 	})
 })
