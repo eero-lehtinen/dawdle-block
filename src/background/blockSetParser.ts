@@ -10,11 +10,7 @@ export type BlockSetIds = z.infer<typeof zBlockSetIds>
  * @throws {Error} if object is not parseable
  * @returns BlockSetIds
  */
-export const plainToBlockSetIds = 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-(obj: any): BlockSetIds => {
-	return zBlockSetIds.parse(obj)
-}
+export const plainToBlockSetIds =	(obj: unknown): BlockSetIds => zBlockSetIds.parse(obj)
 
 const zBlockSetTimesElapsed = z.array(z.number().int().optional())
 export type BlockSetTimesElapsed = z.infer<typeof zBlockSetTimesElapsed>
@@ -25,11 +21,8 @@ export type BlockSetTimesElapsed = z.infer<typeof zBlockSetTimesElapsed>
  * @throws {Error} if object is not parseable
  * @returns BlockSetTimesElapsed
  */
-export const plainToBlockSetTimesElapsed = 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-(obj: any): BlockSetTimesElapsed => {
-	return zBlockSetTimesElapsed.parse(obj)
-}
+export const plainToBlockSetTimesElapsed = (obj: unknown): BlockSetTimesElapsed => 
+	zBlockSetTimesElapsed.parse(obj)
 
 const zActiveTime = z.object({
 	from: z.number().int().default(0),
@@ -116,10 +109,7 @@ export type BlockSetData = BlockSetDataV1
  * @param obj 
  * @returns 
  */
-export const plainToBlockSetData = 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-(obj: any): BlockSetData => {
-	
+export const plainToBlockSetData = (obj: unknown): BlockSetData => {
 	if (obj !== null && obj !== undefined) {
 		if (parseableV0(obj)) {
 			const parsedBlockSetV0 = zBlockSetDataV0.parse(obj)
@@ -137,9 +127,7 @@ export const plainToBlockSetData =
  * Creates a default object of type BlockSetData of the latest version.
  * @returns default BlockSetData
  */
-export const createDefaultBlockSetData = (): BlockSetData => {
-	return zBlockSetDataV1.parse({ v: 1 })
-}
+export const createDefaultBlockSetData = (): BlockSetData => zBlockSetDataV1.parse({ v: 1 })
 
 /**
  * Converts block set version 0 to version 1.
@@ -209,15 +197,11 @@ const convertV0toV1 = (blockSet: BlockSetDataV0): BlockSetDataV1 => {
  * @param obj 
  * @returns 
  */
-const parseableV0 = (obj: any) => {
-	return typeof obj === "object" && (!("v" in obj) || obj.v < 1)
-}
+const parseableV0 = (obj: any) => typeof obj === "object" && (!("v" in obj) || obj.v < 1)
 
 /**
  * Checks if passed object should be parsed with v1 block set parser
  * @param obj 
  * @returns 
  */
-const parseableV1 = (obj: any) => {
-	return typeof obj === "object" && "v" in obj && obj.v === 1
-}
+const parseableV1 = (obj: any) => typeof obj === "object" && "v" in obj && obj.v === 1
