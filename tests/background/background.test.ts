@@ -111,6 +111,17 @@ describe("test Background", () => {
 					expect(mockedBlockTab).toBeCalledTimes(2)
 				})
 
+				it("existing active tabs get blocked when remaining time is zero", () => {
+					mockLoadTabs([
+						{ tabId: 0, active: true },
+						{ tabId: 1, active: true }]) 
+					jest.advanceTimersByTime(timeAllowed)
+					expect(blockSets.list[0]!.timeElapsed).toBe(timeAllowed)
+					expect(mockedBlockTab).toBeCalledWith(0)
+					expect(mockedBlockTab).toBeCalledWith(1)
+					expect(mockedBlockTab).toBeCalledTimes(2)
+				})
+
 				it("we don't get into a blocking loop after opening block tab", () => {				
 					mockLoadTabs([
 						{ tabId: 0, active: false },
@@ -128,8 +139,6 @@ describe("test Background", () => {
 					jest.advanceTimersByTime(timeAllowed + updateInterval)
 					expect(blockSets.list[0]!.timeElapsed).toBe(timeAllowed)
 				})
-
-				it.todo("existing active tabs block page when remaining time is zero")
 			})
 		})
 	})
