@@ -265,12 +265,13 @@ export class BlockSet {
 		if (this.timeElapsed < this._data.timeAllowed) {
 			return BlockSetState.TimeLeft
 		}
-		if (this.timeElapsed === this._data.timeAllowed) {
-			if (this._data.annoyMode) {
-				return BlockSetState.TimeLeft
-			}
+		// annoyMode == false
+		if (!this._data.annoyMode) {
 			return BlockSetState.Block
 		}
+		// annoyMode == true
+		if (this.timeElapsed === this._data.timeAllowed)
+			return BlockSetState.TimeLeft
 		return BlockSetState.OverTime
 	}
 
