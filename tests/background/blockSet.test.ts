@@ -334,11 +334,14 @@ describe.each([
 
 	let blockSet: BlockSet
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	let listener: jest.Mock<any, any>
+	const listener = jest.fn()
+	const anyChangesListener = jest.fn()
 	beforeEach(() => {
 		blockSet = new BlockSet(0)
-		listener = jest.fn()
+		blockSet.subscribeAnyChanged(anyChangesListener)
 	})
+
+	afterEach(() => jest.clearAllMocks())
 
 	/* eslint-disable @typescript-eslint/ban-ts-comment */
 	it("notifies on changes", () => {
@@ -348,6 +351,7 @@ describe.each([
 		// @ts-ignore
 		blockSet[funcName] = testValue
 		expect(listener).toBeCalledWith(changedEventOf(testValue))
+		expect(anyChangesListener).toBeCalledWith(changedEventOf(blockSet))
 	})
 
 })

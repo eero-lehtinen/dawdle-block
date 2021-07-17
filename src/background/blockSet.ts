@@ -65,6 +65,8 @@ export class BlockSet {
 		this._timeElapsed = timeElapsed
 
 		this.compileRules()
+
+		this.connectChangeObserverAny()
 	}
 
 	/**
@@ -433,4 +435,22 @@ export class BlockSet {
 		this.changeObserverActiveTime.publish({ newValue: val })
 	}
 
+	/** Connect any change observer to listen to all changes. 
+	 * Call this only once in constructor. */
+	private connectChangeObserverAny() {
+		const listener = () => this.changeObserverAny.publish({ newValue: this })
+		this.subscribeTimeElapsedChanged(listener)
+		this.subscribeNameChanged(listener)
+		this.subscribeRequireActiveChanged(listener)
+		this.subscribeAnnoyModeChanged(listener)
+		this.subscribeTimeAllowedChanged(listener)
+		this.subscribeResetTimeChanged(listener)
+		this.subscribeLastResetChanged(listener)
+		this.subscribeActiveDaysChanged(listener)
+		this.subscribeActiveTimeChanged(listener)
+	}
+	private changeObserverAny = new Observer<ChangedEvent<BlockSet>>()
+	subscribeAnyChanged(listener: Listener<ChangedEvent<BlockSet>>): () => void { 
+		return this.changeObserverAny.subscribe(listener)
+	}
 }
