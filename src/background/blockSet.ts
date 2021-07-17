@@ -344,6 +344,10 @@ export class BlockSet {
 		return this._id
 	}
 
+	get overtime(): number {
+		return this.timeElapsed - this._data.timeAllowed
+	}
+
 	/* eslint-disable jsdoc/require-jsdoc*/
 
 	private readonly changeObservers = {

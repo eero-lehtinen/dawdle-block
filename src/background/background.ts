@@ -3,7 +3,8 @@ import { BlockSets } from "./blockSets"
 import { BrowserStorage } from "./browserStorage"
 import { TabLoadedEvent, TabObserver, TabRemovedEvent } from "./tabObserver"
 import { getYTInfo, nullYTInfo, YTInfo } from "./youtubeAPI"
-import { blockTab, isBlockPage } from "@src/background/blockTab"
+import { blockTab, isBlockPage } from "./blockTab"
+import { annoyTab } from "./annoyTab"
 
 export const updateInterval = 1000
 
@@ -105,7 +106,11 @@ export class Background {
 		const activeTabIds = this.tabObserver.getActiveTabIds()
 
 		const incrementedBlockSetIds = new Set<number>()
-		const blockedTabIds = new Set<number>()
+
+		const globalAnnoyingBlockSetIds = new Set<number>()
+
+		// key = tabId, value = overtime
+		const highestOvertimeForTab = new Map<number, number>()
 
 		const incrementIfNeeded = (blockSet: BlockSet) => {
 			if (!incrementedBlockSetIds.has(blockSet.id) &&
@@ -115,30 +120,79 @@ export class Background {
 			}
 		}
 
-		const blockIfNeeded = (tabId: number, blockSet: BlockSet) => {
-			if (!blockedTabIds.has(tabId) && 
-				blockSet.getState() === BlockSetState.Block) {
-				blockTab(tabId)
-				blockedTabIds.add(tabId)
-			}
-		}
-
 		for (const [tabId, tabInfo] of this.tabInfoCache) {
 			const isActive = activeTabIds.includes(tabId)
-			
+			let blocked = false
+
+			const blockIfNeeded = (tabId: number, blockSet: BlockSet) => {
+				if (!blocked && blockSet.getState() === BlockSetState.Block) {
+					blockTab(tabId)
+					blocked = true
+				}
+			}
+
 			for (const blockSetId of tabInfo.blockedBy) {
 				const blockSet = this._blockSets.map.get(blockSetId)
 				if (blockSet === undefined) continue
 
-				incrementIfNeeded(blockSet)
+				if (!isActive && blockSet.requireActive) continue
 
+				// requireActive == false, annoyMode == false
 				if (!isActive && !blockSet.requireActive && !blockSet.annoyMode) {
+					incrementIfNeeded(blockSet)
+					blockIfNeeded(tabId, blockSet)
+				}
+				else if (isActive && !blockSet.requireActive && !blockSet.annoyMode) {
+					incrementIfNeeded(blockSet)
 					blockIfNeeded(tabId, blockSet)
 				}
 
-				else if (isActive && !blockSet.requireActive && !blockSet.annoyMode) {
+				// requireActive == true, annoyMode == false
+				else if (!isActive && blockSet.requireActive && !blockSet.annoyMode) {
+					// do nothing
+				}
+				else if (isActive && blockSet.requireActive && !blockSet.annoyMode) {
+					incrementIfNeeded(blockSet)
 					blockIfNeeded(tabId, blockSet)
 				}
+
+				// requireActive == false, annoyMode == true
+				else if (!isActive && !blockSet.requireActive && blockSet.annoyMode) {
+					incrementIfNeeded(blockSet)
+					if (!globalAnnoyingBlockSetIds.has(blockSet.id))
+						globalAnnoyingBlockSetIds.add(blockSet.id)
+				}
+				else if (isActive && !blockSet.requireActive && blockSet.annoyMode) {
+					incrementIfNeeded(blockSet)
+					if (!globalAnnoyingBlockSetIds.has(blockSet.id))
+						globalAnnoyingBlockSetIds.add(blockSet.id)
+				}
+
+				// requireActive == true, annoyMode == true
+				else if (!isActive && blockSet.requireActive && blockSet.annoyMode) {
+					// do nothing
+				}
+				else if (isActive && blockSet.requireActive && blockSet.annoyMode) {
+					incrementIfNeeded(blockSet)
+
+					if (blockSet.getState() === BlockSetState.OverTime && 
+						blockSet.overtime > (highestOvertimeForTab.get(tabId) ?? 0)) {
+						highestOvertimeForTab.set(tabId, blockSet.overtime)
+					}
+				}
+			}
+		}
+		
+		let largestGlobalOverTime = 0
+		for (const blockSetId of globalAnnoyingBlockSetIds) {
+			largestGlobalOverTime = Math.max(largestGlobalOverTime, 
+				this._blockSets.map.get(blockSetId)?.overtime ?? -1)
+		}
+
+		for (const tabId of this.tabInfoCache.keys()) {
+			const largestOverTime = Math.max(largestGlobalOverTime, highestOvertimeForTab.get(tabId) ?? 0)
+			if (largestOverTime > 0) {
+				annoyTab(tabId, largestOverTime)
 			}
 		}
 	}
