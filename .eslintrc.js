@@ -12,10 +12,10 @@ module.exports = {
 	ignorePatterns: [
 		"legacy/**/*",
 		"dist/**/*",
+		"coverage/**/*",
 	],
 	env: {
 		webextensions: true,
-		jquery: true,
 		browser: true,
 		node: true,
 		amd: true,
