@@ -56,11 +56,11 @@ describe("test Background", () => {
 	})
 
 	// ra: requireActive, am: annoyMode, ta: timeAllowed in milliseconds
-	const initBlockSets = async(config: {ra: boolean, am: boolean, ta: number}[]) => {
+	const initBlockSets = async(config: {am: boolean, ra: boolean, ta: number}[]) => {
 		for (const c of config) {
 			const blockSet = await blockSets.addDefaultBlockSet()
-			blockSet.requireActive = c.ra
 			blockSet.annoyMode = c.am
+			blockSet.requireActive = c.ra
 			blockSet.timeAllowed = c.ta
 			blockSet.test = jest.fn().mockImplementation(() => BlockTestRes.Blacklisted)
 		}
@@ -75,9 +75,9 @@ describe("test Background", () => {
 	}
 
 	describe("update function updates block sets appropriately (only once)", () => {
-		describe("when blockSet.requireActive is false", () => {
+		describe("when blockSet.annoyMode is false", () => {
 			const timeAllowed = 2000
-			describe("and blockSet.annoyMode is false", () => {
+			describe("and blockSet.requireActive is false", () => {
 				beforeEach(async() => {
 					await initBlockSets([{ ra: false, am: false, ta: timeAllowed }])
 				})
