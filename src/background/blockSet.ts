@@ -23,7 +23,7 @@ export type ChangedEvent<T> = {
 	newValue: T
 }
 
-export enum BlockSetState {
+export enum BSState {
 	TimeLeft,
 	Block,
 	OverTime,
@@ -258,21 +258,24 @@ export class BlockSet {
 	}
 
 	/** 
-	 * Get current blocking state of this block set. 
+	 * Compare supplied state to current blocking state of this block set. 
 	 * Has specialized behaviour when annoyMode is true.
+	 * When multiple parameters are provided, returns true if any of them match.
 	 */
-	getState(): BlockSetState {
-		if (this.timeElapsed < this._data.timeAllowed) {
-			return BlockSetState.TimeLeft
-		}
-		// annoyMode == false
-		if (!this._data.annoyMode) {
-			return BlockSetState.Block
-		}
-		// annoyMode == true
-		if (this.timeElapsed === this._data.timeAllowed)
-			return BlockSetState.TimeLeft
-		return BlockSetState.OverTime
+	isInState(...states: BSState[]): boolean {
+		return states.some(state => {		
+			if (this.timeElapsed < this._data.timeAllowed) {
+				return state === BSState.TimeLeft
+			}
+			// annoyMode == false
+			if (!this._data.annoyMode) {
+				return state === BSState.Block
+			}
+			// annoyMode == true
+			if (this.timeElapsed === this._data.timeAllowed)
+				return state === BSState.TimeLeft
+			return state === BSState.OverTime
+		})
 	}
 
 	/**

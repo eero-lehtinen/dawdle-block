@@ -1,4 +1,4 @@
-import { BlockSet, BlockSetState } from "./blockSet"
+import { BlockSet, BSState } from "./blockSet"
 import { BlockSets } from "./blockSets"
 import { BrowserStorage } from "./browserStorage"
 import { TabLoadedEvent, TabObserver, TabRemovedEvent } from "./tabObserver"
@@ -96,103 +96,69 @@ export class Background {
 		this.tabInfoCache.delete(tabId)
 	}
 
+	/**
+	 * Increments timeElapsed for block sets.
+	 * Replaces tabs with block pages when block set time is depleted.
+	 * Applies annoy banners to tabs when block sets are on overtime.
+	 */
 	private update() {
-		// bs: requireActive = (true | false)
-		// bs: annoyMode = (true | false)
-		// bs tila: time left, block, overtime
-		// blockedBy list
-		// tab: active = (true | false)
-
 		const activeTabIds = this.tabObserver.getActiveTabIds()
 
+		let globalBiggestOvertime = 0
 		const incrementedBlockSetIds = new Set<number>()
-
-		const globalAnnoyingBlockSetIds = new Set<number>()
-
-		// key = tabId, value = overtime
-		const highestOvertimeForTab = new Map<number, number>()
-
-		const incrementIfNeeded = (blockSet: BlockSet) => {
-			if (!incrementedBlockSetIds.has(blockSet.id) &&
-			 [BlockSetState.TimeLeft, BlockSetState.OverTime].includes(blockSet.getState())) {
+		
+		const incrementTimeElapsed = (blockSet: BlockSet) => {
+			if (!incrementedBlockSetIds.has(blockSet.id)) {
 				blockSet.timeElapsed += updateInterval
 				incrementedBlockSetIds.add(blockSet.id)
 			}
+		}
+
+		// key = tabId, value = overtime
+		const tabBiggestOvertimes = new Map<number, number>()
+
+		const collectTabBiggestOvertime = (overtime: number, tabId: number) => {
+			if ((tabBiggestOvertimes.get(tabId) ?? 0) < overtime)
+				tabBiggestOvertimes.set(tabId, overtime)
 		}
 
 		for (const [tabId, tabInfo] of this.tabInfoCache) {
 			const isActive = activeTabIds.includes(tabId)
 			let blocked = false
 
-			const blockIfNeeded = (tabId: number, blockSet: BlockSet) => {
-				if (!blocked && blockSet.getState() === BlockSetState.Block) {
-					blockTab(tabId)
-					blocked = true
-				}
-			}
-
 			for (const blockSetId of tabInfo.blockedBy) {
 				const blockSet = this._blockSets.map.get(blockSetId)
 				if (blockSet === undefined) continue
 
+				// If block set requires activity and tab is not active, it can be skipped
 				if (!isActive && blockSet.requireActive) continue
 
-				// requireActive == false, annoyMode == false
-				if (!isActive && !blockSet.requireActive && !blockSet.annoyMode) {
-					incrementIfNeeded(blockSet)
-					blockIfNeeded(tabId, blockSet)
-				}
-				else if (isActive && !blockSet.requireActive && !blockSet.annoyMode) {
-					incrementIfNeeded(blockSet)
-					blockIfNeeded(tabId, blockSet)
+				if (blockSet.isInState(BSState.TimeLeft, BSState.OverTime)) {
+					incrementTimeElapsed(blockSet)
 				}
 
-				// requireActive == true, annoyMode == false
-				else if (!isActive && blockSet.requireActive && !blockSet.annoyMode) {
-					// do nothing
-				}
-				else if (isActive && blockSet.requireActive && !blockSet.annoyMode) {
-					incrementIfNeeded(blockSet)
-					blockIfNeeded(tabId, blockSet)
-				}
+				if (blockSet.isInState(BSState.OverTime)) {
+					// When requireActive == true, annoy is only for this tab
+					if (blockSet.requireActive)
+						collectTabBiggestOvertime(blockSet.overtime, tabId)
 
-				// requireActive == false, annoyMode == true
-				else if (!isActive && !blockSet.requireActive && blockSet.annoyMode) {
-					incrementIfNeeded(blockSet)
-					if (!globalAnnoyingBlockSetIds.has(blockSet.id))
-						globalAnnoyingBlockSetIds.add(blockSet.id)
+					// When requireActive == false, annoy is global
+					else
+						globalBiggestOvertime = 
+							Math.max(globalBiggestOvertime, this._blockSets.map.get(blockSetId)?.overtime ?? -1)
 				}
-				else if (isActive && !blockSet.requireActive && blockSet.annoyMode) {
-					incrementIfNeeded(blockSet)
-					if (!globalAnnoyingBlockSetIds.has(blockSet.id))
-						globalAnnoyingBlockSetIds.add(blockSet.id)
-				}
-
-				// requireActive == true, annoyMode == true
-				else if (!isActive && blockSet.requireActive && blockSet.annoyMode) {
-					// do nothing
-				}
-				else if (isActive && blockSet.requireActive && blockSet.annoyMode) {
-					incrementIfNeeded(blockSet)
-
-					if (blockSet.getState() === BlockSetState.OverTime && 
-						blockSet.overtime > (highestOvertimeForTab.get(tabId) ?? 0)) {
-						highestOvertimeForTab.set(tabId, blockSet.overtime)
-					}
+				else if (blockSet.isInState(BSState.Block) && !blocked) {
+					blockTab(tabId)
+					blocked = true
 				}
 			}
 		}
 		
-		let largestGlobalOverTime = 0
-		for (const blockSetId of globalAnnoyingBlockSetIds) {
-			largestGlobalOverTime = Math.max(largestGlobalOverTime, 
-				this._blockSets.map.get(blockSetId)?.overtime ?? -1)
-		}
-
 		for (const tabId of this.tabInfoCache.keys()) {
-			const largestOverTime = Math.max(largestGlobalOverTime, highestOvertimeForTab.get(tabId) ?? 0)
-			if (largestOverTime > 0) {
-				annoyTab(tabId, largestOverTime)
+			const tabBiggestOvertime = 
+				Math.max(globalBiggestOvertime, tabBiggestOvertimes.get(tabId) ?? 0)
+			if (tabBiggestOvertime > 0) {
+				annoyTab(tabId, tabBiggestOvertime)
 			}
 		}
 	}
