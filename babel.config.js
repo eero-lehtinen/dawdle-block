@@ -28,6 +28,7 @@ module.exports = {
 			},
 		}],
 		"@emotion",
+		"macros",
 	],
 	env: {
 		test: {

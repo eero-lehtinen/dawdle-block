@@ -22,6 +22,9 @@ export interface WindowInfo {
 	activeTabId: number | null
 }
 
+const TAB_ID_NONE = browser.tabs.TAB_ID_NONE
+const WINDOW_ID_NONE = browser.windows.WINDOW_ID_NONE
+
 /**
  * Maintains up to date information about all tabs in browser.
  * Listeners can be registered to listen for relevant events (e.g. tab finishing loading).
@@ -36,9 +39,6 @@ export class TabObserver {
 	// Holds internal state of tabs
 	// Main usage is holding url
 	private tabInfos: Record<number, TabInfo> = {}
-
-	private readonly TAB_ID_NONE  = browser.tabs.TAB_ID_NONE
-	private readonly WINDOW_ID_NONE = browser.windows.WINDOW_ID_NONE
 
 	/**
 	 * Returns tabs that are the current active tab in any window 
@@ -108,7 +108,7 @@ export class TabObserver {
 	 * @param windowId 
 	 */
 	private isValidWindowId(windowId: number | undefined): windowId is number {
-		return windowId !== undefined && windowId !== this.WINDOW_ID_NONE
+		return windowId !== undefined && windowId !== WINDOW_ID_NONE
 	}
 	
 	/**
@@ -116,7 +116,7 @@ export class TabObserver {
 	 * @param tabId 
 	 */
 	private isValidTabId(tabId: number | undefined): tabId is number {
-		return tabId !== undefined && tabId !== this.TAB_ID_NONE
+		return tabId !== undefined && tabId !== TAB_ID_NONE
 	}
 
 	/**

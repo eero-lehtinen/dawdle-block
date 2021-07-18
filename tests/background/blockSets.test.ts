@@ -6,6 +6,7 @@ import { timeToMSSinceMidnight } from "@src/shared/utils"
 import { mocked } from "ts-jest/utils"
 import blockSetCmpObj from "../testHelpers/blockSetCmpObj"
 
+jest.mock("webextension-polyfill-ts", () => ({}))
 jest.mock("@src/background/browserStorage")
 
 const browserStorageMock = mocked(BrowserStorage, true)

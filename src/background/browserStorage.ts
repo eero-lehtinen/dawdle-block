@@ -23,7 +23,7 @@ export const bsTimesElapsedSaveKey = "blocksetTimesElapsed"
 export class BrowserStorage {
 
 	private storage: Storage.StorageArea
-	private readonly maxItemSize = browser.storage.sync.QUOTA_BYTES_PER_ITEM
+	private readonly QUOTA_BYTES_PER_ITEM = browser.storage.sync.QUOTA_BYTES_PER_ITEM
 	
 	/**
 	 * Instantiates block set storage.
@@ -147,9 +147,9 @@ export class BrowserStorage {
 		items: Record<string, null | string | BlockSetData | BlockSetIds | BlockSetTimesElapsed>) {
 		
 		for (const key in items) {
-			if (typeof items[key] === "object") {
+			if (!Array.isArray(items[key]) && items[key] !== null) {
 				const compressed = compress(items[key])
-				if (compressed.length + 20 > this.maxItemSize) {
+				if (compressed.length + 20 > this.QUOTA_BYTES_PER_ITEM) {
 					throw Error("Can't save item, it is too large")
 				}
 				items[key] = compressed

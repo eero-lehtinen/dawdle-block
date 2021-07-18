@@ -5,6 +5,7 @@ import { TabLoadedEvent, TabObserver, TabRemovedEvent } from "./tabObserver"
 import { getYTInfo, nullYTInfo, YTInfo } from "./youtubeAPI"
 import { blockTab, isBlockPage } from "./blockTab"
 import { annoyTab } from "./annoyTab"
+import { setBadge } from "./setBadge"
 
 export const updateInterval = 1000
 
@@ -104,9 +105,7 @@ export class Background {
 	private update() {
 		const activeTabIds = this.tabObserver.getActiveTabIds()
 
-		let globalBiggestOvertime = 0
 		const incrementedBlockSetIds = new Set<number>()
-		
 		const incrementTimeElapsed = (blockSet: BlockSet) => {
 			if (!incrementedBlockSetIds.has(blockSet.id)) {
 				blockSet.timeElapsed += updateInterval
@@ -114,9 +113,10 @@ export class Background {
 			}
 		}
 
+		let smallestTimeLeft = Infinity
+		let globalBiggestOvertime = 0
 		// key = tabId, value = overtime
 		const tabBiggestOvertimes = new Map<number, number>()
-
 		const collectTabBiggestOvertime = (overtime: number, tabId: number) => {
 			if ((tabBiggestOvertimes.get(tabId) ?? 0) < overtime)
 				tabBiggestOvertimes.set(tabId, overtime)
@@ -135,6 +135,7 @@ export class Background {
 
 				if (blockSet.isInState(BSState.TimeLeft, BSState.OverTime)) {
 					incrementTimeElapsed(blockSet)
+					smallestTimeLeft = Math.min(smallestTimeLeft, blockSet.timeAllowed - blockSet.timeElapsed)
 				}
 
 				if (blockSet.isInState(BSState.OverTime)) {
@@ -161,5 +162,7 @@ export class Background {
 				annoyTab(tabId, tabBiggestOvertime)
 			}
 		}
+
+		void setBadge(smallestTimeLeft)
 	}
 }

@@ -1,51 +1,63 @@
-import { Browser, Windows, Tabs } from "webextension-polyfill-ts"
-import { deepMock } from "mockzilla"
-import { mockEvent, MockzillaEventOf } from "mockzilla-webextension"
 import flushPromises from "flush-promises"
-
-const [browser, mockBrowser, mockBrowserNode] = deepMock<Browser>("browser", false)
-
-jest.doMock("webextension-polyfill-ts", () => ({ browser }))
-
-import { Listener } from "@src/background/observer"
+import mockEvent from "../testHelpers/mockEvent"
+import { browser, Tabs, Windows } from "webextension-polyfill-ts"
 import { TabLoadedEvent, TabObserver, TabRemovedEvent } from "@src/background/tabObserver"
+import { mocked } from "ts-jest/utils"
+import { Listener } from "@src/background/observer"
+
+jest.mock("webextension-polyfill-ts", () => {
+	return {
+		browser: {
+			tabs: { 
+				TAB_ID_NONE: -1,
+				onUpdated: jest.fn(),
+				onActivated: jest.fn(),
+				onRemoved: jest.fn(),
+			},
+			windows: { 
+				WINDOW_ID_NONE: -1, 
+				getAll: jest.fn(),
+				onFocusChanged: jest.fn(),
+				onCreated: jest.fn(),
+				onRemoved: jest.fn(),
+			 },
+		},
+	}
+})
+
+const mockBrowser = mocked(browser, true)
+
+const emitTabUpdated = 
+	mockEvent<[number, Tabs.OnUpdatedChangeInfoType, Tabs.Tab]>(mockBrowser.tabs.onUpdated)
+const emitTabActivated = mockEvent<[Tabs.OnActivatedActiveInfoType]>(mockBrowser.tabs.onActivated)
+const emitTabRemoved = mockEvent<[number, Tabs.OnRemovedRemoveInfoType]>(mockBrowser.tabs.onRemoved)
+const emitWindowFocusChanged = mockEvent<[number]>(mockBrowser.windows.onFocusChanged)
+const emitWindowCreated = mockEvent<[Windows.Window]>(mockBrowser.windows.onCreated)
+const emitWindowRemoved = mockEvent<[number]>(mockBrowser.windows.onRemoved)
+
 
 describe("test tabObserver events", () => {
-	let onUpdated: MockzillaEventOf<typeof mockBrowser.tabs.onUpdated>
-	let onTabRemoved: MockzillaEventOf<typeof mockBrowser.tabs.onRemoved>
-	let onActivated: MockzillaEventOf<typeof mockBrowser.tabs.onActivated>
-	let onWindowRemoved: MockzillaEventOf<typeof mockBrowser.windows.onRemoved>
-	let onWindowCreated: MockzillaEventOf<typeof mockBrowser.windows.onCreated>
-	let onFocusChanged: MockzillaEventOf<typeof mockBrowser.windows.onFocusChanged>
 	let tabObserver: TabObserver
 
 	const initialActiveTabIds = [1]
-	const initialTabs = [{ id: 1, windowId: 1, url: "asd" }, 
+	const initialTabs = [
+		{ id: 1, windowId: 1, url: "asd" }, 
 		{ id: 2, windowId: 1, url: null }]
 
 	beforeEach(async() => {
-		mockBrowserNode.enable()
-		
-		mockBrowser.tabs.TAB_ID_NONE.mock(-1)
-		mockBrowser.windows.WINDOW_ID_NONE.mock(-1)
 
-		onUpdated = mockEvent(mockBrowser.tabs.onUpdated)
-		onTabRemoved = mockEvent(mockBrowser.tabs.onRemoved)
-		onActivated = mockEvent(mockBrowser.tabs.onActivated)
-		onWindowRemoved = mockEvent(mockBrowser.windows.onRemoved)
-		onWindowCreated = mockEvent(mockBrowser.windows.onCreated)
-		onFocusChanged = mockEvent(mockBrowser.windows.onFocusChanged)
-	
-		mockBrowser.windows.getAll.expect
-			.andResolve([{ id: 1, state: "normal",
+		mockBrowser.windows.getAll.mockImplementation(
+			() => Promise.resolve([{ 
+				id: 1, state: "normal",
 				tabs: [
 					{ id: 1, windowId: 1, active: true, url: "asd" }, 
-					{ id: 2, windowId: 1, active: false }] } as Windows.Window])
+					{ id: 2, windowId: 1, active: false }], 
+			}] as Windows.Window[]))
 		
 		tabObserver = await TabObserver.create()
 		
 	})
-	afterEach(() => mockBrowserNode.verifyAndDisable())
+	afterEach(() => jest.clearAllMocks())
 
 	it("can get a list of 'active' tab ids in minimal example", () => {
 		expect(tabObserver.getActiveTabIds()).toStrictEqual(initialActiveTabIds)
@@ -56,34 +68,34 @@ describe("test tabObserver events", () => {
 	})
 
 	it("tab gets removed when tabs.onRemoved event is fired", () => {
-		onTabRemoved.emit(2, {} as Tabs.OnRemovedRemoveInfoType)
+		emitTabRemoved(2, {} as Tabs.OnRemovedRemoveInfoType)
 		expect(tabObserver.getTabs()).toHaveLength(1)
 		expect(tabObserver.getTabs()).not.toContainEqual({ id: 2, windowId: 1, url: null })
 	})
 
 	it("after windows.onRemoved event is fired, its active tab is removed", () => {
-		onWindowRemoved.emit(1)
+		emitWindowRemoved(1)
 		expect(tabObserver.getActiveTabIds()).toHaveLength(0)
 	})
 
 	it("a new tab on new window is registered after loading is complete", () => {
-		onWindowCreated.emit({ id: 2, state: "normal" } as Windows.Window)
-		onUpdated.emit(3, { status: "loading" }, { id: 3, windowId: 2, url: undefined } as Tabs.Tab)
-		onUpdated.emit(3, { status: "complete" }, { id: 3, windowId: 2, url: "asd" } as Tabs.Tab)
+		emitWindowCreated({ id: 2, state: "normal" } as Windows.Window)
+		emitTabUpdated(3, { status: "loading" }, { id: 3, windowId: 2, url: undefined } as Tabs.Tab)
+		emitTabUpdated(3, { status: "complete" }, { id: 3, windowId: 2, url: "asd" } as Tabs.Tab)
 		expect(tabObserver.getTabs()).toContainEqual({ id: 3, windowId: 2, url: "asd" })
 	})
 
 	it("active tab of window is no longer active, if window gets minimized", async() => {
-		mockBrowser.windows.getAll.expect
-			.andResolve([{ id: 1, state: "minimized" } as Windows.Window])
+		mockBrowser.windows.getAll.mockImplementation(
+			() => Promise.resolve([{ id: 1, state: "minimized" } as Windows.Window]))
 
-		onFocusChanged.emit(-1)
+		emitWindowFocusChanged(-1)
 		await flushPromises()
 		expect(tabObserver.getActiveTabIds()).toHaveLength(0)
 	})
 
 	it("after tabs.onActiveChanged event is fired, active tab changes", () => {
-		onActivated.emit({ tabId: 2, windowId: 1 })
+		emitTabActivated({ tabId: 2, windowId: 1 })
 		expect(tabObserver.getActiveTabIds()).toStrictEqual([2])
 	})
 
@@ -91,10 +103,10 @@ describe("test tabObserver events", () => {
 		const listener: Listener<TabLoadedEvent> = jest.fn()
 		const _unsubscribe = tabObserver.subscribeTabLoaded(listener)
 
-		onUpdated.emit(0, { status: "loading" }, { id: 1, windowId: 1, url: undefined } as Tabs.Tab)
+		emitTabUpdated(0, { status: "loading" }, { id: 1, windowId: 1, url: undefined } as Tabs.Tab)
 		expect(listener).toBeCalledTimes(0)
 		
-		onUpdated.emit(0, { status: "complete" }, { id: 1, windowId: 1, url: "url" } as Tabs.Tab)
+		emitTabUpdated(0, { status: "complete" }, { id: 1, windowId: 1, url: "url" } as Tabs.Tab)
 		expect(listener).toBeCalledWith({ tabId: 1, url: "url" })
 	})
 
@@ -102,7 +114,7 @@ describe("test tabObserver events", () => {
 		const listener: Listener<TabRemovedEvent> = jest.fn()
 		const _unsubscribe = tabObserver.subscribeTabRemoved(listener)
 
-		onTabRemoved.emit(0, {} as Tabs.OnRemovedRemoveInfoType)
+		emitTabRemoved(0, {} as Tabs.OnRemovedRemoveInfoType)
 		expect(listener).toBeCalledTimes(1)
 		expect(listener).toBeCalledWith({ tabId: 0 })
 	})
@@ -115,37 +127,37 @@ describe("test tabObserver events", () => {
 		}
 
 		it("window creation with invalid ids does nothing", () => {
-			onWindowCreated.emit({ id: -1, state: "normal" } as Windows.Window)
-			onWindowCreated.emit({ id: undefined, state: "normal" } as Windows.Window)
+			emitWindowCreated({ id: -1, state: "normal" } as Windows.Window)
+			emitWindowCreated({ id: undefined, state: "normal" } as Windows.Window)
 			expectToBeUnchanged(tabObserver)
 		})
 
 		it("window removal with invalid ids does nothing", () => {
-			onWindowRemoved.emit(-1)
-			onWindowRemoved.emit(100)
+			emitWindowRemoved(-1)
+			emitWindowRemoved(100)
 			expectToBeUnchanged(tabObserver)
 		})
 
 		it("tab updating with invalid ids does nothing", () => {
 			// invalid ids
-			onUpdated.emit(0, { status: "complete" }, { id: -1, windowId: 1, url: "a" } as Tabs.Tab)
-			onUpdated.emit(0, { status: "complete" }, { id: 1, windowId: -1, url: "a" } as Tabs.Tab)
+			emitTabUpdated(0, { status: "complete" }, { id: -1, windowId: 1, url: "a" } as Tabs.Tab)
+			emitTabUpdated(0, { status: "complete" }, { id: 1, windowId: -1, url: "a" } as Tabs.Tab)
 			// nonexistant window id
-			onUpdated.emit(0, { status: "complete" }, { id: 1, windowId: 100, url: "a" } as Tabs.Tab)
+			emitTabUpdated(0, { status: "complete" }, { id: 1, windowId: 100, url: "a" } as Tabs.Tab)
 
 			expectToBeUnchanged(tabObserver)
 		})
 
 		it("tab removal with invalid or nonexistant ids does nothing", () => {
-			onTabRemoved.emit(-1, {} as Tabs.OnRemovedRemoveInfoType)
-			onTabRemoved.emit(100, {} as Tabs.OnRemovedRemoveInfoType)
+			emitTabRemoved(-1, {} as Tabs.OnRemovedRemoveInfoType)
+			emitTabRemoved(100, {} as Tabs.OnRemovedRemoveInfoType)
 			expectToBeUnchanged(tabObserver)
 		})
 
 		it("tab activation with invalid or nonexistant ids does nothing", () => {
-			onActivated.emit({ tabId: -1, windowId: 1 })
-			onActivated.emit({ tabId: 2, windowId: -1 })
-			onActivated.emit({ tabId: 2, windowId: 100 })
+			emitTabActivated({ tabId: -1, windowId: 1 })
+			emitTabActivated({ tabId: 2, windowId: -1 })
+			emitTabActivated({ tabId: 2, windowId: 100 })
 			expectToBeUnchanged(tabObserver)
 		})
 	})
