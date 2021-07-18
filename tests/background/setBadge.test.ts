@@ -21,13 +21,13 @@ import { setBadge, grey, orange, red } from "@src/background/setBadge"
 afterEach(() => jest.clearAllMocks())
 
 describe("test setBadge", () => {
-	it("sets badge empty if input is Infinity", async() => {
+	test("sets badge empty if input is Infinity", async() => {
 		await setBadge(Infinity)
 		expect(mockSetBadgeText).toBeCalledWith({ text: "" })
 		expect(mockSetBadgeBackgroundColor).toBeCalledTimes(0)
 	})
 
-	it("sets badge to grey empty box with input of more than one hour", async() => {
+	test("sets badge to grey empty box with input of more than one hour", async() => {
 		await setBadge(ms("61min"))
 		await setBadge(ms("10d"))
 		expect(mockSetBadgeText.mock.calls).toEqual([
@@ -38,7 +38,7 @@ describe("test setBadge", () => {
 			[{ color: grey }]])
 	})
 
-	it("sets badge to orange box with minutes if (1min < input <= 60min)", async() => {
+	test("sets badge to orange box with minutes if (1min < input <= 60min)", async() => {
 		await setBadge(ms("60min"))
 		await setBadge(ms("10.1min"))
 		await setBadge(ms("61s"))
@@ -52,7 +52,7 @@ describe("test setBadge", () => {
 			[{ color: orange }]])
 	})
 
-	it("sets badge to red box with seconds if (0sec <= input <= 1min)", async() => {
+	test("sets badge to red box with seconds if (0sec <= input <= 1min)", async() => {
 		await setBadge(ms("1min"))
 		await setBadge(ms("10.1s"))
 		await setBadge(0)
@@ -66,7 +66,7 @@ describe("test setBadge", () => {
 			[{ color: red }]])
 	})
 
-	it("sets badge to red box with exclamation marks input is negative", async() => {
+	test("sets badge to red box with exclamation marks input is negative", async() => {
 		await setBadge(ms("-1ms"))
 		await setBadge(ms("-1year"))
 		expect(mockSetBadgeText.mock.calls).toEqual([

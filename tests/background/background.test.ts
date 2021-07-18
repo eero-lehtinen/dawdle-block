@@ -87,7 +87,7 @@ describe("test Background", () => {
 				await initBlockSets([{ ra: false, am: false, ta: timeAllowed }])
 			})
 
-			it("existing non-active tabs increase blockSet.timeElapsed", async() => {
+			test("existing non-active tabs increase blockSet.timeElapsed", async() => {
 				await mockLoadTabs([
 					{ tabId: 0, active: false },
 					{ tabId: 1, active: false }])
@@ -97,7 +97,7 @@ describe("test Background", () => {
 				expect(mockedAnnoyTab).toBeCalledTimes(0)
 			})
 		
-			it("existing active tabs increase blockSet.timeElapsed", async() => {
+			test("existing active tabs increase blockSet.timeElapsed", async() => {
 				await mockLoadTabs([
 					{ tabId: 0, active: true },
 					{ tabId: 1, active: true }])
@@ -107,7 +107,7 @@ describe("test Background", () => {
 				expect(mockedAnnoyTab).toBeCalledTimes(0)
 			})
 			
-			it("existing non-active tabs get blocked when remaining time is zero", async() => {
+			test("existing non-active tabs get blocked when remaining time is zero", async() => {
 				await mockLoadTabs([
 					{ tabId: 0, active: false },
 					{ tabId: 1, active: false }])
@@ -118,7 +118,7 @@ describe("test Background", () => {
 				expect(mockedAnnoyTab).toBeCalledTimes(0)
 			})
 
-			it("existing active tabs get blocked when remaining time is zero", async() => {
+			test("existing active tabs get blocked when remaining time is zero", async() => {
 				await mockLoadTabs([
 					{ tabId: 0, active: true },
 					{ tabId: 1, active: true }]) 
@@ -129,7 +129,7 @@ describe("test Background", () => {
 				expect(mockedAnnoyTab).toBeCalledTimes(0)
 			})
 
-			it("we don't get into a blocking loop after opening block tab", async() => {				
+			test("we don't get into a blocking loop after opening block tab", async() => {				
 				await mockLoadTabs([
 					{ tabId: 0, active: false },
 					{ tabId: 1, active: false }])
@@ -139,7 +139,7 @@ describe("test Background", () => {
 				expect(mockedAnnoyTab).toBeCalledTimes(0)
 			})
 
-			it("timeElapsed does not overflow", async() => {	
+			test("timeElapsed does not overflow", async() => {	
 				await mockLoadTabs([
 					{ tabId: 0, active: false },
 					{ tabId: 1, active: false }])
@@ -155,7 +155,7 @@ describe("test Background", () => {
 				await initBlockSets([{ ra: true, am: false, ta: timeAllowed }])
 			})
 			
-			it("existing non-active tabs don't increase blockSet.timeElapsed", async() => {
+			test("existing non-active tabs don't increase blockSet.timeElapsed", async() => {
 				await mockLoadTabs([
 					{ tabId: 0, active: false },
 					{ tabId: 1, active: false }])
@@ -165,7 +165,7 @@ describe("test Background", () => {
 				expect(mockedAnnoyTab).toBeCalledTimes(0)
 			})
 		
-			it("existing active tabs increase blockSet.timeElapsed", async() => {
+			test("existing active tabs increase blockSet.timeElapsed", async() => {
 				await mockLoadTabs([
 					{ tabId: 0, active: true },
 					{ tabId: 1, active: true }])
@@ -175,7 +175,7 @@ describe("test Background", () => {
 				expect(mockedAnnoyTab).toBeCalledTimes(0)
 			})
 			
-			it("existing non-active tabs don't get blocked when remaining time is zero", async() => {
+			test("existing non-active tabs don't get blocked when remaining time is zero", async() => {
 				await mockLoadTabs([
 					{ tabId: 0, active: false },
 					{ tabId: 1, active: false }])
@@ -185,7 +185,7 @@ describe("test Background", () => {
 				expect(mockedAnnoyTab).toBeCalledTimes(0)
 			})
 
-			it("existing active tabs get blocked when remaining time is zero", async() => {
+			test("existing active tabs get blocked when remaining time is zero", async() => {
 				await mockLoadTabs([
 					{ tabId: 0, active: true },
 					{ tabId: 1, active: true }]) 
@@ -196,7 +196,7 @@ describe("test Background", () => {
 				expect(mockedAnnoyTab).toBeCalledTimes(0)
 			})
 
-			it("timeElapsed does not overflow", async() => {	
+			test("timeElapsed does not overflow", async() => {	
 				await mockLoadTabs([
 					{ tabId: 0, active: true },
 					{ tabId: 1, active: true }])
@@ -211,7 +211,7 @@ describe("test Background", () => {
 				await initBlockSets([{ ra: false, am: true, ta: timeAllowed }])
 			})
 
-			it("existing non-active tabs increase blockSet.timeElapsed", async() => {
+			test("existing non-active tabs increase blockSet.timeElapsed", async() => {
 				await mockLoadTabs([
 					{ tabId: 0, active: false },
 					{ tabId: 1, active: false }])
@@ -221,7 +221,7 @@ describe("test Background", () => {
 				expect(mockedAnnoyTab).toBeCalledTimes(0)
 			})
 		
-			it("existing active tabs increase blockSet.timeElapsed", async() => {
+			test("existing active tabs increase blockSet.timeElapsed", async() => {
 				await mockLoadTabs([
 					{ tabId: 0, active: true },
 					{ tabId: 1, active: true }])
@@ -231,7 +231,7 @@ describe("test Background", () => {
 				expect(mockedAnnoyTab).toBeCalledTimes(0)
 			})
 
-			it("tabs don't get annoyed when timeElapsed == timeAllowed", async() => {
+			test("tabs don't get annoyed when timeElapsed == timeAllowed", async() => {
 				await mockLoadTabs([
 					{ tabId: 0, active: true },
 					{ tabId: 1, active: true }])
@@ -241,7 +241,7 @@ describe("test Background", () => {
 				expect(mockedAnnoyTab).toBeCalledTimes(0)
 			})
 			
-			it("all tabs get annoyed when timeElapsed > timeAllowed", async() => {
+			test("all tabs get annoyed when timeElapsed > timeAllowed", async() => {
 				await mockLoadTabs([
 					{ tabId: 0, active: false }, { tabId: 1, active: false },
 					{ tabId: 2, active: true }, { tabId: 3, active: true },
@@ -255,7 +255,7 @@ describe("test Background", () => {
 				expect(mockedBlockTab).toBeCalledTimes(0)
 			})
 
-			it("all tabs are annoyed with the largest overtime", async() => {	
+			test("all tabs are annoyed with the largest overtime", async() => {	
 				// this blockset has less timeAllowed 
 				// => it will have more overtime after updates
 				// => it's overtime should be shown as it has the most overtime
@@ -278,7 +278,7 @@ describe("test Background", () => {
 				await initBlockSets([{ ra: true, am: true, ta: timeAllowed }])
 			})
 
-			it("existing non-active tabs don't increase blockSet.timeElapsed", async() => {
+			test("existing non-active tabs don't increase blockSet.timeElapsed", async() => {
 				await mockLoadTabs([
 					{ tabId: 0, active: false },
 					{ tabId: 1, active: false }])
@@ -288,7 +288,7 @@ describe("test Background", () => {
 				expect(mockedAnnoyTab).toBeCalledTimes(0)
 			})
 		
-			it("existing active tabs increase blockSet.timeElapsed", async() => {
+			test("existing active tabs increase blockSet.timeElapsed", async() => {
 				await mockLoadTabs([
 					{ tabId: 0, active: true },
 					{ tabId: 1, active: true }])
@@ -298,7 +298,7 @@ describe("test Background", () => {
 				expect(mockedAnnoyTab).toBeCalledTimes(0)
 			})
 
-			it("tabs don't get annoyed when timeElapsed == timeAllowed", async() => {
+			test("tabs don't get annoyed when timeElapsed == timeAllowed", async() => {
 				await mockLoadTabs([
 					{ tabId: 0, active: true },
 					{ tabId: 1, active: true }])
@@ -308,7 +308,7 @@ describe("test Background", () => {
 				expect(mockedAnnoyTab).toBeCalledTimes(0)
 			})
 			
-			it("active tabs get annoyed when timeElapsed > timeAllowed", async() => {
+			test("active tabs get annoyed when timeElapsed > timeAllowed", async() => {
 				await mockLoadTabs([
 					{ tabId: 0, active: false }, { tabId: 1, active: false },
 					{ tabId: 2, active: true }, { tabId: 3, active: true },
@@ -322,7 +322,7 @@ describe("test Background", () => {
 				expect(mockedBlockTab).toBeCalledTimes(0)
 			})
 
-			it("active tabs are annoyed with the largest overtime", async() => {	
+			test("active tabs are annoyed with the largest overtime", async() => {	
 				// this blockset has less timeAllowed 
 				// => it will have more overtime after updates
 				// => it's overtime should be shown as it has the most overtime
@@ -340,7 +340,7 @@ describe("test Background", () => {
 		})
 
 		describe("largest overtime is chosen for annoy regardless of requireActive", () => {
-			it("blockset with largest overtime (in this case requireActive=true) " +
+			test("blockset with largest overtime (in this case requireActive=true) " +
 				"is chosen", async() => {
 				await initBlockSets([
 					{ ra: true, am: true, ta: 0 }, // larger overtime
@@ -359,7 +359,7 @@ describe("test Background", () => {
 				expect(mockedBlockTab).toBeCalledTimes(0)
 			})
 
-			it("blockset with largest overtime (in this case requireActive=false) " +
+			test("blockset with largest overtime (in this case requireActive=false) " +
 				"is chosen", async() => {
 				await initBlockSets([
 					{ ra: true, am: true, ta: updateInterval }, 
@@ -379,7 +379,7 @@ describe("test Background", () => {
 			})
 		})
 
-		it("does nothing when tabs are empty", async() => {
+		test("does nothing when tabs are empty", async() => {
 			await initBlockSets([
 				{ ra: true, am: true, ta: 0 }, // larger overtime
 				{ ra: false, am: true, ta: updateInterval },
@@ -391,7 +391,7 @@ describe("test Background", () => {
 			expect(mockedBlockTab).toBeCalledTimes(0)
 		})
 
-		it("does nothing when block sets are empty", async() => {
+		test("does nothing when block sets are empty", async() => {
 			await initBlockSets([])
 			await mockLoadTabs([
 				{ tabId: 0, active: false }, { tabId: 1, active: false },
@@ -403,7 +403,7 @@ describe("test Background", () => {
 			expect(mockedBlockTab).toBeCalledTimes(0)
 		})
 
-		it("does nothing when block sets and tabs are empty are empty", async() => {
+		test("does nothing when block sets and tabs are empty are empty", async() => {
 			await initBlockSets([])
 			await mockLoadTabs([])
 
@@ -416,9 +416,9 @@ describe("test Background", () => {
 	// Block set may be configured to be disabled on certain week days, 
 	// e.g. off on weekends and on other days.
 	// Blocking needs to be reevaluated when disabled status changes.
-	it.todo("updates all tabs when active day may have changed")
+	test.todo("updates all tabs when active day may have changed")
 
 	// Block set may be configured to be disabled e.g. from 8 pm to 12 am.
 	// Blocking needs to be reevaluated when disabled status changes.
-	it.todo("updates all tabs when active time may have changed")
+	test.todo("updates all tabs when active time may have changed")
 })

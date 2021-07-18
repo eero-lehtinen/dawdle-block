@@ -15,7 +15,7 @@ import { Background } from "@src/background/background"
 import "@src/background/index"
 
 describe("test background index", () => {
-	it("should create Background object and insert it into window.background", async() => {
+	test("should create Background object and insert it into window.background", async() => {
 		await flushPromises()
 		expect(window.background).toBeInstanceOf(Background)
 	})

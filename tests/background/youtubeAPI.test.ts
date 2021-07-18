@@ -13,25 +13,25 @@ const nullYTInfo = { channelId: null, channelTitle: null, categoryId: null }
 
 describe("test YouTube API error states", () => {
 
-	it("returns null values when YouTube isn't in the beginning of the url", async() => {
+	test("returns null values when YouTube isn't in the beginning of the url", async() => {
 		await expect(getYTInfo(new URL("file:///asd"))).resolves.toStrictEqual(nullYTInfo)
 		await expect(getYTInfo(new URL("https://asdwww.youtube.com")))
 			.resolves.toStrictEqual(nullYTInfo)
 	})
 
-	it("returns null values when YouTube is not on channel, playlist or video page", async() => {
+	test("returns null values when YouTube is not on channel, playlist or video page", async() => {
 		await expect(getYTInfo(new URL("https://www.youtube.com/feed/subscriptions")))
 			.resolves.toStrictEqual(nullYTInfo)
 	})
 
-	it("returns null values when YouTube is on a " +
+	test("returns null values when YouTube is on a " +
 		"valid page but id can't be located in url", async() => {
 		// No "v=" included, which we use to locate the id
 		await expect(getYTInfo(new URL("https://www.youtube.com/watch?asd&t=42")))
 			.resolves.toStrictEqual(nullYTInfo)
 	})
 
-	it("return null values and logs error when channel with this id isn't found", async() => {
+	test("return null values and logs error when channel with this id isn't found", async() => {
 		const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {/* do nothing */})
 		mockedFetch.mockResolvedValueOnce({
 			status: 200, 
@@ -43,7 +43,7 @@ describe("test YouTube API error states", () => {
 		expect(warnSpy).toBeCalled()
 	})
 
-	it("return null values and logs error when request status is not 200", async() => {
+	test("return null values and logs error when request status is not 200", async() => {
 		const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {/* do nothing */})
 		mockedFetch.mockResolvedValueOnce({
 			status: 404, 
@@ -56,7 +56,7 @@ describe("test YouTube API error states", () => {
 })
 
 describe("test YouTube API blocking info for video urls", () => {
-	it("returns correct results with a valid id", async() => {
+	test("returns correct results with a valid id", async() => {
 		mockedFetch.mockResolvedValueOnce({
 			status: 200, 
 			json: async() => Promise.resolve({ 
@@ -75,7 +75,7 @@ describe("test YouTube API blocking info for video urls", () => {
 
 
 describe("test YouTube API blocking info for channel urls", () => {
-	it("returns correct results with a valid id", async() => {
+	test("returns correct results with a valid id", async() => {
 		mockedFetch.mockResolvedValueOnce({
 			status: 200, 
 			json: () => Promise.resolve({ items: [{ snippet: { title: "Google Developers" } }] }), 
@@ -109,21 +109,21 @@ describe("test YouTube API blocking info for channel urls", () => {
 		})
 	}
 
-	it("returns correct results with a valid username", async() => {
+	test("returns correct results with a valid username", async() => {
 		await expectUsername(new URL("https://www.youtube.com/c/google"))
 	})
 
-	it("returns correct results with a valid legacy username", async() => {
+	test("returns correct results with a valid legacy username", async() => {
 		await expectUsername(new URL("https://www.youtube.com/user/google"))
 	})
 	
-	it("returns correct results with a username isn't last part of URL", async() => {
+	test("returns correct results with a username isn't last part of URL", async() => {
 		await expectUsername(new URL("https://www.youtube.com/c/google/videos"))
 	})
 })
 
 describe("test YouTube API blocking info for playlist urls", () => {
-	it("returns correct results with a valid id", async() => {
+	test("returns correct results with a valid id", async() => {
 		mockedFetch.mockResolvedValueOnce({
 			status: 200, 
 			json: () => Promise.resolve(
@@ -144,7 +144,7 @@ describe("test YouTube API blocking info for playlist urls", () => {
 		})
 	})
 
-	it("returns empty results when url contains parameter 'playnext=1'", async() => {
+	test("returns empty results when url contains parameter 'playnext=1'", async() => {
 		const res = await getYTInfo(new URL("https://www.youtube.com/playlist?list=asd&playnext=1"))
 		expect(res).toStrictEqual(nullYTInfo)
 	})

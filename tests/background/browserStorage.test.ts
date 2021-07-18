@@ -69,12 +69,12 @@ describe("test BrowserStorage with browser api mocking", () => {
 
 	afterEach(() => jest.clearAllMocks())
 
-	it("returns empty if storage is empty", async() => {
+	test("returns empty if storage is empty", async() => {
 		mockGet.mockResolvedValue({ [bsIdsSaveKey]: [] })
 		expect(await browserStorage.loadBlockSets()).toEqual([])
 	})
 
-	it("can load block set ids, blocksets, and elapsed times from sync storage", async() => {
+	test("can load block set ids, blocksets, and elapsed times from sync storage", async() => {
 		setUpMockStorageResolves({ ids: [0], elapsed: [0], blockSets: { 0: {} } })
 
 		expect(await browserStorage.loadBlockSets()).toEqual([blockSetCmpObj(new BlockSet(0))])
@@ -82,7 +82,7 @@ describe("test BrowserStorage with browser api mocking", () => {
 		expect(mockGet.mock.calls).toEqual(expectedGetCalls({ 0: null }))
 	})
 
-	it("can load compressed blocksets from sync storage", async() => {
+	test("can load compressed blocksets from sync storage", async() => {
 		setUpMockStorageResolves({ ids: [0], elapsed: [0], blockSets: { 0: compress({}) } })
 
 		expect(await browserStorage.loadBlockSets()).toEqual([blockSetCmpObj(new BlockSet(0))])
@@ -90,7 +90,7 @@ describe("test BrowserStorage with browser api mocking", () => {
 		expect(mockGet.mock.calls).toEqual(expectedGetCalls({ 0: null }))
 	})
 
-	it("can handle non continuous ids", async() => {
+	test("can handle non continuous ids", async() => {
 		setUpMockStorageResolves({ 
 			ids: [3, 2], 
 			elapsed: [undefined, undefined, 0, 50], 
@@ -103,7 +103,7 @@ describe("test BrowserStorage with browser api mocking", () => {
 		expect(mockGet.mock.calls).toEqual(expectedGetCalls({ 3: null, 2: null }))
 	})
 
-	it("ignores invalid saves", async() => {
+	test("ignores invalid saves", async() => {
 		jest.spyOn(console, "error").mockImplementation(() => {/*do nothing*/})
 
 		setUpMockStorageResolves({ 
@@ -118,7 +118,7 @@ describe("test BrowserStorage with browser api mocking", () => {
 		expect(mockGet.mock.calls).toEqual(expectedGetCalls({ 0: null, 1: null, 2: null }))
 	})
 
-	it("can save a new block set", async() => {
+	test("can save a new block set", async() => {
 		await browserStorage.saveNewBlockSet(testBlockSet, [testBlockSet])
 
 		expect(mockSet.mock.calls?.[0]?.[0]).toEqual({
@@ -128,7 +128,7 @@ describe("test BrowserStorage with browser api mocking", () => {
 		})
 	})
 
-	it("can save a new version of old block set", async() => {
+	test("can save a new version of old block set", async() => {
 		await browserStorage.saveBlockSet(testBlockSet)
 
 		expect(mockSet.mock.calls?.[0]?.[0]).toEqual({
@@ -136,14 +136,14 @@ describe("test BrowserStorage with browser api mocking", () => {
 		})
 	})
 
-	it("saveBlockSet throws when object is too large to be saved", async() => {	
+	test("saveBlockSet throws when object is too large to be saved", async() => {	
 		// 10k random bytes is too large to store even compressed
 		testBlockSet.name = randomBytes(10000).toString("hex") 
 		await expect(browserStorage.saveBlockSet(testBlockSet))
 			.rejects.toThrow("Can't save item, it is too large")
 	})
 
-	it("saveBlockSet throws when saves are done in too quick succession", async() => {
+	test("saveBlockSet throws when saves are done in too quick succession", async() => {
 		mockSet.mockRejectedValueOnce(Error("WRITE_OPERATIONS"))
 
 		await expect(browserStorage.saveBlockSet(testBlockSet))
@@ -154,7 +154,7 @@ describe("test BrowserStorage with browser api mocking", () => {
 		})
 	})
 
-	it("can delete a block set", async() => {
+	test("can delete a block set", async() => {
 		await browserStorage.deleteBlockSet(testBlockSet, [])
 
 		expect(mockSet.mock.calls?.[0]?.[0]).toEqual({
@@ -166,7 +166,7 @@ describe("test BrowserStorage with browser api mocking", () => {
 })
 
 describe("test BrowserStorage local storage with browser api mocking", () => {
-	it("uses storage.sync.local if preferSync is false", async() => {
+	test("uses storage.sync.local if preferSync is false", async() => {
 		const browserStorage = new BrowserStorage({ preferSync: false })
 
 		mockBrowser.storage.local.get

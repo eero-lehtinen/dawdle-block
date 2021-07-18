@@ -13,7 +13,7 @@ const browserStorageMock = mocked(BrowserStorage, true)
 
 describe("test BlockSets construction", () => {
 	const testBlockSet = new BlockSet(42)
-	it("loads block sets from block set storage", async() => {
+	test("loads block sets from block set storage", async() => {
 		browserStorageMock.prototype.loadBlockSets
 			.mockImplementation(async() => Promise.resolve([testBlockSet]))
 
@@ -23,7 +23,7 @@ describe("test BlockSets construction", () => {
 		expect(blockSets.map).toStrictEqual(new Map([[42, testBlockSet]]))
 	})
 	
-	it("creates a default block set when storage is empty", async() => {
+	test("creates a default block set when storage is empty", async() => {
 		browserStorageMock.prototype.loadBlockSets
 			.mockImplementation(async() => Promise.resolve([]))
 		
@@ -45,7 +45,7 @@ describe("test BlockSets methods", () => {
 	// They should be assigned a non overlapping id.
 	// Name should be "Block Set ${number}", 
 	// number is based on the amount of old block sets starting with "Block Set".
-	it("can add new default block sets", async() => {
+	test("can add new default block sets", async() => {
 		const newBlockSet = await blockSets.addDefaultBlockSet()
 		const bsIds = blockSets.getIds()
 
@@ -62,7 +62,7 @@ describe("test BlockSets methods", () => {
 			.toBeCalledWith(newBlockSet, blockSets.list)
 	})
 
-	it("added new block set name is 'Block Set ${number}' with restrictions", async() => {
+	test("added new block set name is 'Block Set ${number}' with restrictions", async() => {
 		let newBlockSet = await blockSets.addDefaultBlockSet()
 		expect(newBlockSet.name).toBe("Block Set 1")
 		newBlockSet = await blockSets.addDefaultBlockSet()
@@ -77,7 +77,7 @@ describe("test BlockSets methods", () => {
 	// They should be assigned a non overlapping id.
 	// Their name should have (copy) appended to the end.
 	// If old name had "(copy)" already, then names should continue (copy2), (copy3) etc.
-	it("can add new copies of block sets", async() => {
+	test("can add new copies of block sets", async() => {
 		const testBlockSet = new BlockSet(100, { name: "TEST" })
 		const newBlockSet = await blockSets.addBlockSetCopy(testBlockSet)
 		const bsIds = blockSets.getIds()
@@ -95,7 +95,7 @@ describe("test BlockSets methods", () => {
 			.toBeCalledWith(newBlockSet, blockSets.list)
 	})
 
-	it("added new block set copy name is '${copyName} (copy${number}x)' " +
+	test("added new block set copy name is '${copyName} (copy${number}x)' " +
 	"with restrictions", async() => {
 		const testBlockSet = new BlockSet(100, { name: "TEST" })
 		let newBlockSet = await blockSets.addBlockSetCopy(testBlockSet)
@@ -114,7 +114,7 @@ describe("test BlockSets methods", () => {
 		expect(newBlockSet.name).toStrictEqual(`${testBlockSet.name} (copy124x)`)
 	})
 
-	it("can remove block sets", async() => {
+	test("can remove block sets", async() => {
 		const testBlockSet = blockSets.list[0]!
 		await blockSets.deleteBlockSet(testBlockSet)
 
@@ -146,7 +146,7 @@ describe("test BlockSets blockedBy method", () => {
 
 	/* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-	it("block set methods are called with correct arguments", () => {
+	test("block set methods are called with correct arguments", () => {
 		const currentDate = new Date(2020, 1, 1, 8, 0, 0)
 		jest.useFakeTimers("modern")
 		jest.setSystemTime(currentDate)
@@ -156,17 +156,17 @@ describe("test BlockSets blockedBy method", () => {
 		expect(blockSets.list[0]!.isInActiveWeekday).toBeCalledWith(currentDate.getDay())
 	})
 
-	it("returns ids of each block set returning Blacklisted", () => {
+	test("returns ids of each block set returning Blacklisted", () => {
 		expect(blockSets.blockedBy("", null, null)).toStrictEqual(blockSets.getIds())
 	})
 
-	it("Ignores ids of each block set returning Whitelisted or Ignored", () => {
+	test("Ignores ids of each block set returning Whitelisted or Ignored", () => {
 		blockSets.list[0]!.test = jest.fn().mockImplementation(() => BlockTestRes.Whitelisted)
 		blockSets.list[1]!.test = jest.fn().mockImplementation(() => BlockTestRes.Ignored)
 		expect(blockSets.blockedBy("", null, null)).toStrictEqual([blockSets.list[2]!.id])
 	})
 
-	it("Ignores ids of each block set not being in active time or active day or both", () => {
+	test("Ignores ids of each block set not being in active time or active day or both", () => {
 		blockSets.list[0]!.isInActiveTime = jest.fn().mockImplementation(() => false)
 		blockSets.list[1]!.isInActiveWeekday = jest.fn().mockImplementation(() => false)
 		blockSets.list[2]!.isInActiveTime = jest.fn().mockImplementation(() => false)

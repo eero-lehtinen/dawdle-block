@@ -4,7 +4,7 @@ import { plainToGeneralOptionsData, createDefaultGeneralOptionsData, GeneralOpti
 describe("test GeneralOptions parsing", () => {
 	const defaultGeneralOptions = createDefaultGeneralOptionsData()
 
-	it("basic example is parsed", () => {
+	test("basic example is parsed", () => {
 		const testOptionsObj = {
 			v: 1,
 			clockType: 12,
@@ -17,14 +17,14 @@ describe("test GeneralOptions parsing", () => {
 		expect(plainToGeneralOptionsData(testOptionsObj)).toStrictEqual(testOptionsObj)
 	})
 
-	it("non-objects throw", () => {
+	test("non-objects throw", () => {
 		expect(() => { plainToGeneralOptionsData("string") }).toThrow()
 		expect(() => { plainToGeneralOptionsData(42) }).toThrow()
 		expect(() => { plainToGeneralOptionsData(() => {return 0}) }).toThrow()
 		expect(() => { plainToGeneralOptionsData(null)}).toThrow()
 	})
 
-	it("objects with members of invalid types throw", () => {
+	test("objects with members of invalid types throw", () => {
 
 		const testOptionsObj = {
 			v: 1,
@@ -35,11 +35,11 @@ describe("test GeneralOptions parsing", () => {
 		expect(() => { plainToGeneralOptionsData(testOptionsObj)}).toThrow()
 	})
 
-	it("incomplete objects get filled with defaults", () => {
+	test("incomplete objects get filled with defaults", () => {
 		expect(plainToGeneralOptionsData({})).toStrictEqual(defaultGeneralOptions)
 	})
 
-	it("objects retain their valid property names and lose invalid ones", () => {
+	test("objects retain their valid property names and lose invalid ones", () => {
 		
 		const testBlockSetObj = {
 			displayHelp: true, 
@@ -52,7 +52,7 @@ describe("test GeneralOptions parsing", () => {
 		expect(generalOptions).not.toHaveProperty("loseMe")
 	})
 
-	it("V0 default theme (darkTheme=false) gets converted to default theme in V1", () => {
+	test("V0 default theme (darkTheme=false) gets converted to default theme in V1", () => {
 		const testBlockSetObj = {
 			darkTheme: false,
 		}
@@ -66,7 +66,7 @@ describe("test GeneralOptions parsing", () => {
 	})
 
 	
-	it("V0 non-default theme (darkTheme=true) gets converted to dark theme in V1", () => {
+	test("V0 non-default theme (darkTheme=true) gets converted to dark theme in V1", () => {
 		const testBlockSetObj = {
 			darkTheme: true,
 		}

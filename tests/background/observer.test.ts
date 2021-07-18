@@ -1,7 +1,7 @@
 import { Observer, Listener } from "@src/background/observer"
 
 describe("test observer", () => {
-	it("can subscribe, receive events and unsubscribe", () => {
+	test("can subscribe, receive events and unsubscribe", () => {
 		const observer = new Observer<number>()
 		
 		const listener: Listener<number> = jest.fn()
