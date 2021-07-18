@@ -1,11 +1,13 @@
+import ms from "ms.macro"
+
 /**
  * Returns milliseconds since last midnight. E.g. if it's 1 AM, returns 60*60*1000 milliseconds.
  * @param time input date object to convert
  * @returns milliseconds
  */
 export const timeToMSSinceMidnight = (time: Date): number =>
-	time.getMilliseconds() + time.getSeconds() * 1000 + 
-		time.getMinutes() * 60000 + time.getHours() * 3600000
+	time.getMilliseconds() + time.getSeconds() * ms`1s` + 
+		time.getMinutes() * ms`1min` + time.getHours() * ms`1h`
 
 
 /**

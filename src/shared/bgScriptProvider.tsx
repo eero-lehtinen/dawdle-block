@@ -4,8 +4,9 @@ import { Background } from"../background/background"
 import { browser } from "webextension-polyfill-ts"
 import { sleep } from "./utils"
 import { Box, Typography, CircularProgress } from "@material-ui/core"
+import ms from "ms.macro"
 
-const retryIntervalMS = 2000
+const retryIntervalMS = ms`2s`
 
 const BGScriptContext = createContext<Background | null>(null)
 

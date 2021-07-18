@@ -2,6 +2,7 @@ import { mocked } from "ts-jest/utils"
 import { BlockSet, BlockTestRes, ChangedEvent, ListType } from "@src/background/blockSet"
 import { BlockSetData } from "@src/background/blockSetParser"
 import { timeToMSSinceMidnight } from "@src/shared/utils"
+import ms from "ms.macro"
 
 // Mock needed for a single test
 import{ fetchChannelTitle } from "@src/background/youtubeAPI"
@@ -144,7 +145,7 @@ describe("test BlockSet methods", () => {
 	})
 
 	it("isInActiveTime returns true, if today's time is between from and to", () => {
-		const blockSet = new BlockSet(0, { activeTime: { from: 0, to: 1 * 60 * 60 * 1000 } })
+		const blockSet = new BlockSet(0, { activeTime: { from: 0, to: ms`1h` } })
 		const dateResultPairs = [
 			{ date: new Date("2000-01-01T00:00:00"), result: false },
 			{ date: new Date("2000-01-01T00:30:00"), result: true },
@@ -156,7 +157,7 @@ describe("test BlockSet methods", () => {
 
 	it("if to is less than from, calculation of being in between wraps around " + 
 	"midnight instead", () => {
-		const blockSet = new BlockSet(0, { activeTime: { from: 1 * 60 * 60 * 1000, to: 0 } })
+		const blockSet = new BlockSet(0, { activeTime: { from: ms`1h`, to: 0 } })
 		const dateResultPairs = [
 			{ date: new Date("2000-01-01T00:00:00"), result: false },
 			{ date: new Date("2000-01-01T00:30:00"), result: false },

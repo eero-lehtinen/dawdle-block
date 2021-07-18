@@ -6,8 +6,9 @@ import { getYTInfo, nullYTInfo, YTInfo } from "./youtubeAPI"
 import { blockTab, isBlockPage } from "./blockTab"
 import { annoyTab } from "./annoyTab"
 import { setBadge } from "./setBadge"
+import ms from "ms.macro"
 
-export const updateInterval = 1000
+export const updateInterval = ms`1s`
 
 interface TabInfo {
 	url: string, 

@@ -1,5 +1,6 @@
 import { z } from "zod"
 import { BlockSet } from "./blockSet"
+import ms from "ms.macro"
 
 const zBlockSetIds = z.array(z.number().int().nonnegative())
 export type BlockSetIds = z.infer<typeof zBlockSetIds>
@@ -58,7 +59,7 @@ const zBlockSetDataV0 = z.object({
 	name: z.string().default("Block Set 1"),
 	requireActive: z.boolean().default(false),
 	annoyMode: z.boolean().default(false),
-	timeAllowed: z.number().int().default(60_000),
+	timeAllowed: z.number().int().default(ms`30m`),
 	resetTime: z.number().int().default(0),
 	lastReset: z.number().int().default(0),
 	activeDays: z.array(z.boolean()).length(7).default(new Array(7).fill(true)),
