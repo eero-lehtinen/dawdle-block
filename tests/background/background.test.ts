@@ -4,33 +4,37 @@ import { BlockTestRes } from "@src/background/blockSet"
 import { BlockSets } from "@src/background/blockSets"
 import * as blockTabModule from "@src/background/blockTab"
 import * as annoyTabModule from "@src/background/annoyTab"
+import * as youtubeAPIModule from "@src/background/youtubeAPI"
 import { BrowserStorage } from "@src/background/browserStorage"
 import { Listener, Observer } from "@src/background/observer"
 import { TabLoadedEvent, TabObserver, TabRemovedEvent } from "@src/background/tabObserver"
-import { MockedObject } from "ts-jest/dist/utils/testing"
-import { mocked } from "ts-jest/utils"
+import flushPromises from "flush-promises"
 
 jest.mock("@src/background/tabObserver")
 jest.mock("@src/background/browserStorage")
 
 jest.useFakeTimers()
 
+jest.spyOn(youtubeAPIModule, "getYTInfo").mockImplementation(
+	() => Promise.resolve(youtubeAPIModule.nullYTInfo()))
+
 describe("test Background", () => {
 	let browserStorage: BrowserStorage
-	let tabObserver: MockedObject<TabObserver>
+	let tabObserver: TabObserver
 	let blockSets: BlockSets
 	let _background: Background
 	let mockLoadTab: Observer<TabLoadedEvent>
 	let mockRemoveTab: Observer<TabRemovedEvent>
 	let mockedBlockTab: jest.SpyInstance
 	let mockedAnnoyTab: jest.SpyInstance
+	let _mockedSetBadge: jest.SpyInstance
 
 	beforeEach(async() => {
 
 		browserStorage = new BrowserStorage({ preferSync: true })
 		browserStorage.loadBlockSets = jest.fn(async() => Promise.resolve([])) as jest.Mock
 
-		tabObserver = mocked(await TabObserver.create())
+		tabObserver = await TabObserver.create()
 
 		mockLoadTab = new Observer<TabLoadedEvent>()
 		tabObserver.subscribeTabLoaded = jest.fn((listener: Listener<TabLoadedEvent>) => {
@@ -71,12 +75,13 @@ describe("test Background", () => {
 		}
 	}
 
-	const mockLoadTabs = (tabs: {tabId: number, active: boolean}[]) => {
+	const mockLoadTabs = async(tabs: {tabId: number, active: boolean}[]) => {
 		tabObserver.getActiveTabIds = jest.fn(() => 
 			tabs.filter(({ active }) => active).map(({ tabId }) => tabId)) as jest.Mock
 		for (const tab of tabs) {
-			mockLoadTab.publish({ tabId: tab.tabId, url: "" })
+			mockLoadTab.publish({ tabId: tab.tabId, url: "http://TEST" })
 		}
+		await flushPromises()
 	}
 
 	describe("update function updates block sets appropriately (only once)", () => {
@@ -88,8 +93,8 @@ describe("test Background", () => {
 					await initBlockSets([{ ra: false, am: false, ta: timeAllowed }])
 				})
 
-				it("existing non-active tabs increase blockSet.timeElapsed", () => {
-					mockLoadTabs([
+				it("existing non-active tabs increase blockSet.timeElapsed", async() => {
+					await mockLoadTabs([
 						{ tabId: 0, active: false },
 						{ tabId: 1, active: false }])
 					jest.advanceTimersByTime(updateInterval)
@@ -98,8 +103,8 @@ describe("test Background", () => {
 					expect(mockedAnnoyTab).toBeCalledTimes(0)
 				})
 			
-				it("existing active tabs increase blockSet.timeElapsed", () => {
-					mockLoadTabs([
+				it("existing active tabs increase blockSet.timeElapsed", async() => {
+					await mockLoadTabs([
 						{ tabId: 0, active: true },
 						{ tabId: 1, active: true }])
 					jest.advanceTimersByTime(updateInterval)
@@ -108,32 +113,30 @@ describe("test Background", () => {
 					expect(mockedAnnoyTab).toBeCalledTimes(0)
 				})
 				
-				it("existing non-active tabs get blocked when remaining time is zero", () => {
-					mockLoadTabs([
+				it("existing non-active tabs get blocked when remaining time is zero", async() => {
+					await mockLoadTabs([
 						{ tabId: 0, active: false },
 						{ tabId: 1, active: false }])
 					jest.advanceTimersByTime(timeAllowed)
 					expect(blockSets.list[0]!.timeElapsed).toBe(timeAllowed)
-					expect(mockedBlockTab).toBeCalledWith(0)
-					expect(mockedBlockTab).toBeCalledWith(1)
+					expect(mockedBlockTab.mock.calls).toEqual(expect.arrayContaining([[0], [1]]))
 					expect(mockedBlockTab).toBeCalledTimes(2)
 					expect(mockedAnnoyTab).toBeCalledTimes(0)
 				})
 
-				it("existing active tabs get blocked when remaining time is zero", () => {
-					mockLoadTabs([
+				it("existing active tabs get blocked when remaining time is zero", async() => {
+					await mockLoadTabs([
 						{ tabId: 0, active: true },
 						{ tabId: 1, active: true }]) 
 					jest.advanceTimersByTime(timeAllowed)
 					expect(blockSets.list[0]!.timeElapsed).toBe(timeAllowed)
-					expect(mockedBlockTab).toBeCalledWith(0)
-					expect(mockedBlockTab).toBeCalledWith(1)
+					expect(mockedBlockTab.mock.calls).toEqual(expect.arrayContaining([[0], [1]]))
 					expect(mockedBlockTab).toBeCalledTimes(2)
 					expect(mockedAnnoyTab).toBeCalledTimes(0)
 				})
 
-				it("we don't get into a blocking loop after opening block tab", () => {				
-					mockLoadTabs([
+				it("we don't get into a blocking loop after opening block tab", async() => {				
+					await mockLoadTabs([
 						{ tabId: 0, active: false },
 						{ tabId: 1, active: false }])
 					jest.advanceTimersByTime(timeAllowed)
@@ -142,8 +145,8 @@ describe("test Background", () => {
 					expect(mockedAnnoyTab).toBeCalledTimes(0)
 				})
 
-				it("timeElapsed does not overflow", () => {	
-					mockLoadTabs([
+				it("timeElapsed does not overflow", async() => {	
+					await mockLoadTabs([
 						{ tabId: 0, active: false },
 						{ tabId: 1, active: false }])
 					jest.advanceTimersByTime(timeAllowed + updateInterval)
@@ -156,8 +159,8 @@ describe("test Background", () => {
 				beforeEach(async() => {
 					await initBlockSets([{ ra: true, am: false, ta: timeAllowed }])
 				})
-				it("existing non-active tabs don't increase blockSet.timeElapsed", () => {
-					mockLoadTabs([
+				it("existing non-active tabs don't increase blockSet.timeElapsed", async() => {
+					await mockLoadTabs([
 						{ tabId: 0, active: false },
 						{ tabId: 1, active: false }])
 					jest.advanceTimersByTime(updateInterval)
@@ -166,8 +169,8 @@ describe("test Background", () => {
 					expect(mockedAnnoyTab).toBeCalledTimes(0)
 				})
 			
-				it("existing active tabs increase blockSet.timeElapsed", () => {
-					mockLoadTabs([
+				it("existing active tabs increase blockSet.timeElapsed", async() => {
+					await mockLoadTabs([
 						{ tabId: 0, active: true },
 						{ tabId: 1, active: true }])
 					jest.advanceTimersByTime(updateInterval)
@@ -176,8 +179,8 @@ describe("test Background", () => {
 					expect(mockedAnnoyTab).toBeCalledTimes(0)
 				})
 				
-				it("existing non-active tabs don't get blocked when remaining time is zero", () => {
-					mockLoadTabs([
+				it("existing non-active tabs don't get blocked when remaining time is zero", async() => {
+					await mockLoadTabs([
 						{ tabId: 0, active: false },
 						{ tabId: 1, active: false }])
 					blockSets.list[0]!.timeElapsed = timeAllowed
@@ -186,8 +189,8 @@ describe("test Background", () => {
 					expect(mockedAnnoyTab).toBeCalledTimes(0)
 				})
 
-				it("existing active tabs get blocked when remaining time is zero", () => {
-					mockLoadTabs([
+				it("existing active tabs get blocked when remaining time is zero", async() => {
+					await mockLoadTabs([
 						{ tabId: 0, active: true },
 						{ tabId: 1, active: true }]) 
 					jest.advanceTimersByTime(timeAllowed)
@@ -198,8 +201,8 @@ describe("test Background", () => {
 					expect(mockedAnnoyTab).toBeCalledTimes(0)
 				})
 
-				it("timeElapsed does not overflow", () => {	
-					mockLoadTabs([
+				it("timeElapsed does not overflow", async() => {	
+					await mockLoadTabs([
 						{ tabId: 0, active: true },
 						{ tabId: 1, active: true }])
 					jest.advanceTimersByTime(timeAllowed + updateInterval)
@@ -216,8 +219,8 @@ describe("test Background", () => {
 					await initBlockSets([{ ra: false, am: true, ta: timeAllowed }])
 				})
 
-				it("existing non-active tabs increase blockSet.timeElapsed", () => {
-					mockLoadTabs([
+				it("existing non-active tabs increase blockSet.timeElapsed", async() => {
+					await mockLoadTabs([
 						{ tabId: 0, active: false },
 						{ tabId: 1, active: false }])
 					jest.advanceTimersByTime(updateInterval)
@@ -226,8 +229,8 @@ describe("test Background", () => {
 					expect(mockedAnnoyTab).toBeCalledTimes(0)
 				})
 			
-				it("existing active tabs increase blockSet.timeElapsed", () => {
-					mockLoadTabs([
+				it("existing active tabs increase blockSet.timeElapsed", async() => {
+					await mockLoadTabs([
 						{ tabId: 0, active: true },
 						{ tabId: 1, active: true }])
 					jest.advanceTimersByTime(updateInterval)
@@ -236,8 +239,8 @@ describe("test Background", () => {
 					expect(mockedAnnoyTab).toBeCalledTimes(0)
 				})
 
-				it("tabs don't get annoyed when timeElapsed == timeAllowed", () => {
-					mockLoadTabs([
+				it("tabs don't get annoyed when timeElapsed == timeAllowed", async() => {
+					await mockLoadTabs([
 						{ tabId: 0, active: true },
 						{ tabId: 1, active: true }])
 					jest.advanceTimersByTime(timeAllowed)
@@ -246,8 +249,8 @@ describe("test Background", () => {
 					expect(mockedAnnoyTab).toBeCalledTimes(0)
 				})
 				
-				it("all tabs get annoyed when timeElapsed > timeAllowed", () => {
-					mockLoadTabs([
+				it("all tabs get annoyed when timeElapsed > timeAllowed", async() => {
+					await mockLoadTabs([
 						{ tabId: 0, active: false }, { tabId: 1, active: false },
 						{ tabId: 2, active: true }, { tabId: 3, active: true },
 					])
@@ -266,7 +269,7 @@ describe("test Background", () => {
 					// => it's overtime should be shown as it has the most overtime
 					await initBlockSets([{ ra: false, am: true, ta: updateInterval }])	
 					
-					mockLoadTabs([
+					await mockLoadTabs([
 						{ tabId: 0, active: false }, { tabId: 1, active: false },
 						{ tabId: 2, active: true }, { tabId: 3, active: true },
 					])
@@ -282,8 +285,8 @@ describe("test Background", () => {
 					await initBlockSets([{ ra: true, am: true, ta: timeAllowed }])
 				})
 
-				it("existing non-active tabs don't increase blockSet.timeElapsed", () => {
-					mockLoadTabs([
+				it("existing non-active tabs don't increase blockSet.timeElapsed", async() => {
+					await mockLoadTabs([
 						{ tabId: 0, active: false },
 						{ tabId: 1, active: false }])
 					jest.advanceTimersByTime(updateInterval)
@@ -292,8 +295,8 @@ describe("test Background", () => {
 					expect(mockedAnnoyTab).toBeCalledTimes(0)
 				})
 			
-				it("existing active tabs increase blockSet.timeElapsed", () => {
-					mockLoadTabs([
+				it("existing active tabs increase blockSet.timeElapsed", async() => {
+					await mockLoadTabs([
 						{ tabId: 0, active: true },
 						{ tabId: 1, active: true }])
 					jest.advanceTimersByTime(updateInterval)
@@ -302,8 +305,8 @@ describe("test Background", () => {
 					expect(mockedAnnoyTab).toBeCalledTimes(0)
 				})
 
-				it("tabs don't get annoyed when timeElapsed == timeAllowed", () => {
-					mockLoadTabs([
+				it("tabs don't get annoyed when timeElapsed == timeAllowed", async() => {
+					await mockLoadTabs([
 						{ tabId: 0, active: true },
 						{ tabId: 1, active: true }])
 					jest.advanceTimersByTime(timeAllowed)
@@ -312,8 +315,8 @@ describe("test Background", () => {
 					expect(mockedAnnoyTab).toBeCalledTimes(0)
 				})
 				
-				it("active tabs get annoyed when timeElapsed > timeAllowed", () => {
-					mockLoadTabs([
+				it("active tabs get annoyed when timeElapsed > timeAllowed", async() => {
+					await mockLoadTabs([
 						{ tabId: 0, active: false }, { tabId: 1, active: false },
 						{ tabId: 2, active: true }, { tabId: 3, active: true },
 					])
@@ -332,7 +335,7 @@ describe("test Background", () => {
 					// => it's overtime should be shown as it has the most overtime
 					await initBlockSets([{ ra: true, am: true, ta: 0 }])	
 					
-					mockLoadTabs([
+					await mockLoadTabs([
 						{ tabId: 0, active: false }, { tabId: 1, active: false },
 						{ tabId: 2, active: true }, { tabId: 3, active: true },
 					])
@@ -352,7 +355,7 @@ describe("test Background", () => {
 					{ ra: false, am: true, ta: updateInterval },
 				])
 
-				mockLoadTabs([
+				await mockLoadTabs([
 					{ tabId: 0, active: false }, { tabId: 1, active: false },
 					{ tabId: 2, active: true }, { tabId: 3, active: true },
 				])
@@ -371,7 +374,7 @@ describe("test Background", () => {
 					{ ra: false, am: true, ta: 0 }, // larger overtime
 				])
 
-				mockLoadTabs([
+				await mockLoadTabs([
 					{ tabId: 0, active: false }, { tabId: 1, active: false },
 					{ tabId: 2, active: true }, { tabId: 3, active: true },
 				])
@@ -389,7 +392,7 @@ describe("test Background", () => {
 				{ ra: true, am: true, ta: 0 }, // larger overtime
 				{ ra: false, am: true, ta: updateInterval },
 			])
-			mockLoadTabs([])
+			await mockLoadTabs([])
 
 			jest.advanceTimersByTime(updateInterval * 2)
 			expect(mockedAnnoyTab).toBeCalledTimes(0)
@@ -398,7 +401,7 @@ describe("test Background", () => {
 
 		it("does nothing when block sets are empty", async() => {
 			await initBlockSets([])
-			mockLoadTabs([
+			await mockLoadTabs([
 				{ tabId: 0, active: false }, { tabId: 1, active: false },
 				{ tabId: 2, active: true }, { tabId: 3, active: true },
 			])
@@ -410,7 +413,7 @@ describe("test Background", () => {
 
 		it("does nothing when block sets and tabs are empty are empty", async() => {
 			await initBlockSets([])
-			mockLoadTabs([])
+			await mockLoadTabs([])
 
 			jest.advanceTimersByTime(updateInterval * 2)
 			expect(mockedAnnoyTab).toBeCalledTimes(0)
