@@ -1,5 +1,5 @@
 import flushPromises from "flush-promises"
-import mockEvent from "../testHelpers/mockEvent"
+import { mockEvent, clearMockEventListeners } from "../testHelpers/mockEvent"
 import { browser, Tabs, Windows } from "webextension-polyfill-ts"
 import { TabLoadedEvent, TabObserver, TabRemovedEvent } from "@src/background/tabObserver"
 import { mocked } from "ts-jest/utils"
@@ -34,6 +34,11 @@ const emitTabRemoved = mockEvent<[number, Tabs.OnRemovedRemoveInfoType]>(mockBro
 const emitWindowFocusChanged = mockEvent<[number]>(mockBrowser.windows.onFocusChanged)
 const emitWindowCreated = mockEvent<[Windows.Window]>(mockBrowser.windows.onCreated)
 const emitWindowRemoved = mockEvent<[number]>(mockBrowser.windows.onRemoved)
+
+afterEach(() => {
+	clearMockEventListeners()
+	jest.clearAllMocks()
+})
 
 
 describe("test tabObserver events", () => {
