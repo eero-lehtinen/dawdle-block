@@ -18,7 +18,8 @@ export class BlockSets {
 	}
 
 	/**
-	 * Creates and initializes a BlockSets with storage.
+	 * Creates and initializes a BlockSets.
+	 * Loads all block sets from browser storage.
 	 * @param browserStorage
 	 * @returns new instance of BlockSets
 	 */

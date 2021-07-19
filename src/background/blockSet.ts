@@ -47,20 +47,20 @@ export class BlockSet {
 
 	/**
 	 * Requires an unique (enforce outside of this class) id.
-	 * Parses blocksetPlanObject and initializes internal state to match that.
+	 * Parses blockSetPlanObject and initializes internal state to match that.
 	 * timeElapsed isn't stored in plain object, so we need to supply it separately.
 	 * @throws {Error} if object is not parseable
 	 * @param id unique id
-	 * @param blocksetPlanObject 
+	 * @param blockSetPlanObject 
 	 * @param timeElapsed blocking time elapsed
 	 */
-	constructor(id: number, blocksetPlanObject?: unknown, timeElapsed = 0) {
+	constructor(id: number, blockSetPlanObject?: unknown, timeElapsed = 0) {
 		this._id = id
 
-		if (blocksetPlanObject === undefined)
+		if (blockSetPlanObject === undefined)
 			this._data = createDefaultBlockSetData()
 		else 
-			this._data = plainToBlockSetData(blocksetPlanObject)
+			this._data = plainToBlockSetData(blockSetPlanObject)
 
 		this._timeElapsed = timeElapsed
 
