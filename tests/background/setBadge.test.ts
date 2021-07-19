@@ -66,7 +66,7 @@ describe("test setBadge", () => {
 			[{ color: red }]])
 	})
 
-	test("sets badge to red box with exclamation marks input is negative", async() => {
+	test("sets badge to red box with exclamation marks if input is negative", async() => {
 		await setBadge(ms("-1ms"))
 		await setBadge(ms("-1year"))
 		expect(mockSetBadgeText.mock.calls).toEqual([
