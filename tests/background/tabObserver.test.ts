@@ -27,13 +27,12 @@ jest.mock("webextension-polyfill-ts", () => {
 
 const mockBrowser = mocked(browser, true)
 
-const emitTabUpdated = 
-	mockEvent<[number, Tabs.OnUpdatedChangeInfoType, Tabs.Tab]>(mockBrowser.tabs.onUpdated)
-const emitTabActivated = mockEvent<[Tabs.OnActivatedActiveInfoType]>(mockBrowser.tabs.onActivated)
-const emitTabRemoved = mockEvent<[number, Tabs.OnRemovedRemoveInfoType]>(mockBrowser.tabs.onRemoved)
-const emitWindowFocusChanged = mockEvent<[number]>(mockBrowser.windows.onFocusChanged)
-const emitWindowCreated = mockEvent<[Windows.Window]>(mockBrowser.windows.onCreated)
-const emitWindowRemoved = mockEvent<[number]>(mockBrowser.windows.onRemoved)
+const emitTabUpdated = mockEvent(mockBrowser.tabs.onUpdated)
+const emitTabActivated = mockEvent(mockBrowser.tabs.onActivated)
+const emitTabRemoved = mockEvent(mockBrowser.tabs.onRemoved)
+const emitWindowFocusChanged = mockEvent(mockBrowser.windows.onFocusChanged)
+const emitWindowCreated = mockEvent(mockBrowser.windows.onCreated)
+const emitWindowRemoved = mockEvent(mockBrowser.windows.onRemoved)
 
 afterEach(() => {
 	clearMockEventListeners()
