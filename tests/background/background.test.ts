@@ -11,6 +11,7 @@ import { Listener, Observer } from "@src/background/observer"
 import { TabLoadedEvent, TabObserver, TabRemovedEvent } from "@src/background/tabObserver"
 import flushPromises from "flush-promises"
 import "jest-extended"
+import { GeneralOptions } from "@src/background/generalOptions"
 
 jest.mock("webextension-polyfill-ts", () => ({}))
 jest.mock("@src/background/tabObserver")
@@ -25,6 +26,7 @@ describe("test Background", () => {
 	let browserStorage: BrowserStorage
 	let tabObserver: TabObserver
 	let blockSets: BlockSets
+	let generalOptions: GeneralOptions
 	let _background: Background
 	const mockLoadTab = new Observer<TabLoadedEvent>()
 	const mockRemoveTab = new Observer<TabRemovedEvent>()
@@ -54,7 +56,9 @@ describe("test Background", () => {
 		blockSets = await BlockSets.create(browserStorage)
 		await blockSets.deleteBlockSet(blockSets.list[0]!) // Delete default block set
 
-		_background = new Background(browserStorage, tabObserver, blockSets)
+		generalOptions = await GeneralOptions.create(browserStorage)
+
+		_background = new Background({ browserStorage, tabObserver, blockSets, generalOptions })
 	})
 
 	afterEach(() => {

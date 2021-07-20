@@ -7,6 +7,7 @@ import { blockTab, isBlockPage } from "./blockTab"
 import { annoyTab } from "./annoyTab"
 import { setBadge } from "./setBadge"
 import ms from "ms.macro"
+import { GeneralOptions } from "./generalOptions"
 
 export const updateInterval = ms`1s`
 
@@ -20,22 +21,12 @@ interface BlockSetInfo {
 	affectedTabIds: number[]
 }
 
-/*enum TabUpdateType {
-	Annoy,
-	Block,
+export interface BGConstructParams {
+	browserStorage: BrowserStorage, 
+	tabObserver: TabObserver, 
+	blockSets: BlockSets,
+	generalOptions: GeneralOptions,
 }
-
-interface TabUpdateAnnoy {
-	type: TabUpdateType.Annoy,
-	timeElapsed: number,
-}
-
-interface TabUpdateBlock {
-	type: TabUpdateType.Block,
-	timeElapsed: number,
-}
-
-type TabUpdateResult = TabUpdateAnnoy | TabUpdateBlock*/
 
 /**
  * Main class for whole background.
@@ -43,21 +34,20 @@ type TabUpdateResult = TabUpdateAnnoy | TabUpdateBlock*/
 export class Background { 
 	private tabObserver: TabObserver
 	private _blockSets: BlockSets
+	private _generalOptions: GeneralOptions
 	private browserStorage: BrowserStorage
 	private tabInfoCache: Map<number, TabInfo> = new Map()
 	private blockSetInfoCache: Map<number, BlockSetInfo> = new Map()
 
 	/**
-	 * Initialize with already initialized properties.
-	 * @param browserStorage browser storage to be used in whole background
-	 * @param tabObserver
-	 * @param blockSets
+	 * Initialize with already initialized parameters.
+	 * @param params
 	 */
-	constructor(
-		browserStorage: BrowserStorage, tabObserver: TabObserver, blockSets: BlockSets) {
-		this.browserStorage = browserStorage
-		this.tabObserver = tabObserver
-		this._blockSets = blockSets
+	constructor(params: BGConstructParams) {
+		this.browserStorage = params.browserStorage
+		this.tabObserver = params.tabObserver
+		this._blockSets = params.blockSets
+		this._generalOptions = params.generalOptions
 
 		this.tabObserver.subscribeTabLoaded(async(event: TabLoadedEvent) => {
 			await this.updateTabInfo({ id: event.tabId, url: event.url })
@@ -71,6 +61,10 @@ export class Background {
 
 	get blockSets(): BlockSets {
 		return this._blockSets
+	}
+
+	get generalOptions(): GeneralOptions {
+		return this._generalOptions
 	}
 
 	/**  Precalculate blocking for tab to be easily processed in update function.*/
