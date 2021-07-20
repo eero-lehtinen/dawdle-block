@@ -5,6 +5,9 @@ import {
 	BlockSetIds, BlockSetTimesElapsed, BlockSetData } 
 	from "./blockSetParser"
 import { decompress, compress } from "./compression"
+import { 
+	createDefaultGeneralOptionsData, GeneralOptionsData, plainToGeneralOptionsData, 
+} from "./generalOptionsParser"
 
 interface BrowserStorageOptions {
 	preferSync: boolean
@@ -12,6 +15,7 @@ interface BrowserStorageOptions {
 
 export const bsIdsSaveKey = "blocksetIds"
 export const bsTimesElapsedSaveKey = "blocksetTimesElapsed"
+export const generalOptionsSaveKey = "generalOptions"
 
 /**
  * Object for saving and loading block sets from browser storage. 
@@ -38,7 +42,34 @@ export class BrowserStorage {
 	}
 
 	/**
-	 * Fetches block set ids from sync storage.
+	 * Fetches and validates general options data from storage.
+	 * Returns defaults as a fallback if loaded data is invalid.
+	 */
+	async fetchGeneralOptionsData(): Promise<GeneralOptionsData> {
+		const res = await this.storage.get({ [generalOptionsSaveKey]: null })
+		if (res[generalOptionsSaveKey] === null)
+			return createDefaultGeneralOptionsData()
+		
+		try {
+			return plainToGeneralOptionsData(res[generalOptionsSaveKey])
+		}
+		catch (err) {
+			console.error("Couldn't parse general options, falling back to defaults")
+			console.error(err)
+			return createDefaultGeneralOptionsData()
+		}
+	}
+
+	/**
+	 * Saves general options to storage.
+	 * @throws "Can't save item, too many write operations" when write operations quota is exceeded
+	 */
+	async saveGeneralOptionsData(data: GeneralOptionsData): Promise<void> {
+		await this.storageSet({ [generalOptionsSaveKey]: data })
+	}
+
+	/**
+	 * Fetches and validates block set ids from sync storage.
 	 */
 	private async fetchIds(): Promise<number[]> {
 		const idRes = await this.storage.get({ [bsIdsSaveKey]: [] })
@@ -46,10 +77,10 @@ export class BrowserStorage {
 	}
 
 	/**
-	 * Loads all block sets from storage
+	 * Fetches and validates all block sets from storage
 	 * @param blockSetIds
 	 */
-	async loadBlockSets(): Promise<BlockSet[]> {
+	async fetchBlockSets(): Promise<BlockSet[]> {
 		const blockSetIds = await this.fetchIds()
 
 		if (blockSetIds.length === 0) {
@@ -144,10 +175,12 @@ export class BrowserStorage {
 	 * @throws "Can't save item, too many write operations" when write operations quota is exceeded
 	 */
 	private async storageSet(
-		items: Record<string, null | string | BlockSetData | BlockSetIds | BlockSetTimesElapsed>) {
+		items: Record<string, 
+			null | string | BlockSetData | BlockSetIds | BlockSetTimesElapsed | GeneralOptionsData>) {
 		
 		for (const key in items) {
-			if (!Array.isArray(items[key]) && items[key] !== null) {
+			// if key is number, then item is block set data -> we can compress it
+			if (!isNaN(parseInt(key, 10)) && items[key] !== null) {
 				const compressed = compress(items[key])
 				if (compressed.length + 20 > this.QUOTA_BYTES_PER_ITEM) {
 					throw Error("Can't save item, it is too large")
@@ -160,7 +193,8 @@ export class BrowserStorage {
 			await	this.storage.set(items)
 		}
 		catch(err) {
-			console.log("Can't save item", err.message)
+			console.error("Can't save item")
+			console.error(err)
 
 			if ((err.message as string).includes("WRITE_OPERATIONS")) {
 				throw Error("Can't save item, too many write operations")

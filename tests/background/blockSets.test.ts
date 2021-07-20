@@ -14,7 +14,7 @@ const browserStorageMock = mocked(BrowserStorage, true)
 describe("test BlockSets construction", () => {
 	const testBlockSet = new BlockSet(42)
 	test("loads block sets from block set storage", async() => {
-		browserStorageMock.prototype.loadBlockSets
+		browserStorageMock.prototype.fetchBlockSets
 			.mockImplementation(async() => Promise.resolve([testBlockSet]))
 
 		const blockSets = await BlockSets.create(new BrowserStorage({ preferSync: true }))
@@ -24,7 +24,7 @@ describe("test BlockSets construction", () => {
 	})
 	
 	test("creates a default block set when storage is empty", async() => {
-		browserStorageMock.prototype.loadBlockSets
+		browserStorageMock.prototype.fetchBlockSets
 			.mockImplementation(async() => Promise.resolve([]))
 		
 		const blockSets = await BlockSets.create(new BrowserStorage({ preferSync: true }))
@@ -36,7 +36,7 @@ describe("test BlockSets construction", () => {
 describe("test BlockSets methods", () => {
 	let blockSets: BlockSets
 	beforeEach(async() => {
-		browserStorageMock.prototype.loadBlockSets
+		browserStorageMock.prototype.fetchBlockSets
 			.mockImplementation(async() => Promise.resolve([new BlockSet(0, { name: "TEST" })]))
 		blockSets = await BlockSets.create(new BrowserStorage({ preferSync: true }))
 	})
@@ -130,7 +130,7 @@ describe("test BlockSets methods", () => {
 describe("test BlockSets blockedBy method", () => {
 	let blockSets: BlockSets
 	beforeEach(async() => {
-		browserStorageMock.prototype.loadBlockSets
+		browserStorageMock.prototype.fetchBlockSets
 			.mockImplementation(async() => Promise.resolve([]))
 		blockSets = await BlockSets.create(new BrowserStorage({ preferSync: true }))
 		await blockSets.addDefaultBlockSet()

@@ -83,15 +83,11 @@ const convertV0toV1 = (generalOptionsV0: GeneralOptionsDataV0) => {
  * @param obj 
  * @returns 
  */
-const parseableV0 = (obj: any) => {
-	return typeof obj === "object" && (!("v" in obj) || obj.v < 1)
-}
+const parseableV0 = (obj: any) => typeof obj === "object" && (!("v" in obj) || obj.v < 1)
 
 /**
  * Checks if passed object should be parsed with v1 block set parser
  * @param obj 
  * @returns 
  */
-const parseableV1 = (obj: any) => {
-	return typeof obj === "object" && "v" in obj && obj.v === 1
-}
+const parseableV1 = (obj: any) => typeof obj === "object" && "v" in obj && obj.v === 1

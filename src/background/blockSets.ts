@@ -25,7 +25,7 @@ export class BlockSets {
 	 */
 	static async create(browserStorage: BrowserStorage): Promise<BlockSets> {
 		const instance = new BlockSets(browserStorage)
-		const list = await instance.browserStorage.loadBlockSets()
+		const list = await instance.browserStorage.fetchBlockSets()
 		for (const blockSet of list)
 			instance.addBlockSet(blockSet)
 		

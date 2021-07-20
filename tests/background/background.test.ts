@@ -41,7 +41,7 @@ describe("test Background", () => {
 	beforeEach(async() => {
 
 		browserStorage = new BrowserStorage({ preferSync: true })
-		browserStorage.loadBlockSets = jest.fn(async() => Promise.resolve([]))
+		browserStorage.fetchBlockSets = jest.fn(async() => Promise.resolve([]))
 
 		tabObserver = await TabObserver.create()
 
