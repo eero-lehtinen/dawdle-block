@@ -1,7 +1,7 @@
 import { 
 	Drawer, Toolbar, Divider, List, ListItemButton, ListItemText, ListItemIcon, ListSubheader, 
 } from "@material-ui/core"
-import { SettingsRounded } from "@material-ui/icons"
+import { SettingsRounded, AddRounded } from "@material-ui/icons"
 import { useBGScript } from "@src/shared/bgScriptProvider"
 import { useMemo } from "preact/hooks"
 import { forwardRef } from "preact/compat"
@@ -88,6 +88,14 @@ export const NavDrawer = (): JSX.Element => {
 						/>
 					))
 				}
+
+				{
+					<ListItemButton sx={{ borderRadius: 1.5, mb: 0.5 }}>
+						<ListItemText primary="Add Block Set" />
+						<AddRounded />
+					</ListItemButton>
+				}
+
 			</List>
 		</Drawer>
 	)
