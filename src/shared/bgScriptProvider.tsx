@@ -3,7 +3,7 @@ import { useEffect, useState, useContext } from "preact/hooks"
 import { Background } from"../background/background"
 import { browser } from "webextension-polyfill-ts"
 import { sleep } from "./utils"
-import { Box, Typography, CircularProgress } from "@material-ui/core"
+import { Box, Typography, CircularProgress, Fade } from "@material-ui/core"
 import ms from "ms.macro"
 
 const retryIntervalMS = ms`2s`
@@ -14,18 +14,20 @@ const BGScriptContext = createContext<Background | null>(null)
  * Shows text in the middle of the screen indicating that background has not loaded all options yet.
  */
 const WaitBox = () =>
-	<Box sx={{
-		width: "100%",
-		height: "100%",
-		display: "flex",
-		justifyContent: "center",
-		alignItems: "center",
-	}}>
-		<Typography variant="h4" sx={{ color: "white", mr: 2 }}>
+	<Fade appear in timeout={5000}>
+		<Box sx={{
+			width: "100%",
+			height: "100%",
+			display: "flex",
+			justifyContent: "center",
+			alignItems: "center",
+		}}>
+			<Typography variant="h4" sx={{ color: "white", mr: 2 }}>
 			Waiting for background to finish loading
-		</Typography>
-		 <CircularProgress sx={{ color: "white" }} />
-	</Box> 
+			</Typography>
+			<CircularProgress sx={{ color: "white" }} />
+		</Box> 
+	 </Fade>
 
 /** Provides context for useBGScript hook. */
 export const BGScriptProvider: FunctionComponent = ({ children }): JSX.Element => {
