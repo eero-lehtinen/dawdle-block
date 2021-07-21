@@ -257,7 +257,7 @@ describe("test Background", () => {
 				expect(mockSetBadge.mock.calls).toEqual([[updateInterval], [0]])
 			})
 			
-			test("all tabs get annoyed when timeElapsed > timeAllowed", async() => {
+			test("active tabs get annoyed when timeElapsed > timeAllowed", async() => {
 				await mockLoadTabs([
 					{ tabId: 0, active: false }, { tabId: 1, active: false },
 					{ tabId: 2, active: true }, { tabId: 3, active: true },
@@ -266,12 +266,12 @@ describe("test Background", () => {
 				expect(blockSets.list[0]!.timeElapsed).toBe(timeAllowed + updateInterval)
 				// arguments for annoyTab are (tabId, msOvertime)
 				expect(mockAnnoyTab.mock.calls).toIncludeSameMembers(
-					[0, 1, 2, 3].map(id => [id, updateInterval]))
+					[2, 3].map(id => [id, updateInterval]))
 				expect(mockBlockTab).toBeCalledTimes(0)
 				expect(mockSetBadge.mock.calls).toEqual([[updateInterval], [0], [-updateInterval]])
 			})
 
-			test("all tabs are annoyed with the largest overtime", async() => {	
+			test("active tabs are annoyed with the largest overtime", async() => {	
 				// this blockset has less timeAllowed 
 				// => it will have more overtime after updates
 				// => it's overtime should be shown as it has the most overtime
@@ -282,8 +282,9 @@ describe("test Background", () => {
 					{ tabId: 2, active: true }, { tabId: 3, active: true },
 				])
 				jest.advanceTimersByTime(timeAllowed + updateInterval)
-				expect(mockAnnoyTab.mock.calls.slice(-4)).toIncludeSameMembers(
-					[0, 1, 2, 3].map(id => [id, blockSets.list[1]!.overtime]))
+				expect(mockAnnoyTab.mock.calls.slice(-2)).toIncludeSameMembers(
+					[2, 3].map(id => [id, blockSets.list[1]!.overtime]))
+				expect(mockAnnoyTab).toBeCalledTimes(4)
 				expect(mockBlockTab).toBeCalledTimes(0)
 				expect(mockSetBadge.mock.calls).toEqual([[0], [-updateInterval], [-2 * updateInterval]])
 			})

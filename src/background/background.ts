@@ -113,7 +113,7 @@ export class Background {
 		// key = tabId, value = overtime
 		const tabBiggestOvertimes = new Map<number, number>()
 		const collectTabBiggestOvertime = (overtime: number, tabId: number) => {
-			if ((tabBiggestOvertimes.get(tabId) ?? 0) < overtime)
+			if (activeTabIds.includes(tabId) && (tabBiggestOvertimes.get(tabId) ?? 0) < overtime)
 				tabBiggestOvertimes.set(tabId, overtime)
 		}
 
@@ -150,7 +150,7 @@ export class Background {
 			}
 		}
 		
-		for (const tabId of this.tabInfoCache.keys()) {
+		for (const tabId of activeTabIds) {
 			const tabBiggestOvertime = 
 				Math.max(globalBiggestOvertime, tabBiggestOvertimes.get(tabId) ?? 0)
 			if (tabBiggestOvertime > 0) {
