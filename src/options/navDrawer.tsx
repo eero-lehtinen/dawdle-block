@@ -69,11 +69,9 @@ export const NavDrawer = (): JSX.Element => {
 			<Divider sx={{ mr: 3, ml: 3 }} />
 			<List sx={{ pr: 1, pl: 1 }}>
 
-				<ListSubheader>GENERAL</ListSubheader>
-
 				<ListItemLink 
-					to="/general/options" 
-					primary={"Options"}
+					to="/general-options" 
+					primary={"General Options"}
 					icon={<SettingsRounded />}
 					path={path}
 				/>
