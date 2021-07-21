@@ -348,7 +348,11 @@ export class BlockSet {
 	}
 
 	get overtime(): number {
-		return this.timeElapsed - this._data.timeAllowed
+		return -this.timeLeft
+	}
+
+	get timeLeft(): number {
+		return this._data.timeAllowed - this.timeElapsed
 	}
 
 	/* eslint-disable jsdoc/require-jsdoc*/

@@ -100,15 +100,17 @@ export class Background {
 	private update() {
 		const activeTabIds = this.tabObserver.getActiveTabIds()
 
+		let smallestTimeLeft = Infinity
 		const incrementedBlockSetIds = new Set<number>()
 		const incrementTimeElapsed = (blockSet: BlockSet) => {
 			if (!incrementedBlockSetIds.has(blockSet.id)) {
 				blockSet.timeElapsed += updateInterval
+				smallestTimeLeft = Math.min(smallestTimeLeft, blockSet.timeLeft)
 				incrementedBlockSetIds.add(blockSet.id)
 			}
 		}
 
-		let smallestTimeLeft = Infinity
+		
 		let globalBiggestOvertime = 0
 		// key = tabId, value = overtime
 		const tabBiggestOvertimes = new Map<number, number>()
@@ -128,10 +130,8 @@ export class Background {
 				// If block set requires activity and tab is not active, it can be skipped
 				if (!isActive && blockSet.requireActive) continue
 
-				if (blockSet.isInState(BSState.TimeLeft, BSState.OverTime)) {
+				if (blockSet.isInState(BSState.TimeLeft, BSState.OverTime))
 					incrementTimeElapsed(blockSet)
-					smallestTimeLeft = Math.min(smallestTimeLeft, blockSet.timeAllowed - blockSet.timeElapsed)
-				}
 
 				if (blockSet.isInState(BSState.OverTime)) {
 					// When requireActive == true, annoy is only for this tab
