@@ -1,5 +1,4 @@
 module.exports = {
-	verbose: true,
 	collectCoverage: true,
 	maxWorkers: 1,
 	collectCoverageFrom: ["./src/**/*.ts"],
