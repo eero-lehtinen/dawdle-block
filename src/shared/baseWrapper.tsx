@@ -48,8 +48,8 @@ const InnerWrapper: FunctionComponent = ({ children }) => {
 					},
 					// Firefox
 					"*": {
-						"scrollbar-color": `${scrollbarColors.thumb} ${scrollbarColors.track}`,
-						"scrollbar-width": "thin",
+						scrollbarColor: `${scrollbarColors.thumb} ${scrollbarColors.track}`,
+						scrollbarWidth: "thin",
 					},
 				}} 
 				/>

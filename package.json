@@ -15,7 +15,7 @@
 		"fflate": "^0.7.1",
 		"js-base64": "^3.6.1",
 		"preact": "^10.5.13",
-		"react-router": "^5.2.0",
+		"react-router-dom": "^5.2.0",
 		"webextension-polyfill-ts": "^0.25.0"
 	},
 	"devDependencies": {
@@ -28,6 +28,7 @@
 		"@types/jest": "^26.0.23",
 		"@types/ms": "^0.7.31",
 		"@types/ms.macro": "^2.0.0",
+		"@types/react-router-dom": "^5.1.8",
 		"@typescript-eslint/eslint-plugin": "^4.28.0",
 		"@typescript-eslint/parser": "^4.28.0",
 		"babel-jest": "^27.0.6",

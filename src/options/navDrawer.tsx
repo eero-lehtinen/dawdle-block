@@ -1,13 +1,55 @@
-import { Drawer, Toolbar, Divider, List, ListItem, ListItemText, ListItemIcon, ListSubheader } 
-	from "@material-ui/core"
+import { 
+	Drawer, Toolbar, Divider, List, ListItemButton, ListItemText, ListItemIcon, ListSubheader, 
+} from "@material-ui/core"
 import { SettingsRounded } from "@material-ui/icons"
+import { useBGScript } from "@src/shared/bgScriptProvider"
+import { useMemo } from "preact/hooks"
+import { forwardRef } from "preact/compat"
+import { Link as RouterLink, LinkProps as RouterLinkProps, useLocation } from "react-router-dom"
 
 const drawerWidth = 300
+
+interface ListItemLinkProps {
+  icon?: JSX.Element
+  primary: string
+  to: string
+	path: string
+}
+
+/** 
+ * Element mostly copied from https://next.material-ui.com/guides/routing/#list.
+ * Inner workings are hazy.
+ */
+const ListItemLink = ({ icon, primary, to, path }: ListItemLinkProps) => {
+	const renderLink = useMemo(
+		() =>
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			forwardRef<any, Omit<RouterLinkProps, "to">>((itemProps, ref) => (
+				<RouterLink to={to} ref={ref} {...itemProps} />
+			)),
+		[to],
+	)
+
+	return (
+		<ListItemButton 
+			selected={path === to} 
+			component={renderLink} 
+			sx={{ borderRadius: 1.5, mb: 0.5 }}
+		>
+			{icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
+			<ListItemText primary={primary} />
+		</ListItemButton>
+	)
+}
 
 /**
  * Navigation drawer for options menu.
  */
 export const NavDrawer = (): JSX.Element => {
+	const bg = useBGScript()
+	const location = useLocation()
+	const path = location.pathname
+
 	return (
 		<Drawer
 			variant="permanent" 
@@ -29,21 +71,23 @@ export const NavDrawer = (): JSX.Element => {
 
 				<ListSubheader>GENERAL</ListSubheader>
 
-				<ListItem button sx={{ borderRadius: 1.5, mb: 0.5 }}>
-					<ListItemIcon>
-						<SettingsRounded />
-					</ListItemIcon>
-					<ListItemText primary="Settings" />
-				</ListItem>
+				<ListItemLink 
+					to="/general/options" 
+					primary={"Options"}
+					icon={<SettingsRounded />}
+					path={path}
+				/>
+
+				<ListSubheader>BLOCK SETS</ListSubheader>
 
 				{
-					[...Array(30)].map((v, i) => (
-						<ListItem key={i} button sx={{ borderRadius: 1.5, mb: 0.5 }}>
-							<ListItemIcon>
-								<SettingsRounded />
-							</ListItemIcon>
-							<ListItemText primary="Block Sets" />
-						</ListItem>
+					bg.blockSets.list.map((blockSet, index) => (
+						<ListItemLink 
+							to={`/block-sets/${index + 1}`} 
+							key={blockSet.id} 
+							primary={blockSet.name}
+							path={path}
+						/>
 					))
 				}
 			</List>
