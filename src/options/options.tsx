@@ -1,12 +1,16 @@
 import { Box, Container } from "@material-ui/core"
 import { NavDrawer } from "./navDrawer"
 import { HashRouter, Switch, Route, Redirect } from "react-router-dom"
-
+import { GeneralOptions } from "./generalOptions"
+import { useBGScript } from "@src/shared/bgScriptProvider"
 
 /**
  * Main function for rendering options menu.
  */
 export const Options = (): JSX.Element => {
+	const bg = useBGScript()
+
+	console.log(bg.generalOptions.data)
 	return (
 		<Container maxWidth="lg" sx={{ display: "flex" }}>
 			<HashRouter>
@@ -17,7 +21,7 @@ export const Options = (): JSX.Element => {
 							<Redirect to="/general-options" />
 						</Route>
 						<Route path="/general-options">
-							GENERAL
+							<GeneralOptions />
 						</Route>
 						<Route path="/block-sets/:ordinal">
 						BLOCKSETS

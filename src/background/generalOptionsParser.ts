@@ -17,6 +17,8 @@ type GeneralOptionsDataV0 = z.infer<typeof zGeneralOptionsDataV0>
 
 const zTheme = z.enum(["system", "dark", "light"]).default("system")
 
+export type Theme = z.infer<typeof zTheme>
+
 const zGeneralOptionsDataV1 = zGeneralOptionsDataV0
 	.omit({ darkTheme: true })
 	.extend({
