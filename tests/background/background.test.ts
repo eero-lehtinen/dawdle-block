@@ -22,40 +22,41 @@ jest.useFakeTimers()
 jest.spyOn(youtubeAPIModule, "getYTInfo").mockImplementation(
 	() => Promise.resolve(youtubeAPIModule.nullYTInfo()))
 
+const mockLoadTab = new Observer<TabLoadedEvent>()
+TabObserver.prototype.subscribeTabLoaded = jest.fn((listener: Listener<TabLoadedEvent>) => 
+	mockLoadTab.subscribe(listener))
+
+const mockRemoveTab = new Observer<TabRemovedEvent>()
+TabObserver.prototype.subscribeTabRemoved = jest.fn((listener: Listener<TabRemovedEvent>) => 
+	mockRemoveTab.subscribe(listener)) 
+
+BrowserStorage.prototype.fetchBlockSets = jest.fn(async() => Promise.resolve([]))
+
+const mockBlockTab = jest.spyOn(blockTabModule, "blockTab").mockImplementation(
+	(tabId: number) => mockLoadTab.publish({ tabId, url: "block-page.html" }))
+
+const mockAnnoyTab = jest.spyOn(annoyTabModule, "annoyTab").mockImplementation(
+	() => {/* do nothing */})
+	
+const mockSetBadge = jest.spyOn(setBadgeModule, "setBadge").mockImplementation(
+	() => Promise.resolve())
+
 describe("test Background", () => {
 	let browserStorage: BrowserStorage
 	let tabObserver: TabObserver
 	let blockSets: BlockSets
 	let generalOptions: GeneralOptions
 	let _background: Background
-	const mockLoadTab = new Observer<TabLoadedEvent>()
-	const mockRemoveTab = new Observer<TabRemovedEvent>()
-
-	const mockBlockTab = jest.spyOn(blockTabModule, "blockTab").mockImplementation(
-		(tabId: number) => mockLoadTab.publish({ tabId, url: "block-page.html" }))
-
-	const mockAnnoyTab = jest.spyOn(annoyTabModule, "annoyTab").mockImplementation(
-		() => {/* do nothing */})
-	
-	const mockSetBadge = jest.spyOn(setBadgeModule, "setBadge").mockImplementation(
-		() => Promise.resolve())
 
 	beforeEach(async() => {
 
 		browserStorage = new BrowserStorage({ preferSync: true })
-		browserStorage.fetchBlockSets = jest.fn(async() => Promise.resolve([]))
 
 		tabObserver = await TabObserver.create()
 
-		tabObserver.subscribeTabLoaded = jest.fn((listener: Listener<TabLoadedEvent>) => 
-			mockLoadTab.subscribe(listener))
-
-		tabObserver.subscribeTabRemoved = jest.fn((listener: Listener<TabRemovedEvent>) => 
-			mockRemoveTab.subscribe(listener)) 
-
 		blockSets = await BlockSets.create(browserStorage)
 		await blockSets.deleteBlockSet(blockSets.list[0]!) // Delete default block set
-
+		
 		generalOptions = await GeneralOptions.create(browserStorage)
 
 		_background = new Background({ browserStorage, tabObserver, blockSets, generalOptions })
@@ -86,9 +87,10 @@ describe("test Background", () => {
 		await flushPromises()
 	}
 
+	const timeAllowed = 2000
+
 	describe("update function updates block sets appropriately (only once)", () => {
 		describe("when blockSet.annoyMode is false and blockSet.requireActive is false", () => {
-			const timeAllowed = 2000
 			beforeEach(async() => {
 				await initBlockSets([{ ra: false, am: false, ta: timeAllowed }])
 			})
@@ -160,7 +162,6 @@ describe("test Background", () => {
 		})
 
 		describe("when blockSet.annoyMode is false and blockSet.requireActive is true", () => {
-			const timeAllowed = 2000
 			beforeEach(async() => {
 				await initBlockSets([{ ra: true, am: false, ta: timeAllowed }])
 			})
@@ -219,7 +220,6 @@ describe("test Background", () => {
 		})
 
 		describe("when blockSet.annoyMode is true and blockSet.requireActive is false", () => {
-			const timeAllowed = 2000
 			beforeEach(async() => {
 				await initBlockSets([{ ra: false, am: true, ta: timeAllowed }])
 			})
@@ -290,7 +290,6 @@ describe("test Background", () => {
 		})
 
 		describe("when blockSet.annoyMode is true and and blockSet.requireActive is true", () => {
-			const timeAllowed = 2000
 			beforeEach(async() => {
 				await initBlockSets([{ ra: true, am: true, ta: timeAllowed }])
 			})
@@ -404,14 +403,15 @@ describe("test Background", () => {
 
 		test("does nothing when tabs are empty", async() => {
 			await initBlockSets([
-				{ ra: true, am: true, ta: 0 }, // larger overtime
-				{ ra: false, am: true, ta: updateInterval },
+				{ ra: true, am: true, ta: timeAllowed }, 
+				{ ra: false, am: true, ta: timeAllowed },
 			])
 			await mockLoadTabs([])
 
 			jest.advanceTimersByTime(updateInterval * 2)
 			expect(mockAnnoyTab).toBeCalledTimes(0)
 			expect(mockBlockTab).toBeCalledTimes(0)
+			expect(mockSetBadge.mock.calls).toEqual([[Infinity], [Infinity]])
 		})
 
 		test("does nothing when block sets are empty", async() => {
@@ -437,6 +437,9 @@ describe("test Background", () => {
 			expect(mockSetBadge.mock.calls).toEqual([[Infinity], [Infinity]])
 		})
 	})
+
+
+	test.todo("removed tabs are not processed")
 
 	// Block set may be configured to be disabled on certain week days, 
 	// e.g. off on weekends and on other days.
