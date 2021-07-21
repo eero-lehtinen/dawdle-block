@@ -13,14 +13,14 @@ interface ListItemLinkProps {
   icon?: JSX.Element
   primary: string
   to: string
-	path: string
+	currentPath: string
 }
 
 /** 
  * Element mostly copied from https://next.material-ui.com/guides/routing/#list.
  * Inner workings are hazy.
  */
-const ListItemLink = ({ icon, primary, to, path }: ListItemLinkProps) => {
+const ListItemLink = ({ icon, primary, to, currentPath }: ListItemLinkProps) => {
 	const renderLink = useMemo(
 		() =>
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,7 +32,7 @@ const ListItemLink = ({ icon, primary, to, path }: ListItemLinkProps) => {
 
 	return (
 		<ListItemButton 
-			selected={path === to} 
+			selected={currentPath === to} 
 			component={renderLink} 
 			sx={{ borderRadius: 1.5, mb: 0.5 }}
 		>
@@ -73,7 +73,7 @@ export const NavDrawer = (): JSX.Element => {
 					to="/general-options" 
 					primary={"General Options"}
 					icon={<SettingsRounded />}
-					path={path}
+					currentPath={path}
 				/>
 
 				<ListSubheader>BLOCK SETS</ListSubheader>
@@ -84,7 +84,7 @@ export const NavDrawer = (): JSX.Element => {
 							to={`/block-sets/${index + 1}`} 
 							key={blockSet.id} 
 							primary={blockSet.name}
-							path={path}
+							currentPath={path}
 						/>
 					))
 				}
