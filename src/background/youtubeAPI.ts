@@ -83,7 +83,10 @@ export const getYTInfo = async(url: URL): Promise<YTInfo> => {
 	}
 
 	const result = await get()
-	result.mapErr(console.warn)
+	result.mapErr(err => {
+		if (err === FetchError.RequestFailed) 
+			console.warn("Couldn't reach YouTube API servers")
+	})
 	return result.unwrapOr(nullYTInfo())
 }
 

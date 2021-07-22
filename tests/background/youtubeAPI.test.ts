@@ -31,8 +31,7 @@ describe("test YouTube API error states", () => {
 			.resolves.toStrictEqual(nullYTInfo)
 	})
 
-	test("return null values and logs error when channel with this id isn't found", async() => {
-		const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {/* do nothing */})
+	test("return null values when channel with this id isn't found", async() => {
 		mockedFetch.mockResolvedValueOnce({
 			status: 200, 
 			json: async() => Promise.resolve({}),	
@@ -40,7 +39,6 @@ describe("test YouTube API error states", () => {
 
 		await expect(getYTInfo(new URL("https://www.youtube.com/watch?v=asd")))
 			.resolves.toStrictEqual(nullYTInfo)
-		expect(warnSpy).toBeCalled()
 	})
 
 	test("return null values and logs error when request status is not 200", async() => {
