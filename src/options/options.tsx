@@ -8,9 +8,7 @@ import { useBGScript } from "@src/shared/bgScriptProvider"
  * Main function for rendering options menu.
  */
 export const Options = (): JSX.Element => {
-	const bg = useBGScript()
-
-	console.log(bg.generalOptions.data)
+	const _bg = useBGScript()
 	return (
 		<Container maxWidth="lg" sx={{ display: "flex" }}>
 			<HashRouter>

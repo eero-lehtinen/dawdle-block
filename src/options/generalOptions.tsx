@@ -21,8 +21,10 @@ export const GeneralOptions = (): JSX.Element => {
 		if (newTheme !== "system" && newTheme !== "light" && newTheme !== "dark")
 			throw Error("ToggleButtonGroup configured incorrectly. " +
 				`Themes do not contain string: "${newTheme}"`)
-		else
+		else {
+			bg.generalOptions.theme = newTheme
 			setTheme(newTheme)
+		}
 	}
 
 	return (

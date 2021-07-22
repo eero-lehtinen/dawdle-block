@@ -1,11 +1,12 @@
 import { FunctionComponent } from "preact"
-import { useMemo } from "preact/hooks"
-import { CssBaseline, GlobalStyles } from "@material-ui/core"
+import { useEffect, useMemo, useState } from "preact/hooks"
+import { CssBaseline, GlobalStyles, useMediaQuery } from "@material-ui/core"
 import { ThemeProvider } from "@material-ui/core/styles"
 import { createGlobalTheme } from "./globalTheme"
 import { useBGScript } from "./bgScriptProvider"
 import { BackgroundBox } from "./backgroundBox"
 import { BGScriptProvider } from "../shared/bgScriptProvider"
+import { Theme } from "@src/background/generalOptionsParser"
 
 
 
@@ -24,18 +25,24 @@ export const BaseWrapper: FunctionComponent = ({ children }) =>
  * Inner wrapper is used to get bg script context.
  */
 const InnerWrapper: FunctionComponent = ({ children }) => {
-	const _bg = useBGScript()
-	const mode = "dark"
-	const theme = useMemo(() => createGlobalTheme(mode), [mode])
+	const bg = useBGScript()
+	const [theme, setTheme] = useState<Theme>(bg.generalOptions.data.theme)
+	const prefersDark = useMediaQuery("(prefers-color-scheme: dark)")
+	const mode = theme === "system" ? (prefersDark ? "dark" : "light") : theme
+	const matUITheme = useMemo(() => createGlobalTheme(mode), [mode])
+
+	useEffect(() => 
+		bg.generalOptions.subscribeChanged("theme", ({ newValue }) => setTheme(newValue)), 
+	[bg.generalOptions])
 
 	const scrollbarColors = {
-		track: theme.palette.background.default, 
+		track: matUITheme.palette.background.default, 
 		thumb: "#121212",
 	}
 
 	return (
 		<>
-			<ThemeProvider theme={theme} >
+			<ThemeProvider theme={matUITheme} >
 				<CssBaseline /> 
 				<GlobalStyles styles={{ 
 					// Chromium

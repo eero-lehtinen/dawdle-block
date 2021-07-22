@@ -24,9 +24,12 @@ export const createGlobalTheme = (mode: "dark" | "light"): Theme =>
 		},
 		palette: {
 			mode,
-			background: { 
+			background: mode === "dark" ? {
 				default: "#1F1F1F",
 				paper: "#1F1F1F",
+			} : {
+				default: "#FFF",
+				paper: "#FFF",
 			},
 		},
 	})

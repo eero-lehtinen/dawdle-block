@@ -1,5 +1,6 @@
 import { 
-	Drawer, Toolbar, Divider, List, ListItemButton, ListItemText, ListItemIcon, ListSubheader, 
+	Drawer, Toolbar, Divider, List, ListItemButton, 
+	ListItemText, ListItemIcon, ListSubheader, Button, 
 } from "@material-ui/core"
 import { SettingsRounded, AddRounded } from "@material-ui/icons"
 import { useBGScript } from "@src/shared/bgScriptProvider"
@@ -32,6 +33,7 @@ const ListItemLink = ({ icon, primary, to, currentPath }: ListItemLinkProps) => 
 
 	return (
 		<ListItemButton 
+			disableRipple
 			selected={currentPath === to} 
 			component={renderLink} 
 			sx={{ borderRadius: 1.5, mb: 0.5 }}
@@ -58,7 +60,7 @@ export const NavDrawer = (): JSX.Element => {
 				width: drawerWidth,
 				bgcolor: "background.default",
 				flexShrink: 0,
-				"& .MuiDrawer-paper": {
+				"& > .MuiDrawer-paper": {
 					width: drawerWidth,
 					boxSizing: "border-box",
 					left: "initial",
@@ -89,12 +91,9 @@ export const NavDrawer = (): JSX.Element => {
 					))
 				}
 
-				{
-					<ListItemButton sx={{ borderRadius: 1.5, mb: 0.5 }}>
-						<ListItemText primary="Add Block Set" />
-						<AddRounded />
-					</ListItemButton>
-				}
+				<Button size="large" sx={{ float: "right" }} startIcon={<AddRounded />}>
+						Add New Block Set
+				</Button>
 
 			</List>
 		</Drawer>
