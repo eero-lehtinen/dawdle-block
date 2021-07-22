@@ -204,12 +204,10 @@ export class BlockSet {
 		}
 
 		if (channelTitle === undefined) {
-			try {
-				channelTitle = await fetchChannelTitle(channelId)
-			}
-			catch (err) {
+			const result = await fetchChannelTitle(channelId)
+			if (result.isErr())
 				throw new Error("YouTube channel with id not found")
-			}
+			channelTitle = result.value
 		}
 
 		this._data[listType].ytChannels.push({ id: channelId, title: channelTitle })

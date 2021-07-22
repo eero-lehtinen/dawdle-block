@@ -5,8 +5,9 @@ import { timeToMSSinceMidnight } from "@src/shared/utils"
 import ms from "ms.macro"
 
 // Mock needed for a single test
-import{ fetchChannelTitle } from "@src/background/youtubeAPI"
+import{ fetchChannelTitle, FetchError } from "@src/background/youtubeAPI"
 import { ChangedEvent } from "@src/background/observer"
+import { err } from "neverthrow"
 jest.mock("@src/background/youtubeAPI")
 const mockedFetchChannelTitle = mocked(fetchChannelTitle)
 
@@ -244,7 +245,7 @@ describe("test BlockSet rule matching", () => {
 	})
 
 	test("can't add invalid YouTube channels", async() => {
-		mockedFetchChannelTitle.mockImplementation(() => {throw "YouTube channel with id not found"})
+		mockedFetchChannelTitle.mockImplementation(() => Promise.resolve(err(FetchError.EmptyResponse)))
 
 		await expect(blockSet.addYTChannel(ListType.Whitelist, "asd"))
 			.rejects.toThrowError("YouTube channel with id not found")
