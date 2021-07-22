@@ -1,11 +1,12 @@
 import { mocked } from "ts-jest/utils"
-import { BlockSet, BlockTestRes, ChangedEvent, ListType } from "@src/background/blockSet"
+import { BlockSet, BlockTestRes, ListType } from "@src/background/blockSet"
 import { BlockSetData } from "@src/background/blockSetParser"
 import { timeToMSSinceMidnight } from "@src/shared/utils"
 import ms from "ms.macro"
 
 // Mock needed for a single test
 import{ fetchChannelTitle } from "@src/background/youtubeAPI"
+import { ChangedEvent } from "@src/background/observer"
 jest.mock("@src/background/youtubeAPI")
 const mockedFetchChannelTitle = mocked(fetchChannelTitle)
 

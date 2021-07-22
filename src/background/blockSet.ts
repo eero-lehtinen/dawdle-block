@@ -4,7 +4,7 @@ import {
 } from "./blockSetParser"
 import { ytCategoryNamesById } from "./constants"
 import { fetchChannelTitle } from "./youtubeAPI"
-import { Listener, Observer } from "./observer"
+import { ChangedEvent, Listener, Observer } from "./observer"
 
 export enum ListType {
 	Blacklist = "blacklist",
@@ -18,10 +18,6 @@ export enum BlockTestRes {
 }
 
 type CompiledRules = Record<ListType, RegExp[]>
-
-export type ChangedEvent<T> = {
-	newValue: T
-}
 
 export enum BSState {
 	TimeLeft,
