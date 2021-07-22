@@ -88,7 +88,7 @@ module.exports = (env) => {
 									// Overrides default preset-env in babel.config.js
 									["@babel/preset-env", { 
 										useBuiltIns: "usage",
-										corejs: { version: "3.15", proposals: true },
+										corejs: { version: "3.15", proposals: false },
 										// Use targets based on our selected browser
 										targets: browserlist, 
 									}],
