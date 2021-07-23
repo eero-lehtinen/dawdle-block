@@ -35,6 +35,9 @@ export class BlockSets {
 		
 		// Create a single default block set if storage is empty
 		if (results.length === 0)
+			// Has miniscule chance of erroring and not adding.
+			// Change is low enough and it doesn't break anything irreversibly,
+			// so I choose not to care.
 			await instance.addDefaultBlockSet()
 		return instance
 	}
