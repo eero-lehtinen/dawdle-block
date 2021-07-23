@@ -1,13 +1,16 @@
 import { browser } from "webextension-polyfill-ts"
 import { randomBytes } from "crypto"
-import { BrowserStorage, bsIdsSaveKey, bsTimesElapsedSaveKey, generalOptionsSaveKey } 
-	from "@src/background/browserStorage"
+import { 
+	BrowserStorage, bsIdsSaveKey, bsTimesElapsedSaveKey,
+	generalOptionsSaveKey, StorageSetError,
+} from "@src/background/browserStorage"
 import { BlockSet } from "@src/background/blockSet"
 import { BlockSetIds, BlockSetTimesElapsed } from "@src/background/blockSetParser"
 import { compress } from "@src/background/compression"
 import blockSetCmpObj from "../testHelpers/blockSetCmpObj"
 import { mocked } from "ts-jest/utils"
 import { createDefaultGeneralOptionsData } from "@src/background/generalOptionsParser"
+import { err, ok } from "neverthrow"
 
 jest.mock("webextension-polyfill-ts", () => {
 	return {
@@ -30,23 +33,21 @@ jest.mock("webextension-polyfill-ts", () => {
 
 const mockBrowser = mocked(browser, true)
 
-const mockConsoleError = jest.spyOn(console, "error").mockImplementation(() => {/*do nothing*/})
-
 afterEach(() => jest.clearAllMocks())
 
 describe("test BrowserStorage block sets", () => {
 	
 	/**
- * Sets up expectations and resolves for browser sync storage.
- * Expections should be the same every time. Resolves can be chosen.
- * @param param0 values to resolve
- */
+	 * Sets up expectations and resolves for browser sync storage.
+	 * Expections should be the same every time. Resolves can be chosen.
+	 * @param param0 values to resolve
+	 */
 	const setUpMockStorageResolves = ({ ids, elapsed, blockSets }: 
 		{ids: BlockSetIds, 
 			elapsed: BlockSetTimesElapsed, 
 			blockSets: Record<string, unknown>}) => {
 		
-		mockBrowser.storage.sync.get
+		mockGet
 			.mockResolvedValueOnce({ [bsIdsSaveKey]: ids })
 			.mockResolvedValueOnce({ [bsTimesElapsedSaveKey]: elapsed })
 			.mockResolvedValueOnce(blockSets)
@@ -60,14 +61,14 @@ describe("test BrowserStorage block sets", () => {
 	]
 
 
+	const mockGet = mockBrowser.storage.sync.get
+	const mockSet = mockBrowser.storage.sync.set.mockImplementation(() => Promise.resolve())
+
 	const browserStorage = new BrowserStorage({ preferSync: true })
 	let testBlockSet: BlockSet
 
-	const mockGet = mockBrowser.storage.sync.get
-	const mockSet = mockBrowser.storage.sync.set
-
 	beforeEach(() => {
-		testBlockSet = new BlockSet(1, { name: "TEST" }, 42)
+		testBlockSet = BlockSet.create(1, { name: "TEST" }, 42)._unsafeUnwrap()
 	})
 
 	test("returns empty if storage is empty", async() => {
@@ -78,7 +79,8 @@ describe("test BrowserStorage block sets", () => {
 	test("can load block set ids, blocksets, and elapsed times from sync storage", async() => {
 		setUpMockStorageResolves({ ids: [0], elapsed: [0], blockSets: { 0: {} } })
 
-		expect(await browserStorage.fetchBlockSets()).toEqual([blockSetCmpObj(new BlockSet(0))])
+		expect(await browserStorage.fetchBlockSets()).toEqual(
+			[ok(blockSetCmpObj(BlockSet.createDefault(0)))])
 
 		expect(mockGet.mock.calls).toEqual(expectedGetCalls({ 0: null }))
 	})
@@ -86,7 +88,8 @@ describe("test BrowserStorage block sets", () => {
 	test("can load compressed blocksets from sync storage", async() => {
 		setUpMockStorageResolves({ ids: [0], elapsed: [0], blockSets: { 0: compress({}) } })
 
-		expect(await browserStorage.fetchBlockSets()).toEqual([blockSetCmpObj(new BlockSet(0))])
+		expect(await browserStorage.fetchBlockSets()).toEqual(
+			[ok(blockSetCmpObj(BlockSet.createDefault(0)))])
 		
 		expect(mockGet.mock.calls).toEqual(expectedGetCalls({ 0: null }))
 	})
@@ -99,14 +102,44 @@ describe("test BrowserStorage block sets", () => {
 		})
 
 		expect(await browserStorage.fetchBlockSets()).toEqual(
-			[blockSetCmpObj(new BlockSet(3, {}, 50)), blockSetCmpObj(new BlockSet(2))])
+			[ok(blockSetCmpObj(BlockSet.create(3, {}, 50)._unsafeUnwrap())), 
+				ok(blockSetCmpObj(BlockSet.createDefault(2)))])
 
 		expect(mockGet.mock.calls).toEqual(expectedGetCalls({ 3: null, 2: null }))
 	})
 
-	test("ignores invalid saves", async() => {
-		jest.spyOn(console, "error").mockImplementation(() => {/*do nothing*/})
+	test("returns error as first element for invalid ids", async() => {
+		setUpMockStorageResolves({ 
+			ids: ["invalid" as unknown as number],
+			elapsed: [], 
+			blockSets: {},
+		})
 
+		const res = await browserStorage.fetchBlockSets()
+		expect(res).toHaveLength(1)
+		expect(res[0]?.isErr()).toBe(true)
+
+		expect(mockGet).toBeCalledTimes(1)
+		mockGet.mockReset()
+	})
+
+	test("returns error as first element for invalid timesElapsed", async() => {
+		setUpMockStorageResolves({ 
+			ids: [0, 1, 2], 
+			elapsed: ["invalid" as unknown as number], 
+			blockSets: {},
+		})
+
+		const res = await browserStorage.fetchBlockSets()
+		expect(res).toHaveLength(1)
+		expect(res[0]?.isErr()).toBe(true)
+
+		expect(mockGet).toBeCalledTimes(2)
+		mockGet.mockReset()
+	})
+
+
+	test("returns errors for invalid saves", async() => {
 		setUpMockStorageResolves({ 
 			ids: [0, 1, 2], 
 			elapsed: [0, 0, 0], 
@@ -114,7 +147,8 @@ describe("test BrowserStorage block sets", () => {
 			blockSets: { 0: "asd", 1: [], 2: 42 },
 		})
 
-		expect(await browserStorage.fetchBlockSets()).toStrictEqual([])
+		const res = await browserStorage.fetchBlockSets()
+		res.forEach(r => expect(r.isErr()).toBe(true))
 
 		expect(mockGet.mock.calls).toEqual(expectedGetCalls({ 0: null, 1: null, 2: null }))
 	})
@@ -137,18 +171,32 @@ describe("test BrowserStorage block sets", () => {
 		}]])
 	})
 
-	test("saveBlockSet throws when object is too large to be saved", async() => {	
+	test("saveBlockSet returns error when object is too large to be saved", async() => {	
 		// 10k random bytes is too large to store even compressed
 		testBlockSet.name = randomBytes(10000).toString("hex") 
-		await expect(browserStorage.saveBlockSet(testBlockSet))
-			.rejects.toThrow("Can't save item, it is too large")
+		expect(await browserStorage.saveBlockSet(testBlockSet))
+			.toEqual(err(StorageSetError.TooLarge))
 	})
 
-	test("saveBlockSet throws when saves are done in too quick succession", async() => {
+	test("saveBlockSet returns error when saves are done in too quick succession", async() => {
 		mockSet.mockRejectedValueOnce(Error("WRITE_OPERATIONS"))
 
-		await expect(browserStorage.saveBlockSet(testBlockSet))
-			.rejects.toThrow("Can't save item, too many write operations")
+		expect(await browserStorage.saveBlockSet(testBlockSet))
+			.toEqual(err(StorageSetError.TooManyWrites))
+
+		expect(mockSet.mock.calls).toEqual([[{
+			1: compress(testBlockSet.data),
+		}]])
+	})
+
+	test("saveBlockSet returns and logs message when storage.set returns unknown error", async() => {
+		const mockWarn = jest.spyOn(console, "warn").mockImplementation(() => {/*do nothing*/})
+		mockSet.mockRejectedValueOnce(Error("Invalid moon phase"))
+
+		expect(await browserStorage.saveBlockSet(testBlockSet))
+			.toEqual(err({ message: "Invalid moon phase" }))
+
+		expect(mockWarn).toBeCalledWith(expect.toBeString(), Error("Invalid moon phase"))
 
 		expect(mockSet.mock.calls).toEqual([[{
 			1: compress(testBlockSet.data),
@@ -160,7 +208,7 @@ describe("test BrowserStorage block sets", () => {
 
 		expect(mockSet.mock.calls).toEqual([[{
 			[bsIdsSaveKey]: [], 
-			[bsTimesElapsedSaveKey]: [], 
+			[bsTimesElapsedSaveKey]: [],
 			1: null,
 		}]])
 	})
@@ -171,9 +219,10 @@ describe("test BrowserStorage block sets", () => {
 		mockBrowser.storage.local.get
 			.mockResolvedValueOnce({ [bsIdsSaveKey]: [0] })
 			.mockResolvedValueOnce({ [bsTimesElapsedSaveKey]: [0] })
-			.mockResolvedValueOnce({ 0: compress(new BlockSet(0)) })
+			.mockResolvedValueOnce({ 0: compress(BlockSet.createDefault(0)) })
 
-		expect(await browserStorage.fetchBlockSets()).toEqual([blockSetCmpObj(new BlockSet(0))])
+		const res = await browserStorage.fetchBlockSets()
+		expect(res).toEqual([ok(blockSetCmpObj(BlockSet.createDefault(0)))])
 
 		expect(mockBrowser.storage.local.get.mock.calls).toEqual(expectedGetCalls({ 0: null }))
 	})
@@ -194,7 +243,7 @@ describe("test BrowserStorage general settings", () => {
 
 		const result = await browserStorage.fetchGeneralOptionsData()
 
-		expect(result).toEqual(testGOData)
+		expect(result).toEqual(ok(testGOData))
 		expect(mockGet.mock.calls).toEqual([[{ [generalOptionsSaveKey]: null }]])
 	})
 
@@ -203,17 +252,16 @@ describe("test BrowserStorage general settings", () => {
 
 		const result = await browserStorage.fetchGeneralOptionsData()
 
-		expect(result).toEqual(createDefaultGeneralOptionsData())
+		expect(result).toEqual(ok(createDefaultGeneralOptionsData()))
 		expect(mockGet.mock.calls).toEqual([[{ [generalOptionsSaveKey]: null }]])
 	})
 
-	test("if storage contains invalid data, returns defaults and logs errors", async() => {
+	test("if storage contains invalid data, returns errors", async() => {
 		mockGet.mockResolvedValueOnce({ [generalOptionsSaveKey]: "stringNotObject" })
 
 		const result = await browserStorage.fetchGeneralOptionsData()
 
-		expect(result).toEqual(createDefaultGeneralOptionsData())
+		expect(result.isErr()).toBe(true)
 		expect(mockGet.mock.calls).toEqual([[{ [generalOptionsSaveKey]: null }]])
-		expect(mockConsoleError).toBeCalled()
 	})
 })

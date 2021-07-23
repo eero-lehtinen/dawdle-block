@@ -1,6 +1,6 @@
 import { BrowserStorage } from "./browserStorage"
 import { 
-	createDefaultGeneralOptionsData, GeneralOptionsData, plainToGeneralOptionsData, Theme, 
+	createDefaultGeneralOptionsData, GeneralOptionsData, Theme, 
 } from "./generalOptionsParser"
 import { ChangedEvent, ListenerOf, Observer } from "./observer"
 
@@ -29,22 +29,20 @@ export class GeneralOptions {
 	 * @returns new instance of GeneralOptions
 	 */
 	static async create(browserStorage: BrowserStorage): Promise<GeneralOptions> {
-		const instance = new GeneralOptions(
-			browserStorage, await browserStorage.fetchGeneralOptionsData())
-		return instance
+		const res = await browserStorage.fetchGeneralOptionsData()
+		if (res.isErr())
+			return new GeneralOptions(browserStorage)
+		return new GeneralOptions(browserStorage, res.value)
 	}
 
 	/**
 	 * Assigns new instance of general options data to this object.
-	 * Pass undefined to get defaults.
-	 * @param generalOptionsData 
-	 * @Throws Error if data is invalid
-	 */
+	 * Pass undefined to get defaults. */
 	assignData(generalOptionsData?: GeneralOptionsData): void {
 		if (generalOptionsData === undefined)
 			this._data = createDefaultGeneralOptionsData()
 		else
-			this._data = plainToGeneralOptionsData(generalOptionsData)
+			this._data = generalOptionsData
 	}
 
 	get data(): GeneralOptionsData {

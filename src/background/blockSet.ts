@@ -3,8 +3,10 @@ import {
 	BlockList, ActiveTime, ActiveDays,
 } from "./blockSetParser"
 import { ytCategoryNamesById } from "./constants"
-import { fetchChannelTitle } from "./youtubeAPI"
+import { fetchChannelTitle, FetchError } from "./youtubeAPI"
 import { ChangedEvent, Listener, Observer } from "./observer"
+import { err, errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow"
+import { ParseError, ZodRes } from "./parserHelpers"
 
 export enum ListType {
 	Blacklist = "blacklist",
@@ -24,6 +26,16 @@ export enum BSState {
 	Block,
 	OverTime,
 }
+
+type CantAddDuplicateError = "CantAddDuplicate"
+type InvalidRegExpError = { type: "InvalidRegExp", message: string }
+type InvalidYTCategoryIdError = "InvalidYTCategoryId"
+
+const safeMakeRegExp: (regExpStr: string) => Result<RegExp, InvalidRegExpError> = 
+	Result.fromThrowable((re) => new RegExp(re), (err) => ({ 
+		type: "InvalidRegExp", 
+		message: (err as { message: string }).message, 
+	}))
 
 /**
  * Contains all configuration for website blocking. 
@@ -45,24 +57,35 @@ export class BlockSet {
 	 * Requires an unique (enforce outside of this class) id.
 	 * Parses blockSetPlanObject and initializes internal state to match that.
 	 * timeElapsed isn't stored in plain object, so we need to supply it separately.
-	 * @throws {Error} if object is not parseable
 	 * @param id unique id
 	 * @param blockSetPlanObject 
 	 * @param timeElapsed blocking time elapsed
 	 */
-	constructor(id: number, blockSetPlanObject?: unknown, timeElapsed = 0) {
+	private constructor(id: number, data: BlockSetData, timeElapsed: number) {
 		this._id = id
-
-		if (blockSetPlanObject === undefined)
-			this._data = createDefaultBlockSetData()
-		else 
-			this._data = plainToBlockSetData(blockSetPlanObject)
-
+		this._data = data
 		this._timeElapsed = timeElapsed
 
 		this.compileRules()
-
 		this.connectChangeObserverAny()
+	}
+
+	/**
+	 * Requires an unique (enforce outside of this class) id.
+	 * Parses blockSetPlanObject and initializes internal state to match that.
+	 * timeElapsed isn't stored in plain object, so we need to supply it separately.
+	 */
+	static create(id: number, blockSetPlanObject: unknown, timeElapsed = 0): 
+		ZodRes<BlockSet, ParseError> {		
+		return plainToBlockSetData(blockSetPlanObject).map(data => new BlockSet(id, data, timeElapsed))
+	}
+
+	/**
+	 * Requires an unique (enforce outside of this class) id.
+	 * Creates a block set with default values.
+	 */
+	static createDefault(id: number): BlockSet {
+		return new BlockSet(id, createDefaultBlockSetData(), 0)
 	}
 
 	/**
@@ -115,12 +138,12 @@ export class BlockSet {
 	 * Add pattern to block set.
 	 * @param listType whitelist or blacklist
 	 * @param pattern pattern to add
-	 * @throws "Can't add duplicate" if the rule already exists
 	 */
-	addPattern(listType: ListType, pattern: string): void {
-		if (this._data[listType].urlPatterns.includes(pattern)) throw new Error("Can't add duplicate")
+	addPattern(listType: ListType, pattern: string): Result<void, CantAddDuplicateError> {
+		if (this._data[listType].urlPatterns.includes(pattern)) return err("CantAddDuplicate")
 		this._data[listType].urlPatterns.push(pattern)
 		this.compiledUrlRules[listType].push(BlockSet.patternToRegExp(pattern))
+		return ok(undefined)
 	}
 
 	/**
@@ -138,14 +161,18 @@ export class BlockSet {
 	/**
 	 * Add regular expression to block set
 	 * @param listType whitelist or blacklist
-	 * @param regExp regular expression to add
-	 * @throws "Can't add duplicate" if the rule already exists
+	 * @param regExpStr regular expression to add
 	 */
-	addRegExp(listType: ListType, regExp: string): void {
-		if (this._data[listType].urlRegExps.includes(regExp)) throw new Error("Can't add duplicate")
-		const compiledRegExp = new RegExp(regExp)
-		this._data[listType].urlRegExps.push(regExp)
-		this.compiledUrlRules[listType].push(compiledRegExp)
+	addRegExp(listType: ListType, regExpStr: string): 
+		Result<void, CantAddDuplicateError | InvalidRegExpError> {
+		if (this._data[listType].urlRegExps.includes(regExpStr)) return err("CantAddDuplicate")
+
+		return safeMakeRegExp(regExpStr)
+			.andThen(regExp => {
+				this._data[listType].urlRegExps.push(regExpStr)
+				this.compiledUrlRules[listType].push(regExp)
+				return ok(undefined)
+			})
 	}
 	
 	/**
@@ -163,19 +190,17 @@ export class BlockSet {
 	 * Add YouTube category to block set
 	 * @param listType whitelist or blacklist
 	 * @param categoryId category id to add
-	 * @throws "Invalid YouTube category id" if category isn't found in constant ytCategoryNamesById
-	 * @throws "Can't add duplicate" if the rule already exists
 	 */
-	addYTCategory(listType: ListType, categoryId: string): void {
-		if (!(categoryId in ytCategoryNamesById)) {
-			throw new Error("Invalid YouTube category id")
-		}
-
-		if (this._data[listType].ytCategoryIds.includes(categoryId)) {
-			throw new Error("Can't add duplicate")
-		}
+	addYTCategory(listType: ListType, categoryId: string): 
+		Result<void, InvalidYTCategoryIdError | CantAddDuplicateError>  {
+		if (!(categoryId in ytCategoryNamesById))
+			return err("InvalidYTCategoryId")
+		
+		if (this._data[listType].ytCategoryIds.includes(categoryId))
+			return err("CantAddDuplicate")
 
 		this._data[listType].ytCategoryIds.push(categoryId)
+		return ok(undefined)
 	}
 
 	
@@ -195,22 +220,23 @@ export class BlockSet {
 	 * @param listType whitelist or blacklist
 	 * @param channelId channel id to add
 	 * @param channelTitle trusted channel title
-	 * @throws "YouTube channel with id not found" if channel id does not exist in google servers
-	 * @throws "Can't add duplicate" if the channel already exists in rules
 	 */
-	async addYTChannel(listType: ListType, channelId: string, channelTitle?: string): Promise<void> {
+	async addYTChannel(listType: ListType, channelId: string, channelTitle?: string): 
+		Promise<ResultAsync<void, CantAddDuplicateError | FetchError>> {
+
 		if (this._data[listType].ytChannels.find(({ id }) => id === channelId)) {
-			throw new Error("Can't add duplicate")
+			return errAsync("CantAddDuplicate")
 		}
 
 		if (channelTitle === undefined) {
 			const result = await fetchChannelTitle(channelId)
 			if (result.isErr())
-				throw new Error("YouTube channel with id not found")
+				return errAsync(result.error)
 			channelTitle = result.value
 		}
 
 		this._data[listType].ytChannels.push({ id: channelId, title: channelTitle })
+		return okAsync(undefined)
 	}
 
 	/**

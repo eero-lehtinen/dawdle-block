@@ -1,17 +1,29 @@
+import { err, errAsync, okAsync, Result, ResultAsync } from "neverthrow"
 import { browser, Storage } from "webextension-polyfill-ts"
+import { ZodIssue } from "zod"
 import { BlockSet } from "./blockSet"
 import { 
 	plainToBlockSetIds, plainToBlockSetTimesElapsed, 
-	BlockSetIds, BlockSetTimesElapsed, BlockSetData } 
-	from "./blockSetParser"
-import { decompress, compress } from "./compression"
+	BlockSetIds, BlockSetTimesElapsed, BlockSetData, 
+}	from "./blockSetParser"
+import { decompress, compress, DecompressError } from "./compression"
 import { 
 	createDefaultGeneralOptionsData, GeneralOptionsData, plainToGeneralOptionsData, 
 } from "./generalOptionsParser"
+import { ParseError, ZodResAsync } from "./parserHelpers"
 
 interface BrowserStorageOptions {
 	preferSync: boolean
 }
+
+export enum StorageSetError {
+	TooManyWrites = "TooManyWrites",
+	TooLarge = "TooLarge",
+}
+
+type StorageSetErrorUnknown = { message: string }
+
+export type StorageSetAnyError = StorageSetError | StorageSetErrorUnknown
 
 export const bsIdsSaveKey = "blocksetIds"
 export const bsTimesElapsedSaveKey = "blocksetTimesElapsed"
@@ -41,75 +53,66 @@ export class BrowserStorage {
 		this.storage = opts.preferSync ? browser.storage.sync : browser.storage.local
 	}
 
-	/**
-	 * Fetches and validates general options data from storage.
-	 * Returns defaults as a fallback if loaded data is invalid.
-	 */
-	async fetchGeneralOptionsData(): Promise<GeneralOptionsData> {
-		const res = await this.storage.get({ [generalOptionsSaveKey]: null })
-		if (res[generalOptionsSaveKey] === null)
-			return createDefaultGeneralOptionsData()
-		
-		try {
-			return plainToGeneralOptionsData(res[generalOptionsSaveKey])
-		}
-		catch (err) {
-			console.error("Couldn't parse general options, falling back to defaults")
-			console.error(err)
-			return createDefaultGeneralOptionsData()
-		}
+	/** Fetches and validates general options data from storage.*/
+	fetchGeneralOptionsData(): ZodResAsync<GeneralOptionsData, ParseError> {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		return ResultAsync.fromSafePromise<any, ZodIssue[] | ParseError>(
+			this.storage.get({ [generalOptionsSaveKey]: null }))
+			.andThen<GeneralOptionsData, ZodIssue[] | ParseError>(
+				res => res[generalOptionsSaveKey] === null ?
+					okAsync(createDefaultGeneralOptionsData()) :
+					plainToGeneralOptionsData(res[generalOptionsSaveKey]))
 	}
 
 	/**
 	 * Saves general options to storage.
-	 * @throws "Can't save item, too many write operations" when write operations quota is exceeded
 	 */
-	async saveGeneralOptionsData(data: GeneralOptionsData): Promise<void> {
-		await this.storageSet({ [generalOptionsSaveKey]: data })
-	}
-
-	/**
-	 * Fetches and validates block set ids from sync storage.
-	 */
-	private async fetchIds(): Promise<number[]> {
-		const idRes = await this.storage.get({ [bsIdsSaveKey]: [] })
-		return plainToBlockSetIds(idRes[bsIdsSaveKey])
+	saveGeneralOptionsData(data: GeneralOptionsData): ResultAsync<void, StorageSetAnyError> {
+		return this.storageSet({ [generalOptionsSaveKey]: data })
 	}
 
 	/**
 	 * Fetches and validates all block sets from storage
-	 * @param blockSetIds
+	 * Returns list of results, which may be block sets or their errors.
+	 * Eg. if second block set parsing failed, result may be 
+	 * [ok(BlockSet), err(ParseErr), ok(BlockSet), ...].
+	 * If ids or elapsedTimes fetching fails, their errors will be in the first element.
 	 */
-	async fetchBlockSets(): Promise<BlockSet[]> {
-		const blockSetIds = await this.fetchIds()
-
+	async fetchBlockSets(): Promise<Result<BlockSet,
+		ZodIssue[] | ParseError | DecompressError>[]> {
+	
+		const idsGet = await this.storage.get({ [bsIdsSaveKey]: [] })
+		const idsRes = plainToBlockSetIds(idsGet[bsIdsSaveKey])
+		if (idsRes.isErr()) return [err(idsRes.error)]
+		
+		const blockSetIds = idsRes.value
 		if (blockSetIds.length === 0) {
 			return []
 		}
 
-		const elapsedTimeRes = await this.storage.get(
-			{ [bsTimesElapsedSaveKey]: [] })
-		const timesElapsed = plainToBlockSetTimesElapsed(elapsedTimeRes[bsTimesElapsedSaveKey])
+		const timesElapsedGet = await this.storage.get({ [bsTimesElapsedSaveKey]: [] })
+		const timesElapsedRes = plainToBlockSetTimesElapsed(timesElapsedGet[bsTimesElapsedSaveKey])
+		if (timesElapsedRes.isErr()) return [err(timesElapsedRes.error)]
+
+		const timesElapsed = timesElapsedRes.value
 
 		const blockSetQuery: Record<string, null> = {}
 		for (const id of blockSetIds) {
 			blockSetQuery[id] = null
 		}
-		const blockSetRes = await this.storage.get(blockSetQuery)
+		const blockSetGetResults = await this.storage.get(blockSetQuery)
 
-		const results: BlockSet[] = []
+		const results: Result<BlockSet, ZodIssue[] | ParseError | DecompressError>[] = []
 
 		for(const id of blockSetIds) {
-			try {
-				if (typeof blockSetRes[id] === "string") {
-					blockSetRes[id] = decompress(blockSetRes[id])
-				}
-				results.push(new BlockSet(id, blockSetRes[id], timesElapsed[id]))
+			if (typeof blockSetGetResults[id] === "string") {
+				results.push(decompress(blockSetGetResults[id])
+					.andThen(blockSetPlainObj => BlockSet.create(id, blockSetPlainObj, timesElapsed[id])))
 			}
-			catch (err) {
-				console.error(`Couldn't parse blockset with id ${id}`)
-				console.error(err)
+			else {
+				results.push(BlockSet.create(id, blockSetGetResults[id], timesElapsed[id]))
 			}
+			
 		}
 		return results
 	}
@@ -118,37 +121,31 @@ export class BrowserStorage {
 	 * Saves new block set to the *END* of the block set list.
 	 * @param blockSet block set to save
 	 * @param blockSetList ordered list of all block sets with this new block set id added
-	 * @throws "Can't save item, it is too large" when size quota is exceeded
-	 * @throws "Can't save item, too many write operations" when write operations quota is exceeded
 	 */
-	async saveNewBlockSet(blockSet: BlockSet, blockSetList: BlockSet[]): Promise<void> {
+	saveNewBlockSet(blockSet: BlockSet, blockSetList: BlockSet[]): 
+		ResultAsync<void, StorageSetAnyError> {
 		const [bsIds, timesElapsed] = this.generateIdsAndTimesElapsed(blockSetList)
-		await	this.storageSet({ 
+		return this.storageSet({
 			[bsIdsSaveKey]: bsIds,
 			[bsTimesElapsedSaveKey]: timesElapsed,
 			[blockSet.id]: blockSet.data,
 		})
 	}
 
-	/**
-	 * Saves a new version of a block set that has already been saved.
-	 * @param blockSet
-	 * @throws "Can't save item, it is too large" when size quota is exceeded
-	 * @throws "Can't save item, too many write operations" when write operations quota is exceeded
-	 */
-	async saveBlockSet(blockSet: BlockSet): Promise<void> {
-		await	this.storageSet({ [blockSet.id]: blockSet.data })
+	/** Saves a new version of a block set that has already been saved.*/
+	saveBlockSet(blockSet: BlockSet): ResultAsync<void, StorageSetAnyError> {
+		return this.storageSet({ [blockSet.id]: blockSet.data })
 	}
 
 	/**
 	 * Saves a new version of a block set that has already been saved.
 	 * @param blockSet block set to delete
 	 * @param blockSetList ordered list of all block sets with this block set id removed
-	 * @throws "Can't save item, too many write operations" when write operations quota is exceeded
 	 */
-	async deleteBlockSet(blockSet: BlockSet, blockSetList: BlockSet[]): Promise<void> {
+	deleteBlockSet(blockSet: BlockSet, blockSetList: BlockSet[]): 
+		ResultAsync<void, StorageSetAnyError> {
 		const [bsIds, timesElapsed] = this.generateIdsAndTimesElapsed(blockSetList)
-		await	this.storageSet({ 
+		return this.storageSet({ 
 			[bsIdsSaveKey]: bsIds,
 			[bsTimesElapsedSaveKey]: timesElapsed,
 			[blockSet.id]: null,
@@ -170,35 +167,29 @@ export class BrowserStorage {
 	/**
 	 * Saves items to browser storage with enhanced error messages.
 	 * If item is BlockSetData, apply compression.
-	 * @param items items to save
-	 * @throws "Can't save item, it is too large" when size quota is exceeded
-	 * @throws "Can't save item, too many write operations" when write operations quota is exceeded
 	 */
-	private async storageSet(
+	private storageSet(
 		items: Record<string, 
-			null | string | BlockSetData | BlockSetIds | BlockSetTimesElapsed | GeneralOptionsData>) {
+			null | string | BlockSetData | BlockSetIds | BlockSetTimesElapsed | GeneralOptionsData>): 
+			ResultAsync<void, StorageSetAnyError> {
 		
 		for (const key in items) {
 			// if key is number, then item is block set data -> we can compress it
 			if (!isNaN(parseInt(key, 10)) && items[key] !== null) {
 				const compressed = compress(items[key])
 				if (compressed.length + 20 > this.QUOTA_BYTES_PER_ITEM) {
-					throw Error("Can't save item, it is too large")
+					return errAsync(StorageSetError.TooLarge)
 				}
 				items[key] = compressed
 			}
 		}
 
-		try {
-			await	this.storage.set(items)
-		}
-		catch(err) {
-			console.error("Can't save item")
-			console.error(err)
-
-			if ((err.message as string).includes("WRITE_OPERATIONS")) {
-				throw Error("Can't save item, too many write operations")
-			}
-		}
+		return ResultAsync.fromPromise(this.storage.set(items), err => {
+			if ((err as { message: string }).message.includes("WRITE_OPERATIONS"))
+				return StorageSetError.TooManyWrites
+				
+			console.warn("Can't save item: ", err)
+			return { message: (err as { message: string }).message }
+		})
 	}
 }

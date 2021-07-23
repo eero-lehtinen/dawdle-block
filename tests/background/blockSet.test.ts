@@ -5,22 +5,24 @@ import { timeToMSSinceMidnight } from "@src/shared/utils"
 import ms from "ms.macro"
 
 // Mock needed for a single test
-import{ fetchChannelTitle, FetchError } from "@src/background/youtubeAPI"
+import{ fetchChannelTitle, FetchErrorType } from "@src/background/youtubeAPI"
 import { ChangedEvent } from "@src/background/observer"
-import { err } from "neverthrow"
+import { err, errAsync } from "neverthrow"
+import blockSetCmpObj from "../testHelpers/blockSetCmpObj"
 jest.mock("@src/background/youtubeAPI")
 const mockedFetchChannelTitle = mocked(fetchChannelTitle)
 
 describe("test BlockSet construction parameters", () => {
-	const defaultBlockSetData = new BlockSet(0).data
+	const defaultBlockSet = BlockSet.createDefault(0)
 
 	test("non-objects throw", () => {
 		jest.spyOn(console, "error").mockImplementation(() => {/*do nothing*/})
-		expect(() => new BlockSet(0, "string")).toThrow()
-		expect(() => new BlockSet(0, 42)).toThrow()
-		expect(() => new BlockSet(0, () => {return 0})).toThrow()
-		expect(() => new BlockSet(0, [])).toThrow()
-		expect(() => new BlockSet(0, null)).toThrow()
+		expect(BlockSet.create(0, "string").isErr()).toBe(true)
+		expect(BlockSet.create(0, 42).isErr()).toBe(true)
+		expect(BlockSet.create(0, () => {return 0}).isErr()).toBe(true)
+		expect(BlockSet.create(0, []).isErr()).toBe(true)
+		expect(BlockSet.create(0, null).isErr()).toBe(true)
+		expect(BlockSet.create(0, undefined).isErr()).toBe(true)
 	})
 
 	test("objects with members of invalid types throw", () => {
@@ -30,16 +32,11 @@ describe("test BlockSet construction parameters", () => {
 			activeDays: undefined,
 		}
 
-		expect(() => { new BlockSet(0, testBlockSetObj)}).toThrow()
+		expect(BlockSet.create(0, testBlockSetObj).isErr()).toBe(true)
 	})
 
 	test("incomplete objects get filled with defaults", () => {
-		expect(new BlockSet(0, {}).data).toStrictEqual(defaultBlockSetData)
-	})
-
-	test("undefined creates a default block set", () => {
-		expect(new BlockSet(0, undefined).data).toStrictEqual(defaultBlockSetData)
-		expect(new BlockSet(0).data).toStrictEqual(defaultBlockSetData)
+		expect(BlockSet.create(0, {})._unsafeUnwrap()).toEqual(blockSetCmpObj(defaultBlockSet))
 	})
 
 	test("objects retain their valid property names and lose invalid ones", () => {
@@ -49,10 +46,10 @@ describe("test BlockSet construction parameters", () => {
 			loseMe: "lost",
 		}
 
-		const blockSetData = new BlockSet(0, testBlockSetObj).data
+		const blockSet = BlockSet.create(0, testBlockSetObj)._unsafeUnwrap()
 
-		expect(blockSetData).toHaveProperty("name")
-		expect(blockSetData).not.toHaveProperty("loseMe")
+		expect(blockSet.data).toHaveProperty("name")
+		expect(blockSet.data).not.toHaveProperty("loseMe")
 	})
 
 	test("V0 block sets get converted to V1", () => {
@@ -88,12 +85,13 @@ describe("test BlockSet construction parameters", () => {
 			whitelist: listV0,
 		}
 		const testBlockSetObjExpected: BlockSetData = {
-			...defaultBlockSetData,
+			...defaultBlockSet.data,
 			blacklist: listV1Expected,
 			whitelist: listV1Expected,
 		}
 
-		expect(new BlockSet(0, testBlockSetObj).data).toStrictEqual(testBlockSetObjExpected)
+		expect(BlockSet.create(0, testBlockSetObj)._unsafeUnwrap().data)
+			.toStrictEqual(testBlockSetObjExpected)
 	})
 
 	test("V0 \"*\"-characters get escaped when converting to V1", () => {
@@ -117,12 +115,13 @@ describe("test BlockSet construction parameters", () => {
 		}
 
 		const testBlockSetObjExpected = {
-			...defaultBlockSetData,
+			...defaultBlockSet.data,
 			blacklist: listV1Expected,
 			whitelist: listV1Expected,
 		}
 
-		expect(new BlockSet(0, testBlockSetObj).data).toStrictEqual(testBlockSetObjExpected)
+		expect(BlockSet.create(0, testBlockSetObj)._unsafeUnwrap().data)
+			.toStrictEqual(testBlockSetObjExpected)
 	})
 })
 
@@ -137,7 +136,7 @@ describe("test BlockSet methods", () => {
 	
 
 	test("isInActiveTime returns always true, if activeTime from and to are the same", () => {
-		const blockSet = new BlockSet(0, { activeTime: { from: 0, to: 0 } })
+		const blockSet = BlockSet.create(0, { activeTime: { from: 0, to: 0 } })._unsafeUnwrap()
 		const dateResultPairs = [
 			{ date: new Date(0), result: true },
 			{ date: new Date(42), result: true },
@@ -147,7 +146,7 @@ describe("test BlockSet methods", () => {
 	})
 
 	test("isInActiveTime returns true, if today's time is between from and to", () => {
-		const blockSet = new BlockSet(0, { activeTime: { from: 0, to: ms`1h` } })
+		const blockSet = BlockSet.create(0, { activeTime: { from: 0, to: ms`1h` } })._unsafeUnwrap()
 		const dateResultPairs = [
 			{ date: new Date("2000-01-01T00:00:00"), result: false },
 			{ date: new Date("2000-01-01T00:30:00"), result: true },
@@ -159,7 +158,7 @@ describe("test BlockSet methods", () => {
 
 	test("if to is less than from, calculation of being in between wraps around " + 
 	"midnight instead", () => {
-		const blockSet = new BlockSet(0, { activeTime: { from: ms`1h`, to: 0 } })
+		const blockSet = BlockSet.create(0, { activeTime: { from: ms`1h`, to: 0 } })._unsafeUnwrap()
 		const dateResultPairs = [
 			{ date: new Date("2000-01-01T00:00:00"), result: false },
 			{ date: new Date("2000-01-01T00:30:00"), result: false },
@@ -172,14 +171,14 @@ describe("test BlockSet methods", () => {
 
 	test("active weekday detection returns values of activeDays for values between 0 and 6", () => {
 		const activeDays = [false, true, false, false, true, false, false]
-		const blockSet = new BlockSet(0, { activeDays })
+		const blockSet = BlockSet.create(0, { activeDays })._unsafeUnwrap()
 		for (let i = 0; i < activeDays.length; i++) {
 			expect(blockSet.isInActiveWeekday(i)).toBe(activeDays[i])
 		}
 	})
 
 	test("active weekday detection returns false for all numbers that aren't between 0 and 6", () => {
-		const blockSet = new BlockSet(0)
+		const blockSet = BlockSet.createDefault(0)
 		expect(blockSet.isInActiveWeekday(-1000)).toBe(false)
 		expect(blockSet.isInActiveWeekday(42)).toBe(false)
 	})
@@ -218,37 +217,34 @@ describe("test pattern escaping", () => {
 describe("test BlockSet rule matching", () => {
 	let blockSet: BlockSet
 	beforeEach(() => {
-		blockSet = new BlockSet(0)
+		blockSet = BlockSet.createDefault(0)
 	})
 
 	test("can't add duplicate rules", async() => {
 		blockSet.addPattern(ListType.Whitelist, "a")
-		expect(() => blockSet.addPattern(ListType.Whitelist, "a")).toThrowError("Can't add duplicate")
+		expect(blockSet.addPattern(ListType.Whitelist, "a")).toEqual(err("CantAddDuplicate"))
 
 		blockSet.addRegExp(ListType.Whitelist, "a")
-		expect(() => blockSet.addRegExp(ListType.Whitelist, "a")).toThrowError("Can't add duplicate")
+		expect(blockSet.addRegExp(ListType.Whitelist, "a")).toEqual(err("CantAddDuplicate"))
 
 		blockSet.addYTCategory(ListType.Whitelist, "10")
-		expect(() => blockSet.addYTCategory(ListType.Whitelist, "10"))
-			.toThrowError("Can't add duplicate")
+		expect(blockSet.addYTCategory(ListType.Whitelist, "10")).toEqual(err("CantAddDuplicate"))
 		
 		await blockSet.addYTChannel(ListType.Whitelist, "a", "title")
-		await expect(() => blockSet.addYTChannel(ListType.Whitelist, "a", "title2"))
-			.rejects.toThrowError("Can't add duplicate")
+		expect(await blockSet.addYTChannel(ListType.Whitelist, "a", "title2"))
+			.toEqual(err("CantAddDuplicate"))
 	})
 
 	test("can't add invalid YouTube categories", () => {
-		expect(() => blockSet.addYTCategory(ListType.Whitelist, "a"))
-			.toThrowError("Invalid YouTube category id")
-		expect(() => blockSet.addYTCategory(ListType.Whitelist, "100"))
-			.toThrowError("Invalid YouTube category id")
+		expect(blockSet.addYTCategory(ListType.Whitelist, "a")).toEqual(err("InvalidYTCategoryId"))
+		expect(blockSet.addYTCategory(ListType.Whitelist, "100")).toEqual(err("InvalidYTCategoryId"))
 	})
 
 	test("can't add invalid YouTube channels", async() => {
-		mockedFetchChannelTitle.mockImplementation(() => Promise.resolve(err(FetchError.EmptyResponse)))
+		const error = { type: FetchErrorType.EmptyResponse }
+		mockedFetchChannelTitle.mockResolvedValueOnce(errAsync(error))
 
-		await expect(blockSet.addYTChannel(ListType.Whitelist, "asd"))
-			.rejects.toThrowError("YouTube channel with id not found")
+		expect(await blockSet.addYTChannel(ListType.Whitelist, "asd")).toEqual(err(error))
 	})
 
 	test("returns Blacklisted when url is contained in black list", () => {
@@ -340,7 +336,7 @@ describe.each([
 	const listener = jest.fn()
 	const anyChangesListener = jest.fn()
 	beforeEach(() => {
-		blockSet = new BlockSet(0)
+		blockSet = BlockSet.createDefault(0)
 		blockSet.subscribeAnyChanged(anyChangesListener)
 	})
 

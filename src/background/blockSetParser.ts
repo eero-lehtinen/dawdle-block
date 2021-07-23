@@ -1,29 +1,22 @@
 import { z } from "zod"
 import { BlockSet } from "./blockSet"
 import ms from "ms.macro"
+import { neverThrowZodParse, ParseError, ZodRes, ZodResDefault } from "./parserHelpers"
+import { err } from "neverthrow"
 
 const zBlockSetIds = z.array(z.number().int().nonnegative())
 export type BlockSetIds = z.infer<typeof zBlockSetIds>
 
-/**
- * Converts plain js object into type BlockSetIds with type validation.
- * @param obj plain js object
- * @throws {Error} if object is not parseable
- * @returns BlockSetIds
- */
-export const plainToBlockSetIds =	(obj: unknown): BlockSetIds => zBlockSetIds.parse(obj)
+/** Converts plain js object into type BlockSetIds with type validation. */
+export const plainToBlockSetIds =	(obj: unknown): ZodResDefault<BlockSetIds> => 
+	neverThrowZodParse(zBlockSetIds.safeParse(obj))
 
 const zBlockSetTimesElapsed = z.array(z.number().int().optional())
 export type BlockSetTimesElapsed = z.infer<typeof zBlockSetTimesElapsed>
 
-/**
- * Converts plain js object into type BlockSetTimesElapsed with type validation.
- * @param obj plain js object
- * @throws {Error} if object is not parseable
- * @returns BlockSetTimesElapsed
- */
-export const plainToBlockSetTimesElapsed = (obj: unknown): BlockSetTimesElapsed => 
-	zBlockSetTimesElapsed.parse(obj)
+/** Converts plain js object into type BlockSetTimesElapsed with type validation. */
+export const plainToBlockSetTimesElapsed = (obj: unknown): ZodResDefault<BlockSetTimesElapsed> => 
+	neverThrowZodParse(zBlockSetTimesElapsed.safeParse(obj))
 
 const zActiveTime = z.object({
 	from: z.number().int().default(0),
@@ -104,31 +97,23 @@ type BlockSetDataV1 = z.infer<typeof zBlockSetDataV1>
 
 export type BlockSetData = BlockSetDataV1
 
-/**
- * Converts plain js object into a BlockSet with type validation.
- * @throws {Error} if object is not parseable
- * @param obj 
- * @returns 
- */
-export const plainToBlockSetData = (obj: unknown): BlockSetData => {
-	if (obj !== null && obj !== undefined) {
-		if (parseableV0(obj)) {
-			const parsedBlockSetV0 = zBlockSetDataV0.parse(obj)
-			return convertV0toV1(parsedBlockSetV0)
-		}
-		else if (parseableV1(obj)) {
-			return zBlockSetDataV1.parse(obj)
-		}
-	}
+/** Converts plain js object into a BlockSet with type validation. */
+export const plainToBlockSetData = (obj: unknown): ZodRes<BlockSetData, ParseError> => {
+	if (obj === null || obj === undefined)
+		return err(ParseError.NullOrUndefined)
 
-	throw new Error("Can't parse to block set")
+	if (parseableV0(obj))
+		return neverThrowZodParse(zBlockSetDataV0.safeParse(obj)).map(convertV0toV1)
+	
+	if (parseableV1(obj))
+		return neverThrowZodParse(zBlockSetDataV1.safeParse(obj))
+	
+	return err(ParseError.CantIdentifyVersion)
 }
 
-/**
- * Creates a default object of type BlockSetData of the latest version.
- * @returns default BlockSetData
- */
-export const createDefaultBlockSetData = (): BlockSetData => zBlockSetDataV1.parse({ v: 1 })
+/** Creates a default object of type BlockSetData of the latest version. */
+export const createDefaultBlockSetData = (): BlockSetData => 
+	zBlockSetDataV1.parse({ v: 1 })
 
 /**
  * Converts block set version 0 to version 1.

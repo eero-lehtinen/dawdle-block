@@ -12,16 +12,24 @@ import { TabLoadedEvent, TabObserver, TabRemovedEvent } from "@src/background/ta
 import flushPromises from "flush-promises"
 import "jest-extended"
 import { GeneralOptions } from "@src/background/generalOptions"
+import { mocked } from "ts-jest/utils"
+import { okAsync } from "neverthrow"
+import { createDefaultGeneralOptionsData } from "@src/background/generalOptionsParser"
 
 jest.mock("webextension-polyfill-ts", () => ({}))
 jest.mock("@src/background/tabObserver")
 jest.mock("@src/background/browserStorage")
 
+const mockBrowserStorage = mocked(BrowserStorage, true)
+mockBrowserStorage.prototype.fetchBlockSets.mockResolvedValue([])
+mockBrowserStorage.prototype.saveNewBlockSet.mockReturnValue(okAsync(undefined))
+mockBrowserStorage.prototype.deleteBlockSet.mockReturnValue(okAsync(undefined))
+mockBrowserStorage.prototype.fetchGeneralOptionsData
+	.mockReturnValue(okAsync(createDefaultGeneralOptionsData()))
+
 jest.useFakeTimers()
 
-jest.spyOn(youtubeAPIModule, "getYTInfo").mockImplementation(
-	() => Promise.resolve(youtubeAPIModule.nullYTInfo()))
-
+// Mock TabObserver
 const mockLoadTab = new Observer<TabLoadedEvent>()
 TabObserver.prototype.subscribeTabLoaded = jest.fn((listener: Listener<TabLoadedEvent>) => 
 	mockLoadTab.subscribe(listener))
@@ -30,16 +38,13 @@ const mockRemoveTab = new Observer<TabRemovedEvent>()
 TabObserver.prototype.subscribeTabRemoved = jest.fn((listener: Listener<TabRemovedEvent>) => 
 	mockRemoveTab.subscribe(listener)) 
 
-BrowserStorage.prototype.fetchBlockSets = jest.fn(async() => Promise.resolve([]))
 
+// Mock single functions from modules
+jest.spyOn(youtubeAPIModule, "getYTInfo").mockResolvedValue(youtubeAPIModule.nullYTInfo())
+const mockAnnoyTab = jest.spyOn(annoyTabModule, "annoyTab").mockReturnValue()
+const mockSetBadge = jest.spyOn(setBadgeModule, "setBadge").mockResolvedValue()
 const mockBlockTab = jest.spyOn(blockTabModule, "blockTab").mockImplementation(
 	(tabId: number) => mockLoadTab.publish({ tabId, url: "block-page.html" }))
-
-const mockAnnoyTab = jest.spyOn(annoyTabModule, "annoyTab").mockImplementation(
-	() => {/* do nothing */})
-	
-const mockSetBadge = jest.spyOn(setBadgeModule, "setBadge").mockImplementation(
-	() => Promise.resolve())
 
 describe("test Background", () => {
 	let browserStorage: BrowserStorage
@@ -70,7 +75,7 @@ describe("test Background", () => {
 	// ra: requireActive, am: annoyMode, ta: timeAllowed in milliseconds
 	const initBlockSets = async(config: {am: boolean, ra: boolean, ta: number}[]) => {
 		for (const c of config) {
-			const blockSet = await blockSets.addDefaultBlockSet()
+			const blockSet = (await blockSets.addDefaultBlockSet())._unsafeUnwrap()
 			blockSet.annoyMode = c.am
 			blockSet.requireActive = c.ra
 			blockSet.timeAllowed = c.ta

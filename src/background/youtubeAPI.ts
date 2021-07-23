@@ -1,5 +1,5 @@
 import fetch from "cross-fetch"
-import { err, ok, Result } from "neverthrow"
+import { err, errAsync, ok, okAsync, ResultAsync } from "neverthrow"
 
 const APIKey = 
 	"A%49%7a%61%53y%42O%4f%6e%39%79%2dbx%42%38%4c%48k%2d%35%51%36%4e%44tq%63y9%5f%46%48%6a%35R%484"
@@ -55,39 +55,35 @@ export const getYTInfo = async(url: URL): Promise<YTInfo> => {
 		return nullYTInfo()
 	}
 
-	const get = async(): FetchRes<YTInfo> => {
+	const get = (): FetchRes<YTInfo> => {
 		const videoId = findVideoId(url)
 		if (videoId !== null) {
-			return await fetchVideoInfo(videoId)
+			return fetchVideoInfo(videoId)
 		}
 
 		const channelId = findChannelId(url)
 		if (channelId !== null) {
-			const result = await fetchChannelTitle(channelId)
-			return result.map(title => ({ ...nullYTInfo(), channelId, channelTitle: title }))
+			return fetchChannelTitle(channelId)
+				.map(title => ({ ...nullYTInfo(), channelId, channelTitle: title }))
 		}
 
 		const channelUsername = findChannelUsername(url)
 		if (channelUsername !== null) {
-			const result = await fetchUsernameChannelInfo(channelUsername)
-			return result.map(channelInfo => ({ ...nullYTInfo(), ...channelInfo }))
+			return fetchUsernameChannelInfo(channelUsername)
+				.map(channelInfo => ({ ...nullYTInfo(), ...channelInfo }))
 		}
 
 		const playlistId = findPlaylistId(url)
 		if (playlistId !== null && url.searchParams.get("playnext") !== "1") {
-			const result = await fetchPlaylistChannelInfo(playlistId)
-			return result.map(channelInfo => ({ ...nullYTInfo(), ...channelInfo }))
+			return fetchPlaylistChannelInfo(playlistId)
+				.map(channelInfo => ({ ...nullYTInfo(), ...channelInfo }))
 		}
 
-		return ok(nullYTInfo())
+		return okAsync(nullYTInfo())
 	}
-
-	const result = await get()
-	result.mapErr(err => {
-		if (err === FetchError.RequestFailed) 
-			console.warn("Couldn't reach YouTube API servers")
-	})
-	return result.unwrapOr(nullYTInfo())
+	
+	const res = await get()
+	return res.unwrapOr(nullYTInfo())
 }
 
 
@@ -147,85 +143,89 @@ const findPlaylistId = (url: URL): string | null => {
 	return null
 }
 
-export enum FetchError {
-	RequestFailed = "Request Failed",
-	EmptyResponse = "Empty response",
+export enum FetchErrorType {
+	BadStatusCode = "BadStatusCode",
+	EmptyResponse = "EmptyResponse",
+	NetworkError = "NetworkError",
 }
 
-export type FetchRes<T> = Promise<Result<T, FetchError>>
 
+export interface FetchError {
+	type: FetchErrorType
+	message?: string
+}
+
+export type FetchRes<T> = ResultAsync<T, FetchError>
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /** Returns the first item of YouTube data API request response. */
 const getItemFromResponse = 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async(response: Response): FetchRes<any> =>  {
+(response: Response): FetchRes<any> =>  {
 	if (response.status !== 200)
-		return err(FetchError.RequestFailed)
+		return errAsync({ type: FetchErrorType.BadStatusCode })
 
-	const body = await response.json()
-
-	if (body.items === undefined || body.items.length === 0) {
-		return err(FetchError.EmptyResponse)
-	}
-
-	return ok(body.items[0])
+	return ResultAsync.fromSafePromise<any, FetchError>(response.json())
+		.andThen(body =>
+			(body.items === undefined || body.items.length === 0) ? 
+				err({ type: FetchErrorType.EmptyResponse }) :
+				ok(body.items[0]))
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
+/** Fetch with error handling */
+const safeFetch = (url: string) =>
+	ResultAsync.fromPromise<Response, FetchError>(fetch(url), (err) => ({ 
+		type: FetchErrorType.NetworkError, 
+		message: (err as {message: string}).message, 
+	}))
+
 
 /** Fetches video info from YouTube API with this id. */
-const fetchVideoInfo = async(videoId: string): FetchRes<YTInfo> => {
-	const response = await fetch(
+const fetchVideoInfo = (videoId: string): FetchRes<YTInfo> =>
+	safeFetch(
 		`${APIBaseUrl}/videos?part=snippet` +
-		`&id=${videoId}` + 
-		"&field=items/snippet(categoryId,channelId,channelTitle)" +
-		`&key=${APIKey}`,
-	)
-
-	const result = await getItemFromResponse(response)
-	return result.map(item => ({
-		channelId: item.snippet.channelId, 
-		channelTitle: item.snippet.channelTitle,
-		categoryId: item.snippet.categoryId,
-	}))
-}
+			`&id=${videoId}` + 
+			"&field=items/snippet(categoryId,channelId,channelTitle)" +
+			`&key=${APIKey}`)
+		.andThen(getItemFromResponse)
+		.map(item => ({
+			channelId: item.snippet.channelId, 
+			channelTitle: item.snippet.channelTitle,
+			categoryId: item.snippet.categoryId,
+		}))
 
 /** Fetches channel id and title of the author of this playlist. */
-const fetchPlaylistChannelInfo = async(playlistId: string): FetchRes<YTChannelInfo> => {
-	const response = await fetch(
+const fetchPlaylistChannelInfo = (playlistId: string): FetchRes<YTChannelInfo> =>
+	safeFetch(
 		`${APIBaseUrl}/playlists?part=snippet` +
-		`&id=${playlistId}` + 
-		"&field=items/snippet(channelId,channelTitle)" +
-		`&key=${APIKey}`,
-	)
-
-	const result = await getItemFromResponse(response)
-	return result.map(item => ({ 
-		channelId: item.snippet.channelId, 
-		channelTitle: item.snippet.channelTitle, 
-	}))
-}
+			`&id=${playlistId}` + 
+			"&field=items/snippet(channelId,channelTitle)" +
+			`&key=${APIKey}`)
+		.andThen(getItemFromResponse)
+		.map(item => ({
+			channelId: item.snippet.channelId, 
+			channelTitle: item.snippet.channelTitle, 
+		}))
 
 /** Fetches channel id and title associated with this username. */
-const fetchUsernameChannelInfo = async(username: string): FetchRes<YTChannelInfo> => {
-	const response = await fetch(
+const fetchUsernameChannelInfo = (username: string): FetchRes<YTChannelInfo> =>
+	safeFetch(
 		`${APIBaseUrl}/channels?part=snippet` +
-		`&forUsername=${username}` +
-		"&field=items(id,snippet(title))" +
-		`&key=${APIKey}`,
-	)
-	const result = await getItemFromResponse(response)
-	return result.map(item => ({  
-		channelId: item.id, 
-		channelTitle: item.snippet.title, 
-	}))
-}
+			`&forUsername=${username}` +
+			"&field=items(id,snippet(title))" +
+			`&key=${APIKey}`)
+		.andThen(getItemFromResponse)
+		.map(item => ({
+			channelId: item.id, 
+			channelTitle: item.snippet.title, 
+		}))
 
 /** Fetches channel title associated with this channel id. */
-export const fetchChannelTitle = async(channelId: string): FetchRes<string> => {
-	const response = await fetch(
+export const fetchChannelTitle = (channelId: string): FetchRes<string> =>
+	safeFetch(
 		`${APIBaseUrl}/channels?part=snippet` +
-		`&id=${channelId}` +
-		"&field=items/snippet(title)" +
-		`&key=${APIKey}`,
-	)
-	const result = await getItemFromResponse(response)
-	return result.map(item => item.snippet.title)
-}
+			`&id=${channelId}` +
+			"&field=items/snippet(title)" +
+			`&key=${APIKey}`)
+		.andThen(getItemFromResponse)
+		.map(item => item.snippet.title)

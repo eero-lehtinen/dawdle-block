@@ -1,5 +1,6 @@
 
 import { compress, decompress } from "@src/background/compression"
+import { err } from "neverthrow"
 
 const testObject = { test: { test: [{}, 42, "test"] } }
 
@@ -15,11 +16,15 @@ describe("test save compression and decompression", () => {
 
 	test("save data compress and decompress loses no data", () => {
 		const compressed = compress(testObject)
-		expect(decompress(compressed)).toStrictEqual(testObject)
+		expect(decompress(compressed)._unsafeUnwrap()).toStrictEqual(testObject)
 	})
 
 	test("saves compressed with old system decompress into the same value", () => {
-		expect(decompress(testObjectCompressedOld)).toStrictEqual(testObject)
+		expect(decompress(testObjectCompressedOld)._unsafeUnwrap()).toStrictEqual(testObject)
+	})
+
+	test("returns error when compressed value is invalid (not gzip compressed base64 string)", () => {
+		expect(decompress("x")).toStrictEqual(err("InputCantBeDecompressed"))
 	})
 })
 

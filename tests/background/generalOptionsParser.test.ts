@@ -1,5 +1,6 @@
 import { plainToGeneralOptionsData, createDefaultGeneralOptionsData, GeneralOptionsData } 
 	from "@src/background/generalOptionsParser"
+import { ok } from "neverthrow"
 
 describe("test GeneralOptions parsing", () => {
 	const defaultGeneralOptions = createDefaultGeneralOptionsData()
@@ -14,14 +15,14 @@ describe("test GeneralOptions parsing", () => {
 			typingTestWordCount: 100,
 		}
 
-		expect(plainToGeneralOptionsData(testOptionsObj)).toStrictEqual(testOptionsObj)
+		expect(plainToGeneralOptionsData(testOptionsObj)).toEqual(ok(testOptionsObj))
 	})
 
 	test("non-objects throw", () => {
-		expect(() => { plainToGeneralOptionsData("string") }).toThrow()
-		expect(() => { plainToGeneralOptionsData(42) }).toThrow()
-		expect(() => { plainToGeneralOptionsData(() => {return 0}) }).toThrow()
-		expect(() => { plainToGeneralOptionsData(null)}).toThrow()
+		expect(plainToGeneralOptionsData("string") .isErr()).toBe(true)
+		expect(plainToGeneralOptionsData(42) .isErr()).toBe(true)
+		expect(plainToGeneralOptionsData(() => {return 0}) .isErr()).toBe(true)
+		expect(plainToGeneralOptionsData(null).isErr()).toBe(true)
 	})
 
 	test("objects with members of invalid types throw", () => {
@@ -32,11 +33,11 @@ describe("test GeneralOptions parsing", () => {
 			theme: undefined,
 		} 
 
-		expect(() => { plainToGeneralOptionsData(testOptionsObj)}).toThrow()
+		expect(plainToGeneralOptionsData(testOptionsObj).isErr()).toBe(true)
 	})
 
 	test("incomplete objects get filled with defaults", () => {
-		expect(plainToGeneralOptionsData({})).toStrictEqual(defaultGeneralOptions)
+		expect(plainToGeneralOptionsData({})).toStrictEqual(ok(defaultGeneralOptions))
 	})
 
 	test("objects retain their valid property names and lose invalid ones", () => {
@@ -46,8 +47,7 @@ describe("test GeneralOptions parsing", () => {
 			loseMe: "lost",
 		}
 
-		const generalOptions = plainToGeneralOptionsData(testBlockSetObj)
-
+		const generalOptions = plainToGeneralOptionsData(testBlockSetObj)._unsafeUnwrap()
 		expect(generalOptions).toHaveProperty("displayHelp")
 		expect(generalOptions).not.toHaveProperty("loseMe")
 	})
@@ -62,7 +62,7 @@ describe("test GeneralOptions parsing", () => {
 			theme: "system",
 		}
 
-		expect(plainToGeneralOptionsData(testBlockSetObj)).toStrictEqual(testBlockSetObjResult)
+		expect(plainToGeneralOptionsData(testBlockSetObj)).toEqual(ok(testBlockSetObjResult))
 	})
 
 	
@@ -76,6 +76,6 @@ describe("test GeneralOptions parsing", () => {
 			theme: "dark",
 		}
 
-		expect(plainToGeneralOptionsData(testBlockSetObj)).toStrictEqual(testBlockSetObjResult)
+		expect(plainToGeneralOptionsData(testBlockSetObj)).toEqual(ok(testBlockSetObjResult))
 	})
 })

@@ -41,15 +41,13 @@ describe("test YouTube API error states", () => {
 			.resolves.toStrictEqual(nullYTInfo)
 	})
 
-	test("return null values and logs error when request status is not 200", async() => {
-		const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {/* do nothing */})
+	test("return null values when request status is not 200", async() => {
 		mockedFetch.mockResolvedValueOnce({
-			status: 404, 
+			status: 404,
 		} as Response)
 		
 		await expect(getYTInfo(new URL("https://www.youtube.com/watch?v=asd")))
 			.resolves.toStrictEqual(nullYTInfo)
-		expect(warnSpy).toBeCalled()
 	})
 })
 

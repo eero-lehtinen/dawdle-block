@@ -15,7 +15,7 @@ jest.mock("webextension-polyfill-ts", () => {
 				onRemoved: jest.fn(),
 			},
 			windows: { 
-				WINDOW_ID_NONE: -1, 
+				WINDOW_ID_NONE: -1,
 				getAll: jest.fn(),
 				onFocusChanged: jest.fn(),
 				onCreated: jest.fn(),

@@ -1,5 +1,6 @@
+import { err } from "neverthrow"
 import { z } from "zod"
-
+import { neverThrowZodParse, parseableV0, parseableVN, ParseError, ZodRes } from "./parserHelpers"
 
 const zClockType = z.union([z.literal(12), z.literal(24)]).default(24)
 const zSettingsProtection = z.enum(["never", "always", "timerZero"]).default("never")
@@ -30,25 +31,20 @@ type GeneralOptionsDataV1 = z.infer<typeof zGeneralOptionsDataV1>
 
 export type GeneralOptionsData = GeneralOptionsDataV1
 
-/**
- * Converts plain js object into GeneralOptionsData with type validation.
- * @throws {Error} if object is not parseable
- * @param obj
- * @returns 
- */
+/** Converts plain js object into GeneralOptionsData with type validation. */
 export const plainToGeneralOptionsData = 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-(obj: any): GeneralOptionsData => {
-	if (obj !== null && obj !== undefined) {
-		if (parseableV0(obj)) {
-			const parsedGeneralOptionsV0 = zGeneralOptionsDataV0.parse(obj)
-			return convertV0toV1(parsedGeneralOptionsV0)
-		}
-		else if (parseableV1(obj)) {
-			return zGeneralOptionsDataV1.parse(obj)
-		}
-	}
-	throw new Error("Can't parse to general options")
+(obj: unknown): ZodRes<GeneralOptionsData, ParseError> => {
+	if (obj === null || obj === undefined)
+		return err(ParseError.NullOrUndefined)
+
+	if (parseableV0(obj))
+		return neverThrowZodParse(zGeneralOptionsDataV0.safeParse(obj)).map(convertV0toV1)
+
+	else if (parseableVN(1, obj))
+		return neverThrowZodParse(zGeneralOptionsDataV1.safeParse(obj))
+
+	return err(ParseError.CantIdentifyVersion)
 }
 
 /**
@@ -77,19 +73,3 @@ const convertV0toV1 = (generalOptionsV0: GeneralOptionsDataV0) => {
 
 	return generalOptionsV1
 }
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-/**
- * Checks if passed object should be parsed with v0 block set parser
- * @param obj 
- * @returns 
- */
-const parseableV0 = (obj: any) => typeof obj === "object" && (!("v" in obj) || obj.v < 1)
-
-/**
- * Checks if passed object should be parsed with v1 block set parser
- * @param obj 
- * @returns 
- */
-const parseableV1 = (obj: any) => typeof obj === "object" && "v" in obj && obj.v === 1
