@@ -8,20 +8,6 @@ import "@material-ui/lab/themeAugmentation"
  */
 export const createGlobalTheme = (mode: "dark" | "light"): Theme =>
 	createTheme({
-		typography: {
-			fontFamily: [
-				"-apple-system",
-				"BlinkMacSystemFont",
-				"\"Segoe UI\"",
-				"Roboto",
-				"\"Helvetica Neue\"",
-				"Arial",
-				"sans-serif",
-				"\"Apple Color Emoji\"",
-				"\"Segoe UI Emoji\"",
-				"\"Segoe UI Symbol\"",
-			].join(","),
-		},
 		palette: {
 			mode,
 			background: mode === "dark" ? {

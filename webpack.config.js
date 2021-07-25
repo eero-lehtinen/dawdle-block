@@ -98,12 +98,11 @@ module.exports = (env) => {
 					],
 				},
 				{
-					exclude: /node_modules/,
-					test: /\.scss$/,
+					include: /node_modules\/@fontsource/,
+					test: /\.css$/,
 					use: [
 						{ loader: "style-loader" }, // Creates style nodes from JS strings
 						{ loader: "css-loader" }, // Translates CSS into CommonJS
-						{ loader: "sass-loader" }, // Compiles Sass to CSS
 					],
 				},
 			],
