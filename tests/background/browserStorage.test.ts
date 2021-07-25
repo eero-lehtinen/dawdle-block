@@ -10,7 +10,9 @@ import { BlockSetIds, BlockSetTimesElapsed } from "@src/background/blockSetParse
 import { compress } from "@src/background/compression"
 import blockSetCmpObj from "../testHelpers/blockSetCmpObj"
 import { mocked } from "ts-jest/utils"
-import { createDefaultGeneralOptionsData } from "@src/background/generalOptionsParser"
+import { 
+	createDefaultGeneralOptionsData, plainToGeneralOptionsData, 
+} from "@src/background/generalOptionsParser"
 import { err, ok } from "neverthrow"
 import { sleep } from "@src/shared/utils"
 
@@ -61,7 +63,6 @@ describe("test BrowserStorage block sets", () => {
 		[{ [bsTimesElapsedSaveKey]: [] }],
 		[blockSets],
 	]
-
 
 	const mockGet = mockBrowser.storage.sync.get
 	const mockSet = mockBrowser.storage.sync.set.mockImplementation(() => Promise.resolve())
@@ -232,7 +233,7 @@ describe("test BrowserStorage general settings", () => {
 	beforeEach(() => browserStorage = new BrowserStorage({ preferSync: true }))
 
 	const mockGet = mockBrowser.storage.sync.get
-	// const mockSet = mockBrowser.storage.sync.set
+	const mockSet = mockBrowser.storage.sync.set.mockImplementation(() => Promise.resolve())
 	
 	test("can load general settings data", async() => {
 		mockGet.mockResolvedValueOnce({ [generalOptionsSaveKey]: testGOData })
@@ -259,6 +260,14 @@ describe("test BrowserStorage general settings", () => {
 
 		expect(result.isErr()).toBe(true)
 		expect(mockGet.mock.calls).toEqual([[{ [generalOptionsSaveKey]: null }]])
+	})
+
+	test("can save general settings data", async() => {
+		const testGOD = plainToGeneralOptionsData({ typingTestWordCount: 42 })._unsafeUnwrap()
+		const result = await browserStorage.saveGeneralOptionsData(testGOD)
+
+		expect(result).toEqual(ok(StorageSetSuccess.Completed))
+		expect(mockSet.mock.calls).toEqual([[{ [generalOptionsSaveKey]: testGOD }]])
 	})
 })
 
