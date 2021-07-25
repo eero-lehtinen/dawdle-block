@@ -1,7 +1,7 @@
 import { FunctionComponent } from "preact"
 import { useEffect, useMemo, useState } from "preact/hooks"
 import { CssBaseline, GlobalStyles, useMediaQuery } from "@material-ui/core"
-import { ThemeProvider } from "@material-ui/core/styles"
+import { ThemeProvider, Theme as MatUITheme } from "@material-ui/core/styles"
 import { createGlobalTheme } from "./globalTheme"
 import { useBGScript } from "./bgScriptProvider"
 import { BackgroundBox } from "./backgroundBox"
@@ -22,6 +22,34 @@ export const BaseWrapper: FunctionComponent = ({ children }) =>
 	</BGScriptProvider>
 
 /**
+ * Global styles object that has styling for scrollbars.
+ */
+const MyGlobalStyles = ({ matUITheme }: { matUITheme: MatUITheme }) => {
+	const scrollbarColors = {
+		track: matUITheme.palette.background.default, 
+		thumb: "#121212",
+	}
+	return (
+		<GlobalStyles styles={{ 
+		// Chromium
+			"::-webkit-scrollbar": { color: "#FFF", width: "16px" }, 
+			"::-webkit-scrollbar-track": { backgroundColor: scrollbarColors.track },
+			"::-webkit-scrollbar-thumb": {
+				backgroundColor: scrollbarColors.thumb, 
+				borderRadius: 8, 
+				border: `4px solid ${scrollbarColors.track}`, 
+			},
+			// Firefox
+			"*": {
+				scrollbarColor: `${scrollbarColors.thumb} ${scrollbarColors.track}`,
+				scrollbarWidth: "thin",
+			},
+		}} 
+		/>
+	)
+}
+
+/**
  * Inner wrapper is used to get bg script context.
  */
 const InnerWrapper: FunctionComponent = ({ children }) => {
@@ -35,31 +63,11 @@ const InnerWrapper: FunctionComponent = ({ children }) => {
 		bg.generalOptions.subscribeChanged("theme", ({ newValue }) => setTheme(newValue)), 
 	[bg.generalOptions])
 
-	const scrollbarColors = {
-		track: matUITheme.palette.background.default, 
-		thumb: "#121212",
-	}
-
 	return (
 		<>
 			<ThemeProvider theme={matUITheme} >
 				<CssBaseline /> 
-				<GlobalStyles styles={{ 
-					// Chromium
-					"::-webkit-scrollbar": { color: "#FFF", width: "16px" }, 
-					"::-webkit-scrollbar-track": { backgroundColor: scrollbarColors.track },
-					"::-webkit-scrollbar-thumb": {
-						backgroundColor: scrollbarColors.thumb, 
-						borderRadius: 8, 
-						border: `4px solid ${scrollbarColors.track}`, 
-					},
-					// Firefox
-					"*": {
-						scrollbarColor: `${scrollbarColors.thumb} ${scrollbarColors.track}`,
-						scrollbarWidth: "thin",
-					},
-				}} 
-				/>
+				<MyGlobalStyles matUITheme={matUITheme} />
 				<BackgroundBox>
 					{ children }
 				</BackgroundBox>
