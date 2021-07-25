@@ -1,7 +1,7 @@
 import { BlockSet, BlockTestRes } from "./blockSet"
 import { timeToMSSinceMidnight } from "../shared/utils"
-import { BrowserStorage, StorageSetAnyError } from "./browserStorage"
-import { ok, ResultAsync } from "neverthrow"
+import { BrowserStorage, StorageSetError } from "./browserStorage"
+import { ResultAsync } from "neverthrow"
 import { ParseError, ZodResAsync } from "./parserHelpers"
 
 /**
@@ -85,14 +85,14 @@ export class BlockSets {
 	 * Add a new block set to the end of the list with default values.
 	 * Id will be automatically assigned.
 	 */
-	addDefaultBlockSet(): ResultAsync<BlockSet, StorageSetAnyError> {
+	addDefaultBlockSet(): ResultAsync<BlockSet, StorageSetError> {
 		const newBlockSet = BlockSet.createDefault(this.findNextSafeId())
 		newBlockSet.name = this.computeNewName()
 
 		return this.browserStorage.saveNewBlockSet(newBlockSet, [...this._list, newBlockSet])
-			.andThen(() => {
+			.map(() => {
 				this.addBlockSet(newBlockSet)
-				return ok(newBlockSet)
+				return newBlockSet
 			})
 	}
 
@@ -102,12 +102,11 @@ export class BlockSets {
 	 * (copy) will be appended to the end of the name.
 	 */
 	addBlockSetCopy(copyFrom: BlockSet): 
-		ZodResAsync<BlockSet, ParseError | StorageSetAnyError> {
+		ZodResAsync<BlockSet, ParseError | StorageSetError> {
 		return BlockSet.create(this.findNextSafeId(), copyFrom.data)
 			.map(bs => this.insertCopyName(bs))
-			.asyncAndThen(newBlockSet => 
-				this.browserStorage.saveNewBlockSet(newBlockSet, [...this._list, newBlockSet])
-					.map(() => newBlockSet))
+			.asyncAndThen(bs => 
+				this.browserStorage.saveNewBlockSet(bs, [...this._list, bs]).map(() => bs))
 			.map(bs => this.addBlockSet(bs))
 	}
 
@@ -173,7 +172,7 @@ export class BlockSets {
 	 * Deletes block set referenced by blockSet
 	 * @param blockSet reference to value to be deleted
 	 */
-	deleteBlockSet(blockSet: BlockSet): ResultAsync<void, StorageSetAnyError> {
+	deleteBlockSet(blockSet: BlockSet): ResultAsync<void, StorageSetError> {
 		const newList = this._list.filter(bs => bs !== blockSet)
 		return this.browserStorage
 			.deleteBlockSet(blockSet, newList)

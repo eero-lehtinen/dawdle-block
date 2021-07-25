@@ -1,6 +1,9 @@
 import { err } from "neverthrow"
 import { z } from "zod"
-import { neverThrowZodParse, parseableV0, parseableVN, ParseError, ZodRes } from "./parserHelpers"
+import { 
+	ParseError, CantIdentifyVersionParseError, NullOrUndefinedParseError, 
+	parseableV0, parseableVN, ZodRes, neverThrowZodParse, 
+} from "./parserHelpers"
 
 const zClockType = z.union([z.literal(12), z.literal(24)]).default(24)
 const zSettingsProtection = z.enum(["never", "always", "timerZero"]).default("never")
@@ -36,7 +39,7 @@ export const plainToGeneralOptionsData =
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
 (obj: unknown): ZodRes<GeneralOptionsData, ParseError> => {
 	if (obj === null || obj === undefined)
-		return err(ParseError.NullOrUndefined)
+		return err(new NullOrUndefinedParseError())
 
 	if (parseableV0(obj))
 		return neverThrowZodParse(zGeneralOptionsDataV0.safeParse(obj)).map(convertV0toV1)
@@ -44,7 +47,7 @@ export const plainToGeneralOptionsData =
 	else if (parseableVN(1, obj))
 		return neverThrowZodParse(zGeneralOptionsDataV1.safeParse(obj))
 
-	return err(ParseError.CantIdentifyVersion)
+	return err(new CantIdentifyVersionParseError())
 }
 
 /**

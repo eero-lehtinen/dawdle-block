@@ -2,7 +2,8 @@ import { browser } from "webextension-polyfill-ts"
 import { randomBytes } from "crypto"
 import { 
 	BrowserStorage, bsIdsSaveKey, bsTimesElapsedSaveKey,
-	generalOptionsSaveKey, StorageSetError,
+	EmptyStorageGetError,
+	generalOptionsSaveKey, StorageSetSuccess, TooLargeStorageSetError, UnknownStorageSetError,
 } from "@src/background/browserStorage"
 import { BlockSet } from "@src/background/blockSet"
 import { BlockSetIds, BlockSetTimesElapsed } from "@src/background/blockSetParser"
@@ -11,6 +12,7 @@ import blockSetCmpObj from "../testHelpers/blockSetCmpObj"
 import { mocked } from "ts-jest/utils"
 import { createDefaultGeneralOptionsData } from "@src/background/generalOptionsParser"
 import { err, ok } from "neverthrow"
+import { sleep } from "@src/shared/utils"
 
 jest.mock("webextension-polyfill-ts", () => {
 	return {
@@ -64,10 +66,11 @@ describe("test BrowserStorage block sets", () => {
 	const mockGet = mockBrowser.storage.sync.get
 	const mockSet = mockBrowser.storage.sync.set.mockImplementation(() => Promise.resolve())
 
-	const browserStorage = new BrowserStorage({ preferSync: true })
+	let browserStorage: BrowserStorage
 	let testBlockSet: BlockSet
 
 	beforeEach(() => {
+		browserStorage = new BrowserStorage({ preferSync: true })
 		testBlockSet = BlockSet.create(1, { name: "TEST" }, 42)._unsafeUnwrap()
 	})
 
@@ -174,19 +177,8 @@ describe("test BrowserStorage block sets", () => {
 	test("saveBlockSet returns error when object is too large to be saved", async() => {	
 		// 10k random bytes is too large to store even compressed
 		testBlockSet.name = randomBytes(10000).toString("hex") 
-		expect(await browserStorage.saveBlockSet(testBlockSet))
-			.toEqual(err(StorageSetError.TooLarge))
-	})
-
-	test("saveBlockSet returns error when saves are done in too quick succession", async() => {
-		mockSet.mockRejectedValueOnce(Error("WRITE_OPERATIONS"))
-
-		expect(await browserStorage.saveBlockSet(testBlockSet))
-			.toEqual(err(StorageSetError.TooManyWrites))
-
-		expect(mockSet.mock.calls).toEqual([[{
-			1: compress(testBlockSet.data),
-		}]])
+		expect((await browserStorage.saveBlockSet(testBlockSet))._unsafeUnwrapErr())
+			.toBeInstanceOf(TooLargeStorageSetError)
 	})
 
 	test("saveBlockSet returns and logs message when storage.set returns unknown error", async() => {
@@ -194,9 +186,10 @@ describe("test BrowserStorage block sets", () => {
 		mockSet.mockRejectedValueOnce(Error("Invalid moon phase"))
 
 		expect(await browserStorage.saveBlockSet(testBlockSet))
-			.toEqual(err({ message: "Invalid moon phase" }))
+			.toEqual(err(new UnknownStorageSetError("Invalid moon phase")))
 
-		expect(mockWarn).toBeCalledWith(expect.toBeString(), Error("Invalid moon phase"))
+		expect(mockWarn).toBeCalledWith(expect.toBeString(), 
+			new UnknownStorageSetError("Invalid moon phase"))
 
 		expect(mockSet.mock.calls).toEqual([[{
 			1: compress(testBlockSet.data),
@@ -229,11 +222,14 @@ describe("test BrowserStorage block sets", () => {
 })
 
 describe("test BrowserStorage general settings", () => {
-	const browserStorage = new BrowserStorage({ preferSync: true })
+	let browserStorage: BrowserStorage
+
 	const testGOData = {
 		...createDefaultGeneralOptionsData(),
 		typingTestWordCount: 42,
 	}
+
+	beforeEach(() => browserStorage = new BrowserStorage({ preferSync: true }))
 
 	const mockGet = mockBrowser.storage.sync.get
 	// const mockSet = mockBrowser.storage.sync.set
@@ -247,12 +243,12 @@ describe("test BrowserStorage general settings", () => {
 		expect(mockGet.mock.calls).toEqual([[{ [generalOptionsSaveKey]: null }]])
 	})
 
-	test("if storage is empty, returns defaults", async() => {
+	test("if storage is empty, returns empty error", async() => {
 		mockGet.mockResolvedValueOnce({ [generalOptionsSaveKey]: null })
 
 		const result = await browserStorage.fetchGeneralOptionsData()
 
-		expect(result).toEqual(ok(createDefaultGeneralOptionsData()))
+		expect(result._unsafeUnwrapErr()).toBeInstanceOf(EmptyStorageGetError)
 		expect(mockGet.mock.calls).toEqual([[{ [generalOptionsSaveKey]: null }]])
 	})
 
@@ -264,4 +260,112 @@ describe("test BrowserStorage general settings", () => {
 		expect(result.isErr()).toBe(true)
 		expect(mockGet.mock.calls).toEqual([[{ [generalOptionsSaveKey]: null }]])
 	})
+})
+
+describe("test save deferring", () => {
+	
+	const mockSet = mockBrowser.storage.sync.set.mockImplementation(() => Promise.resolve())
+
+	let browserStorage: BrowserStorage 
+	let testBlockSet: BlockSet
+
+	jest.useFakeTimers()
+
+	beforeEach(() => {
+		browserStorage = new BrowserStorage({ preferSync: true })
+		testBlockSet = BlockSet.create(1, { name: "TEST" }, 42)._unsafeUnwrap()
+	})
+
+	afterEach(() => jest.clearAllTimers())
+	
+	test("defers saving when there are too many writes in quick succession", async() => {
+		mockSet.mockRejectedValueOnce(Error("WRITE_OPERATIONS"))
+
+		expect(await browserStorage.saveBlockSet(testBlockSet))
+			.toEqual(ok(StorageSetSuccess.Deferred))
+		
+		const compressed = compress(testBlockSet.data)
+
+		jest.advanceTimersToNextTimer()
+
+		expect(mockSet.mock.calls).toEqual([[{ 1: compressed }], [{ 1: compressed }]])
+	})
+
+	test("If there are items in defer-queue, all new saves are deferred too", async() => {
+		mockSet.mockRejectedValueOnce(Error("WRITE_OPERATIONS"))
+
+		expect(await browserStorage.saveBlockSet(testBlockSet))
+			.toEqual(ok(StorageSetSuccess.Deferred))
+		const compressed1 = compress(testBlockSet.data)
+		
+		testBlockSet.name = "TEST2"
+		expect(await browserStorage.saveBlockSet(testBlockSet))
+			.toEqual(ok(StorageSetSuccess.Deferred))
+
+		testBlockSet.name = "TEST3"
+		expect(await browserStorage.saveBlockSet(testBlockSet))
+			.toEqual(ok(StorageSetSuccess.Deferred))
+		const compressed3 = compress(testBlockSet.data)
+
+		jest.advanceTimersToNextTimer()
+
+		expect(mockSet.mock.calls).toEqual([
+			[{ 1: compressed1 }],
+			[{ 1: compressed3 }], // Deferred save uses most recent data
+		])
+	})
+
+	test("Multiple different types items can be deferred at the same time", async() => {
+		mockSet.mockRejectedValueOnce(Error("WRITE_OPERATIONS"))
+
+		expect(await browserStorage.saveBlockSet(testBlockSet))
+			.toEqual(ok(StorageSetSuccess.Deferred))
+		const compressed1 = compress(testBlockSet.data)
+		
+		const testBlockSet2 = BlockSet.create(2, { name: "TEST2" })._unsafeUnwrap()
+		expect(await browserStorage.saveNewBlockSet(testBlockSet2, [testBlockSet, testBlockSet2]))
+			.toEqual(ok(StorageSetSuccess.Deferred))
+		const compressed2 = compress(testBlockSet2.data)
+
+		jest.advanceTimersToNextTimer()
+
+		expect(mockSet.mock.calls).toEqual([
+			[{ 1: compressed1 }],
+			[{ 1: compressed1, 2: compressed2, 
+				[bsTimesElapsedSaveKey]: [undefined, 42, 0],
+				[bsIdsSaveKey]: [1, 2],
+			}], // Deferred save uses most recent data
+		])
+	})
+
+	test("If deferred items change while saving, it will be retried later", async() => {
+		mockSet.mockRejectedValueOnce(Error("WRITE_OPERATIONS"))
+			.mockImplementation(async() => await sleep(500)) // items may change when save is slow
+
+		expect(await browserStorage.saveBlockSet(testBlockSet))
+			.toEqual(ok(StorageSetSuccess.Deferred))
+		const compressed1 = compress(testBlockSet.data)
+
+		// Defer triggers, save will resolve in 500ms
+		jest.advanceTimersToNextTimer()
+		
+		// Update values while save is in progress
+		testBlockSet.name = "TEST2"
+		expect(await browserStorage.saveBlockSet(testBlockSet))
+			.toEqual(ok(StorageSetSuccess.Deferred))
+		const compressed2 = compress(testBlockSet.data)
+		
+		// Save resolves, finds out that values have changed
+		jest.advanceTimersByTime(500)
+
+		// Defer will be retried
+		jest.advanceTimersToNextTimer()
+
+		expect(mockSet.mock.calls).toEqual([
+			[{ 1: compressed1 }],
+			[{ 1: compressed1 }], // First defer try with old values
+			[{ 1: compressed2 }], // Second try with current values (succeeds)
+		])
+	})
+
 })

@@ -21,10 +21,11 @@ export type ZodRes<T, E> = Result<T, z.ZodIssue[] | E>
 export type ZodResDefaultAsync<T> = ResultAsync<T, z.ZodIssue[]> 
 export type ZodResAsync<T, E> = ResultAsync<T, z.ZodIssue[] | E>
 
-export enum ParseError {
-	NullOrUndefined = "NullOrUndefined",
-	CantIdentifyVersion = "CantIdentifyVersion",
-}
+/* eslint-disable jsdoc/require-jsdoc */
+export class ParseError extends Error {}
+export class NullOrUndefinedParseError extends ParseError {}
+export class CantIdentifyVersionParseError extends ParseError {}
+/* eslint-enable jsdoc/require-jsdoc */
 
 /* eslint-disable @typescript-eslint/no-explicit-any, 
 	@typescript-eslint/explicit-module-boundary-types */

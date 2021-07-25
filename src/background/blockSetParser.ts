@@ -1,7 +1,10 @@
 import { z } from "zod"
 import { BlockSet } from "./blockSet"
 import ms from "ms.macro"
-import { neverThrowZodParse, ParseError, ZodRes, ZodResDefault } from "./parserHelpers"
+import { 
+	ParseError, CantIdentifyVersionParseError, NullOrUndefinedParseError, 
+	neverThrowZodParse, ZodRes, ZodResDefault, 
+} from "./parserHelpers"
 import { err } from "neverthrow"
 
 const zBlockSetIds = z.array(z.number().int().nonnegative())
@@ -100,7 +103,7 @@ export type BlockSetData = BlockSetDataV1
 /** Converts plain js object into a BlockSet with type validation. */
 export const plainToBlockSetData = (obj: unknown): ZodRes<BlockSetData, ParseError> => {
 	if (obj === null || obj === undefined)
-		return err(ParseError.NullOrUndefined)
+		return err(new NullOrUndefinedParseError())
 
 	if (parseableV0(obj))
 		return neverThrowZodParse(zBlockSetDataV0.safeParse(obj)).map(convertV0toV1)
@@ -108,7 +111,7 @@ export const plainToBlockSetData = (obj: unknown): ZodRes<BlockSetData, ParseErr
 	if (parseableV1(obj))
 		return neverThrowZodParse(zBlockSetDataV1.safeParse(obj))
 	
-	return err(ParseError.CantIdentifyVersion)
+	return err(new CantIdentifyVersionParseError())
 }
 
 /** Creates a default object of type BlockSetData of the latest version. */

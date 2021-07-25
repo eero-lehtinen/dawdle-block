@@ -11,9 +11,12 @@ describe("test time to ms since midnight", () => {
 	})
 })
 
+
+
 describe("test sleep", () => {
-	beforeEach(() => { jest.useFakeTimers() })
-	afterEach(() => { jest.useRealTimers() })
+	jest.useFakeTimers()
+
+	afterEach(() => jest.clearAllTimers())
 
 	test("waits milliseconds based on parameters, then resolves", async() => {
 		const spy = jest.fn()

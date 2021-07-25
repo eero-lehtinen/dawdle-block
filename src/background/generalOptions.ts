@@ -1,4 +1,5 @@
-import { BrowserStorage } from "./browserStorage"
+import { ok, ResultAsync } from "neverthrow"
+import { BrowserStorage, StorageSetError, StorageSetSuccess } from "./browserStorage"
 import { 
 	createDefaultGeneralOptionsData, GeneralOptionsData, Theme, 
 } from "./generalOptionsParser"
@@ -65,8 +66,14 @@ export class GeneralOptions {
 		return this.changeObservers[key].subscribe(listener as any)
 	}
 
-	set theme(newValue: Theme) {
-		this.data.theme = newValue
-		this.changeObservers.theme.publish({ newValue })
+	/** Sets theme to a new value */
+	setTheme(newValue: Theme): ResultAsync<StorageSetSuccess, StorageSetError> {
+		return this.browserStorage.saveGeneralOptionsData(
+			{ ...this._data, theme: newValue })
+			.andThen(res => {
+				this.data.theme = newValue
+				this.changeObservers.theme.publish({ newValue })
+				return ok(res)
+			})
 	}
 }

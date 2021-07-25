@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { BlockSet, BlockTestRes } from "@src/background/blockSet"
 import { BlockSets } from "@src/background/blockSets"
-import { BrowserStorage } from "@src/background/browserStorage"
-// import { createDefaultGeneralOptionsData } from "@src/background/generalOptionsParser"
+import { BrowserStorage, StorageSetSuccess } from "@src/background/browserStorage"
 import { timeToMSSinceMidnight } from "@src/shared/utils"
 import { ok, okAsync } from "neverthrow"
 import { mocked } from "ts-jest/utils"
@@ -12,8 +11,8 @@ jest.mock("webextension-polyfill-ts", () => ({}))
 jest.mock("@src/background/browserStorage")
 
 const mockBrowserStorage = mocked(BrowserStorage, true)
-mockBrowserStorage.prototype.saveNewBlockSet.mockReturnValue(okAsync(undefined))
-mockBrowserStorage.prototype.deleteBlockSet.mockReturnValue(okAsync(undefined))
+mockBrowserStorage.prototype.saveNewBlockSet.mockReturnValue(okAsync(StorageSetSuccess.Completed))
+mockBrowserStorage.prototype.deleteBlockSet.mockReturnValue(okAsync(StorageSetSuccess.Completed))
 
 describe("test BlockSets construction", () => {
 	const testBlockSet = BlockSet.createDefault(42)
@@ -150,7 +149,7 @@ describe("test BlockSets blockedBy method", () => {
 
 	test("block set methods are called with correct arguments", () => {
 		const currentDate = new Date(2020, 1, 1, 8, 0, 0)
-		jest.useFakeTimers("modern")
+		jest.useFakeTimers()
 		jest.setSystemTime(currentDate)
 		blockSets.blockedBy("testUrl", "testCategoryId", "testChannelId")
 		expect(blockSets.list[0]!.test).toBeCalledWith("testUrl", "testCategoryId", "testChannelId")

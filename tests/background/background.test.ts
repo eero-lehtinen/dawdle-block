@@ -6,7 +6,7 @@ import * as blockTabModule from "@src/background/blockTab"
 import * as annoyTabModule from "@src/background/annoyTab"
 import * as setBadgeModule from "@src/background/setBadge"
 import * as youtubeAPIModule from "@src/background/youtubeAPI"
-import { BrowserStorage } from "@src/background/browserStorage"
+import { BrowserStorage, StorageSetSuccess } from "@src/background/browserStorage"
 import { Listener, Observer } from "@src/background/observer"
 import { TabLoadedEvent, TabObserver, TabRemovedEvent } from "@src/background/tabObserver"
 import flushPromises from "flush-promises"
@@ -22,8 +22,8 @@ jest.mock("@src/background/browserStorage")
 
 const mockBrowserStorage = mocked(BrowserStorage, true)
 mockBrowserStorage.prototype.fetchBlockSets.mockResolvedValue([])
-mockBrowserStorage.prototype.saveNewBlockSet.mockReturnValue(okAsync(undefined))
-mockBrowserStorage.prototype.deleteBlockSet.mockReturnValue(okAsync(undefined))
+mockBrowserStorage.prototype.saveNewBlockSet.mockReturnValue(okAsync(StorageSetSuccess.Completed))
+mockBrowserStorage.prototype.deleteBlockSet.mockReturnValue(okAsync(StorageSetSuccess.Completed))
 mockBrowserStorage.prototype.fetchGeneralOptionsData
 	.mockReturnValue(okAsync(createDefaultGeneralOptionsData()))
 

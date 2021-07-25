@@ -143,17 +143,14 @@ const findPlaylistId = (url: URL): string | null => {
 	return null
 }
 
-export enum FetchErrorType {
-	BadStatusCode = "BadStatusCode",
-	EmptyResponse = "EmptyResponse",
-	NetworkError = "NetworkError",
-}
 
 
-export interface FetchError {
-	type: FetchErrorType
-	message?: string
-}
+/* eslint-disable jsdoc/require-jsdoc */
+export class FetchError extends Error {}
+export class BadStatusCodeFetchError extends FetchError {}
+export class EmptyResponseFetchError extends FetchError {}
+export class NetworkFetchError extends FetchError {}
+/* eslint-enable jsdoc/require-jsdoc */
 
 export type FetchRes<T> = ResultAsync<T, FetchError>
 
@@ -162,22 +159,19 @@ export type FetchRes<T> = ResultAsync<T, FetchError>
 const getItemFromResponse = 
 (response: Response): FetchRes<any> =>  {
 	if (response.status !== 200)
-		return errAsync({ type: FetchErrorType.BadStatusCode })
+		return errAsync(new BadStatusCodeFetchError())
 
 	return ResultAsync.fromSafePromise<any, FetchError>(response.json())
 		.andThen(body =>
 			(body.items === undefined || body.items.length === 0) ? 
-				err({ type: FetchErrorType.EmptyResponse }) :
+				err(new EmptyResponseFetchError()) :
 				ok(body.items[0]))
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 /** Fetch with error handling */
 const safeFetch = (url: string) =>
-	ResultAsync.fromPromise<Response, FetchError>(fetch(url), (err) => ({ 
-		type: FetchErrorType.NetworkError, 
-		message: (err as {message: string}).message, 
-	}))
+	ResultAsync.fromPromise<Response, FetchError>(fetch(url), () => new NetworkFetchError())
 
 
 /** Fetches video info from YouTube API with this id. */

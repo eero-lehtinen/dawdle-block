@@ -1,4 +1,4 @@
-import { err, errAsync, okAsync, Result, ResultAsync } from "neverthrow"
+import { err, errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow"
 import { browser, Storage } from "webextension-polyfill-ts"
 import { ZodIssue } from "zod"
 import { BlockSet } from "./blockSet"
@@ -7,8 +7,7 @@ import {
 	BlockSetIds, BlockSetTimesElapsed, BlockSetData, 
 }	from "./blockSetParser"
 import { decompress, compress, DecompressError } from "./compression"
-import { 
-	createDefaultGeneralOptionsData, GeneralOptionsData, plainToGeneralOptionsData, 
+import { GeneralOptionsData, plainToGeneralOptionsData, 
 } from "./generalOptionsParser"
 import { ParseError, ZodResAsync } from "./parserHelpers"
 
@@ -16,18 +15,26 @@ interface BrowserStorageOptions {
 	preferSync: boolean
 }
 
-export enum StorageSetError {
-	TooManyWrites = "TooManyWrites",
-	TooLarge = "TooLarge",
+export enum StorageSetSuccess {
+	Completed = "StorageSetCompleted",
+	Deferred = "StorageSetDeferred",
 }
 
-type StorageSetErrorUnknown = { message: string }
+/* eslint-disable jsdoc/require-jsdoc */
+export class StorageSetError extends Error {}
+export class TooLargeStorageSetError extends StorageSetError {}
+export class UnknownStorageSetError extends StorageSetError {}
 
-export type StorageSetAnyError = StorageSetError | StorageSetErrorUnknown
+export class StorageGetError extends Error {}
+export class EmptyStorageGetError extends StorageGetError {}
+/* eslint-enable jsdoc/require-jsdoc */
 
 export const bsIdsSaveKey = "blocksetIds"
 export const bsTimesElapsedSaveKey = "blocksetTimesElapsed"
 export const generalOptionsSaveKey = "generalOptions"
+
+type SetItems = Record<string, 
+	null | string | BlockSetData | BlockSetIds | BlockSetTimesElapsed | GeneralOptionsData>
 
 /**
  * Object for saving and loading block sets from browser storage. 
@@ -54,20 +61,21 @@ export class BrowserStorage {
 	}
 
 	/** Fetches and validates general options data from storage.*/
-	fetchGeneralOptionsData(): ZodResAsync<GeneralOptionsData, ParseError> {
+	fetchGeneralOptionsData(): ZodResAsync<GeneralOptionsData, EmptyStorageGetError | ParseError> {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		return ResultAsync.fromSafePromise<any, ZodIssue[] | ParseError>(
 			this.storage.get({ [generalOptionsSaveKey]: null }))
-			.andThen<GeneralOptionsData, ZodIssue[] | ParseError>(
+			.andThen(
 				res => res[generalOptionsSaveKey] === null ?
-					okAsync(createDefaultGeneralOptionsData()) :
+					err(new EmptyStorageGetError()) :
 					plainToGeneralOptionsData(res[generalOptionsSaveKey]))
 	}
 
 	/**
 	 * Saves general options to storage.
 	 */
-	saveGeneralOptionsData(data: GeneralOptionsData): ResultAsync<void, StorageSetAnyError> {
+	saveGeneralOptionsData(data: GeneralOptionsData): 
+		ResultAsync<StorageSetSuccess, StorageSetError> {
 		return this.storageSet({ [generalOptionsSaveKey]: data })
 	}
 
@@ -123,7 +131,7 @@ export class BrowserStorage {
 	 * @param blockSetList ordered list of all block sets with this new block set id added
 	 */
 	saveNewBlockSet(blockSet: BlockSet, blockSetList: BlockSet[]): 
-		ResultAsync<void, StorageSetAnyError> {
+		ResultAsync<StorageSetSuccess, StorageSetError> {
 		const [bsIds, timesElapsed] = this.generateIdsAndTimesElapsed(blockSetList)
 		return this.storageSet({
 			[bsIdsSaveKey]: bsIds,
@@ -133,7 +141,7 @@ export class BrowserStorage {
 	}
 
 	/** Saves a new version of a block set that has already been saved.*/
-	saveBlockSet(blockSet: BlockSet): ResultAsync<void, StorageSetAnyError> {
+	saveBlockSet(blockSet: BlockSet): ResultAsync<StorageSetSuccess, StorageSetError> {
 		return this.storageSet({ [blockSet.id]: blockSet.data })
 	}
 
@@ -143,7 +151,7 @@ export class BrowserStorage {
 	 * @param blockSetList ordered list of all block sets with this block set id removed
 	 */
 	deleteBlockSet(blockSet: BlockSet, blockSetList: BlockSet[]): 
-		ResultAsync<void, StorageSetAnyError> {
+		ResultAsync<StorageSetSuccess, StorageSetError> {
 		const [bsIds, timesElapsed] = this.generateIdsAndTimesElapsed(blockSetList)
 		return this.storageSet({ 
 			[bsIdsSaveKey]: bsIds,
@@ -164,6 +172,38 @@ export class BrowserStorage {
 		return [bsIds, timesElapsed]
 	}
 
+	private readonly deferInterval = 1000
+	private deferTimeoutHandle: ReturnType<typeof setInterval> | null = null
+	private deferredItems: SetItems = {}
+
+	/**
+	 * Defer `items` to be saved later when storage quotas allow.
+	*/
+	private deferSet(items: SetItems) {
+		this.deferredItems = { ...this.deferredItems, ...items }
+
+		if (this.deferTimeoutHandle === null) {
+			this.deferTimeoutHandle = setInterval(
+				async() => {
+
+					const deferredItemsToSave = JSON.stringify(this.deferredItems)
+					try{
+						await this.storage.set(this.deferredItems)
+
+						// If save succeeds, interval can be cleared
+						if (this.deferTimeoutHandle !== null &&
+							JSON.stringify(this.deferredItems) === deferredItemsToSave) {
+							clearInterval(this.deferTimeoutHandle)
+							this.deferTimeoutHandle = null
+							this.deferredItems = {}
+						}
+					}
+					catch(_e) {}
+				},
+			 this.deferInterval)
+		}
+	}
+
 	/**
 	 * Saves items to browser storage with enhanced error messages.
 	 * If item is BlockSetData, apply compression.
@@ -171,25 +211,34 @@ export class BrowserStorage {
 	private storageSet(
 		items: Record<string, 
 			null | string | BlockSetData | BlockSetIds | BlockSetTimesElapsed | GeneralOptionsData>): 
-			ResultAsync<void, StorageSetAnyError> {
+			ResultAsync<StorageSetSuccess, StorageSetError> {
 		
 		for (const key in items) {
 			// if key is number, then item is block set data -> we can compress it
 			if (!isNaN(parseInt(key, 10)) && items[key] !== null) {
 				const compressed = compress(items[key])
 				if (compressed.length + 20 > this.QUOTA_BYTES_PER_ITEM) {
-					return errAsync(StorageSetError.TooLarge)
+					return errAsync(new TooLargeStorageSetError())
 				}
 				items[key] = compressed
 			}
 		}
 
-		return ResultAsync.fromPromise(this.storage.set(items), err => {
-			if ((err as { message: string }).message.includes("WRITE_OPERATIONS"))
-				return StorageSetError.TooManyWrites
-				
-			console.warn("Can't save item: ", err)
-			return { message: (err as { message: string }).message }
-		})
+		if (Object.keys(this.deferredItems).length > 0) {
+			this.deferSet(items)
+			return okAsync(StorageSetSuccess.Deferred)
+		}
+		
+		return ResultAsync.fromPromise(
+			this.storage.set(items), error => new UnknownStorageSetError((error as Error).message))
+			.map(() => StorageSetSuccess.Completed)
+			.orElse(error => {
+				if (error.message.includes("WRITE_OPERATIONS")) {
+					this.deferSet(items)
+					return ok(StorageSetSuccess.Deferred)
+				}
+				console.warn("Unknown storage set error:", error)
+				return err(error)
+			})
 	}
 }

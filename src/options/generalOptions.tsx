@@ -11,7 +11,7 @@ export const GeneralOptions = (): JSX.Element => {
 	const bg = useBGScript()
 	const [theme, setTheme] = useState<Theme>(bg.generalOptions.data.theme)
 
-	const handleThemeChange = (
+	const handleThemeChange = async(
 		event: React.MouseEvent<HTMLElement>,
 		newTheme: string | null,
 	) => {
@@ -22,8 +22,10 @@ export const GeneralOptions = (): JSX.Element => {
 			throw Error("ToggleButtonGroup configured incorrectly. " +
 				`Themes do not contain string: "${newTheme}"`)
 		else {
-			bg.generalOptions.theme = newTheme
-			setTheme(newTheme)
+			const res = await bg.generalOptions.setTheme(newTheme)
+			console.log(res)
+			if (res.isOk())
+				setTheme(newTheme)
 		}
 	}
 

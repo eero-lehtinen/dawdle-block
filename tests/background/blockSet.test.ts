@@ -5,7 +5,7 @@ import { timeToMSSinceMidnight } from "@src/shared/utils"
 import ms from "ms.macro"
 
 // Mock needed for a single test
-import{ fetchChannelTitle, FetchErrorType } from "@src/background/youtubeAPI"
+import{ EmptyResponseFetchError, fetchChannelTitle } from "@src/background/youtubeAPI"
 import { ChangedEvent } from "@src/background/observer"
 import { err, errAsync } from "neverthrow"
 import blockSetCmpObj from "../testHelpers/blockSetCmpObj"
@@ -241,7 +241,7 @@ describe("test BlockSet rule matching", () => {
 	})
 
 	test("can't add invalid YouTube channels", async() => {
-		const error = { type: FetchErrorType.EmptyResponse }
+		const error = new EmptyResponseFetchError()
 		mockedFetchChannelTitle.mockResolvedValueOnce(errAsync(error))
 
 		expect(await blockSet.addYTChannel(ListType.Whitelist, "asd")).toEqual(err(error))
