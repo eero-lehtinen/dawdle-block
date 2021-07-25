@@ -1,5 +1,5 @@
 import { FunctionComponent } from "preact"
-import { useEffect, useMemo, useState } from "preact/hooks"
+import { useMemo, useState } from "preact/hooks"
 import { CssBaseline, GlobalStyles, useMediaQuery } from "@material-ui/core"
 import { ThemeProvider, Theme as MatUITheme } from "@material-ui/core/styles"
 import { createGlobalTheme } from "./globalTheme"
@@ -7,9 +7,7 @@ import { useBGScript } from "./bgScriptProvider"
 import { BackgroundBox } from "./backgroundBox"
 import { BGScriptProvider } from "../shared/bgScriptProvider"
 import { Theme } from "@src/background/generalOptionsParser"
-
-
-
+import useEffectCleanUpPageUnload from "./useEffectCleanupPageUnload"
 
 /**
  * Contains common shared wrappers for theming and state management with background script.
@@ -59,9 +57,8 @@ const InnerWrapper: FunctionComponent = ({ children }) => {
 	const mode = theme === "system" ? (prefersDark ? "dark" : "light") : theme
 	const matUITheme = useMemo(() => createGlobalTheme(mode), [mode])
 
-	useEffect(() => 
-		bg.generalOptions.subscribeChanged("theme", ({ newValue }) => setTheme(newValue)), 
-	[bg.generalOptions])
+	useEffectCleanUpPageUnload(() => 
+		bg.generalOptions.subscribeChanged("theme", ({ newValue }) => setTheme(newValue)), [])
 
 	return (
 		<>
