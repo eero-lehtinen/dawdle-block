@@ -5,7 +5,7 @@ import {
 import { ytCategoryNamesById } from "./constants"
 import { fetchChannelTitle, FetchError } from "./youtubeAPI"
 import { ChangedEvent, Listener, Observer } from "./observer"
-import { err, errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow"
+import { err, ok, Result } from "neverthrow"
 import { ParseError, ZodRes } from "./parserHelpers"
 
 export enum ListType {
@@ -222,21 +222,21 @@ export class BlockSet {
 	 * @param channelTitle trusted channel title
 	 */
 	async addYTChannel(listType: ListType, channelId: string, channelTitle?: string): 
-		Promise<ResultAsync<void, CantAddDuplicateError | FetchError>> {
+		Promise<Result<void, CantAddDuplicateError | FetchError>> {
 
 		if (this._data[listType].ytChannels.find(({ id }) => id === channelId)) {
-			return errAsync("CantAddDuplicate")
+			return err("CantAddDuplicate")
 		}
 
 		if (channelTitle === undefined) {
 			const result = await fetchChannelTitle(channelId)
 			if (result.isErr())
-				return errAsync(result.error)
+				return err(result.error)
 			channelTitle = result.value
 		}
 
 		this._data[listType].ytChannels.push({ id: channelId, title: channelTitle })
-		return okAsync(undefined)
+		return ok(undefined)
 	}
 
 	/**
