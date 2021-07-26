@@ -102,8 +102,25 @@ module.exports = (env) => {
 					test: /\.css$/,
 					use: [
 						{ loader: "style-loader" }, // Creates style nodes from JS strings
-						{ loader: "css-loader" }, // Translates CSS into CommonJS
+						{ 
+							loader: "css-loader", // Translates CSS into CommonJS
+							options: { 
+								url: {
+									filter: (url) => {
+										if (url.endsWith(".woff")) return false
+										return true
+									},
+								},
+							},
+						}, 
 					],
+				},
+				{
+					test: /\.woff2?$/,
+					type: "asset/resource",
+					generator: {
+						filename: "fonts/[name][ext][query]",
+					},
 				},
 			],
 		},
