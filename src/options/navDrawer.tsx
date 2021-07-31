@@ -4,9 +4,7 @@ import {
 } from "@material-ui/core"
 import { SettingsRounded, AddRounded, ImportExportRounded } from "@material-ui/icons"
 import { useBGScript } from "@src/shared/bgScriptProvider"
-import { useMemo } from "preact/hooks"
-import { forwardRef } from "preact/compat"
-import { Link as RouterLink, LinkProps as RouterLinkProps, useLocation } from "react-router-dom"
+import { Link as RouterLink, useLocation } from "react-router-dom"
 
 const drawerWidth = 300
 
@@ -22,21 +20,13 @@ interface ListItemLinkProps {
  * Inner workings are hazy.
  */
 const ListItemLink = ({ icon, primary, to, currentPath }: ListItemLinkProps) => {
-	const renderLink = useMemo(
-		() =>
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			forwardRef<any, Omit<RouterLinkProps, "to">>((itemProps, ref) => (
-				<RouterLink to={to} ref={ref} {...itemProps} />
-			)),
-		[to],
-	)
-
 	return (
 		<ListItemButton 
 			disableRipple
-			selected={currentPath === to} 
-			component={renderLink} 
+			selected={currentPath === to}
 			sx={{ borderRadius: 1.5, mb: 0.5 }}
+			component={RouterLink}
+			to={to}
 		>
 			{icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
 			<ListItemText primary={primary} />
@@ -50,7 +40,7 @@ const ListItemLink = ({ icon, primary, to, currentPath }: ListItemLinkProps) => 
 export const NavDrawer = (): JSX.Element => {
 	const bg = useBGScript()
 	const location = useLocation()
-	const path = location.pathname
+	const currentPath = location.pathname
 
 	return (
 		<Drawer
@@ -75,14 +65,14 @@ export const NavDrawer = (): JSX.Element => {
 					to="/general-options" 
 					primary={"General Options"}
 					icon={<SettingsRounded />}
-					currentPath={path}
+					currentPath={currentPath}
 				/>
 
 				<ListItemLink 
 					to="/import-export" 
 					primary={"Import/Export"}
 					icon={<ImportExportRounded />}
-					currentPath={path}
+					currentPath={currentPath}
 				/>
 
 				<ListSubheader>BLOCK SETS</ListSubheader>
@@ -93,7 +83,7 @@ export const NavDrawer = (): JSX.Element => {
 							to={`/block-sets/${index + 1}`} 
 							key={blockSet.id} 
 							primary={blockSet.name}
-							currentPath={path}
+							currentPath={currentPath}
 						/>
 					))
 				}
