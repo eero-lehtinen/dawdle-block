@@ -2,7 +2,7 @@ import {
 	Drawer, Toolbar, Divider, List, ListItemButton, 
 	ListItemText, ListItemIcon, ListSubheader, Button, 
 } from "@material-ui/core"
-import { SettingsRounded, AddRounded } from "@material-ui/icons"
+import { SettingsRounded, AddRounded, ImportExportRounded } from "@material-ui/icons"
 import { useBGScript } from "@src/shared/bgScriptProvider"
 import { useMemo } from "preact/hooks"
 import { forwardRef } from "preact/compat"
@@ -75,6 +75,13 @@ export const NavDrawer = (): JSX.Element => {
 					to="/general-options" 
 					primary={"General Options"}
 					icon={<SettingsRounded />}
+					currentPath={path}
+				/>
+
+				<ListItemLink 
+					to="/import-export" 
+					primary={"Import/Export"}
+					icon={<ImportExportRounded />}
 					currentPath={path}
 				/>
 
