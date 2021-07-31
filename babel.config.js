@@ -17,16 +17,22 @@ module.exports = {
 		}],
 
 		// Optimize material ui bundle
-		["babel-plugin-transform-imports", {
-			"@material-ui/core": {
-				transform: "@material-ui/core/${member}",
-				preventFullImport: true,
-			},
-			"@material-ui/icons": {
-				transform: "@material-ui/icons/${member}",
-				preventFullImport: true,
-			},
-		}],
+		["babel-plugin-import", {
+			libraryName: "@material-ui/core",
+			libraryDirectory: "",
+			camel2DashComponentName: false,
+		}, "core"],
+		["babel-plugin-import",	{
+			libraryName: "@material-ui/icons",
+			libraryDirectory: "esm",
+			camel2DashComponentName: false,
+		}, "icons"],
+		["babel-plugin-import",	{
+			libraryName: "@material-ui/lab",
+			libraryDirectory: "",
+			camel2DashComponentName: false,
+		}, "lab"],
+
 		"@emotion",
 		"macros",
 	],
