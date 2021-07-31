@@ -133,6 +133,9 @@ module.exports = (env) => {
 				"react-dom": "preact/compat",
 			},
 		},
+		performance: {
+			assetFilter: (asset) => !asset.endsWith(".zip"),
+		},
 		plugins: [
 			// Clean old builds
 			new CleanWebpackPlugin({
