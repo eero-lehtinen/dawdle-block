@@ -15,10 +15,7 @@ interface ListItemLinkProps {
 	currentPath: string
 }
 
-/** 
- * Element mostly copied from https://next.material-ui.com/guides/routing/#list.
- * Inner workings are hazy.
- */
+/** Link for navigation drawer */
 const ListItemLink = ({ icon, primary, to, currentPath }: ListItemLinkProps) => {
 	return (
 		<ListItemButton 
