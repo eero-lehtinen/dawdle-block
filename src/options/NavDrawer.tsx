@@ -4,6 +4,7 @@ import {
 } from "@material-ui/core"
 import { SettingsRounded, AddRounded, ImportExportRounded } from "@material-ui/icons"
 import { useBGScript } from "@src/shared/BGScriptProvider"
+import { useState, useRef } from "preact/hooks"
 import { Link as RouterLink, useLocation } from "react-router-dom"
 
 const drawerWidth = 300
@@ -41,6 +42,18 @@ const NavDrawer = (): JSX.Element => {
 	const location = useLocation()
 	const currentPath = location.pathname
 
+	const [blockSetsList, setBlockSetsList] = useState(bg.blockSets.list)
+	const addPending = useRef(false)
+
+	const addNewBlockSet = async() => {
+		if (addPending.current) return
+		addPending.current = true
+		const res = await bg.blockSets.addDefaultBlockSet()
+		if (res.isOk())
+			setBlockSetsList([...bg.blockSets.list])
+		addPending.current = false
+	}
+
 	return (
 		<Drawer
 			variant="permanent" 
@@ -66,7 +79,6 @@ const NavDrawer = (): JSX.Element => {
 					icon={<SettingsRounded />}
 					currentPath={currentPath}
 				/>
-
 				<ListItemLink 
 					to="/import-export" 
 					primary={"Import/Export"}
@@ -77,17 +89,19 @@ const NavDrawer = (): JSX.Element => {
 				<ListSubheader>BLOCK SETS</ListSubheader>
 
 				{
-					bg.blockSets.list.map((blockSet, index) => (
+					blockSetsList.map((blockSet, index) => (
 						<ListItemLink 
 							to={`/block-sets/${index + 1}`} 
-							key={blockSet.id} 
+							key={blockSet.id}
 							primary={blockSet.name}
 							currentPath={currentPath}
 						/>
 					))
 				}
 
-				<Button size="large" sx={{ float: "right" }} startIcon={<AddRounded />}>
+				<Button size="large" sx={{ float: "right" }} startIcon={<AddRounded />}
+					onClick={addNewBlockSet}
+				>
 						Add New Block Set
 				</Button>
 

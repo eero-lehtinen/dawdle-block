@@ -90,10 +90,7 @@ export class BlockSets {
 		newBlockSet.name = this.computeNewName()
 
 		return this.browserStorage.saveNewBlockSet(newBlockSet, [...this._list, newBlockSet])
-			.map(() => {
-				this.addBlockSet(newBlockSet)
-				return newBlockSet
-			})
+			.map(() => this.addBlockSet(newBlockSet))
 	}
 
 	/**
