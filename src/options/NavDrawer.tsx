@@ -3,7 +3,7 @@ import {
 	ListItemText, ListItemIcon, ListSubheader, Button, 
 } from "@material-ui/core"
 import { SettingsRounded, AddRounded, ImportExportRounded } from "@material-ui/icons"
-import { useBGScript } from "@src/shared/bgScriptProvider"
+import { useBGScript } from "@src/shared/BGScriptProvider"
 import { Link as RouterLink, useLocation } from "react-router-dom"
 
 const drawerWidth = 300
@@ -34,7 +34,7 @@ const ListItemLink = ({ icon, primary, to, currentPath }: ListItemLinkProps) => 
 /**
  * Navigation drawer for options menu.
  */
-export const NavDrawer = (): JSX.Element => {
+const NavDrawer = (): JSX.Element => {
 	const bg = useBGScript()
 	const location = useLocation()
 	const currentPath = location.pathname
@@ -93,3 +93,5 @@ export const NavDrawer = (): JSX.Element => {
 		</Drawer>
 	)
 }
+
+export default NavDrawer

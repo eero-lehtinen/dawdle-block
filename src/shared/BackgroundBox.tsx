@@ -4,7 +4,7 @@ import { FunctionComponent  } from "preact"
 /**
  * Styled box for the background. Stretches to whole viewport.
  */
-export const BackgroundBox: FunctionComponent = ({ children }) => 
+const BackgroundBox: FunctionComponent = ({ children }) => 
 	<Box 
 		sx={{
 			width: "100%", 
@@ -14,3 +14,5 @@ export const BackgroundBox: FunctionComponent = ({ children }) =>
 	>
 		{ children }
 	</Box>
+
+export default BackgroundBox

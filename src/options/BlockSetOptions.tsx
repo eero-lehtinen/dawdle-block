@@ -1,5 +1,5 @@
 import { Typography, Stack, TextField, Box } from "@material-ui/core"
-import { useBGScript } from "@src/shared/bgScriptProvider"
+import { useBGScript } from "@src/shared/BGScriptProvider"
 import { useParams } from "react-router-dom"
 import { DesktopTimePicker } from "@material-ui/lab"
 import { useState } from "preact/hooks"
@@ -20,7 +20,7 @@ const InvalidLinkMessage = ({ ordinal }: { ordinal: string }) => (
 /**
  * BlockSets options page for options menu.
  */
-export const BlockSetOptions = (): JSX.Element => {
+const BlockSetOptions = (): JSX.Element => {
 	const bg = useBGScript()
 	const { ordinal } = useParams<{ordinal: string}>()
 	const [timePickerValue, setTimePickerValue] = useState(new Date())
@@ -75,3 +75,5 @@ export const BlockSetOptions = (): JSX.Element => {
 		</>
 	)
 }
+
+export default BlockSetOptions

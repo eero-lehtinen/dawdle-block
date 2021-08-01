@@ -30,7 +30,7 @@ const WaitBox = () =>
 	 </Fade>
 
 /** Provides context for useBGScript hook. */
-export const BGScriptProvider: FunctionComponent = ({ children }): JSX.Element => {
+const BGScriptProvider: FunctionComponent = ({ children }): JSX.Element => {
 	const [bgScript, setBGScript] = useState<Background | null>(null)
 	const [retries, setRetries] = useState(0)
 
@@ -70,4 +70,6 @@ export const useBGScript = (): Background => {
 	}
 	return background
 }
+
+export default BGScriptProvider
 

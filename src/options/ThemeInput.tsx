@@ -1,14 +1,14 @@
 import { ToggleButton, ToggleButtonGroup, Typography, Box } from "@material-ui/core"
 import { LightModeRounded, BrightnessMediumRounded, DarkModeRounded } from "@material-ui/icons"
 import { Theme } from "@src/background/generalOptionsParser"
-import { useBGScript } from "@src/shared/bgScriptProvider"
+import { useBGScript } from "@src/shared/BGScriptProvider"
 import { useState } from "preact/hooks"
 
 
 /**
  * Input for general options theme property.
  */
-export const ThemeInput = (): JSX.Element => {
+const ThemeInput = (): JSX.Element => {
 	const bg = useBGScript()
 	const [theme, setTheme] = useState<Theme>(bg.generalOptions.data.theme)
 
@@ -54,3 +54,5 @@ export const ThemeInput = (): JSX.Element => {
 		</Box>
 	)
 }
+
+export default ThemeInput

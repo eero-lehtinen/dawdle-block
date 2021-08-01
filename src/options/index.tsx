@@ -1,6 +1,6 @@
 import { render } from "preact"
-import { Options } from "./options"
-import { BaseWrapper } from "../shared/baseWrapper"
+import { Options } from "./Options"
+import BaseWrapper from "../shared/BaseWrapper"
 import "../shared/fonts"
 
 render(

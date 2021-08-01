@@ -1,13 +1,13 @@
 import { ToggleButton, ToggleButtonGroup, Typography, Box } from "@material-ui/core"
 import { ClockType } from "@src/background/generalOptionsParser"
-import { useBGScript } from "@src/shared/bgScriptProvider"
+import { useBGScript } from "@src/shared/BGScriptProvider"
 import { useState } from "preact/hooks"
 
 
 /**
  * Input for general options time convention property.
  */
-export const TimeConventionInput = (): JSX.Element => {
+const TimeConventionInput = (): JSX.Element => {
 	const bg = useBGScript()
 	const [clockType, setClockType] = useState(bg.generalOptions.data.clockType)
 
@@ -50,3 +50,5 @@ export const TimeConventionInput = (): JSX.Element => {
 		</Box>
 	)
 }
+
+export default TimeConventionInput

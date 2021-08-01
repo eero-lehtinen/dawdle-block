@@ -3,16 +3,15 @@ import { useMemo, useState } from "preact/hooks"
 import { CssBaseline, GlobalStyles, useMediaQuery } from "@material-ui/core"
 import { ThemeProvider, Theme as MatUITheme } from "@material-ui/core/styles"
 import { createGlobalTheme } from "./globalTheme"
-import { useBGScript } from "./bgScriptProvider"
-import { BackgroundBox } from "./backgroundBox"
-import { BGScriptProvider } from "../shared/bgScriptProvider"
+import BackgroundBox from "./BackgroundBox"
+import BGScriptProvider, { useBGScript } from "./BGScriptProvider"
 import { Theme } from "@src/background/generalOptionsParser"
 import useEffectCleanUpPageUnload from "./useEffectCleanupPageUnload"
 
 /**
  * Contains common shared wrappers for theming and state management with background script.
  */
-export const BaseWrapper: FunctionComponent = ({ children }) =>
+const BaseWrapper: FunctionComponent = ({ children }) =>
 	<BGScriptProvider>
 		<InnerWrapper>
 			{ children }
@@ -72,3 +71,5 @@ const InnerWrapper: FunctionComponent = ({ children }) => {
 		</>
 	)
 }
+
+export default BaseWrapper
