@@ -39,7 +39,14 @@ module.exports = {
 	env: {
 		test: {
 			presets: [
-				["@babel/preset-env", { targets: { node: "current" } }],
+				["@babel/preset-env", { targets: "current Node" }],
+			],
+			plugins: [
+				["babel-plugin-import",	{
+					libraryName: "@material-ui/icons",
+					libraryDirectory: "",
+					camel2DashComponentName: false,
+				}, "icons"],
 			],
 		},
 	},

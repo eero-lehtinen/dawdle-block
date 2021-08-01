@@ -18,16 +18,18 @@ interface ListItemLinkProps {
 /** Link for navigation drawer */
 const ListItemLink = ({ icon, primary, to, currentPath }: ListItemLinkProps) => {
 	return (
-		<ListItemButton 
-			disableRipple
-			selected={currentPath === to}
-			sx={{ borderRadius: 1.5, mb: 0.5 }}
-			component={RouterLink}
-			to={to}
-		>
-			{icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
-			<ListItemText primary={primary} />
-		</ListItemButton>
+		<li>
+			<ListItemButton 
+				disableRipple
+				selected={currentPath === to}
+				sx={{ borderRadius: 1.5, mb: 0.5 }}
+				component={RouterLink}
+				to={to}
+			>
+				{icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
+				<ListItemText primary={primary} />
+			</ListItemButton>
+		</li>
 	)
 }
 
