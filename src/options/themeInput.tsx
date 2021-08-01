@@ -31,7 +31,7 @@ export const ThemeInput = (): JSX.Element => {
 
 	return (
 		<>
-			<Typography variant="h6" component="h2" sx={{ mb: 1 }}>
+			<Typography variant="h2" sx={{ mb: 1 }}>
 				Theme
 			</Typography>
 			<ToggleButtonGroup

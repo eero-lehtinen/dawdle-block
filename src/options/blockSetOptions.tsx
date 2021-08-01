@@ -30,7 +30,7 @@ export const BlockSetOptions = (): JSX.Element => {
 
 	return (
 		<>
-			<Typography variant="h4" component="h1" sx={{ mb: 3 }}>
+			<Typography variant="h1" sx={{ mb: 2 }}>
 				{blockSet.name}
 			</Typography>
 			<Stack spacing={2} >

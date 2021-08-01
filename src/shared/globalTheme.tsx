@@ -8,6 +8,20 @@ import "@material-ui/lab/themeAugmentation"
  */
 export const createGlobalTheme = (mode: "dark" | "light"): Theme =>
 	createTheme({
+		typography: {
+			h1: {
+				fontWeight: 400,
+				fontSize: "2.125rem",
+				lineHeight: 1.235,
+				letterSpacing: "0.00735em",
+			},
+			h2: {
+				fontWeight: 500,
+				fontSize: "1.25rem",
+				lineHeight: 1.6,
+				letterSpacing: "0.0075em",
+			},
+		},
 		palette: {
 			mode,
 			background: mode === "dark" ? {

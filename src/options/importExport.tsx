@@ -6,7 +6,7 @@ import { Typography } from "@material-ui/core"
 export const ImportExport = (): JSX.Element => {
 	return (
 		<>
-			<Typography variant="h4" component="h1" sx={{ mb: 3 }}>
+			<Typography variant="h1" sx={{ mb: 2 }}>
 				Import/Export
 			</Typography>
 		</>
