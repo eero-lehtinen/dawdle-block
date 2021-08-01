@@ -1,13 +1,17 @@
 import { ok, ResultAsync } from "neverthrow"
 import { BrowserStorage, StorageSetError, StorageSetSuccess } from "./browserStorage"
-import { 
-	createDefaultGeneralOptionsData, GeneralOptionsData, Theme, 
+import {
+	createDefaultGeneralOptionsData, GeneralOptionsData,
 } from "./generalOptionsParser"
 import { ChangedEvent, ListenerOf, Observer } from "./observer"
 
+
+
+type SettableData = Pick<GeneralOptionsData, "theme" | "clockType">
+
 type ChangeObservers = {
-	[Property in keyof Pick<GeneralOptionsData, "theme">]: 
-		Observer<ChangedEvent<GeneralOptionsData[Property]>>
+	[Property in keyof SettableData]: 
+		Observer<ChangedEvent<SettableData[Property]>>
 }
 
 /**
@@ -52,6 +56,7 @@ export class GeneralOptions {
 
 	private readonly changeObservers: ChangeObservers = {
 		theme: new Observer(),
+		clockType: new Observer(),
 	}
 
 	/**
@@ -60,19 +65,22 @@ export class GeneralOptions {
 	 */
 	subscribeChanged<K extends keyof ChangeObservers>(
 		key: K, listener: ListenerOf<ChangeObservers[K]>): () => void {
-		// For some reason subscribe doesn't allow this listener type even though 
-		// it seems to be correct. Calling site type requirements work as expected.
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		return this.changeObservers[key].subscribe(listener as any)
+		return this.changeObservers[key].subscribe(listener as ListenerOf<ChangeObservers[K]>)
 	}
 
-	/** Sets theme to a new value */
-	setTheme(newValue: Theme): ResultAsync<StorageSetSuccess, StorageSetError> {
+	/** 
+	 * Set any settable value with type safety. 
+	 * Saves value to storage. 
+	 */
+	set<K extends keyof SettableData>(
+		key: K, newValue: GeneralOptionsData[K]):
+		ResultAsync<StorageSetSuccess, StorageSetError> {
 		return this.browserStorage.saveGeneralOptionsData(
-			{ ...this._data, theme: newValue })
+			{ ...this._data, [key]: newValue })
 			.andThen(res => {
-				this.data.theme = newValue
-				this.changeObservers.theme.publish({ newValue })
+				this.data[key] = newValue
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				this.changeObservers[key].publish({ newValue } as any)
 				return ok(res)
 			})
 	}

@@ -1,4 +1,4 @@
-import { ToggleButton, ToggleButtonGroup, Typography } from "@material-ui/core"
+import { ToggleButton, ToggleButtonGroup, Typography, Box } from "@material-ui/core"
 import { LightModeRounded, BrightnessMediumRounded, DarkModeRounded } from "@material-ui/icons"
 import { Theme } from "@src/background/generalOptionsParser"
 import { useBGScript } from "@src/shared/bgScriptProvider"
@@ -23,14 +23,14 @@ export const ThemeInput = (): JSX.Element => {
 			throw Error("ToggleButtonGroup configured incorrectly. " +
 				`Themes do not contain string: "${newTheme}"`)
 		else {
-			const res = await bg.generalOptions.setTheme(newTheme)
+			const res = await bg.generalOptions.set("theme", newTheme)
 			if (res.isOk())
 				setTheme(newTheme)
 		}
 	}
 
 	return (
-		<>
+		<Box>
 			<Typography variant="h2" sx={{ mb: 1 }}>
 				Theme
 			</Typography>
@@ -51,6 +51,6 @@ export const ThemeInput = (): JSX.Element => {
 					<DarkModeRounded sx={{ mr: 1 }} />Dark Mode
 				</ToggleButton>
 			</ToggleButtonGroup>
-		</>
+		</Box>
 	)
 }

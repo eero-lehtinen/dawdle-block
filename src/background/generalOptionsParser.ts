@@ -6,6 +6,8 @@ import {
 } from "./parserHelpers"
 
 const zClockType = z.union([z.literal(12), z.literal(24)]).default(24)
+export type ClockType = z.infer<typeof zClockType>
+
 const zSettingsProtection = z.enum(["never", "always", "timerZero"]).default("never")
 
 const zGeneralOptionsDataV0 = z.object({

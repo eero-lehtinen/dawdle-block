@@ -1,5 +1,6 @@
-import { Typography } from "@material-ui/core"
+import { Typography, Stack } from "@material-ui/core"
 import { ThemeInput } from"./themeInput"
+import { TimeConventionInput } from "./timeConventionInput"
 
 /**
  * General options page for options menu.
@@ -10,7 +11,10 @@ export const GeneralOptions = (): JSX.Element => {
 			<Typography variant="h1" sx={{ mb: 2 }}>
 				General Options
 			</Typography>
-			<ThemeInput />
+			<Stack spacing={3} >
+				<ThemeInput />
+				<TimeConventionInput />
+			</Stack>
 		</>
 	)
 }
