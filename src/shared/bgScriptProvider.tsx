@@ -60,7 +60,7 @@ export const BGScriptProvider: FunctionComponent = ({ children }): JSX.Element =
 
 /**
  * Custom hook for getting bg script context.
- * @throws Error if background is null. Should newer happen, 
+ * @throws Error if background is null. Should never happen, 
  * because BGScriptProvider doesn't render its children when background is null.
  */
 export const useBGScript = (): Background => {
