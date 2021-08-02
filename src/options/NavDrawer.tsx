@@ -9,6 +9,8 @@ import { Link as RouterLink, useLocation } from "react-router-dom"
 
 const drawerWidth = 300
 
+const betweenButtonMargin = 0.5
+
 interface ListItemLinkProps {
   icon?: JSX.Element
   primary: string
@@ -23,7 +25,7 @@ const ListItemLink = ({ icon, primary, to, currentPath }: ListItemLinkProps) => 
 			<ListItemButton 
 				disableRipple
 				selected={currentPath === to}
-				sx={{ borderRadius: 1.5, mb: 0.5 }}
+				sx={{ borderRadius: 1.5, mb: betweenButtonMargin }}
 				component={RouterLink}
 				to={to}
 			>
@@ -70,9 +72,8 @@ const NavDrawer = (): JSX.Element => {
 			}}
 		>
 			<Toolbar />
-			<Divider sx={{ mr: 3, ml: 3 }} />
 			<List sx={{ pr: 1, pl: 1 }}>
-
+				<Divider sx={{ mb: betweenButtonMargin }} />
 				<ListItemLink 
 					to="/general-options" 
 					primary={"General Options"}
@@ -86,6 +87,7 @@ const NavDrawer = (): JSX.Element => {
 					currentPath={currentPath}
 				/>
 
+				<Divider sx={{ mb: betweenButtonMargin }} />
 				<ListSubheader>BLOCK SETS</ListSubheader>
 
 				{
