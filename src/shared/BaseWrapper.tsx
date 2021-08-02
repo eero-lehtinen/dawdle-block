@@ -24,7 +24,7 @@ const BaseWrapper: FunctionComponent = ({ children }) =>
 const MyGlobalStyles = ({ matUITheme }: { matUITheme: MatUITheme }) => {
 	const scrollbarColors = {
 		track: matUITheme.palette.background.default, 
-		thumb: "#121212",
+		thumb: matUITheme.palette.mode === "dark" ? "#121212" : matUITheme.palette.grey[500],
 	}
 	return (
 		<GlobalStyles styles={{ 
