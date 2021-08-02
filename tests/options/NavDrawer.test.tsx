@@ -19,23 +19,16 @@ import BGScriptProvider from "@src/shared/BGScriptProvider"
 import { render, screen } from "@testing-library/preact"
 import NavDrawer from "@src/options/NavDrawer"
 import "@testing-library/jest-dom"
-import { mocked } from "ts-jest/utils"
-import { BrowserStorage, StorageSetSuccess } from "@src/background/browserStorage"
-import { createDefaultGeneralOptionsData } from "@src/background/generalOptionsParser"
-import { okAsync } from "neverthrow"
+import { BrowserStorage } from "@src/background/browserStorage"
 import { Background } from "@src/background/background"
 import { TabObserver } from "@src/background/tabObserver"
 import { BlockSets } from "@src/background/blockSets"
 import { GeneralOptions } from "@src/background/generalOptions"
 import { MemoryRouter } from "react-router-dom"
 import userEvent from "@testing-library/user-event"
+import { insertMockBrowserStorageDefaults } from "../testHelpers/mockDefaults"
 
-const mockBrowserStorage = mocked(BrowserStorage, true)
-mockBrowserStorage.prototype.fetchBlockSets.mockResolvedValue([])
-mockBrowserStorage.prototype.saveNewBlockSet.mockReturnValue(okAsync(StorageSetSuccess.Completed))
-mockBrowserStorage.prototype.deleteBlockSet.mockReturnValue(okAsync(StorageSetSuccess.Completed))
-mockBrowserStorage.prototype.fetchGeneralOptionsData
-	.mockReturnValue(okAsync(createDefaultGeneralOptionsData()))
+insertMockBrowserStorageDefaults(BrowserStorage.prototype)
 
 TabObserver.prototype.subscribeTabLoaded = jest.fn()
 TabObserver.prototype.subscribeTabRemoved = jest.fn()
@@ -54,6 +47,12 @@ beforeEach(async() => {
 	mockWindow.background = background
 })
 
+/** NavDrawer wrapped with elements required for testing */
+const TestNavDrawer = () =>
+	<BGScriptProvider><MemoryRouter>
+		<NavDrawer />
+	</MemoryRouter></BGScriptProvider>
+
 
 describe("test options NavDrawer", () => {
 	const expectBlockSetListNames = (names: string[]) => {
@@ -68,18 +67,14 @@ describe("test options NavDrawer", () => {
 		await background.blockSets.addDefaultBlockSet()
 		await background.blockSets.addDefaultBlockSet()
 		
-		render(<BGScriptProvider><MemoryRouter>
-			<NavDrawer />
-		</MemoryRouter></BGScriptProvider>)
+		render(<TestNavDrawer />)
 
 		await screen.findByRole("list")
 		expectBlockSetListNames(background.blockSets.list.map(blockSet => blockSet.name))
 	})
 
 	test("can add new block sets with button", async() => {
-		render(<BGScriptProvider><MemoryRouter>
-			<NavDrawer />
-		</MemoryRouter></BGScriptProvider>)
+		render(<TestNavDrawer />)
 
 		await screen.findByRole("list")
 

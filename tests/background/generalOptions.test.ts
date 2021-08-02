@@ -1,21 +1,19 @@
-import { BrowserStorage, StorageSetSuccess } from "@src/background/browserStorage"
+import { BrowserStorage } from "@src/background/browserStorage"
 import { GeneralOptions } from "@src/background/generalOptions"
 import { 
 	createDefaultGeneralOptionsData, GeneralOptionsData, 
 } from "@src/background/generalOptionsParser"
 import { ChangedEvent } from "@src/background/observer"
 import { ParseError } from "@src/background/parserHelpers"
-import { err, ok, okAsync } from "neverthrow"
+import { err, ok } from "neverthrow"
+import { insertMockBrowserStorageDefaults } from "../testHelpers/mockDefaults"
 import { mocked } from "ts-jest/utils"
 
 jest.mock("webextension-polyfill-ts", () => ({}))
 jest.mock("@src/background/browserStorage")
 
+insertMockBrowserStorageDefaults(BrowserStorage.prototype)
 const mockBrowserStorage = mocked(BrowserStorage, true)
-mockBrowserStorage.prototype.fetchGeneralOptionsData
-	.mockResolvedValue(ok(createDefaultGeneralOptionsData()))
-mockBrowserStorage.prototype.saveGeneralOptionsData
-	.mockReturnValue(okAsync(StorageSetSuccess.Completed))
 
 let browserStorage: BrowserStorage
 

@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { BlockSet, BlockTestRes } from "@src/background/blockSet"
 import { BlockSets } from "@src/background/blockSets"
-import { BrowserStorage, StorageSetSuccess } from "@src/background/browserStorage"
+import { BrowserStorage } from "@src/background/browserStorage"
 import { timeToMSSinceMidnight } from "@src/shared/utils"
-import { ok, okAsync } from "neverthrow"
+import { ok } from "neverthrow"
+import { insertMockBrowserStorageDefaults } from "../testHelpers/mockDefaults"
 import { mocked } from "ts-jest/utils"
 import blockSetCmpObj from "../testHelpers/blockSetCmpObj"
 
 jest.mock("webextension-polyfill-ts", () => ({}))
 jest.mock("@src/background/browserStorage")
 
+insertMockBrowserStorageDefaults(BrowserStorage.prototype)
 const mockBrowserStorage = mocked(BrowserStorage, true)
-mockBrowserStorage.prototype.saveNewBlockSet.mockReturnValue(okAsync(StorageSetSuccess.Completed))
-mockBrowserStorage.prototype.deleteBlockSet.mockReturnValue(okAsync(StorageSetSuccess.Completed))
 
 describe("test BlockSets construction", () => {
 	const testBlockSet = BlockSet.createDefault(42)

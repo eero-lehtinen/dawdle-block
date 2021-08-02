@@ -6,26 +6,19 @@ import * as blockTabModule from "@src/background/blockTab"
 import * as annoyTabModule from "@src/background/annoyTab"
 import * as setBadgeModule from "@src/background/setBadge"
 import * as youtubeAPIModule from "@src/background/youtubeAPI"
-import { BrowserStorage, StorageSetSuccess } from "@src/background/browserStorage"
+import { BrowserStorage } from "@src/background/browserStorage"
 import { Listener, Observer } from "@src/background/observer"
 import { TabLoadedEvent, TabObserver, TabRemovedEvent } from "@src/background/tabObserver"
 import flushPromises from "flush-promises"
 import "jest-extended"
 import { GeneralOptions } from "@src/background/generalOptions"
-import { mocked } from "ts-jest/utils"
-import { okAsync } from "neverthrow"
-import { createDefaultGeneralOptionsData } from "@src/background/generalOptionsParser"
+import { insertMockBrowserStorageDefaults } from "../testHelpers/mockDefaults"
 
 jest.mock("webextension-polyfill-ts", () => ({}))
 jest.mock("@src/background/tabObserver")
 jest.mock("@src/background/browserStorage")
 
-const mockBrowserStorage = mocked(BrowserStorage, true)
-mockBrowserStorage.prototype.fetchBlockSets.mockResolvedValue([])
-mockBrowserStorage.prototype.saveNewBlockSet.mockReturnValue(okAsync(StorageSetSuccess.Completed))
-mockBrowserStorage.prototype.deleteBlockSet.mockReturnValue(okAsync(StorageSetSuccess.Completed))
-mockBrowserStorage.prototype.fetchGeneralOptionsData
-	.mockReturnValue(okAsync(createDefaultGeneralOptionsData()))
+insertMockBrowserStorageDefaults(BrowserStorage.prototype)
 
 jest.useFakeTimers()
 
