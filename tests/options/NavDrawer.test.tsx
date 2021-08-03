@@ -32,7 +32,7 @@ insertMockBrowserStorageDefaults(BrowserStorage.prototype)
 
 TabObserver.prototype.subscribeTabLoaded = jest.fn()
 TabObserver.prototype.subscribeTabRemoved = jest.fn()
-TabObserver.prototype.getActiveTabIds = jest.fn().mockReturnValue([])
+TabObserver.prototype.getActiveTabIds = jest.fn(() => [])
 
 let background: Background
 

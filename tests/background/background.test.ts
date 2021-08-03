@@ -72,7 +72,7 @@ describe("test Background", () => {
 			blockSet.annoyMode = c.am
 			blockSet.requireActive = c.ra
 			blockSet.timeAllowed = c.ta
-			blockSet.test = jest.fn().mockImplementation(() => BlockTestRes.Blacklisted)
+			blockSet.test = jest.fn(() => BlockTestRes.Blacklisted)
 		}
 	}
 

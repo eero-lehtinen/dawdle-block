@@ -139,9 +139,9 @@ describe("test BlockSets blockedBy method", () => {
 
 		const list = blockSets.list
 		for (const bs of list) {
-			bs.isInActiveTime = jest.fn().mockImplementation(() => true)
-			bs.isInActiveWeekday = jest.fn().mockImplementation(() => true)
-			bs.test = jest.fn().mockImplementation(() => BlockTestRes.Blacklisted)
+			bs.isInActiveTime = jest.fn(() => true)
+			bs.isInActiveWeekday = jest.fn(() => true)
+			bs.test = jest.fn(() => BlockTestRes.Blacklisted)
 		}
 	})
 
@@ -162,16 +162,16 @@ describe("test BlockSets blockedBy method", () => {
 	})
 
 	test("Ignores ids of each block set returning Whitelisted or Ignored", () => {
-		blockSets.list[0]!.test = jest.fn().mockImplementation(() => BlockTestRes.Whitelisted)
-		blockSets.list[1]!.test = jest.fn().mockImplementation(() => BlockTestRes.Ignored)
+		blockSets.list[0]!.test = jest.fn(() => BlockTestRes.Whitelisted)
+		blockSets.list[1]!.test = jest.fn(() => BlockTestRes.Ignored)
 		expect(blockSets.blockedBy("", null, null)).toStrictEqual([blockSets.list[2]!.id])
 	})
 
 	test("Ignores ids of each block set not being in active time or active day or both", () => {
-		blockSets.list[0]!.isInActiveTime = jest.fn().mockImplementation(() => false)
-		blockSets.list[1]!.isInActiveWeekday = jest.fn().mockImplementation(() => false)
-		blockSets.list[2]!.isInActiveTime = jest.fn().mockImplementation(() => false)
-		blockSets.list[2]!.isInActiveWeekday = jest.fn().mockImplementation(() => false)
+		blockSets.list[0]!.isInActiveTime = jest.fn(() => false)
+		blockSets.list[1]!.isInActiveWeekday = jest.fn(() => false)
+		blockSets.list[2]!.isInActiveTime = jest.fn(() => false)
+		blockSets.list[2]!.isInActiveWeekday = jest.fn(() => false)
 
 		expect(blockSets.blockedBy("", null, null)).toStrictEqual([])
 	})
