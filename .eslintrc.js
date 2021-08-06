@@ -13,6 +13,7 @@ module.exports = {
 		"legacy/**/*",
 		"dist/**/*",
 		"coverage/**/*",
+		"static/**/*",
 	],
 	env: {
 		webextensions: true,
@@ -48,6 +49,7 @@ module.exports = {
 		"comma-dangle": ["error", "always-multiline"],
 		"space-infix-ops": "error",
 		"jest/expect-expect": ["error", {	assertFunctionNames: ["expect*", "**.expect"] }],
+		"require-await": "error",
 	},
 	overrides: [
 		{
@@ -60,6 +62,7 @@ module.exports = {
 			extends: [
 				"plugin:@typescript-eslint/recommended",
 			],
+			// Commented out rules are useful, but way too slow execute (as shown by TIMING=1 eslint .)
 			rules: {
 				"no-unused-vars": "off",
 				"@typescript-eslint/no-unused-vars": ["error", { 
@@ -73,8 +76,8 @@ module.exports = {
 				"@typescript-eslint/type-annotation-spacing": "error",
 				semi: "off",
 				"@typescript-eslint/semi": ["error", "never"],
-				"@typescript-eslint/prefer-nullish-coalescing": "error",
-				"@typescript-eslint/strict-boolean-expressions": "error",
+				//"@typescript-eslint/prefer-nullish-coalescing": "error",
+				//"@typescript-eslint/strict-boolean-expressions": "error",
 				"jsdoc/require-jsdoc": ["warn", {
 					// Require top level function comments	
 					contexts: [
@@ -94,9 +97,9 @@ module.exports = {
 					checkGetters: false,
 					checkSetters: false,
 				}],
-				"require-await": "off",
-				"@typescript-eslint/require-await": "error",
-				"@typescript-eslint/no-floating-promises": "error",
+				// "require-await": "off",
+				//"@typescript-eslint/require-await": "error",
+				//"@typescript-eslint/no-floating-promises": "error",
 				"no-useless-constructor": "off",
 				"@typescript-eslint/no-useless-constructor": ["error"],
 			},

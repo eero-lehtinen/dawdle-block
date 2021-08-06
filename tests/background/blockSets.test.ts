@@ -38,7 +38,7 @@ describe("test BlockSets methods", () => {
 	let blockSets: BlockSets
 	beforeEach(async() => {
 		mockBrowserStorage.prototype.fetchBlockSets
-			.mockImplementation(async() => Promise.resolve([BlockSet.create(0, { name: "TEST" })]))
+			.mockResolvedValue([BlockSet.create(0, { name: "TEST" })])
 		blockSets = await BlockSets.create(new BrowserStorage({ preferSync: true }))
 	})
 
@@ -132,7 +132,7 @@ describe("test BlockSets blockedBy method", () => {
 	let blockSets: BlockSets
 	beforeEach(async() => {
 		mockBrowserStorage.prototype.fetchBlockSets
-			.mockImplementation(async() => Promise.resolve([]))
+			.mockImplementation(() => Promise.resolve([]))
 		blockSets = await BlockSets.create(new BrowserStorage({ preferSync: true }))
 		await blockSets.addDefaultBlockSet()
 		await blockSets.addDefaultBlockSet()

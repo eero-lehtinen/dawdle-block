@@ -34,7 +34,7 @@ describe("test YouTube API error states", () => {
 	test("return null values when channel with this id isn't found", async() => {
 		mockedFetch.mockResolvedValueOnce({
 			status: 200, 
-			json: async() => Promise.resolve({}),	
+			json: () => Promise.resolve({}),	
 		} as Response)
 
 		await expect(getYTInfo(new URL("https://www.youtube.com/watch?v=asd")))
@@ -55,7 +55,7 @@ describe("test YouTube API blocking info for video urls", () => {
 	test("returns correct results with a valid id", async() => {
 		mockedFetch.mockResolvedValueOnce({
 			status: 200, 
-			json: async() => Promise.resolve({ 
+			json: () => Promise.resolve({ 
 				items: [{ snippet: { channelId: "UC_x5XG1OV2P6uZZ5FSM9Ttw", categoryId: "22" } }] }), 
 		} as Response)
 		
@@ -88,7 +88,7 @@ describe("test YouTube API blocking info for channel urls", () => {
 	const expectUsername = async(url: URL) => {
 		mockedFetch.mockResolvedValueOnce({
 			status: 200, 
-			json: async() => 
+			json: () => 
 				Promise.resolve({ items: [{ 
 					id: "UC_x5XG1OV2P6uZZ5FSM9Ttw", 
 					snippet: { title: "Google Developers" } }] }),
