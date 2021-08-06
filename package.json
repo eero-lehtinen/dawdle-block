@@ -72,7 +72,8 @@
 	},
 	"scripts": {
 		"validate": "yarn lint && yarn test && yarn build",
-		"lint": "eslint .",
+		"fastlint": "eslint --cache .",
+		"lint": "eslint --cache --cache-location .eslintcache.slow --config .eslintrc.slow.js .",
 		"test": "jest",
 		"build:chromium": "webpack --env chromium --env prod",
 		"build:firefox": "webpack --env firefox --env prod",
