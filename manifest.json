@@ -1,33 +1,24 @@
 {
-  "manifest_version": 2,
-  "name": "Dawdle Block",
-  "short_name": "Dawdle Block",
-  "description": "Put time limits on unproductive sites.",
-  "options_ui": {
-    "page": "options.html",
-    "open_in_tab": true,
-    "browser_style": false
-  },
-  "browser_action": {
-    "default_icon": "images/icon.png",
-    "default_popup": "popup.html",
-    "default_title": "Dawdle Block"
-  },
-  "icons": {
-    "128": "images/icon.png"
-  },
-  "permissions": [
-    "https://www.googleapis.com/youtube/v3/",
-    "storage",
-    "tabs",
-    "alarms"
-  ],
-  "optional_permissions": [
-    "<all_urls>"
-  ],
-  "background": {
-    "scripts": [
-      "js/background.js"
-    ]
-  }
+	"manifest_version": 2,
+	"name": "Dawdle Block",
+	"short_name": "Dawdle Block",
+	"description": "Put time limits on unproductive sites.",
+	"options_ui": {
+		"page": "options.html",
+		"open_in_tab": true,
+		"browser_style": false
+	},
+	"browser_action": {
+		"default_icon": "images/icon.png",
+		"default_popup": "popup.html",
+		"default_title": "Dawdle Block"
+	},
+	"icons": {
+		"128": "images/icon.png"
+	},
+	"permissions": ["https://www.googleapis.com/youtube/v3/", "storage", "tabs", "alarms"],
+	"optional_permissions": ["<all_urls>"],
+	"background": {
+		"scripts": ["js/background.js"]
+	}
 }

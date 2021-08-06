@@ -1,9 +1,9 @@
 export type Listener<Ev> = (ev: Ev) => void
 
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ListenerOf<O extends Observer<any>> = 
-	O extends Observer<infer Ev> ? Listener<Ev> : never
+export type ListenerOf<O extends Observer<any>> = O extends Observer<infer Ev>
+	? Listener<Ev>
+	: never
 
 /**
  * Class used for publishing events to listeners.
@@ -25,7 +25,7 @@ export class Observer<Ev> {
 
 	/**
 	 * Publishes event to all listeners
-	 * @param event 
+	 * @param event
 	 */
 	publish(event: Ev): void {
 		this.listeners.forEach(listener => listener(event))

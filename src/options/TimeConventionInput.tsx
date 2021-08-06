@@ -3,7 +3,6 @@ import { ClockType } from "@src/background/generalOptionsParser"
 import { useBGScript } from "@src/shared/BGScriptProvider"
 import { useState } from "preact/hooks"
 
-
 /**
  * Input for general options time convention property.
  */
@@ -11,20 +10,20 @@ const TimeConventionInput = (): JSX.Element => {
 	const bg = useBGScript()
 	const [clockType, setClockType] = useState(bg.generalOptions.data.clockType)
 
-	const handleChange = async(
+	const handleChange = async (
 		event: React.MouseEvent<HTMLElement>,
-		newValue: ClockType | null,
+		newValue: ClockType | null
 	) => {
 		// is null when old selection is selected again.
-		if (newValue === null)
-			return
+		if (newValue === null) return
 		if (newValue !== 12 && newValue !== 24)
-			throw Error("ToggleButtonGroup configured incorrectly. " +
-				`ClockTypes do not contain value: "${newValue}"`)
+			throw Error(
+				"ToggleButtonGroup configured incorrectly. " +
+					`ClockTypes do not contain value: "${newValue}"`
+			)
 		else {
 			const res = await bg.generalOptions.set("clockType", newValue)
-			if (res.isOk())
-				setClockType(newValue)
+			if (res.isOk()) setClockType(newValue)
 		}
 	}
 

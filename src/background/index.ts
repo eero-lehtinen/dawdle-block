@@ -7,14 +7,16 @@ import { TabObserver } from "./tabObserver"
 
 // export background variable for usage in options and popup
 declare global {
-    interface Window { background: Background | undefined }
+	interface Window {
+		background: Background | undefined
+	}
 }
 
-void (async() => {
+void (async () => {
 	const browserStorage = new BrowserStorage({ preferSync: true })
 	window.background = new Background({
 		browserStorage,
-		tabObserver: await TabObserver.create(), 
+		tabObserver: await TabObserver.create(),
 		blockSets: await BlockSets.create(browserStorage),
 		generalOptions: await GeneralOptions.create(browserStorage),
 	})

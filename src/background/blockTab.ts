@@ -1,6 +1,6 @@
 /**
  * In the future replace tab with block page
- * @param tabId 
+ * @param tabId
  */
 export const blockTab = (_tabId: number): void => {
 	/* TODO: implement */

@@ -1,5 +1,5 @@
 import { Typography, Stack } from "@material-ui/core"
-import ThemeInput from"./ThemeInput"
+import ThemeInput from "./ThemeInput"
 import TimeConventionInput from "./TimeConventionInput"
 
 /**
@@ -11,7 +11,7 @@ const GeneralOptions = (): JSX.Element => {
 			<Typography variant="h1" sx={{ mb: 2 }}>
 				General Options
 			</Typography>
-			<Stack spacing={3} >
+			<Stack spacing={3}>
 				<ThemeInput />
 				<TimeConventionInput />
 			</Stack>

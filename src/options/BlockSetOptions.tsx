@@ -11,9 +11,7 @@ const InvalidLinkMessage = ({ ordinal }: { ordinal: string }) => (
 		<Typography variant="h4" component="h1" sx={{ mb: 3 }}>
 			Invalid Link: BlockSet number {ordinal} doesn't exist
 		</Typography>
-		<Typography variant="body1">
-			Please choose a valid block set.
-		</Typography>
+		<Typography variant="body1">Please choose a valid block set.</Typography>
 	</>
 )
 
@@ -22,12 +20,13 @@ const InvalidLinkMessage = ({ ordinal }: { ordinal: string }) => (
  */
 const BlockSetOptions = (): JSX.Element => {
 	const bg = useBGScript()
-	const { ordinal } = useParams<{ordinal: string}>()
+	const { ordinal } = useParams<{ ordinal: string }>()
 	const [timePickerValue, setTimePickerValue] = useState(new Date())
 	const [clockType, setClockType] = useState(bg.generalOptions.data.clockType)
 
-	useEffectCleanUpPageUnload(() => 
-		bg.generalOptions.subscribeChanged("clockType", ({ newValue }) => setClockType(newValue)), [])
+	useEffectCleanUpPageUnload(() => {
+		bg.generalOptions.subscribeChanged("clockType", ({ newValue }) => setClockType(newValue))
+	}, [])
 
 	const blockSet = bg.blockSets.list[parseInt(ordinal, 10) - 1]
 
@@ -38,7 +37,7 @@ const BlockSetOptions = (): JSX.Element => {
 			<Typography variant="h1" sx={{ mb: 2 }}>
 				{blockSet.name}
 			</Typography>
-			<Stack spacing={3} >
+			<Stack spacing={3}>
 				<Box sx={{ p: 1 }}>
 					<Typography variant="h2" sx={{ mb: 1 }}>
 						Time Allowed
@@ -46,13 +45,12 @@ const BlockSetOptions = (): JSX.Element => {
 					<DesktopTimePicker
 						value={timePickerValue}
 						ampm={false}
-						onChange={(newValue) => {
-							if (newValue !== null)
-								setTimePickerValue(newValue)
+						onChange={newValue => {
+							if (newValue !== null) setTimePickerValue(newValue)
 						}}
-						renderInput={(params) => (
-							<TextField {...params} sx={{ width: 200 }} />
-						) as React.ReactElement}
+						renderInput={params =>
+							(<TextField {...params} sx={{ width: 200 }} />) as React.ReactElement
+						}
 					/>
 				</Box>
 				<Box sx={{ p: 1 }}>
@@ -62,13 +60,12 @@ const BlockSetOptions = (): JSX.Element => {
 					<DesktopTimePicker
 						value={timePickerValue}
 						ampm={clockType === 12}
-						onChange={(newValue) => {
-							if (newValue !== null)
-								setTimePickerValue(newValue)
+						onChange={newValue => {
+							if (newValue !== null) setTimePickerValue(newValue)
 						}}
-						renderInput={(params) => (
-							<TextField {...params} sx={{ width: 200 }} />
-						) as React.ReactElement}
+						renderInput={params =>
+							(<TextField {...params} sx={{ width: 200 }} />) as React.ReactElement
+						}
 					/>
 				</Box>
 			</Stack>

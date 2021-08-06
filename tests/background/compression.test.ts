@@ -1,4 +1,3 @@
-
 import { compress, decompress } from "@src/background/compression"
 import { err } from "neverthrow"
 
@@ -27,4 +26,3 @@ describe("test save compression and decompression", () => {
 		expect(decompress("x")).toStrictEqual(err("InputCantBeDecompressed"))
 	})
 })
-

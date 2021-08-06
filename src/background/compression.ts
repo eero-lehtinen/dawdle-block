@@ -10,12 +10,12 @@ import { Result } from "neverthrow"
 export const compress = (object: unknown): string =>
 	fromUint8Array(compressSync(strToU8(JSON.stringify(object))))
 
-
 export type DecompressError = "InputCantBeDecompressed"
 
 const safeDecompress = Result.fromThrowable(
-	(str) => JSON.parse(strFromU8(decompressSync(toUint8Array(str)))), 
-	(): DecompressError => "InputCantBeDecompressed")
+	str => JSON.parse(strFromU8(decompressSync(toUint8Array(str)))),
+	(): DecompressError => "InputCantBeDecompressed"
+)
 
 /** Decompress base64 encoded string and return the object it stores. */
 export const decompress = (base64str: string): Result<unknown, DecompressError> => {

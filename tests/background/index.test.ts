@@ -15,10 +15,9 @@ jest.mock("@src/background/browserStorage")
 insertMockBrowserStorageDefaults(BrowserStorage.prototype)
 
 describe("test background index", () => {
-	test("should create Background object and insert it into window.background", async() => {
+	test("should create Background object and insert it into window.background", async () => {
 		await import("@src/background/index")
 		await flushPromises()
 		expect(window.background).toBeInstanceOf(Background)
 	})
 })
-

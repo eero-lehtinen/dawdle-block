@@ -16,7 +16,7 @@ const mockBrowserStorage = mocked(BrowserStorage, true)
 
 describe("test BlockSets construction", () => {
 	const testBlockSet = BlockSet.createDefault(42)
-	test("loads block sets from block set storage", async() => {
+	test("loads block sets from block set storage", async () => {
 		mockBrowserStorage.prototype.fetchBlockSets.mockResolvedValue([ok(testBlockSet)])
 
 		const blockSets = await BlockSets.create(new BrowserStorage({ preferSync: true }))
@@ -24,34 +24,37 @@ describe("test BlockSets construction", () => {
 		expect(blockSets.list).toStrictEqual([testBlockSet])
 		expect(blockSets.map).toStrictEqual(new Map([[42, testBlockSet]]))
 	})
-	
-	test("creates a default block set when storage is empty", async() => {
+
+	test("creates a default block set when storage is empty", async () => {
 		mockBrowserStorage.prototype.fetchBlockSets.mockResolvedValue([])
-		
+
 		const blockSets = await BlockSets.create(new BrowserStorage({ preferSync: true }))
 		expect(blockSets.list).toStrictEqual([blockSetCmpObj(BlockSet.createDefault(0))])
-		expect(blockSets.map).toStrictEqual(new Map([[0, blockSetCmpObj(BlockSet.createDefault(0))]]))
+		expect(blockSets.map).toStrictEqual(
+			new Map([[0, blockSetCmpObj(BlockSet.createDefault(0))]])
+		)
 	})
 })
 
 describe("test BlockSets methods", () => {
 	let blockSets: BlockSets
-	beforeEach(async() => {
-		mockBrowserStorage.prototype.fetchBlockSets
-			.mockResolvedValue([BlockSet.create(0, { name: "TEST" })])
+	beforeEach(async () => {
+		mockBrowserStorage.prototype.fetchBlockSets.mockResolvedValue([
+			BlockSet.create(0, { name: "TEST" }),
+		])
 		blockSets = await BlockSets.create(new BrowserStorage({ preferSync: true }))
 	})
 
 	// New block sets should get saved to storage.
 	// They should be assigned a non overlapping id.
-	// Name should be "Block Set ${number}", 
+	// Name should be "Block Set ${number}",
 	// number is based on the amount of old block sets starting with "Block Set".
-	test("can add new default block sets", async() => {
+	test("can add new default block sets", async () => {
 		const newBlockSet = (await blockSets.addDefaultBlockSet())._unsafeUnwrap()
 		const bsIds = blockSets.getIds()
 
 		// Check for duplicate ids
-		expect(new Set(bsIds).size).toBe(bsIds.length) 
+		expect(new Set(bsIds).size).toBe(bsIds.length)
 		// Added block set is equal to default block set except from id and name
 		const defaultBlockSet = BlockSet.createDefault(newBlockSet.id)
 		defaultBlockSet.name = newBlockSet.name
@@ -59,11 +62,13 @@ describe("test BlockSets methods", () => {
 
 		expect(blockSets.list).toContain(newBlockSet)
 		expect(blockSets.map.get(newBlockSet.id)).toStrictEqual(newBlockSet)
-		expect(mockBrowserStorage.prototype.saveNewBlockSet)
-			.toBeCalledWith(newBlockSet, blockSets.list)
+		expect(mockBrowserStorage.prototype.saveNewBlockSet).toBeCalledWith(
+			newBlockSet,
+			blockSets.list
+		)
 	})
 
-	test("added new block set name is 'Block Set ${number}' with restrictions", async() => {
+	test("added new block set name is 'Block Set ${number}' with restrictions", async () => {
 		let newBlockSet = (await blockSets.addDefaultBlockSet())._unsafeUnwrap()
 		expect(newBlockSet.name).toBe("Block Set 1")
 		newBlockSet = (await blockSets.addDefaultBlockSet())._unsafeUnwrap()
@@ -78,7 +83,7 @@ describe("test BlockSets methods", () => {
 	// They should be assigned a non overlapping id.
 	// Their name should have (copy) appended to the end.
 	// If old name had "(copy)" already, then names should continue (copy2), (copy3) etc.
-	test("can add new copies of block sets", async() => {
+	test("can add new copies of block sets", async () => {
 		const testBlockSet = BlockSet.create(100, { name: "TEST" })._unsafeUnwrap()
 		const newBlockSet = (await blockSets.addBlockSetCopy(testBlockSet))._unsafeUnwrap()
 		const bsIds = blockSets.getIds()
@@ -92,13 +97,14 @@ describe("test BlockSets methods", () => {
 
 		expect(blockSets.list).toContain(newBlockSet)
 		expect(blockSets.map.get(newBlockSet.id)).toStrictEqual(newBlockSet)
-		expect(mockBrowserStorage.prototype.saveNewBlockSet)
-			.toBeCalledWith(newBlockSet, blockSets.list)
+		expect(mockBrowserStorage.prototype.saveNewBlockSet).toBeCalledWith(
+			newBlockSet,
+			blockSets.list
+		)
 	})
 
-	test("added new block set copy name is '${copyName} (copy${number}x)' " +
-	"with restrictions", async() => {
-		const testBlockSet = (BlockSet.create(100, { name: "TEST" }))._unsafeUnwrap()
+	test("added new block set copy name is '${copyName} (copy${number}x)' with restrictions", async () => {
+		const testBlockSet = BlockSet.create(100, { name: "TEST" })._unsafeUnwrap()
 		let newBlockSet = (await blockSets.addBlockSetCopy(testBlockSet))._unsafeUnwrap()
 		expect(newBlockSet.name).toStrictEqual(`${testBlockSet.name} (copy)`)
 		newBlockSet = (await blockSets.addBlockSetCopy(testBlockSet))._unsafeUnwrap()
@@ -115,24 +121,20 @@ describe("test BlockSets methods", () => {
 		expect(newBlockSet.name).toStrictEqual(`${testBlockSet.name} (copy124x)`)
 	})
 
-	test("can remove block sets", async() => {
+	test("can remove block sets", async () => {
 		const testBlockSet = blockSets.list[0]!
 		await blockSets.deleteBlockSet(testBlockSet)
 
 		expect(blockSets.list).toStrictEqual([])
 		expect(blockSets.map.size).toStrictEqual(0)
-		expect(mockBrowserStorage.prototype.deleteBlockSet)
-			.toBeCalledWith(testBlockSet, [])
+		expect(mockBrowserStorage.prototype.deleteBlockSet).toBeCalledWith(testBlockSet, [])
 	})
 })
 
-
-
 describe("test BlockSets blockedBy method", () => {
 	let blockSets: BlockSets
-	beforeEach(async() => {
-		mockBrowserStorage.prototype.fetchBlockSets
-			.mockImplementation(() => Promise.resolve([]))
+	beforeEach(async () => {
+		mockBrowserStorage.prototype.fetchBlockSets.mockImplementation(() => Promise.resolve([]))
 		blockSets = await BlockSets.create(new BrowserStorage({ preferSync: true }))
 		await blockSets.addDefaultBlockSet()
 		await blockSets.addDefaultBlockSet()

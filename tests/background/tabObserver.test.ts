@@ -8,19 +8,19 @@ import { Listener } from "@src/background/observer"
 jest.mock("webextension-polyfill-ts", () => {
 	return {
 		browser: {
-			tabs: { 
+			tabs: {
 				TAB_ID_NONE: -1,
 				onUpdated: jest.fn(),
 				onActivated: jest.fn(),
 				onRemoved: jest.fn(),
 			},
-			windows: { 
+			windows: {
 				WINDOW_ID_NONE: -1,
 				getAll: jest.fn(),
 				onFocusChanged: jest.fn(),
 				onCreated: jest.fn(),
 				onRemoved: jest.fn(),
-			 },
+			},
 		},
 	}
 })
@@ -39,27 +39,30 @@ afterEach(() => {
 	jest.clearAllMocks()
 })
 
-
 describe("test tabObserver events", () => {
 	let tabObserver: TabObserver
 
 	const initialActiveTabIds = [1]
 	const initialTabs = [
-		{ id: 1, windowId: 1, url: "asd" }, 
-		{ id: 2, windowId: 1, url: null }]
+		{ id: 1, windowId: 1, url: "asd" },
+		{ id: 2, windowId: 1, url: null },
+	]
 
-	beforeEach(async() => {
+	beforeEach(async () => {
+		mockBrowser.windows.getAll.mockImplementation(() =>
+			Promise.resolve([
+				{
+					id: 1,
+					state: "normal",
+					tabs: [
+						{ id: 1, windowId: 1, active: true, url: "asd" },
+						{ id: 2, windowId: 1, active: false },
+					],
+				},
+			] as Windows.Window[])
+		)
 
-		mockBrowser.windows.getAll.mockImplementation(
-			() => Promise.resolve([{ 
-				id: 1, state: "normal",
-				tabs: [
-					{ id: 1, windowId: 1, active: true, url: "asd" }, 
-					{ id: 2, windowId: 1, active: false }], 
-			}] as Windows.Window[]))
-		
 		tabObserver = await TabObserver.create()
-		
 	})
 	afterEach(() => jest.clearAllMocks())
 
@@ -84,14 +87,23 @@ describe("test tabObserver events", () => {
 
 	test("a new tab on new window is registered after loading is complete", () => {
 		emitWindowCreated({ id: 2, state: "normal" } as Windows.Window)
-		emitTabUpdated(3, { status: "loading" }, { id: 3, windowId: 2, url: undefined } as Tabs.Tab)
-		emitTabUpdated(3, { status: "complete" }, { id: 3, windowId: 2, url: "asd" } as Tabs.Tab)
+		emitTabUpdated(3, { status: "loading" }, {
+			id: 3,
+			windowId: 2,
+			url: undefined,
+		} as Tabs.Tab)
+		emitTabUpdated(3, { status: "complete" }, {
+			id: 3,
+			windowId: 2,
+			url: "asd",
+		} as Tabs.Tab)
 		expect(tabObserver.getTabs()).toContainEqual({ id: 3, windowId: 2, url: "asd" })
 	})
 
-	test("active tab of window is no longer active, if window gets minimized", async() => {
-		mockBrowser.windows.getAll.mockImplementation(
-			() => Promise.resolve([{ id: 1, state: "minimized" } as Windows.Window]))
+	test("active tab of window is no longer active, if window gets minimized", async () => {
+		mockBrowser.windows.getAll.mockImplementation(() =>
+			Promise.resolve([{ id: 1, state: "minimized" } as Windows.Window])
+		)
 
 		emitWindowFocusChanged(-1)
 		await flushPromises()
@@ -107,10 +119,18 @@ describe("test tabObserver events", () => {
 		const listener: Listener<TabLoadedEvent> = jest.fn()
 		const _unsubscribe = tabObserver.subscribeTabLoaded(listener)
 
-		emitTabUpdated(0, { status: "loading" }, { id: 1, windowId: 1, url: undefined } as Tabs.Tab)
+		emitTabUpdated(0, { status: "loading" }, {
+			id: 1,
+			windowId: 1,
+			url: undefined,
+		} as Tabs.Tab)
 		expect(listener).toBeCalledTimes(0)
-		
-		emitTabUpdated(0, { status: "complete" }, { id: 1, windowId: 1, url: "url" } as Tabs.Tab)
+
+		emitTabUpdated(0, { status: "complete" }, {
+			id: 1,
+			windowId: 1,
+			url: "url",
+		} as Tabs.Tab)
 		expect(listener).toBeCalledWith({ tabId: 1, url: "url" })
 	})
 
@@ -124,7 +144,6 @@ describe("test tabObserver events", () => {
 	})
 
 	describe("test invalid events", () => {
-
 		const expectToBeUnchanged = (tabObserver: TabObserver) => {
 			expect(tabObserver.getTabs()).toStrictEqual(initialTabs)
 			expect(tabObserver.getActiveTabIds()).toStrictEqual(initialActiveTabIds)
@@ -144,10 +163,22 @@ describe("test tabObserver events", () => {
 
 		test("tab updating with invalid ids does nothing", () => {
 			// invalid ids
-			emitTabUpdated(0, { status: "complete" }, { id: -1, windowId: 1, url: "a" } as Tabs.Tab)
-			emitTabUpdated(0, { status: "complete" }, { id: 1, windowId: -1, url: "a" } as Tabs.Tab)
+			emitTabUpdated(0, { status: "complete" }, {
+				id: -1,
+				windowId: 1,
+				url: "a",
+			} as Tabs.Tab)
+			emitTabUpdated(0, { status: "complete" }, {
+				id: 1,
+				windowId: -1,
+				url: "a",
+			} as Tabs.Tab)
 			// nonexistant window id
-			emitTabUpdated(0, { status: "complete" }, { id: 1, windowId: 100, url: "a" } as Tabs.Tab)
+			emitTabUpdated(0, { status: "complete" }, {
+				id: 1,
+				windowId: 100,
+				url: "a",
+			} as Tabs.Tab)
 
 			expectToBeUnchanged(tabObserver)
 		})

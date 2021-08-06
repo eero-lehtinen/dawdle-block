@@ -1,6 +1,10 @@
-import { 
-	BlockSetData, plainToBlockSetData, createDefaultBlockSetData, 
-	BlockList, ActiveTime, ActiveDays,
+import {
+	BlockSetData,
+	plainToBlockSetData,
+	createDefaultBlockSetData,
+	BlockList,
+	ActiveTime,
+	ActiveDays,
 } from "./blockSetParser"
 import { ytCategoryNamesById } from "./constants"
 import { fetchChannelTitle, FetchError } from "./youtubeAPI"
@@ -16,7 +20,7 @@ export enum ListType {
 export enum BlockTestRes {
 	Blacklisted,
 	Whitelisted,
-	Ignored
+	Ignored,
 }
 
 type CompiledRules = Record<ListType, RegExp[]>
@@ -28,17 +32,20 @@ export enum BSState {
 }
 
 type CantAddDuplicateError = "CantAddDuplicate"
-type InvalidRegExpError = { type: "InvalidRegExp", message: string }
+type InvalidRegExpError = { type: "InvalidRegExp"; message: string }
 type InvalidYTCategoryIdError = "InvalidYTCategoryId"
 
-const safeMakeRegExp: (regExpStr: string) => Result<RegExp, InvalidRegExpError> = 
-	Result.fromThrowable((re) => new RegExp(re), (err) => ({ 
-		type: "InvalidRegExp", 
-		message: (err as { message: string }).message, 
-	}))
+const safeMakeRegExp: (regExpStr: string) => Result<RegExp, InvalidRegExpError> =
+	Result.fromThrowable(
+		re => new RegExp(re),
+		err => ({
+			type: "InvalidRegExp",
+			message: (err as { message: string }).message,
+		})
+	)
 
 /**
- * Contains all configuration for website blocking. 
+ * Contains all configuration for website blocking.
  * Instances should be managed with the BlockSetManager.
  * Has function for testing a URL against all rules.
  */
@@ -48,8 +55,8 @@ export class BlockSet {
 	private _timeElapsed: number
 
 	// Blocking rules compiled to regular expressions (doesn't include yt rules)
-	private compiledUrlRules: CompiledRules = { 
-		blacklist: [], 
+	private compiledUrlRules: CompiledRules = {
+		blacklist: [],
 		whitelist: [],
 	}
 
@@ -58,7 +65,7 @@ export class BlockSet {
 	 * Parses blockSetPlanObject and initializes internal state to match that.
 	 * timeElapsed isn't stored in plain object, so we need to supply it separately.
 	 * @param id unique id
-	 * @param blockSetPlanObject 
+	 * @param blockSetPlanObject
 	 * @param timeElapsed blocking time elapsed
 	 */
 	private constructor(id: number, data: BlockSetData, timeElapsed: number) {
@@ -75,9 +82,14 @@ export class BlockSet {
 	 * Parses blockSetPlanObject and initializes internal state to match that.
 	 * timeElapsed isn't stored in plain object, so we need to supply it separately.
 	 */
-	static create(id: number, blockSetPlanObject: unknown, timeElapsed = 0): 
-		ZodRes<BlockSet, ParseError> {		
-		return plainToBlockSetData(blockSetPlanObject).map(data => new BlockSet(id, data, timeElapsed))
+	static create(
+		id: number,
+		blockSetPlanObject: unknown,
+		timeElapsed = 0
+	): ZodRes<BlockSet, ParseError> {
+		return plainToBlockSetData(blockSetPlanObject).map(
+			data => new BlockSet(id, data, timeElapsed)
+		)
 	}
 
 	/**
@@ -91,7 +103,6 @@ export class BlockSet {
 	/**
 	 * Compile user written block rules into machine friendly regular expressions.
 	 * @param listType whitelist or blacklist (if not set, do both)
-	 * 
 	 */
 	private compileRules(listType?: ListType): void {
 		if (!listType) {
@@ -101,14 +112,16 @@ export class BlockSet {
 		}
 		this.compiledUrlRules[listType] = [
 			...this._data[listType].urlRegExps.map((value: string) => new RegExp(value)),
-			...this._data[listType].urlPatterns.map((value: string) => BlockSet.patternToRegExp(value)),
+			...this._data[listType].urlPatterns.map((value: string) =>
+				BlockSet.patternToRegExp(value)
+			),
 		]
 	}
 
 	/**
-	 * If from is less than to, returns true when msSinceMidnight is between user 
+	 * If from is less than to, returns true when msSinceMidnight is between user
 	 * defined active time to and from.
-	 * If from is greater than to, active time is effectively over night 
+	 * If from is greater than to, active time is effectively over night
 	 * eg. from 22.00 at night to 7.00 in the morning and returns are reversed.
 	 * @param msSinceMidnight milliseconds starting from today 00:00 o'clock
 	 * @returns true if in active time, false otherwise
@@ -119,11 +132,10 @@ export class BlockSet {
 
 		if (from === to) {
 			return true
+		} else if (from < to) {
+			return msSinceMidnight > from && msSinceMidnight < to
 		}
-		else if (from < to) {
-			return (msSinceMidnight > from && msSinceMidnight < to)
-		}
-		return (msSinceMidnight > from || msSinceMidnight < to)
+		return msSinceMidnight > from || msSinceMidnight < to
 	}
 
 	/**
@@ -153,37 +165,42 @@ export class BlockSet {
 	 */
 	removePattern(listType: ListType, pattern: string): void {
 		const compiled = BlockSet.patternToRegExp(pattern as string)
-		this.compiledUrlRules[listType] = this.compiledUrlRules[listType]
-			.filter((c) => c.source !== compiled.source)
-		this._data[listType].urlPatterns = this._data[listType].urlPatterns.filter((p) => p !== pattern)
-	}	
+		this.compiledUrlRules[listType] = this.compiledUrlRules[listType].filter(
+			c => c.source !== compiled.source
+		)
+		this._data[listType].urlPatterns = this._data[listType].urlPatterns.filter(
+			p => p !== pattern
+		)
+	}
 
 	/**
 	 * Add regular expression to block set
 	 * @param listType whitelist or blacklist
 	 * @param regExpStr regular expression to add
 	 */
-	addRegExp(listType: ListType, regExpStr: string): 
-		Result<void, CantAddDuplicateError | InvalidRegExpError> {
+	addRegExp(
+		listType: ListType,
+		regExpStr: string
+	): Result<void, CantAddDuplicateError | InvalidRegExpError> {
 		if (this._data[listType].urlRegExps.includes(regExpStr)) return err("CantAddDuplicate")
 
-		return safeMakeRegExp(regExpStr)
-			.andThen(regExp => {
-				this._data[listType].urlRegExps.push(regExpStr)
-				this.compiledUrlRules[listType].push(regExp)
-				return ok(undefined)
-			})
+		return safeMakeRegExp(regExpStr).andThen(regExp => {
+			this._data[listType].urlRegExps.push(regExpStr)
+			this.compiledUrlRules[listType].push(regExp)
+			return ok(undefined)
+		})
 	}
-	
+
 	/**
 	 * Remove regular expression from block set.
 	 * @param listType whitelist or blacklist
 	 * @param regExp regular expression to remove
 	 */
 	removeRegExp(listType: ListType, regExp: string): void {
-		this.compiledUrlRules[listType] = this.compiledUrlRules[listType]
-			.filter((c) => c.source !== regExp)
-		this._data[listType].urlRegExps = this._data[listType].urlRegExps.filter((r) => r !== regExp)
+		this.compiledUrlRules[listType] = this.compiledUrlRules[listType].filter(
+			c => c.source !== regExp
+		)
+		this._data[listType].urlRegExps = this._data[listType].urlRegExps.filter(r => r !== regExp)
 	}
 
 	/**
@@ -191,27 +208,27 @@ export class BlockSet {
 	 * @param listType whitelist or blacklist
 	 * @param categoryId category id to add
 	 */
-	addYTCategory(listType: ListType, categoryId: string): 
-		Result<void, InvalidYTCategoryIdError | CantAddDuplicateError>  {
-		if (!(categoryId in ytCategoryNamesById))
-			return err("InvalidYTCategoryId")
-		
-		if (this._data[listType].ytCategoryIds.includes(categoryId))
-			return err("CantAddDuplicate")
+	addYTCategory(
+		listType: ListType,
+		categoryId: string
+	): Result<void, InvalidYTCategoryIdError | CantAddDuplicateError> {
+		if (!(categoryId in ytCategoryNamesById)) return err("InvalidYTCategoryId")
+
+		if (this._data[listType].ytCategoryIds.includes(categoryId)) return err("CantAddDuplicate")
 
 		this._data[listType].ytCategoryIds.push(categoryId)
 		return ok(undefined)
 	}
 
-	
 	/**
 	 * Remove YouTube category from block set.
 	 * @param listType whitelist or blacklist
 	 * @param categoryId category id to remove
 	 */
 	removeYTCategory(listType: ListType, categoryId: string): void {
-		this._data[listType].ytCategoryIds = this._data[listType].ytCategoryIds
-			.filter((id) => id !== categoryId)
+		this._data[listType].ytCategoryIds = this._data[listType].ytCategoryIds.filter(
+			id => id !== categoryId
+		)
 	}
 
 	/**
@@ -221,17 +238,18 @@ export class BlockSet {
 	 * @param channelId channel id to add
 	 * @param channelTitle trusted channel title
 	 */
-	async addYTChannel(listType: ListType, channelId: string, channelTitle?: string): 
-		Promise<Result<void, CantAddDuplicateError | FetchError>> {
-
+	async addYTChannel(
+		listType: ListType,
+		channelId: string,
+		channelTitle?: string
+	): Promise<Result<void, CantAddDuplicateError | FetchError>> {
 		if (this._data[listType].ytChannels.find(({ id }) => id === channelId)) {
 			return err("CantAddDuplicate")
 		}
 
 		if (channelTitle === undefined) {
 			const result = await fetchChannelTitle(channelId)
-			if (result.isErr())
-				return err(result.error)
+			if (result.isErr()) return err(result.error)
 			channelTitle = result.value
 		}
 
@@ -245,14 +263,14 @@ export class BlockSet {
 	 * @param channelId channel id to remove
 	 */
 	removeYTChannel(listType: ListType, channelId: string): void {
-		this._data[listType].ytChannels = this._data[listType].ytChannels
-			.filter(({ id }) => id !== channelId)
+		this._data[listType].ytChannels = this._data[listType].ytChannels.filter(
+			({ id }) => id !== channelId
+		)
 	}
-	
+
 	/**
 	 * Get all blockrules based on list type
 	 * @param listType whitelist or blacklist
-	 * @returns 
 	 */
 	getBlockList(listType: ListType): BlockList {
 		return this._data[listType]
@@ -263,9 +281,12 @@ export class BlockSet {
 	 * @param urlNoProtocol url to test (protocol not allowed)
 	 * @param channelId channel id to test against
 	 * @param categoryId category id to test against
-	 * @returns 
 	 */
-	test(urlNoProtocol: string, channelId: string | null, categoryId: string | null): BlockTestRes {
+	test(
+		urlNoProtocol: string,
+		channelId: string | null,
+		categoryId: string | null
+	): BlockTestRes {
 		if (this.testList(ListType.Whitelist, urlNoProtocol, channelId, categoryId)) {
 			return BlockTestRes.Whitelisted
 		}
@@ -273,17 +294,17 @@ export class BlockSet {
 		if (this.testList(ListType.Blacklist, urlNoProtocol, channelId, categoryId)) {
 			return BlockTestRes.Blacklisted
 		}
-		
+
 		return BlockTestRes.Ignored
 	}
 
-	/** 
-	 * Compare supplied state to current blocking state of this block set. 
+	/**
+	 * Compare supplied state to current blocking state of this block set.
 	 * Has specialized behaviour when annoyMode is true.
 	 * When multiple parameters are provided, returns true if any of them match.
 	 */
 	isInState(...states: BSState[]): boolean {
-		return states.some(state => {		
+		return states.some(state => {
 			if (this.timeElapsed < this._data.timeAllowed) {
 				return state === BSState.TimeLeft
 			}
@@ -292,8 +313,7 @@ export class BlockSet {
 				return state === BSState.Block
 			}
 			// annoyMode == true
-			if (this.timeElapsed === this._data.timeAllowed)
-				return state === BSState.TimeLeft
+			if (this.timeElapsed === this._data.timeAllowed) return state === BSState.TimeLeft
 			return state === BSState.OverTime
 		})
 	}
@@ -301,45 +321,48 @@ export class BlockSet {
 	/**
 	 * Helper function for testing both whitelist and blacklist.
 	 */
-	private testList(listType: ListType, url: string, channelId: string | null, 
-		categoryId: string | null): boolean {
-		if (this.compiledUrlRules[listType].some((regExp) => regExp.test(url)))
+	private testList(
+		listType: ListType,
+		url: string,
+		channelId: string | null,
+		categoryId: string | null
+	): boolean {
+		if (this.compiledUrlRules[listType].some(regExp => regExp.test(url))) return true
+		if (
+			channelId !== null &&
+			this._data[listType].ytChannels.some(({ id }) => id === channelId)
+		)
 			return true
-		if (channelId !== null && this._data[listType].ytChannels.some(({ id }) => id === channelId))
+		if (categoryId !== null && this._data[listType].ytCategoryIds.some(id => id === categoryId))
 			return true
-		if (categoryId !== null && this._data[listType].ytCategoryIds.some((id) => id === categoryId))
-			return true
-		
+
 		return false
 	}
 
 	/**
-	 * Escape user defined strings to be used in regular expressions for exact matching with 
-	 * wildcards. Part of regular expression copied from MDN 
+	 * Escape user defined strings to be used in regular expressions for exact matching with
+	 * wildcards. Part of regular expression copied from MDN
 	 * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#escaping.
 	 * @param string string to escape
 	 * @returns escaped string
 	 */
 	static patternToRegExp(string: string): RegExp {
-		string = string.replace(/(\\\*)|(\*)|([.+?^${}()|[\]\\])/g, 
-			(_, g1, g2, g3): string => {
-				// If we found an escaped wildcard, just return it
-				if (g1 !== undefined)
-					return g1
+		string = string.replace(/(\\\*)|(\*)|([.+?^${}()|[\]\\])/g, (_, g1, g2, g3): string => {
+			// If we found an escaped wildcard, just return it
+			if (g1 !== undefined) return g1
 
-				// If we found an unescaped wildcard, replace it with a regular expression wildcard
-				if (g2 !== undefined)
-					return ".*"
-			
-				// Otherwise just escape the forbidden character
-				return `\\${g3}`
-			})
+			// If we found an unescaped wildcard, replace it with a regular expression wildcard
+			if (g2 !== undefined) return ".*"
+
+			// Otherwise just escape the forbidden character
+			return `\\${g3}`
+		})
 
 		if (!string.startsWith(".*")) {
-			string = `^${  string}`
+			string = `^${string}`
 		}
 		if (!string.endsWith(".*")) {
-			string = `${string  }$`
+			string = `${string}$`
 		}
 
 		return new RegExp(string)
@@ -390,88 +413,106 @@ export class BlockSet {
 		any: new Observer<ChangedEvent<BlockSet>>(),
 	}
 
-	subscribeTimeElapsedChanged(listener: Listener<ChangedEvent<number>>): () => void { 
+	subscribeTimeElapsedChanged(listener: Listener<ChangedEvent<number>>): () => void {
 		return this.changeObservers.timeElapsed.subscribe(listener)
 	}
-	get timeElapsed(): number { return this._timeElapsed }
+	get timeElapsed(): number {
+		return this._timeElapsed
+	}
 	set timeElapsed(val: number) {
 		this._timeElapsed = val
 		this.changeObservers.timeElapsed.publish({ newValue: val })
 	}
 
-	subscribeNameChanged(listener: Listener<ChangedEvent<string>>): () => void { 
+	subscribeNameChanged(listener: Listener<ChangedEvent<string>>): () => void {
 		return this.changeObservers.name.subscribe(listener)
 	}
-	get name(): string { return this._data.name}
-	set name(val: string) { 
+	get name(): string {
+		return this._data.name
+	}
+	set name(val: string) {
 		this._data.name = val
 		this.changeObservers.name.publish({ newValue: val })
 	}
 
-	subscribeRequireActiveChanged(listener: Listener<ChangedEvent<boolean>>): () => void { 
+	subscribeRequireActiveChanged(listener: Listener<ChangedEvent<boolean>>): () => void {
 		return this.changeObservers.requireActive.subscribe(listener)
 	}
-	get requireActive(): boolean { return this._data.requireActive}
-	set requireActive(val: boolean) { 
+	get requireActive(): boolean {
+		return this._data.requireActive
+	}
+	set requireActive(val: boolean) {
 		this._data.requireActive = val
 		this.changeObservers.requireActive.publish({ newValue: val })
 	}
 
-	subscribeAnnoyModeChanged(listener: Listener<ChangedEvent<boolean>>): () => void { 
+	subscribeAnnoyModeChanged(listener: Listener<ChangedEvent<boolean>>): () => void {
 		return this.changeObservers.annoyMode.subscribe(listener)
 	}
-	get annoyMode(): boolean { return this._data.annoyMode}
-	set annoyMode(val: boolean) { 
+	get annoyMode(): boolean {
+		return this._data.annoyMode
+	}
+	set annoyMode(val: boolean) {
 		this._data.annoyMode = val
 		this.changeObservers.annoyMode.publish({ newValue: val })
 	}
 
-	subscribeTimeAllowedChanged(listener: Listener<ChangedEvent<number>>): () => void { 
+	subscribeTimeAllowedChanged(listener: Listener<ChangedEvent<number>>): () => void {
 		return this.changeObservers.timeAllowed.subscribe(listener)
 	}
-	get timeAllowed(): number { return this._data.timeAllowed}
-	set timeAllowed(val: number) { 
+	get timeAllowed(): number {
+		return this._data.timeAllowed
+	}
+	set timeAllowed(val: number) {
 		this._data.timeAllowed = val
 		this.changeObservers.timeAllowed.publish({ newValue: val })
 	}
 
-	subscribeResetTimeChanged(listener: Listener<ChangedEvent<number>>): () => void { 
+	subscribeResetTimeChanged(listener: Listener<ChangedEvent<number>>): () => void {
 		return this.changeObservers.resetTime.subscribe(listener)
 	}
-	get resetTime(): number { return this._data.resetTime}
-	set resetTime(val: number) { 
+	get resetTime(): number {
+		return this._data.resetTime
+	}
+	set resetTime(val: number) {
 		this._data.resetTime = val
 		this.changeObservers.resetTime.publish({ newValue: val })
 	}
 
-	subscribeLastResetChanged(listener: Listener<ChangedEvent<number>>): () => void { 
+	subscribeLastResetChanged(listener: Listener<ChangedEvent<number>>): () => void {
 		return this.changeObservers.lastReset.subscribe(listener)
 	}
-	get lastReset(): number { return this._data.lastReset}
-	set lastReset(val: number) { 
+	get lastReset(): number {
+		return this._data.lastReset
+	}
+	set lastReset(val: number) {
 		this._data.lastReset = val
 		this.changeObservers.lastReset.publish({ newValue: val })
 	}
 
-	subscribeActiveDaysChanged(listener: Listener<ChangedEvent<ActiveDays>>): () => void { 
+	subscribeActiveDaysChanged(listener: Listener<ChangedEvent<ActiveDays>>): () => void {
 		return this.changeObservers.activeDays.subscribe(listener)
 	}
-	get activeDays(): ActiveDays { return this._data.activeDays}
-	set activeDays(val: ActiveDays) { 
+	get activeDays(): ActiveDays {
+		return this._data.activeDays
+	}
+	set activeDays(val: ActiveDays) {
 		this._data.activeDays = val
 		this.changeObservers.activeDays.publish({ newValue: val })
 	}
 
-	subscribeActiveTimeChanged(listener: Listener<ChangedEvent<ActiveTime>>): () => void { 
+	subscribeActiveTimeChanged(listener: Listener<ChangedEvent<ActiveTime>>): () => void {
 		return this.changeObservers.activeTime.subscribe(listener)
 	}
-	get activeTime(): ActiveTime { return this._data.activeTime}
-	set activeTime(val: ActiveTime) { 
+	get activeTime(): ActiveTime {
+		return this._data.activeTime
+	}
+	set activeTime(val: ActiveTime) {
 		this._data.activeTime = val
 		this.changeObservers.activeTime.publish({ newValue: val })
 	}
 
-	/** Connect any change observer to listen to all changes. 
+	/** Connect any change observer to listen to all changes.
 	 * Call this only once in constructor. */
 	private connectChangeObserverAny() {
 		const listener = () => this.changeObservers.any.publish({ newValue: this })
@@ -485,7 +526,7 @@ export class BlockSet {
 		this.subscribeActiveDaysChanged(listener)
 		this.subscribeActiveTimeChanged(listener)
 	}
-	subscribeAnyChanged(listener: Listener<ChangedEvent<BlockSet>>): () => void { 
+	subscribeAnyChanged(listener: Listener<ChangedEvent<BlockSet>>): () => void {
 		return this.changeObservers.any.subscribe(listener)
 	}
 }

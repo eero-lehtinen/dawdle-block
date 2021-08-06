@@ -1,6 +1,13 @@
-import { 
-	Drawer, Toolbar, Divider, List, ListItemButton, 
-	ListItemText, ListItemIcon, ListSubheader, Button, 
+import {
+	Drawer,
+	Toolbar,
+	Divider,
+	List,
+	ListItemButton,
+	ListItemText,
+	ListItemIcon,
+	ListSubheader,
+	Button,
 } from "@material-ui/core"
 import { SettingsRounded, AddRounded, ImportExportRounded } from "@material-ui/icons"
 import { useBGScript } from "@src/shared/BGScriptProvider"
@@ -12,9 +19,9 @@ const drawerWidth = 300
 const betweenButtonMargin = 0.5
 
 interface ListItemLinkProps {
-  icon?: JSX.Element
-  primary: string
-  to: string
+	icon?: JSX.Element
+	primary: string
+	to: string
 	currentPath: string
 }
 
@@ -22,7 +29,7 @@ interface ListItemLinkProps {
 const ListItemLink = ({ icon, primary, to, currentPath }: ListItemLinkProps) => {
 	return (
 		<li>
-			<ListItemButton 
+			<ListItemButton
 				disableRipple
 				selected={currentPath === to}
 				sx={{ borderRadius: 1.5, mb: betweenButtonMargin }}
@@ -47,18 +54,17 @@ const NavDrawer = (): JSX.Element => {
 	const [blockSetsList, setBlockSetsList] = useState(bg.blockSets.list)
 	const addPending = useRef(false)
 
-	const addNewBlockSet = async() => {
+	const addNewBlockSet = async () => {
 		if (addPending.current) return
 		addPending.current = true
 		const res = await bg.blockSets.addDefaultBlockSet()
-		if (res.isOk())
-			setBlockSetsList([...bg.blockSets.list])
+		if (res.isOk()) setBlockSetsList([...bg.blockSets.list])
 		addPending.current = false
 	}
 
 	return (
 		<Drawer
-			variant="permanent" 
+			variant="permanent"
 			anchor="left"
 			sx={{
 				width: drawerWidth,
@@ -74,14 +80,14 @@ const NavDrawer = (): JSX.Element => {
 			<Toolbar />
 			<List sx={{ pr: 1, pl: 1 }}>
 				<Divider sx={{ mb: betweenButtonMargin }} />
-				<ListItemLink 
-					to="/general-options" 
+				<ListItemLink
+					to="/general-options"
 					primary={"General Options"}
 					icon={<SettingsRounded />}
 					currentPath={currentPath}
 				/>
-				<ListItemLink 
-					to="/import-export" 
+				<ListItemLink
+					to="/import-export"
 					primary={"Import/Export"}
 					icon={<ImportExportRounded />}
 					currentPath={currentPath}
@@ -90,23 +96,23 @@ const NavDrawer = (): JSX.Element => {
 				<Divider sx={{ mb: betweenButtonMargin }} />
 				<ListSubheader>BLOCK SETS</ListSubheader>
 
-				{
-					blockSetsList.map((blockSet, index) => (
-						<ListItemLink 
-							to={`/block-sets/${index + 1}`} 
-							key={blockSet.id}
-							primary={blockSet.name}
-							currentPath={currentPath}
-						/>
-					))
-				}
+				{blockSetsList.map((blockSet, index) => (
+					<ListItemLink
+						to={`/block-sets/${index + 1}`}
+						key={blockSet.id}
+						primary={blockSet.name}
+						currentPath={currentPath}
+					/>
+				))}
 
-				<Button size="large" sx={{ float: "right" }} startIcon={<AddRounded />}
+				<Button
+					size="large"
+					sx={{ float: "right" }}
+					startIcon={<AddRounded />}
 					onClick={addNewBlockSet}
 				>
-						Add New Block Set
+					Add New Block Set
 				</Button>
-
 			</List>
 		</Drawer>
 	)

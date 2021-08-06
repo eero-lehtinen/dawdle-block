@@ -11,37 +11,37 @@ import useEffectCleanUpPageUnload from "./useEffectCleanupPageUnload"
 /**
  * Contains common shared wrappers for theming and state management with background script.
  */
-const BaseWrapper: FunctionComponent = ({ children }) =>
+const BaseWrapper: FunctionComponent = ({ children }) => (
 	<BGScriptProvider>
-		<InnerWrapper>
-			{ children }
-		</InnerWrapper>
+		<InnerWrapper>{children}</InnerWrapper>
 	</BGScriptProvider>
+)
 
 /**
  * Global styles object that has styling for scrollbars.
  */
 const MyGlobalStyles = ({ matUITheme }: { matUITheme: MatUITheme }) => {
 	const scrollbarColors = {
-		track: matUITheme.palette.background.default, 
+		track: matUITheme.palette.background.default,
 		thumb: matUITheme.palette.mode === "dark" ? "#121212" : matUITheme.palette.grey[500],
 	}
 	return (
-		<GlobalStyles styles={{ 
-		// Chromium
-			"::-webkit-scrollbar": { color: "#FFF", width: "16px" }, 
-			"::-webkit-scrollbar-track": { backgroundColor: scrollbarColors.track },
-			"::-webkit-scrollbar-thumb": {
-				backgroundColor: scrollbarColors.thumb, 
-				borderRadius: 8, 
-				border: `4px solid ${scrollbarColors.track}`, 
-			},
-			// Firefox
-			"*": {
-				scrollbarColor: `${scrollbarColors.thumb} ${scrollbarColors.track}`,
-				scrollbarWidth: "thin",
-			},
-		}} 
+		<GlobalStyles
+			styles={{
+				// Chromium
+				"::-webkit-scrollbar": { color: "#FFF", width: "16px" },
+				"::-webkit-scrollbar-track": { backgroundColor: scrollbarColors.track },
+				"::-webkit-scrollbar-thumb": {
+					backgroundColor: scrollbarColors.thumb,
+					borderRadius: 8,
+					border: `4px solid ${scrollbarColors.track}`,
+				},
+				// Firefox
+				"*": {
+					scrollbarColor: `${scrollbarColors.thumb} ${scrollbarColors.track}`,
+					scrollbarWidth: "thin",
+				},
+			}}
 		/>
 	)
 }
@@ -56,17 +56,16 @@ const InnerWrapper: FunctionComponent = ({ children }) => {
 	const mode = theme === "system" ? (prefersDark ? "dark" : "light") : theme
 	const matUITheme = useMemo(() => createGlobalTheme(mode), [mode])
 
-	useEffectCleanUpPageUnload(() => 
-		bg.generalOptions.subscribeChanged("theme", ({ newValue }) => setTheme(newValue)), [])
+	useEffectCleanUpPageUnload(() => {
+		bg.generalOptions.subscribeChanged("theme", ({ newValue }) => setTheme(newValue))
+	}, [])
 
 	return (
 		<>
-			<ThemeProvider theme={matUITheme} >
-				<CssBaseline /> 
+			<ThemeProvider theme={matUITheme}>
+				<CssBaseline />
 				<MyGlobalStyles matUITheme={matUITheme} />
-				<BackgroundBox>
-					{ children }
-				</BackgroundBox>
+				<BackgroundBox>{children}</BackgroundBox>
 			</ThemeProvider>
 		</>
 	)

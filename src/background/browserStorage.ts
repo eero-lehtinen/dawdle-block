@@ -2,13 +2,15 @@ import { err, errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow"
 import { browser, Storage } from "webextension-polyfill-ts"
 import { ZodIssue } from "zod"
 import { BlockSet } from "./blockSet"
-import { 
-	plainToBlockSetIds, plainToBlockSetTimesElapsed, 
-	BlockSetIds, BlockSetTimesElapsed, BlockSetData, 
-}	from "./blockSetParser"
+import {
+	plainToBlockSetIds,
+	plainToBlockSetTimesElapsed,
+	BlockSetIds,
+	BlockSetTimesElapsed,
+	BlockSetData,
+} from "./blockSetParser"
 import { decompress, compress, DecompressError } from "./compression"
-import { GeneralOptionsData, plainToGeneralOptionsData, 
-} from "./generalOptionsParser"
+import { GeneralOptionsData, plainToGeneralOptionsData } from "./generalOptionsParser"
 import { ParseError, ZodResAsync } from "./parserHelpers"
 
 interface BrowserStorageOptions {
@@ -33,21 +35,22 @@ export const bsIdsSaveKey = "blocksetIds"
 export const bsTimesElapsedSaveKey = "blocksetTimesElapsed"
 export const generalOptionsSaveKey = "generalOptions"
 
-type SetItems = Record<string, 
-	null | string | BlockSetData | BlockSetIds | BlockSetTimesElapsed | GeneralOptionsData>
+type SetItems = Record<
+	string,
+	null | string | BlockSetData | BlockSetIds | BlockSetTimesElapsed | GeneralOptionsData
+>
 
 /**
- * Object for saving and loading block sets from browser storage. 
+ * Object for saving and loading block sets from browser storage.
  * Can be configured to be local or cloud synced.
- * NOTE!!: 
+ * NOTE!!:
  * There is no way to detect if cloud sync has beed disabled by the browser.
  * In that case storage will silently be local.
  */
 export class BrowserStorage {
-
 	private storage: Storage.StorageArea
 	private readonly QUOTA_BYTES_PER_ITEM = browser.storage.sync.QUOTA_BYTES_PER_ITEM
-	
+
 	/**
 	 * Instantiates block set storage.
 	 * @param opts Configuration options
@@ -61,38 +64,43 @@ export class BrowserStorage {
 	}
 
 	/** Fetches and validates general options data from storage.*/
-	fetchGeneralOptionsData(): ZodResAsync<GeneralOptionsData, EmptyStorageGetError | ParseError> {
+	fetchGeneralOptionsData(): ZodResAsync<
+		GeneralOptionsData,
+		EmptyStorageGetError | ParseError
+	> {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		return ResultAsync.fromSafePromise<any, ZodIssue[] | ParseError>(
-			this.storage.get({ [generalOptionsSaveKey]: null }))
-			.andThen(
-				res => res[generalOptionsSaveKey] === null ?
-					err(new EmptyStorageGetError()) :
-					plainToGeneralOptionsData(res[generalOptionsSaveKey]))
+			this.storage.get({ [generalOptionsSaveKey]: null })
+		).andThen(res =>
+			res[generalOptionsSaveKey] === null
+				? err(new EmptyStorageGetError())
+				: plainToGeneralOptionsData(res[generalOptionsSaveKey])
+		)
 	}
 
 	/**
 	 * Saves general options to storage.
 	 */
-	saveGeneralOptionsData(data: GeneralOptionsData): 
-		ResultAsync<StorageSetSuccess, StorageSetError> {
+	saveGeneralOptionsData(
+		data: GeneralOptionsData
+	): ResultAsync<StorageSetSuccess, StorageSetError> {
 		return this.storageSet({ [generalOptionsSaveKey]: data })
 	}
 
 	/**
 	 * Fetches and validates all block sets from storage
 	 * Returns list of results, which may be block sets or their errors.
-	 * Eg. if second block set parsing failed, result may be 
+	 * Eg. if second block set parsing failed, result may be
 	 * [ok(BlockSet), err(ParseErr), ok(BlockSet), ...].
 	 * If ids or elapsedTimes fetching fails, their errors will be in the first element.
 	 */
-	async fetchBlockSets(): Promise<Result<BlockSet,
-		ZodIssue[] | ParseError | DecompressError>[]> {
-	
+	async fetchBlockSets(): Promise<
+		Result<BlockSet, ZodIssue[] | ParseError | DecompressError>[]
+	> {
 		const idsGet = await this.storage.get({ [bsIdsSaveKey]: [] })
 		const idsRes = plainToBlockSetIds(idsGet[bsIdsSaveKey])
 		if (idsRes.isErr()) return [err(idsRes.error)]
-		
+
 		const blockSetIds = idsRes.value
 		if (blockSetIds.length === 0) {
 			return []
@@ -112,15 +120,16 @@ export class BrowserStorage {
 
 		const results: Result<BlockSet, ZodIssue[] | ParseError | DecompressError>[] = []
 
-		for(const id of blockSetIds) {
+		for (const id of blockSetIds) {
 			if (typeof blockSetGetResults[id] === "string") {
-				results.push(decompress(blockSetGetResults[id])
-					.andThen(blockSetPlainObj => BlockSet.create(id, blockSetPlainObj, timesElapsed[id])))
-			}
-			else {
+				results.push(
+					decompress(blockSetGetResults[id]).andThen(blockSetPlainObj =>
+						BlockSet.create(id, blockSetPlainObj, timesElapsed[id])
+					)
+				)
+			} else {
 				results.push(BlockSet.create(id, blockSetGetResults[id], timesElapsed[id]))
 			}
-			
 		}
 		return results
 	}
@@ -130,8 +139,10 @@ export class BrowserStorage {
 	 * @param blockSet block set to save
 	 * @param blockSetList ordered list of all block sets with this new block set id added
 	 */
-	saveNewBlockSet(blockSet: BlockSet, blockSetList: BlockSet[]): 
-		ResultAsync<StorageSetSuccess, StorageSetError> {
+	saveNewBlockSet(
+		blockSet: BlockSet,
+		blockSetList: BlockSet[]
+	): ResultAsync<StorageSetSuccess, StorageSetError> {
 		const [bsIds, timesElapsed] = this.generateIdsAndTimesElapsed(blockSetList)
 		return this.storageSet({
 			[bsIdsSaveKey]: bsIds,
@@ -150,10 +161,12 @@ export class BrowserStorage {
 	 * @param blockSet block set to delete
 	 * @param blockSetList ordered list of all block sets with this block set id removed
 	 */
-	deleteBlockSet(blockSet: BlockSet, blockSetList: BlockSet[]): 
-		ResultAsync<StorageSetSuccess, StorageSetError> {
+	deleteBlockSet(
+		blockSet: BlockSet,
+		blockSetList: BlockSet[]
+	): ResultAsync<StorageSetSuccess, StorageSetError> {
 		const [bsIds, timesElapsed] = this.generateIdsAndTimesElapsed(blockSetList)
-		return this.storageSet({ 
+		return this.storageSet({
 			[bsIdsSaveKey]: bsIds,
 			[bsTimesElapsedSaveKey]: timesElapsed,
 			[blockSet.id]: null,
@@ -161,8 +174,9 @@ export class BrowserStorage {
 	}
 
 	/** Generate saveable list of ids and elapsed times from raw list of block sets. */
-	private generateIdsAndTimesElapsed(blockSetList: BlockSet[]): 
-		[BlockSetIds, BlockSetTimesElapsed] {
+	private generateIdsAndTimesElapsed(
+		blockSetList: BlockSet[]
+	): [BlockSetIds, BlockSetTimesElapsed] {
 		const bsIds: BlockSetIds = []
 		const timesElapsed: BlockSetTimesElapsed = []
 		for (const blockSet of blockSetList) {
@@ -178,29 +192,27 @@ export class BrowserStorage {
 
 	/**
 	 * Defer `items` to be saved later when storage quotas allow.
-	*/
+	 */
 	private deferSet(items: SetItems) {
 		this.deferredItems = { ...this.deferredItems, ...items }
 
 		if (this.deferTimeoutHandle === null) {
-			this.deferTimeoutHandle = setInterval(
-				async() => {
+			this.deferTimeoutHandle = setInterval(async () => {
+				const deferredItemsToSave = JSON.stringify(this.deferredItems)
+				try {
+					await this.storage.set(this.deferredItems)
 
-					const deferredItemsToSave = JSON.stringify(this.deferredItems)
-					try{
-						await this.storage.set(this.deferredItems)
-
-						// If save succeeds, interval can be cleared
-						if (this.deferTimeoutHandle !== null &&
-							JSON.stringify(this.deferredItems) === deferredItemsToSave) {
-							clearInterval(this.deferTimeoutHandle)
-							this.deferTimeoutHandle = null
-							this.deferredItems = {}
-						}
+					// If save succeeds, interval can be cleared
+					if (
+						this.deferTimeoutHandle !== null &&
+						JSON.stringify(this.deferredItems) === deferredItemsToSave
+					) {
+						clearInterval(this.deferTimeoutHandle)
+						this.deferTimeoutHandle = null
+						this.deferredItems = {}
 					}
-					catch(_e) {}
-				},
-			 this.deferInterval)
+				} catch (_e) {}
+			}, this.deferInterval)
 		}
 	}
 
@@ -209,10 +221,11 @@ export class BrowserStorage {
 	 * If item is BlockSetData, apply compression.
 	 */
 	private storageSet(
-		items: Record<string, 
-			null | string | BlockSetData | BlockSetIds | BlockSetTimesElapsed | GeneralOptionsData>): 
-			ResultAsync<StorageSetSuccess, StorageSetError> {
-		
+		items: Record<
+			string,
+			null | string | BlockSetData | BlockSetIds | BlockSetTimesElapsed | GeneralOptionsData
+		>
+	): ResultAsync<StorageSetSuccess, StorageSetError> {
 		for (const key in items) {
 			// if key is number, then item is block set data -> we can compress it
 			if (!isNaN(parseInt(key, 10)) && items[key] !== null) {
@@ -228,9 +241,11 @@ export class BrowserStorage {
 			this.deferSet(items)
 			return okAsync(StorageSetSuccess.Deferred)
 		}
-		
+
 		return ResultAsync.fromPromise(
-			this.storage.set(items), error => new UnknownStorageSetError((error as Error).message))
+			this.storage.set(items),
+			error => new UnknownStorageSetError((error as Error).message)
+		)
 			.map(() => StorageSetSuccess.Completed)
 			.orElse(error => {
 				if (error.message.includes("WRITE_OPERATIONS")) {

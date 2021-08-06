@@ -1,4 +1,3 @@
-
 const path = require("path")
 const { CleanWebpackPlugin } = require("clean-webpack-plugin")
 const HtmlWebpackPlugin = require("html-webpack-plugin")
@@ -6,60 +5,55 @@ const WebextensionPlugin = require("webpack-webextension-plugin")
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer")
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin")
 const ZipPlugin = require("zip-webpack-plugin")
-const TerserPlugin = require("terser-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin")
 const CopyWebpackPlugin = require("copy-webpack-plugin")
+const DefinePlugin = require("webpack").DefinePlugin
 const PACKAGE = require("./package.json")
 
-const getTargetsBrowserlist = (targetBrowser) => {
+const getTargetsBrowserlist = targetBrowser => {
 	if (targetBrowser === "chromium") {
 		return "last 3 chrome version, last 3 edge version, last 3 opera version"
-	}
-	else if (targetBrowser === "firefox") {
+	} else if (targetBrowser === "firefox") {
 		return "last 3 firefox version"
 	}
 	throw new Error("browser argument not specified")
 }
 
-const getTargetBrowser = (env) => {
+const getTargetBrowser = env => {
 	if (env.chromium) {
 		return "chromium"
-	}
-	else if (env.firefox) {
+	} else if (env.firefox) {
 		return "firefox"
 	}
 	throw new Error("invalid browser argument")
 }
 
-const getMode = (env) => {
+const getMode = env => {
 	if (env.prod) {
 		return "production"
-	}
-	else if (env.dev) {
+	} else if (env.dev) {
 		return "development"
 	}
 	throw new Error("invalid mode argument")
 }
 
-
 const getFirefoxDebugSettings = (targetBrowser, mode) => {
 	if (targetBrowser === "firefox" && mode === "development") {
 		/* eslint-disable camelcase */
-		return ({
-			browser_specific_settings: { 
+		return {
+			browser_specific_settings: {
 				gecko: {
 					id: "dawdle_block@eerolehtinen.fi",
 					strict_min_version: "42.0",
-				}, 
-			}, 
-		})
+				},
+			},
+		}
 		/* eslint-disable camelcase */
 	}
 	return undefined
 }
 
-
-
-module.exports = (env) => {
+module.exports = env => {
 	const targetBrowser = getTargetBrowser(env)
 	const mode = getMode(env)
 	const browserlist = getTargetsBrowserlist(targetBrowser)
@@ -81,19 +75,23 @@ module.exports = (env) => {
 					exclude: /node_modules/,
 					test: /\.tsx?$/,
 					use: [
-						{ loader: "babel-loader",
+						{
+							loader: "babel-loader",
 							options: {
 								cacheDirectory: true,
 								presets: [
 									// Overrides default preset-env in babel.config.js
-									["@babel/preset-env", { 
-										useBuiltIns: "usage",
-										corejs: { version: "3.15", proposals: false },
-										// Use targets based on our selected browser
-										targets: browserlist, 
-									}],
+									[
+										"@babel/preset-env",
+										{
+											useBuiltIns: "usage",
+											corejs: { version: "3.15", proposals: false },
+											// Use targets based on our selected browser
+											targets: browserlist,
+										},
+									],
 								],
-							}, 
+							},
 						},
 					],
 				},
@@ -102,17 +100,17 @@ module.exports = (env) => {
 					test: /\.css$/,
 					use: [
 						{ loader: "style-loader" }, // Creates style nodes from JS strings
-						{ 
+						{
 							loader: "css-loader", // Translates CSS into CommonJS
-							options: { 
+							options: {
 								url: {
-									filter: (url) => {
+									filter: url => {
 										if (url.endsWith(".woff")) return false
 										return true
 									},
 								},
 							},
-						}, 
+						},
 					],
 				},
 				{
@@ -134,7 +132,7 @@ module.exports = (env) => {
 			},
 		},
 		performance: {
-			assetFilter: (asset) => !asset.endsWith(".zip"),
+			assetFilter: asset => !asset.endsWith(".zip"),
 		},
 		plugins: [
 			// Clean old builds
@@ -164,7 +162,7 @@ module.exports = (env) => {
 			new CopyWebpackPlugin({
 				patterns: [{ from: "static/images", to: "images" }],
 			}),
-			
+
 			// Parse manifest.json and apply browser specific settings
 			new WebextensionPlugin({
 				vendor: targetBrowser,
@@ -183,6 +181,9 @@ module.exports = (env) => {
 					},
 				},
 			}),
+			new DefinePlugin({
+				__DEV__: JSON.stringify(mode === "development"),
+			}),
 		],
 		optimization: {
 			minimize: true,
@@ -199,7 +200,7 @@ module.exports = (env) => {
 			],
 		},
 	}
-	
+
 	if (mode === "development") {
 		config.devtool = "inline-source-map"
 	}

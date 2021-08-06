@@ -8,7 +8,7 @@ export interface TabInfo {
 }
 
 export interface TabLoadedEvent {
-	tabId: number,
+	tabId: number
 	url: string
 }
 
@@ -31,7 +31,6 @@ const WINDOW_ID_NONE = browser.windows.WINDOW_ID_NONE
  * Active tabs can be queried at any time.
  */
 export class TabObserver {
-
 	// Holds internal state of windows
 	// Main usage is holding active tab id and minimized-status
 	private windowInfos: Record<number, WindowInfo> = {}
@@ -41,7 +40,7 @@ export class TabObserver {
 	private tabInfos: Record<number, TabInfo> = {}
 
 	/**
-	 * Returns tabs that are the current active tab in any window 
+	 * Returns tabs that are the current active tab in any window
 	 * and the window is not minimized.
 	 */
 	getActiveTabIds(): number[] {
@@ -74,12 +73,11 @@ export class TabObserver {
 	 */
 	private subscribeToAllEvents() {
 		try {
-			// Try first if browser allows filters (FireFox onUpdated event is fired on all 
+			// Try first if browser allows filters (FireFox onUpdated event is fired on all
 			// changes, so we need to filter only status changes).
 			const filter: Tabs.UpdateFilter = { properties: ["status"] }
 			browser.tabs.onUpdated.addListener(this.onTabUpdated.bind(this), filter)
-		}
-		catch {
+		} catch {
 			// If filters aren't allowed, then behaviour is just as we want, only firing on status changes
 			browser.tabs.onUpdated.addListener(this.onTabUpdated.bind(this))
 		}
@@ -105,15 +103,15 @@ export class TabObserver {
 
 	/**
 	 * Checks if this windowId is valid. (defined and not explicit none)
-	 * @param windowId 
+	 * @param windowId
 	 */
 	private isValidWindowId(windowId: number | undefined): windowId is number {
 		return windowId !== undefined && windowId !== WINDOW_ID_NONE
 	}
-	
+
 	/**
 	 * Checks if this tabId is valid. (defined and not explicit none)
-	 * @param tabId 
+	 * @param tabId
 	 */
 	private isValidTabId(tabId: number | undefined): tabId is number {
 		return tabId !== undefined && tabId !== TAB_ID_NONE
@@ -124,12 +122,14 @@ export class TabObserver {
 	 * Can be used to update old window infos.
 	 * @param window
 	 */
-	private registerWindow(windowId: number | undefined, 
-		state: string | undefined): WindowInfo | null {
+	private registerWindow(
+		windowId: number | undefined,
+		state: string | undefined
+	): WindowInfo | null {
 		if (!this.isValidWindowId(windowId)) return null
-			
-		const windowInfo: WindowInfo = { 
-			id: windowId, 
+
+		const windowInfo: WindowInfo = {
+			id: windowId,
 			minimized: state === "minimized",
 			activeTabId: this.windowInfos[windowId]?.activeTabId ?? null,
 		}
@@ -139,7 +139,7 @@ export class TabObserver {
 
 	/**
 	 * Removes window with windowId from internal state if window exists and is valid.
-	 * @param windowId 
+	 * @param windowId
 	 */
 	private unregisterWindow(windowId: number | undefined) {
 		if (this.isValidWindowId(windowId) && this.windowInfos[windowId]) {
@@ -157,33 +157,35 @@ export class TabObserver {
 	 * @param active is this tab the active tab of its window
 	 * @returns null if register was unsuccessful (bc tabId or windowId were invalid)
 	 */
-	private registerTab(tabId: number| undefined, windowId: number | undefined,
-		url: string | undefined, active: boolean): TabInfo | null {
-		
+	private registerTab(
+		tabId: number | undefined,
+		windowId: number | undefined,
+		url: string | undefined,
+		active: boolean
+	): TabInfo | null {
 		if (!this.isValidWindowId(windowId)) return null
 
 		const windowInfo = this.windowInfos[windowId]
 		if (!windowInfo) return null
 
 		if (!this.isValidTabId(tabId)) return null
-		
-		const tabInfo: TabInfo = { 
-			id: tabId, 
-			url: url ?? this.tabInfos[tabId]?.url ?? null, 
-			windowId: windowInfo.id, 
+
+		const tabInfo: TabInfo = {
+			id: tabId,
+			url: url ?? this.tabInfos[tabId]?.url ?? null,
+			windowId: windowInfo.id,
 		}
 		this.tabInfos = { ...this.tabInfos, [tabInfo.id]: tabInfo }
-		
+
 		if (active) {
 			windowInfo.activeTabId = tabInfo.id
 		}
 		return tabInfo
 	}
 
-	
 	/**
 	 * Removes window with windowId from internal state if window exists and is valid.
-	 * @param windowId 
+	 * @param windowId
 	 */
 	private unregisterTab(tabId: number | undefined) {
 		if (this.isValidTabId(tabId) && this.tabInfos[tabId]) {
@@ -195,49 +197,50 @@ export class TabObserver {
 	 * Event handler for tabs.onUpdated.
 	 * Registers tab if it isn't accounted for.
 	 * Notifies listeners if tab has completed loading.
-	 * @param tabId 
-	 * @param changeInfo 
-	 * @param tab 
+	 * @param tabId
+	 * @param changeInfo
+	 * @param tab
 	 */
-	private onTabUpdated = (_tabId: number, 
-		changeInfo: Tabs.OnUpdatedChangeInfoType, tab: Tabs.Tab) => {
+	private onTabUpdated = (
+		_tabId: number,
+		changeInfo: Tabs.OnUpdatedChangeInfoType,
+		tab: Tabs.Tab
+	) => {
 		if (changeInfo?.status !== "complete") return
 
 		const tabInfo = this.registerTab(tab.id, tab.windowId, tab.url, tab.active)
 
 		// Publish results to listeners only we actually found an url in a valid tab
-		if (tabInfo && tabInfo.url !== null) 
+		if (tabInfo && tabInfo.url !== null)
 			this.tabLoadedObserver.publish({ tabId: tabInfo.id, url: tabInfo.url })
 	}
 
 	/**
 	 * Event handler for tab.onActivated.
 	 * Changes activeTabId of window if relevant.
-	 * @param activeInfo 
+	 * @param activeInfo
 	 */
 	private onTabActivated = (activeInfo: Tabs.OnActivatedActiveInfoType) => {
 		this.registerTab(activeInfo.tabId, activeInfo.windowId, undefined, true)
 	}
 
-	
 	/**
 	 * Event handler for tab.onRemoved.
 	 * Unregisters tab.
-	 * @param activeInfo 
+	 * @param activeInfo
 	 */
 	private onTabRemoved = (tabId: number, _removeInfo: Tabs.OnRemovedRemoveInfoType) => {
 		this.unregisterTab(tabId)
-		if (this.isValidTabId(tabId))
-			this.tabRemovedObserver.publish({ tabId })
+		if (this.isValidTabId(tabId)) this.tabRemovedObserver.publish({ tabId })
 	}
-	
+
 	/**
 	 * Event handler for window.onFocusChanged.
 	 * This gets fired when user minimizes window (among other focus changes),
 	 * so we need to check if any window has been minimized.
-	 * @param _windowId 
+	 * @param _windowId
 	 */
-	private onWindowFocusChanged = async(_windowId: number) => {
+	private onWindowFocusChanged = async (_windowId: number) => {
 		const windows = await browser.windows.getAll()
 
 		for (const window of windows) {
@@ -248,7 +251,7 @@ export class TabObserver {
 	/**
 	 * Event handler for window.onCreated.
 	 * Registers the new window.
-	 * @param window 
+	 * @param window
 	 */
 	private onWindowCreated(window: Windows.Window) {
 		this.registerWindow(window.id, window.state)
@@ -257,7 +260,7 @@ export class TabObserver {
 	/**
 	 * Event handler for window.onRemoved.
 	 * Unregisters the window.
-	 * @param windowId 
+	 * @param windowId
 	 */
 	private onWindowRemoved(windowId: number) {
 		this.unregisterWindow(windowId)
@@ -267,7 +270,7 @@ export class TabObserver {
 
 	/**
 	 * Registers listener for TabLoadedEvent.
-	 * @param listener 
+	 * @param listener
 	 * @returns unsubscribe function
 	 */
 	subscribeTabLoaded(listener: Listener<TabLoadedEvent>): () => void {
@@ -278,7 +281,7 @@ export class TabObserver {
 
 	/**
 	 * Registers listener for TabLoadedEvent.
-	 * @param listener 
+	 * @param listener
 	 * @returns unsubscribe function
 	 */
 	subscribeTabRemoved(listener: Listener<TabRemovedEvent>): () => void {

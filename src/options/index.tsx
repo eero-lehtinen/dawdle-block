@@ -6,4 +6,6 @@ import "../shared/fonts"
 render(
 	<BaseWrapper>
 		<Options />
-	</BaseWrapper>, document.body)
+	</BaseWrapper>,
+	document.body
+)

@@ -9,12 +9,12 @@ import { setBadge } from "./setBadge"
 import ms from "ms.macro"
 import { GeneralOptions } from "./generalOptions"
 
-export const updateInterval = ms`1s`
+export const updateInterval = ms("1s")
 
 interface TabInfo {
-	url: string, 
-	ytInfo: YTInfo,
-	blockedBy: number[],
+	url: string
+	ytInfo: YTInfo
+	blockedBy: number[]
 }
 
 interface BlockSetInfo {
@@ -22,16 +22,16 @@ interface BlockSetInfo {
 }
 
 export interface BGConstructParams {
-	browserStorage: BrowserStorage, 
-	tabObserver: TabObserver, 
-	blockSets: BlockSets,
-	generalOptions: GeneralOptions,
+	browserStorage: BrowserStorage
+	tabObserver: TabObserver
+	blockSets: BlockSets
+	generalOptions: GeneralOptions
 }
 
 /**
  * Main class for whole background.
  */
-export class Background { 
+export class Background {
 	private tabObserver: TabObserver
 	private _blockSets: BlockSets
 	private _generalOptions: GeneralOptions
@@ -49,13 +49,13 @@ export class Background {
 		this._blockSets = params.blockSets
 		this._generalOptions = params.generalOptions
 
-		this.tabObserver.subscribeTabLoaded(async(event: TabLoadedEvent) => {
+		this.tabObserver.subscribeTabLoaded(async (event: TabLoadedEvent) => {
 			await this.updateTabInfo({ id: event.tabId, url: event.url })
 		})
 		this.tabObserver.subscribeTabRemoved((event: TabRemovedEvent) => {
 			this.removeTabInfo(event.tabId)
 		})
-		
+
 		setInterval(() => this.update(), updateInterval)
 	}
 
@@ -68,22 +68,22 @@ export class Background {
 	}
 
 	/**  Precalculate blocking for tab to be easily processed in update function.*/
-	private async updateTabInfo(tab: {id: number, url: string}) {
+	private async updateTabInfo(tab: { id: number; url: string }) {
 		let ytInfo: YTInfo
 		try {
 			const urlObj = new URL(tab.url)
 			ytInfo = await getYTInfo(urlObj)
-		}
-		catch(err) {
+		} catch (err) {
 			// catch when URL is not valid
 			ytInfo = nullYTInfo()
 		}
-		const blockedBy = isBlockPage(tab.url) ? [] :
-			this.blockSets.blockedBy(
-				tab.url.replace(/(^\w+:|^)\/\//, ""), // remove protocol
-				ytInfo.channelId, 
-				ytInfo.categoryId,
-			)
+		const blockedBy = isBlockPage(tab.url)
+			? []
+			: this.blockSets.blockedBy(
+					tab.url.replace(/(^\w+:|^)\/\//, ""), // remove protocol
+					ytInfo.channelId,
+					ytInfo.categoryId
+			  )
 		this.tabInfoCache.set(tab.id, { url: tab.url, ytInfo, blockedBy })
 	}
 
@@ -110,7 +110,6 @@ export class Background {
 			}
 		}
 
-		
 		let globalBiggestOvertime = 0
 		// key = tabId, value = overtime
 		const tabBiggestOvertimes = new Map<number, number>()
@@ -135,24 +134,25 @@ export class Background {
 
 				if (blockSet.isInState(BSState.OverTime)) {
 					// When requireActive == true, annoy is only for this tab
-					if (blockSet.requireActive)
-						collectTabBiggestOvertime(blockSet.overtime, tabId)
-
+					if (blockSet.requireActive) collectTabBiggestOvertime(blockSet.overtime, tabId)
 					// When requireActive == false, annoy is global
 					else
-						globalBiggestOvertime = 
-							Math.max(globalBiggestOvertime, this._blockSets.map.get(blockSetId)?.overtime ?? -1)
-				}
-				else if (blockSet.isInState(BSState.Block) && !blocked) {
+						globalBiggestOvertime = Math.max(
+							globalBiggestOvertime,
+							this._blockSets.map.get(blockSetId)?.overtime ?? -1
+						)
+				} else if (blockSet.isInState(BSState.Block) && !blocked) {
 					blockTab(tabId)
 					blocked = true
 				}
 			}
 		}
-		
+
 		for (const tabId of activeTabIds) {
-			const tabBiggestOvertime = 
-				Math.max(globalBiggestOvertime, tabBiggestOvertimes.get(tabId) ?? 0)
+			const tabBiggestOvertime = Math.max(
+				globalBiggestOvertime,
+				tabBiggestOvertimes.get(tabId) ?? 0
+			)
 			if (tabBiggestOvertime > 0) {
 				annoyTab(tabId, tabBiggestOvertime)
 			}

@@ -1,33 +1,36 @@
 import { createContext, FunctionComponent } from "preact"
 import { useEffect, useState, useContext } from "preact/hooks"
-import { Background } from"../background/background"
+import { Background } from "../background/background"
 import { browser } from "webextension-polyfill-ts"
 import { sleep } from "./utils"
 import { Box, Typography, CircularProgress, Fade } from "@material-ui/core"
 import ms from "ms.macro"
 
-const retryIntervalMS = ms`2s`
+const retryIntervalMS = ms("2s")
 
 const BGScriptContext = createContext<Background | null>(null)
 
-/** 
+/**
  * Shows text in the middle of the screen indicating that background has not loaded all options yet.
  */
-const WaitBox = () =>
+const WaitBox = () => (
 	<Fade appear in timeout={5000}>
-		<Box sx={{
-			width: "100%",
-			height: "100%",
-			display: "flex",
-			justifyContent: "center",
-			alignItems: "center",
-		}}>
+		<Box
+			sx={{
+				width: "100%",
+				height: "100%",
+				display: "flex",
+				justifyContent: "center",
+				alignItems: "center",
+			}}
+		>
 			<Typography variant="h4" sx={{ color: "white", mr: 2 }}>
-			Waiting for background to finish loading
+				Waiting for background to finish loading
 			</Typography>
 			<CircularProgress sx={{ color: "white" }} />
-		</Box> 
-	 </Fade>
+		</Box>
+	</Fade>
+)
 
 /** Provides context for useBGScript hook. */
 const BGScriptProvider: FunctionComponent = ({ children }): JSX.Element => {
@@ -35,15 +38,14 @@ const BGScriptProvider: FunctionComponent = ({ children }): JSX.Element => {
 	const [retries, setRetries] = useState(0)
 
 	useEffect(() => {
-		void (async() => {
+		void (async () => {
 			try {
 				const page = await browser.runtime.getBackgroundPage()
 				if (page.background === undefined) {
 					throw new Error("Undefined background")
 				}
 				setBGScript(page.background)
-			}
-			catch(err) {
+			} catch (err) {
 				console.error(err.message, `retrying in ${retryIntervalMS / 1000} seconds...`)
 				await sleep(retryIntervalMS)
 				setRetries(retries + 1)
@@ -53,14 +55,14 @@ const BGScriptProvider: FunctionComponent = ({ children }): JSX.Element => {
 
 	return (
 		<BGScriptContext.Provider value={bgScript}>
-			{ bgScript === null ? <WaitBox /> : children }
+			{bgScript === null ? <WaitBox /> : children}
 		</BGScriptContext.Provider>
 	)
 }
 
 /**
  * Custom hook for getting bg script context.
- * @throws Error if background is null. Should never happen, 
+ * @throws Error if background is null. Should never happen,
  * because BGScriptProvider doesn't render its children when background is null.
  */
 export const useBGScript = (): Background => {
@@ -72,4 +74,3 @@ export const useBGScript = (): Background => {
 }
 
 export default BGScriptProvider
-

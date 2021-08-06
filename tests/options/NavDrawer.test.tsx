@@ -4,10 +4,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 const mockWindow = window
 
-jest.mock("webextension-polyfill-ts", () => (
-	{ browser: { runtime: {
-		getBackgroundPage: () => mockWindow,
-	} } }))
+jest.mock("webextension-polyfill-ts", () => ({
+	browser: {
+		runtime: {
+			getBackgroundPage: () => mockWindow,
+		},
+	},
+}))
 jest.mock("@src/background/tabObserver")
 jest.mock("@src/background/browserStorage")
 jest.mock("@src/background/youtubeAPI")
@@ -36,11 +39,11 @@ TabObserver.prototype.getActiveTabIds = jest.fn(() => [])
 
 let background: Background
 
-beforeEach(async() => {
+beforeEach(async () => {
 	const browserStorage = new BrowserStorage({ preferSync: true })
 	background = new Background({
 		browserStorage,
-		tabObserver: await TabObserver.create(), 
+		tabObserver: await TabObserver.create(),
 		blockSets: await BlockSets.create(browserStorage),
 		generalOptions: await GeneralOptions.create(browserStorage),
 	})
@@ -48,32 +51,33 @@ beforeEach(async() => {
 })
 
 /** NavDrawer wrapped with elements required for testing */
-const TestNavDrawer = () =>
-	<BGScriptProvider><MemoryRouter>
-		<NavDrawer />
-	</MemoryRouter></BGScriptProvider>
-
+const TestNavDrawer = () => (
+	<BGScriptProvider>
+		<MemoryRouter>
+			<NavDrawer />
+		</MemoryRouter>
+	</BGScriptProvider>
+)
 
 describe("test options NavDrawer", () => {
 	const expectBlockSetListNames = (names: string[]) => {
 		const listItems = screen.getAllByRole("listitem")
-		let i = listItems.findIndex(elem => 
-			elem !== null && elem.textContent?.includes("BLOCK SETS")) + 1
-		for (const name of names)
-			expect(listItems[i++]).toHaveTextContent(name)
+		let i =
+			listItems.findIndex(elem => elem !== null && elem.textContent?.includes("BLOCK SETS")) + 1
+		for (const name of names) expect(listItems[i++]).toHaveTextContent(name)
 	}
 
-	test("shows list of current block sets in order", async() => {
+	test("shows list of current block sets in order", async () => {
 		await background.blockSets.addDefaultBlockSet()
 		await background.blockSets.addDefaultBlockSet()
-		
+
 		render(<TestNavDrawer />)
 
 		await screen.findByRole("list")
 		expectBlockSetListNames(background.blockSets.list.map(blockSet => blockSet.name))
 	})
 
-	test("can add new block sets with button", async() => {
+	test("can add new block sets with button", async () => {
 		render(<TestNavDrawer />)
 
 		await screen.findByRole("list")
