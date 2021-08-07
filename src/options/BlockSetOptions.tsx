@@ -49,7 +49,9 @@ const BlockSetOptions = (): JSX.Element => {
 							if (newValue !== null) setTimePickerValue(newValue)
 						}}
 						renderInput={params =>
-							(<TextField {...params} sx={{ width: 200 }} />) as React.ReactElement
+							(
+								<TextField id={"time-allowed-input"} {...params} sx={{ width: 200 }} />
+							) as React.ReactElement
 						}
 					/>
 				</Box>
@@ -64,7 +66,7 @@ const BlockSetOptions = (): JSX.Element => {
 							if (newValue !== null) setTimePickerValue(newValue)
 						}}
 						renderInput={params =>
-							(<TextField {...params} sx={{ width: 200 }} />) as React.ReactElement
+							(<TextField id={"asd"} {...params} sx={{ width: 200 }} />) as React.ReactElement
 						}
 					/>
 				</Box>

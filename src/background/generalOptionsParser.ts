@@ -13,6 +13,8 @@ import {
 const zClockType = z.union([z.literal(12), z.literal(24)]).default(24)
 export type ClockType = z.infer<typeof zClockType>
 
+export const typingTestWordCountDefault = 30
+
 const zSettingsProtection = z.enum(["never", "always", "timerZero"]).default("never")
 
 const zGeneralOptionsDataV0 = z.object({
@@ -21,7 +23,7 @@ const zGeneralOptionsDataV0 = z.object({
 	displayHelp: z.boolean().default(true),
 	darkTheme: z.boolean().default(false),
 	settingProtection: zSettingsProtection,
-	typingTestWordCount: z.number().int().default(30),
+	typingTestWordCount: z.number().int().default(typingTestWordCountDefault),
 })
 
 type GeneralOptionsDataV0 = z.infer<typeof zGeneralOptionsDataV0>

@@ -3,7 +3,10 @@ import { BrowserStorage, StorageSetError, StorageSetSuccess } from "./browserSto
 import { createDefaultGeneralOptionsData, GeneralOptionsData } from "./generalOptionsParser"
 import { ChangedEvent, ListenerOf, Observer } from "./observer"
 
-type SettableData = Pick<GeneralOptionsData, "theme" | "clockType" | "typingTestWordCount">
+type SettableData = Pick<
+	GeneralOptionsData,
+	"theme" | "clockType" | "settingProtection" | "typingTestWordCount"
+>
 
 type ChangeObservers = {
 	[Property in keyof SettableData]: Observer<ChangedEvent<SettableData[Property]>>
@@ -49,6 +52,7 @@ export class GeneralOptions {
 	private readonly changeObservers: ChangeObservers = {
 		theme: new Observer(),
 		clockType: new Observer(),
+		settingProtection: new Observer(),
 		typingTestWordCount: new Observer(),
 	}
 

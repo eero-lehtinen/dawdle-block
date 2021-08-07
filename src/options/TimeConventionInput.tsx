@@ -1,5 +1,4 @@
 import { ToggleButton, ToggleButtonGroup, Typography, Box } from "@material-ui/core"
-import { ClockType } from "@src/background/generalOptionsParser"
 import { useBGScript } from "@src/shared/BGScriptProvider"
 import { useState } from "preact/hooks"
 
@@ -12,7 +11,7 @@ const TimeConventionInput = (): JSX.Element => {
 
 	const handleChange = async (
 		event: React.MouseEvent<HTMLElement>,
-		newValue: ClockType | null
+		newValue: unknown | null
 	) => {
 		// is null when old selection is selected again.
 		if (newValue === null) return
@@ -40,10 +39,10 @@ const TimeConventionInput = (): JSX.Element => {
 				onChange={handleChange}
 			>
 				<ToggleButton value={24} aria-label="24-hour clock">
-					24-hour clock
+					24-Hour Clock
 				</ToggleButton>
 				<ToggleButton value={12} aria-label="12-hour clock">
-					12-hour clock
+					12-Hour Clock
 				</ToggleButton>
 			</ToggleButtonGroup>
 		</Box>
