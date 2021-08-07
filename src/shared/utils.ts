@@ -19,3 +19,26 @@ export const timeToMSSinceMidnight = (time: Date): number =>
 export const sleep = (ms: number): Promise<void> => {
 	return new Promise(resolve => setTimeout(resolve, ms))
 }
+
+/** Clamp `num` to be between `a` and `b` */
+export const clamp = (num: number, a: number, b: number): number =>
+	Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b))
+
+/**
+ * Apply debounce functionality to given func.
+ * Calls `func` after `wait` ms of no activity.
+ * Can be awaited or called normally.
+ */
+export const debounce = <T extends unknown[], U>(
+	func: (...args: T) => PromiseLike<U> | U,
+	wait: number
+): ((...args: T) => Promise<U>) => {
+	let timer: ReturnType<typeof setTimeout>
+
+	return (...args: T): Promise<U> => {
+		clearTimeout(timer)
+		return new Promise(resolve => {
+			timer = setTimeout(() => resolve(func(...args)), wait)
+		})
+	}
+}

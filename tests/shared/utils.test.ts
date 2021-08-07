@@ -1,4 +1,4 @@
-import { timeToMSSinceMidnight, sleep } from "@src/shared/utils"
+import { timeToMSSinceMidnight, sleep, clamp, debounce } from "@src/shared/utils"
 import ms from "ms.macro"
 
 describe("test time to ms since midnight", () => {
@@ -26,5 +26,45 @@ describe("test sleep", () => {
 		jest.advanceTimersByTime(20)
 		await Promise.resolve()
 		expect(spy).toHaveBeenCalled()
+	})
+})
+
+test("test clamp", () => {
+	expect(clamp(5, 0, 10)).toBe(5)
+	expect(clamp(-5, 0, 10)).toBe(0)
+	expect(clamp(15, 0, 10)).toBe(10)
+})
+
+describe("test debounce", () => {
+	jest.useFakeTimers()
+	afterEach(() => jest.clearAllTimers())
+	const wait = ms("10ms")
+
+	test("when calling once, function gets called once after wait", () => {
+		const spy = jest.fn()
+		const debounced = debounce(spy, wait)
+		void debounced()
+		expect(spy).not.toBeCalled()
+		jest.advanceTimersByTime(wait)
+		expect(spy).toBeCalledTimes(1)
+	})
+
+	test("when calling multiple times, function gets called once after wait", () => {
+		const spy = jest.fn()
+		const debounced = debounce(spy, wait)
+		void debounced()
+		void debounced()
+		void debounced()
+		expect(spy).not.toBeCalled()
+		jest.advanceTimersByTime(wait)
+		expect(spy).toBeCalledTimes(1)
+	})
+
+	test("works like a promise if we want to wait for next call", async () => {
+		jest.useRealTimers()
+		const spy = jest.fn()
+		const debounced = debounce(spy, wait)
+		await debounced()
+		expect(spy).toBeCalledTimes(1)
 	})
 })
