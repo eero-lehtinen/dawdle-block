@@ -11,7 +11,7 @@ import {
 	UnknownStorageSetError,
 } from "@src/background/browserStorage"
 import { BlockSet } from "@src/background/blockSet"
-import { BlockSetIds, BlockSetTimesElapsed } from "@src/background/blockSetParser"
+import { BlockSetIds, BlockSetTimesElapsed } from "@src/background/blockSetParseTypes"
 import { compress } from "@src/background/compression"
 import blockSetCmpObj from "../testHelpers/blockSetCmpObj"
 import { mocked } from "ts-jest/utils"

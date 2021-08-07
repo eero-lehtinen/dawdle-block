@@ -1,11 +1,5 @@
-import {
-	BlockSetData,
-	plainToBlockSetData,
-	createDefaultBlockSetData,
-	BlockList,
-	ActiveTime,
-	ActiveDays,
-} from "./blockSetParser"
+import { plainToBlockSetData, createDefaultBlockSetData } from "./blockSetParser"
+import { BlockSetData, BlockList, ActiveTime, ActiveDays } from "./blockSetParseTypes"
 import { ytCategoryNamesById } from "./constants"
 import { fetchChannelTitle, FetchError } from "./youtubeAPI"
 import { ChangedEvent, Listener, Observer } from "./observer"

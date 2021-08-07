@@ -1,8 +1,8 @@
 import {
 	plainToGeneralOptionsData,
 	createDefaultGeneralOptionsData,
-	GeneralOptionsData,
 } from "@src/background/generalOptionsParser"
+import { GeneralOptionsData } from "@src/background/generalOptionsParseTypes"
 import { ok } from "neverthrow"
 
 describe("test GeneralOptions parsing", () => {

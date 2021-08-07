@@ -1,6 +1,7 @@
 import { ok, ResultAsync } from "neverthrow"
 import { BrowserStorage, StorageSetError, StorageSetSuccess } from "./browserStorage"
-import { createDefaultGeneralOptionsData, GeneralOptionsData } from "./generalOptionsParser"
+import { createDefaultGeneralOptionsData } from "./generalOptionsParser"
+import { GeneralOptionsData } from "./generalOptionsParseTypes"
 import { ChangedEvent, ListenerOf, Observer } from "./observer"
 
 type SettableData = Pick<

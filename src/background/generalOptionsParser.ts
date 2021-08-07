@@ -1,5 +1,4 @@
 import { err } from "neverthrow"
-import { z } from "zod"
 import {
 	ParseError,
 	CantIdentifyVersionParseError,
@@ -9,51 +8,30 @@ import {
 	ZodRes,
 	neverThrowZodParse,
 } from "./parserHelpers"
+import {
+	makeZGeneralOptionsDataV0,
+	makeZGeneralOptionsDataV1,
+	GeneralOptionsData,
+	GeneralOptionsDataV0,
+	GeneralOptionsDataV1,
+} from "./generalOptionsParseTypes"
 
-const zClockType = z.union([z.literal(12), z.literal(24)]).default(24)
-export type ClockType = z.infer<typeof zClockType>
+const zGeneralOptionsDataV0 = makeZGeneralOptionsDataV0()
 
-export const typingTestWordCountDefault = 30
-
-const zSettingsProtection = z.enum(["never", "always", "timerZero"]).default("never")
-
-const zGeneralOptionsDataV0 = z.object({
-	v: z.union([z.undefined(), z.literal(0)]).transform((): 0 => 0),
-	clockType: zClockType,
-	displayHelp: z.boolean().default(true),
-	darkTheme: z.boolean().default(false),
-	settingProtection: zSettingsProtection,
-	typingTestWordCount: z.number().int().default(typingTestWordCountDefault),
-})
-
-type GeneralOptionsDataV0 = z.infer<typeof zGeneralOptionsDataV0>
-
-const zTheme = z.enum(["system", "dark", "light"]).default("system")
-
-export type Theme = z.infer<typeof zTheme>
-
-const zGeneralOptionsDataV1 = zGeneralOptionsDataV0.omit({ darkTheme: true }).extend({
-	v: z.literal(1),
-	theme: zTheme,
-})
-
-type GeneralOptionsDataV1 = z.infer<typeof zGeneralOptionsDataV1>
-
-export type GeneralOptionsData = GeneralOptionsDataV1
+const zGeneralOptionsDataV1 = makeZGeneralOptionsDataV1()
 
 /** Converts plain js object into GeneralOptionsData with type validation. */
-export const plainToGeneralOptionsData =
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-	(obj: unknown): ZodRes<GeneralOptionsData, ParseError> => {
-		if (obj === null || obj === undefined) return err(new NullOrUndefinedParseError())
+export const plainToGeneralOptionsData = (
+	obj: unknown
+): ZodRes<GeneralOptionsData, ParseError> => {
+	if (obj === null || obj === undefined) return err(new NullOrUndefinedParseError())
 
-		if (parseableV0(obj))
-			return neverThrowZodParse(zGeneralOptionsDataV0.safeParse(obj)).map(convertV0toV1)
-		else if (parseableVN(1, obj))
-			return neverThrowZodParse(zGeneralOptionsDataV1.safeParse(obj))
+	if (parseableV0(obj))
+		return neverThrowZodParse(zGeneralOptionsDataV0.safeParse(obj)).map(convertV0toV1)
+	else if (parseableVN(1, obj)) return neverThrowZodParse(zGeneralOptionsDataV1.safeParse(obj))
 
-		return err(new CantIdentifyVersionParseError())
-	}
+	return err(new CantIdentifyVersionParseError())
+}
 
 /**
  * Creates a default object of type GeneralOptionsData of the latest version.

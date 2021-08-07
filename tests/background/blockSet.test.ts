@@ -1,6 +1,6 @@
 import { mocked } from "ts-jest/utils"
 import { BlockSet, BlockTestRes, ListType } from "@src/background/blockSet"
-import { BlockSetData } from "@src/background/blockSetParser"
+import { BlockSetData } from "@src/background/blockSetParseTypes"
 import { timeToMSSinceMidnight } from "@src/shared/utils"
 import ms from "ms.macro"
 

@@ -2,15 +2,11 @@ import { err, errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow"
 import { browser, Storage } from "webextension-polyfill-ts"
 import { ZodIssue } from "zod"
 import { BlockSet } from "./blockSet"
-import {
-	plainToBlockSetIds,
-	plainToBlockSetTimesElapsed,
-	BlockSetIds,
-	BlockSetTimesElapsed,
-	BlockSetData,
-} from "./blockSetParser"
+import { plainToBlockSetIds, plainToBlockSetTimesElapsed } from "./blockSetParser"
+import { BlockSetIds, BlockSetTimesElapsed, BlockSetData } from "./blockSetParseTypes"
 import { decompress, compress, DecompressError } from "./compression"
-import { GeneralOptionsData, plainToGeneralOptionsData } from "./generalOptionsParser"
+import { plainToGeneralOptionsData } from "./generalOptionsParser"
+import { GeneralOptionsData } from "./generalOptionsParseTypes"
 import { ParseError, ZodResAsync } from "./parserHelpers"
 
 interface BrowserStorageOptions {

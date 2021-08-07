@@ -9,8 +9,8 @@ import {
 import { useBGScript } from "@src/shared/BGScriptProvider"
 import { useState } from "preact/hooks"
 import { clamp } from "../shared/utils"
-import { typingTestWordCountDefault } from "../background/generalOptionsParser"
 import TypingTestDialog from "./TypingTestDialog"
+import { defaultTypingTestWordCount } from "../background/generalOptionsParseTypes"
 
 /**
  * Input for general options settings protection and typing test word count property
@@ -61,8 +61,8 @@ const SettingProtectionInput = (): JSX.Element => {
 			if (typingTestWordCountInput.val !== "") {
 				void typingTestWordCount.handleSave(parseInt(typingTestWordCountInput.val, 10))
 			} else {
-				setTypingTestWordCountInput({ val: typingTestWordCountDefault.toString() })
-				void typingTestWordCount.handleSave(typingTestWordCountDefault)
+				setTypingTestWordCountInput({ val: defaultTypingTestWordCount.toString() })
+				void typingTestWordCount.handleSave(defaultTypingTestWordCount)
 			}
 		},
 		handleSave: async (newValue: number) => {

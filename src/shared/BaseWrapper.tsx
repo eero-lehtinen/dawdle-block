@@ -5,7 +5,7 @@ import { ThemeProvider, Theme as MatUITheme } from "@material-ui/core/styles"
 import { createGlobalTheme } from "./globalTheme"
 import BackgroundBox from "./BackgroundBox"
 import BGScriptProvider, { useBGScript } from "./BGScriptProvider"
-import { Theme } from "@src/background/generalOptionsParser"
+import { Theme } from "@src/background/generalOptionsParseTypes"
 import useEffectCleanUpPageUnload from "./useEffectCleanupPageUnload"
 
 /**

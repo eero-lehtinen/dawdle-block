@@ -1,14 +1,12 @@
 import { BrowserStorage } from "@src/background/browserStorage"
 import { GeneralOptions } from "@src/background/generalOptions"
-import {
-	createDefaultGeneralOptionsData,
-	GeneralOptionsData,
-} from "@src/background/generalOptionsParser"
+import { createDefaultGeneralOptionsData } from "@src/background/generalOptionsParser"
 import { ChangedEvent } from "@src/background/observer"
 import { ParseError } from "@src/background/parserHelpers"
 import { err, ok } from "neverthrow"
 import { insertMockBrowserStorageDefaults } from "../testHelpers/mockDefaults"
 import { mocked } from "ts-jest/utils"
+import { GeneralOptionsData } from "@src/background/generalOptionsParseTypes"
 
 jest.mock("webextension-polyfill-ts", () => ({}))
 jest.mock("@src/background/browserStorage")

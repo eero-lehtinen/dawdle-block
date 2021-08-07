@@ -4,6 +4,10 @@
 	"description": "Put time limits on unproductive sites.",
 	"main": "",
 	"private": true,
+	"sideEffects": [
+		"./src/background/index.ts",
+		"./src/shared/fonts.tsx"
+	],
 	"dependencies": {
 		"@date-io/dayjs": "^2.11.0",
 		"@emotion/react": "^11.4.0",
