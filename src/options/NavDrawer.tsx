@@ -100,7 +100,7 @@ const NavDrawer = (): JSX.Element => {
 					<ListItemLink
 						to={`/block-sets/${index + 1}`}
 						key={blockSet.id}
-						primary={blockSet.name}
+						primary={blockSet.data.name}
 						currentPath={currentPath}
 					/>
 				))}

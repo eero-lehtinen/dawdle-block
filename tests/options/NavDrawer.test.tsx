@@ -74,7 +74,7 @@ describe("test options NavDrawer", () => {
 		render(<TestNavDrawer />)
 
 		await screen.findByRole("list")
-		expectBlockSetListNames(background.blockSets.list.map(blockSet => blockSet.name))
+		expectBlockSetListNames(background.blockSets.list.map(blockSet => blockSet.data.name))
 	})
 
 	test("can add new block sets with button", async () => {

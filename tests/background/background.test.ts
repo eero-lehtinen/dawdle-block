@@ -75,9 +75,9 @@ describe("test Background", () => {
 	const initBlockSets = async (config: { am: boolean; ra: boolean; ta: number }[]) => {
 		for (const c of config) {
 			const blockSet = (await blockSets.addDefaultBlockSet())._unsafeUnwrap()
-			blockSet.annoyMode = c.am
-			blockSet.requireActive = c.ra
-			blockSet.timeAllowed = c.ta
+			blockSet.set("annoyMode", c.am)
+			blockSet.set("requireActive", c.ra)
+			blockSet.set("timeAllowed", c.ta)
 			blockSet.test = jest.fn(() => BlockTestRes.Blacklisted)
 		}
 	}
@@ -206,7 +206,7 @@ describe("test Background", () => {
 					{ tabId: 0, active: false },
 					{ tabId: 1, active: false },
 				])
-				blockSets.list[0]!.timeElapsed = timeAllowed
+				blockSets.list[0]!.set("timeElapsed", timeAllowed)
 				jest.advanceTimersByTime(updateInterval)
 				expect(mockBlockTab).toBeCalledTimes(0)
 				expect(mockAnnoyTab).toBeCalledTimes(0)

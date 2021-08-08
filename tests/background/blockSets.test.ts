@@ -57,7 +57,7 @@ describe("test BlockSets methods", () => {
 		expect(new Set(bsIds).size).toBe(bsIds.length)
 		// Added block set is equal to default block set except from id and name
 		const defaultBlockSet = BlockSet.createDefault(newBlockSet.id)
-		defaultBlockSet.name = newBlockSet.name
+		defaultBlockSet.set("name", newBlockSet.data.name)
 		expect(newBlockSet).toStrictEqual(blockSetCmpObj(defaultBlockSet))
 
 		expect(blockSets.list).toContain(newBlockSet)
@@ -70,13 +70,13 @@ describe("test BlockSets methods", () => {
 
 	test("added new block set name is 'Block Set ${number}' with restrictions", async () => {
 		let newBlockSet = (await blockSets.addDefaultBlockSet())._unsafeUnwrap()
-		expect(newBlockSet.name).toBe("Block Set 1")
+		expect(newBlockSet.data.name).toBe("Block Set 1")
 		newBlockSet = (await blockSets.addDefaultBlockSet())._unsafeUnwrap()
-		expect(newBlockSet.name).toBe("Block Set 2")
+		expect(newBlockSet.data.name).toBe("Block Set 2")
 
-		newBlockSet.name = "Block Set 120"
+		newBlockSet.data.name = "Block Set 120"
 		newBlockSet = (await blockSets.addDefaultBlockSet())._unsafeUnwrap()
-		expect(newBlockSet.name).toBe("Block Set 121")
+		expect(newBlockSet.data.name).toBe("Block Set 121")
 	})
 
 	// Copied block sets should get saved to storage.
@@ -106,19 +106,19 @@ describe("test BlockSets methods", () => {
 	test("added new block set copy name is '${copyName} (copy${number}x)' with restrictions", async () => {
 		const testBlockSet = BlockSet.create(100, { name: "TEST" })._unsafeUnwrap()
 		let newBlockSet = (await blockSets.addBlockSetCopy(testBlockSet))._unsafeUnwrap()
-		expect(newBlockSet.name).toStrictEqual(`${testBlockSet.name} (copy)`)
+		expect(newBlockSet.data.name).toStrictEqual(`${testBlockSet.data.name} (copy)`)
 		newBlockSet = (await blockSets.addBlockSetCopy(testBlockSet))._unsafeUnwrap()
-		expect(newBlockSet.name).toStrictEqual(`${testBlockSet.name} (copy)`)
+		expect(newBlockSet.data.name).toStrictEqual(`${testBlockSet.data.name} (copy)`)
 
 		newBlockSet = (await blockSets.addBlockSetCopy(newBlockSet))._unsafeUnwrap()
-		expect(newBlockSet.name).toStrictEqual(`${testBlockSet.name} (copy2x)`)
+		expect(newBlockSet.data.name).toStrictEqual(`${testBlockSet.data.name} (copy2x)`)
 
 		newBlockSet = (await blockSets.addBlockSetCopy(newBlockSet))._unsafeUnwrap()
-		expect(newBlockSet.name).toStrictEqual(`${testBlockSet.name} (copy3x)`)
+		expect(newBlockSet.data.name).toStrictEqual(`${testBlockSet.data.name} (copy3x)`)
 
-		newBlockSet.name = "TEST (copy123x)"
+		newBlockSet.data.name = "TEST (copy123x)"
 		newBlockSet = (await blockSets.addBlockSetCopy(newBlockSet))._unsafeUnwrap()
-		expect(newBlockSet.name).toStrictEqual(`${testBlockSet.name} (copy124x)`)
+		expect(newBlockSet.data.name).toStrictEqual(`${testBlockSet.data.name} (copy124x)`)
 	})
 
 	test("can remove block sets", async () => {

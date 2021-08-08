@@ -1,8 +1,8 @@
 import { plainToBlockSetData, createDefaultBlockSetData } from "./blockSetParser"
-import { BlockSetData, BlockList, ActiveTime, ActiveDays } from "./blockSetParseTypes"
+import { BlockSetData, BlockList } from "./blockSetParseTypes"
 import { ytCategoryNamesById } from "./constants"
 import { fetchChannelTitle, FetchError } from "./youtubeAPI"
-import { ChangedEvent, Listener, Observer } from "./observer"
+import { ChangedEvent, ListenerOf, Observer } from "./observer"
 import { err, ok, Result } from "neverthrow"
 import { ParseError, ZodRes } from "./parserHelpers"
 
@@ -23,6 +23,17 @@ export enum BSState {
 	TimeLeft,
 	Block,
 	OverTime,
+}
+
+type SettableData = Omit<BlockSetData, "v" | "blacklist" | "whitelist"> & {
+	timeElapsed: number
+}
+
+type ChangeObservers = {
+	[Property in keyof SettableData]: Observer<ChangedEvent<SettableData[Property]>>
+} & {
+	any: Observer<ChangedEvent<BlockSet>>
+	timeElapsed: Observer<ChangedEvent<number>>
 }
 
 type CantAddDuplicateError = "CantAddDuplicate"
@@ -68,7 +79,6 @@ export class BlockSet {
 		this._timeElapsed = timeElapsed
 
 		this.compileRules()
-		this.connectChangeObserverAny()
 	}
 
 	/**
@@ -299,7 +309,7 @@ export class BlockSet {
 	 */
 	isInState(...states: BSState[]): boolean {
 		return states.some(state => {
-			if (this.timeElapsed < this._data.timeAllowed) {
+			if (this._timeElapsed < this._data.timeAllowed) {
 				return state === BSState.TimeLeft
 			}
 			// annoyMode == false
@@ -307,7 +317,7 @@ export class BlockSet {
 				return state === BSState.Block
 			}
 			// annoyMode == true
-			if (this.timeElapsed === this._data.timeAllowed) return state === BSState.TimeLeft
+			if (this._timeElapsed === this._data.timeAllowed) return state === BSState.TimeLeft
 			return state === BSState.OverTime
 		})
 	}
@@ -384,6 +394,10 @@ export class BlockSet {
 		return this._id
 	}
 
+	get timeElapsed(): number {
+		return this._timeElapsed
+	}
+
 	get overtime(): number {
 		return -this.timeLeft
 	}
@@ -394,133 +408,43 @@ export class BlockSet {
 
 	/* eslint-disable jsdoc/require-jsdoc*/
 
-	private readonly changeObservers = {
-		timeElapsed: new Observer<ChangedEvent<number>>(),
-		name: new Observer<ChangedEvent<string>>(),
-		requireActive: new Observer<ChangedEvent<boolean>>(),
-		annoyMode: new Observer<ChangedEvent<boolean>>(),
-		timeAllowed: new Observer<ChangedEvent<number>>(),
-		resetTime: new Observer<ChangedEvent<number>>(),
-		lastReset: new Observer<ChangedEvent<number>>(),
-		activeDays: new Observer<ChangedEvent<ActiveDays>>(),
-		activeTime: new Observer<ChangedEvent<ActiveTime>>(),
-		any: new Observer<ChangedEvent<BlockSet>>(),
+	private readonly changeObservers: ChangeObservers = {
+		timeElapsed: new Observer(),
+		name: new Observer(),
+		requireActive: new Observer(),
+		annoyMode: new Observer(),
+		timeAllowed: new Observer(),
+		resetTime: new Observer(),
+		lastReset: new Observer(),
+		activeDays: new Observer(),
+		activeTime: new Observer(),
+		any: new Observer(),
 	}
 
-	subscribeTimeElapsedChanged(listener: Listener<ChangedEvent<number>>): () => void {
-		return this.changeObservers.timeElapsed.subscribe(listener)
-	}
-	get timeElapsed(): number {
-		return this._timeElapsed
-	}
-	set timeElapsed(val: number) {
-		this._timeElapsed = val
-		this.changeObservers.timeElapsed.publish({ newValue: val })
-	}
-
-	subscribeNameChanged(listener: Listener<ChangedEvent<string>>): () => void {
-		return this.changeObservers.name.subscribe(listener)
-	}
-	get name(): string {
-		return this._data.name
-	}
-	set name(val: string) {
-		this._data.name = val
-		this.changeObservers.name.publish({ newValue: val })
+	/**
+	 * Subscribe to changes of any allowed property in general options.
+	 * @returns unsubscribe function
+	 */
+	subscribeChanged<K extends keyof ChangeObservers>(
+		key: K,
+		listener: ListenerOf<ChangeObservers[K]>
+	): () => void {
+		return this.changeObservers[key].subscribe(listener as ListenerOf<ChangeObservers[K]>)
 	}
 
-	subscribeRequireActiveChanged(listener: Listener<ChangedEvent<boolean>>): () => void {
-		return this.changeObservers.requireActive.subscribe(listener)
-	}
-	get requireActive(): boolean {
-		return this._data.requireActive
-	}
-	set requireActive(val: boolean) {
-		this._data.requireActive = val
-		this.changeObservers.requireActive.publish({ newValue: val })
-	}
-
-	subscribeAnnoyModeChanged(listener: Listener<ChangedEvent<boolean>>): () => void {
-		return this.changeObservers.annoyMode.subscribe(listener)
-	}
-	get annoyMode(): boolean {
-		return this._data.annoyMode
-	}
-	set annoyMode(val: boolean) {
-		this._data.annoyMode = val
-		this.changeObservers.annoyMode.publish({ newValue: val })
-	}
-
-	subscribeTimeAllowedChanged(listener: Listener<ChangedEvent<number>>): () => void {
-		return this.changeObservers.timeAllowed.subscribe(listener)
-	}
-	get timeAllowed(): number {
-		return this._data.timeAllowed
-	}
-	set timeAllowed(val: number) {
-		this._data.timeAllowed = val
-		this.changeObservers.timeAllowed.publish({ newValue: val })
-	}
-
-	subscribeResetTimeChanged(listener: Listener<ChangedEvent<number>>): () => void {
-		return this.changeObservers.resetTime.subscribe(listener)
-	}
-	get resetTime(): number {
-		return this._data.resetTime
-	}
-	set resetTime(val: number) {
-		this._data.resetTime = val
-		this.changeObservers.resetTime.publish({ newValue: val })
-	}
-
-	subscribeLastResetChanged(listener: Listener<ChangedEvent<number>>): () => void {
-		return this.changeObservers.lastReset.subscribe(listener)
-	}
-	get lastReset(): number {
-		return this._data.lastReset
-	}
-	set lastReset(val: number) {
-		this._data.lastReset = val
-		this.changeObservers.lastReset.publish({ newValue: val })
-	}
-
-	subscribeActiveDaysChanged(listener: Listener<ChangedEvent<ActiveDays>>): () => void {
-		return this.changeObservers.activeDays.subscribe(listener)
-	}
-	get activeDays(): ActiveDays {
-		return this._data.activeDays
-	}
-	set activeDays(val: ActiveDays) {
-		this._data.activeDays = val
-		this.changeObservers.activeDays.publish({ newValue: val })
-	}
-
-	subscribeActiveTimeChanged(listener: Listener<ChangedEvent<ActiveTime>>): () => void {
-		return this.changeObservers.activeTime.subscribe(listener)
-	}
-	get activeTime(): ActiveTime {
-		return this._data.activeTime
-	}
-	set activeTime(val: ActiveTime) {
-		this._data.activeTime = val
-		this.changeObservers.activeTime.publish({ newValue: val })
-	}
-
-	/** Connect any change observer to listen to all changes.
-	 * Call this only once in constructor. */
-	private connectChangeObserverAny() {
-		const listener = () => this.changeObservers.any.publish({ newValue: this })
-		this.subscribeTimeElapsedChanged(listener)
-		this.subscribeNameChanged(listener)
-		this.subscribeRequireActiveChanged(listener)
-		this.subscribeAnnoyModeChanged(listener)
-		this.subscribeTimeAllowedChanged(listener)
-		this.subscribeResetTimeChanged(listener)
-		this.subscribeLastResetChanged(listener)
-		this.subscribeActiveDaysChanged(listener)
-		this.subscribeActiveTimeChanged(listener)
-	}
-	subscribeAnyChanged(listener: Listener<ChangedEvent<BlockSet>>): () => void {
-		return this.changeObservers.any.subscribe(listener)
+	/**
+	 * Set any settable value with type safety.
+	 * Saves value to storage.
+	 */
+	set<K extends keyof SettableData>(key: K, newValue: SettableData[K]): void {
+		if (key === "timeElapsed") {
+			this._timeElapsed = newValue as number
+		} else {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			;(this.data as any)[key] = newValue
+		}
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		this.changeObservers[key].publish({ newValue } as any)
+		this.changeObservers["any"].publish({ newValue: this })
 	}
 }

@@ -196,7 +196,7 @@ describe("test BrowserStorage block sets", () => {
 
 	test("saveBlockSet returns error when object is too large to be saved", async () => {
 		// 10k random bytes is too large to store even compressed
-		testBlockSet.name = randomBytes(10000).toString("hex")
+		testBlockSet.data.name = randomBytes(10000).toString("hex")
 		expect((await browserStorage.saveBlockSet(testBlockSet))._unsafeUnwrapErr()).toBeInstanceOf(
 			TooLargeStorageSetError
 		)
@@ -341,12 +341,12 @@ describe("test save deferring", () => {
 		)
 		const compressed1 = compress(testBlockSet.data)
 
-		testBlockSet.name = "TEST2"
+		testBlockSet.data.name = "TEST2"
 		expect(await browserStorage.saveBlockSet(testBlockSet)).toEqual(
 			ok(StorageSetSuccess.Deferred)
 		)
 
-		testBlockSet.name = "TEST3"
+		testBlockSet.data.name = "TEST3"
 		expect(await browserStorage.saveBlockSet(testBlockSet)).toEqual(
 			ok(StorageSetSuccess.Deferred)
 		)
@@ -403,7 +403,7 @@ describe("test save deferring", () => {
 		jest.advanceTimersToNextTimer()
 
 		// Update values while save is in progress
-		testBlockSet.name = "TEST2"
+		testBlockSet.data.name = "TEST2"
 		expect(await browserStorage.saveBlockSet(testBlockSet)).toEqual(
 			ok(StorageSetSuccess.Deferred)
 		)

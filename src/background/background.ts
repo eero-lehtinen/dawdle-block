@@ -104,7 +104,7 @@ export class Background {
 		const incrementedBlockSetIds = new Set<number>()
 		const incrementTimeElapsed = (blockSet: BlockSet) => {
 			if (!incrementedBlockSetIds.has(blockSet.id)) {
-				blockSet.timeElapsed += updateInterval
+				blockSet.set("timeElapsed", blockSet.timeElapsed + updateInterval)
 				smallestTimeLeft = Math.min(smallestTimeLeft, blockSet.timeLeft)
 				incrementedBlockSetIds.add(blockSet.id)
 			}
@@ -127,14 +127,14 @@ export class Background {
 				if (blockSet === undefined) continue
 
 				// If block set requires activity and tab is not active, it can be skipped
-				if (!isActive && blockSet.requireActive) continue
+				if (!isActive && blockSet.data.requireActive) continue
 
 				if (blockSet.isInState(BSState.TimeLeft, BSState.OverTime))
 					incrementTimeElapsed(blockSet)
 
 				if (blockSet.isInState(BSState.OverTime)) {
 					// When requireActive == true, annoy is only for this tab
-					if (blockSet.requireActive) collectTabBiggestOvertime(blockSet.overtime, tabId)
+					if (blockSet.data.requireActive) collectTabBiggestOvertime(blockSet.overtime, tabId)
 					// When requireActive == false, annoy is global
 					else
 						globalBiggestOvertime = Math.max(

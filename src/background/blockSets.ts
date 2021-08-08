@@ -1,5 +1,5 @@
 import { BlockSet, BlockTestRes } from "./blockSet"
-import { timeToMSSinceMidnight } from "../shared/utils"
+import { dateToTodayMS } from "../shared/utils"
 import { BrowserStorage, StorageSetError } from "./browserStorage"
 import { ResultAsync } from "neverthrow"
 import { ParseError, ZodResAsync } from "./parserHelpers"
@@ -61,7 +61,7 @@ export class BlockSets {
 		const blockingBSIds: number[] = []
 
 		const now = new Date()
-		const msSinceMidnight = timeToMSSinceMidnight(now)
+		const msSinceMidnight = dateToTodayMS(now)
 		const weekDay = now.getDay()
 		for (const blockSet of this._list) {
 			// if today is not an active day or not in active hours
@@ -96,7 +96,7 @@ export class BlockSets {
 	 */
 	addDefaultBlockSet(): ResultAsync<BlockSet, StorageSetError> {
 		const newBlockSet = BlockSet.createDefault(this.findNextSafeId())
-		newBlockSet.name = this.computeNewName()
+		newBlockSet.data.name = this.computeNewName()
 
 		return this.browserStorage
 			.saveNewBlockSet(newBlockSet, [...this._list, newBlockSet])
@@ -141,9 +141,9 @@ export class BlockSets {
 	 * Continues in this fashion for further copies.
 	 */
 	private insertCopyName(blockSet: BlockSet): BlockSet {
-		const regexRes = /\(copy(?:(\d{1,})x)?\)$/.exec(blockSet.name)
+		const regexRes = /\(copy(?:(\d{1,})x)?\)$/.exec(blockSet.data.name)
 		if (regexRes === null) {
-			blockSet.name = `${blockSet.name} (copy)`
+			blockSet.data.name = `${blockSet.data.name} (copy)`
 			return blockSet
 		}
 
@@ -151,7 +151,7 @@ export class BlockSets {
 		const copyIndex = regexRes.index
 		const copyNumber = copyNumberStr !== undefined ? parseInt(copyNumberStr, 10) : 1
 
-		blockSet.name = `${blockSet.name.substring(0, copyIndex)}(copy${copyNumber + 1}x)`
+		blockSet.data.name = `${blockSet.data.name.substring(0, copyIndex)}(copy${copyNumber + 1}x)`
 		return blockSet
 	}
 
@@ -164,7 +164,7 @@ export class BlockSets {
 	private computeNewName(): string {
 		let largestNumber = 0
 		for (const blockSet of this._list) {
-			const regexRes = /^Block Set (\d{1,})$/.exec(blockSet.name)
+			const regexRes = /^Block Set (\d{1,})$/.exec(blockSet.data.name)
 			if (regexRes !== null) {
 				const number = parseInt(regexRes[1] as string, 10)
 				largestNumber = Math.max(largestNumber, number)

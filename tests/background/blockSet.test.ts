@@ -329,9 +329,8 @@ describe.each([
 	["lastReset", 1000],
 	["activeDays", [false, false, false, true, true, true, true]],
 	["activeTime", { from: 1, to: 2 }],
-])("test BlockSet change callback %s", (funcName, testValue) => {
+])("test BlockSet change callback %s", (valueName, testValue) => {
 	const changedEventOf = <T>(value: T): ChangedEvent<T> => ({ newValue: value })
-	const capitalize = (s: string) => s[0]?.toUpperCase() + s.slice(1)
 
 	let blockSet: BlockSet
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -339,7 +338,7 @@ describe.each([
 	const anyChangesListener = jest.fn()
 	beforeEach(() => {
 		blockSet = BlockSet.createDefault(0)
-		blockSet.subscribeAnyChanged(anyChangesListener)
+		blockSet.subscribeChanged("any", anyChangesListener)
 	})
 
 	afterEach(() => jest.clearAllMocks())
@@ -348,9 +347,9 @@ describe.each([
 	test("notifies on changes", () => {
 		// ts does not like using bracket notation on classes, but use here for brevity
 		//@ts-ignore
-		blockSet[`subscribe${capitalize(funcName as string)}Changed`](listener)
+		blockSet.subscribeChanged(valueName, listener)
 		// @ts-ignore
-		blockSet[funcName] = testValue
+		blockSet.set(valueName, testValue)
 		expect(listener).toBeCalledWith(changedEventOf(testValue))
 		expect(anyChangesListener).toBeCalledWith(changedEventOf(blockSet))
 	})
