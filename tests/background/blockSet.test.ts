@@ -1,7 +1,7 @@
 import { mocked } from "ts-jest/utils"
 import { BlockSet, BlockTestRes, ListType } from "@src/background/blockSet"
 import { BlockSetData } from "@src/background/blockSetParseTypes"
-import { timeToMSSinceMidnight } from "@src/shared/utils"
+import { dateToTodayMS } from "@src/shared/utils"
 import ms from "ms.macro"
 
 // Mock needed for a single test
@@ -121,7 +121,7 @@ describe("test BlockSet methods", () => {
 		dateResultPairs: Array<{ date: Date; result: boolean }>
 	) => {
 		for (const { date, result } of dateResultPairs) {
-			expect(blockSet.isInActiveTime(timeToMSSinceMidnight(date))).toBe(result)
+			expect(blockSet.isInActiveTime(dateToTodayMS(date))).toBe(result)
 		}
 	}
 

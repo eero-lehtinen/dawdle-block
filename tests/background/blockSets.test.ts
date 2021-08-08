@@ -2,7 +2,7 @@
 import { BlockSet, BlockTestRes } from "@src/background/blockSet"
 import { BlockSets } from "@src/background/blockSets"
 import { BrowserStorage } from "@src/background/browserStorage"
-import { timeToMSSinceMidnight } from "@src/shared/utils"
+import { dateToTodayMS } from "@src/shared/utils"
 import { ok } from "neverthrow"
 import { insertMockBrowserStorageDefaults } from "../testHelpers/mockDefaults"
 import { mocked } from "ts-jest/utils"
@@ -155,7 +155,7 @@ describe("test BlockSets blockedBy method", () => {
 		jest.setSystemTime(currentDate)
 		blockSets.blockedBy("testUrl", "testCategoryId", "testChannelId")
 		expect(blockSets.list[0]!.test).toBeCalledWith("testUrl", "testCategoryId", "testChannelId")
-		expect(blockSets.list[0]!.isInActiveTime).toBeCalledWith(timeToMSSinceMidnight(currentDate))
+		expect(blockSets.list[0]!.isInActiveTime).toBeCalledWith(dateToTodayMS(currentDate))
 		expect(blockSets.list[0]!.isInActiveWeekday).toBeCalledWith(currentDate.getDay())
 	})
 
