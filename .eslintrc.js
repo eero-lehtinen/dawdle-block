@@ -2,7 +2,6 @@ module.exports = {
 	plugins: [],
 	extends: ["eslint:recommended", "preact"],
 	parserOptions: {
-		project: "./tsconfig.json",
 		ecmaVersion: 12,
 		sourceType: "module",
 	},
@@ -71,11 +70,6 @@ module.exports = {
 				],
 				"no-useless-constructor": "off",
 				"@typescript-eslint/no-useless-constructor": ["error"],
-				"@typescript-eslint/prefer-nullish-coalescing": "error",
-				"@typescript-eslint/strict-boolean-expressions": "error",
-				"@typescript-eslint/no-floating-promises": "error",
-				"require-await": "off",
-				"@typescript-eslint/require-await": "error",
 			},
 		},
 		{
