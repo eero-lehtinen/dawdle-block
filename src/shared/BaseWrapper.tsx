@@ -3,7 +3,6 @@ import { useMemo, useState } from "preact/hooks"
 import { CssBaseline, GlobalStyles, useMediaQuery } from "@material-ui/core"
 import { ThemeProvider, Theme as MatUITheme } from "@material-ui/core/styles"
 import { createGlobalTheme } from "./globalTheme"
-import BackgroundBox from "./BackgroundBox"
 import BGScriptProvider, { useBGScript } from "./BGScriptProvider"
 import { Theme } from "@src/background/generalOptionsParseTypes"
 import useEffectCleanUpPageUnload from "./useEffectCleanupPageUnload"
@@ -28,6 +27,8 @@ const MyGlobalStyles = ({ matUITheme }: { matUITheme: MatUITheme }) => {
 	return (
 		<GlobalStyles
 			styles={{
+				body: { backgroundColor: `${matUITheme.palette.background.default} !important` },
+
 				// Chromium
 				"::-webkit-scrollbar": { color: "#FFF", width: "16px" },
 				"::-webkit-scrollbar-track": { backgroundColor: scrollbarColors.track },
@@ -65,7 +66,7 @@ const InnerWrapper: FunctionComponent = ({ children }) => {
 			<ThemeProvider theme={matUITheme}>
 				<CssBaseline />
 				<MyGlobalStyles matUITheme={matUITheme} />
-				<BackgroundBox>{children}</BackgroundBox>
+				{children}
 			</ThemeProvider>
 		</>
 	)
