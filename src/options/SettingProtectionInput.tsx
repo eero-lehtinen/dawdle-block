@@ -1,16 +1,8 @@
-import {
-	ToggleButton,
-	ToggleButtonGroup,
-	Typography,
-	Stack,
-	Button,
-	TextField,
-} from "@material-ui/core"
+import { ToggleButton, ToggleButtonGroup, Typography, Stack } from "@material-ui/core"
 import { useBGScript } from "@src/shared/BGScriptProvider"
 import { useState } from "preact/hooks"
-import { clamp } from "../shared/utils"
-import TypingTestDialog from "./TypingTestDialog"
 import { defaultTypingTestWordCount } from "../background/generalOptionsParseTypes"
+import NumericTextField from "./NumericTextField"
 
 /**
  * Input for general options settings protection and typing test word count property
@@ -21,11 +13,9 @@ const SettingProtectionInput = (): JSX.Element => {
 		bg.generalOptions.data.settingProtection
 	)
 
-	const [typingTestWordCountInput, setTypingTestWordCountInput] = useState({
-		val: bg.generalOptions.data.typingTestWordCount.toString(),
-	})
-
-	const [typingTestOpen, setTypingTestOpen] = useState(false)
+	const [typingTestWordCountValue, setTypingTestWordCountValue] = useState(
+		bg.generalOptions.data.typingTestWordCount
+	)
 
 	const handleSettingProtectionChange = async (
 		event: React.MouseEvent<HTMLElement>,
@@ -44,33 +34,10 @@ const SettingProtectionInput = (): JSX.Element => {
 		}
 	}
 
-	const typingTestWordCount = {
-		handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-			if (e.target.value !== "") {
-				const numericVal = e.target.value.replace(/\D/g, "")
-				if (numericVal.length === 0) {
-					setTypingTestWordCountInput({ val: "" })
-				} else {
-					setTypingTestWordCountInput({
-						val: clamp(parseInt(numericVal, 10), 0, 500).toString(),
-					})
-				}
-			}
-		},
-		handleEditingFinished: () => {
-			if (typingTestWordCountInput.val !== "") {
-				void typingTestWordCount.handleSave(parseInt(typingTestWordCountInput.val, 10))
-			} else {
-				setTypingTestWordCountInput({ val: defaultTypingTestWordCount.toString() })
-				void typingTestWordCount.handleSave(defaultTypingTestWordCount)
-			}
-		},
-		handleSave: async (newValue: number) => {
-			const res = await bg.generalOptions.set("typingTestWordCount", newValue)
-			if (res.isErr()) {
-				// TODO: handle error
-			}
-		},
+	const handleTypingTestWordCountSave = async (newValue: number) => {
+		const res = await bg.generalOptions.set("typingTestWordCount", newValue)
+		if (res.isErr()) return
+		setTypingTestWordCountValue(newValue)
 	}
 
 	return (
@@ -96,24 +63,15 @@ const SettingProtectionInput = (): JSX.Element => {
 					When Out of Time
 				</ToggleButton>
 			</ToggleButtonGroup>
-			<TextField
-				variant="filled"
-				autoComplete="off"
-				id="typing-test-word-count"
+			<NumericTextField
+				inputId="typing-test-word-count"
 				label="Test word count"
-				inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-				value={typingTestWordCountInput.val}
-				onChange={typingTestWordCount.handleChange}
-				onBlur={typingTestWordCount.handleEditingFinished}
-				onKeyPress={e => {
-					if (e.key === "Enter") typingTestWordCount.handleEditingFinished()
-				}}
-				sx={{ width: "120px" }}
+				min={0}
+				max={500}
+				defaultValue={defaultTypingTestWordCount}
+				savedValue={typingTestWordCountValue}
+				handleValueAccepted={handleTypingTestWordCountSave}
 			/>
-			<Button size="large" variant="outlined" onClick={() => setTypingTestOpen(true)}>
-				Try It Out
-			</Button>
-			<TypingTestDialog open={typingTestOpen} onClose={() => setTypingTestOpen(false)} />
 		</Stack>
 	)
 }
