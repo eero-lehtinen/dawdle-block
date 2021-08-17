@@ -130,8 +130,8 @@ const NavDrawer = (): JSX.Element => {
 				))}
 
 				<Button
-					size="large"
-					sx={{ float: "right", mr: 1 }}
+					size="medium"
+					sx={{ float: "right", m: 1 }}
 					startIcon={<AddRounded />}
 					onClick={addNewBlockSet}
 				>
