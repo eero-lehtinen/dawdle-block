@@ -27,13 +27,11 @@ const NumericTextField = (props: NumericTextFieldProps): JSX.Element => {
 	}, [savedValue])
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-		if (e.target.value !== "") {
-			const numericVal = e.target.value.replace(/\D/g, "")
-			if (numericVal.length === 0) {
-				setValue({ v: "" })
-			} else {
-				setValue({ v: clamp(parseInt(numericVal, 10), min, max).toString() })
-			}
+		const numericVal = e.target.value.replace(/\D/g, "")
+		if (numericVal.length === 0) {
+			setValue({ v: "" })
+		} else {
+			setValue({ v: clamp(parseInt(numericVal, 10), min, max).toString() })
 		}
 	}
 
