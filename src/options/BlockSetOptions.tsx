@@ -33,6 +33,7 @@ const BlockSetOptions = (): JSX.Element => {
 						Time Allowed
 					</Typography>
 					<ValidatingTimerPicker
+						label={"Time allowed"}
 						inputId={"time-allowed-input"}
 						clockType={24}
 						savedValue={0 /*timeAllowed*/}

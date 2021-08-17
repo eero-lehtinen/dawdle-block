@@ -6,6 +6,7 @@ import dayjs from "dayjs"
 import { clamp, dateToTodayMS } from "../shared/utils"
 
 interface ValidatingTimerPickerProps {
+	label: string
 	inputId: string
 	clockType: ClockType
 	/** savedValue should change after `handleValueAccepted` is called */
@@ -71,7 +72,7 @@ const autoCompleteInput = (input: string, clockType: ClockType) => {
  * TimePicker that allows sloppy inputs and autocompletes all inputs no matter how full of errors.
  */
 const ValidatingTimerPicker = (props: ValidatingTimerPickerProps): JSX.Element => {
-	const { inputId, clockType, savedValue, handleValueAccepted } = props
+	const { label, inputId, clockType, savedValue, handleValueAccepted } = props
 
 	const [inputTime, setInputTime] = useState<dayjs.Dayjs>(dayjs(savedValue))
 	const [inputStr, setInputStr] = useState(dayjs(savedValue).format("HH:mm"))
@@ -99,6 +100,7 @@ const ValidatingTimerPicker = (props: ValidatingTimerPickerProps): JSX.Element =
 	return (
 		<>
 			<DesktopTimePicker
+				label={label}
 				value={inputTime}
 				ampm={clockType === 12}
 				// Gets called when popup is used or text field is changed
