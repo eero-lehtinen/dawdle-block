@@ -7,6 +7,7 @@ import ImportExport from "./ImportExport"
 import BlockSetOptions from "./BlockSetOptions"
 import { LocalizationProvider } from "@material-ui/lab"
 import AdapterDayjs from "@material-ui/lab/AdapterDayjs"
+import SettingsLock from "./SettingsLock"
 
 /**
  * Main function for rendering options menu.
@@ -28,6 +29,9 @@ export const Options = (): JSX.Element => {
 							</Route>
 							<Route path="/import-export">
 								<ImportExport />
+							</Route>
+							<Route path="/settings-lock">
+								<SettingsLock />
 							</Route>
 							<Route path="/block-sets/:ordinal">
 								<BlockSetOptions />

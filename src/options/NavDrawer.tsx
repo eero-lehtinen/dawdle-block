@@ -9,7 +9,12 @@ import {
 	ListSubheader,
 	Button,
 } from "@material-ui/core"
-import { SettingsRounded, AddRounded, ImportExportRounded } from "@material-ui/icons"
+import {
+	SettingsRounded,
+	AddRounded,
+	ImportExportRounded,
+	LockRounded,
+} from "@material-ui/icons"
 import { useBGScript } from "@src/shared/BGScriptProvider"
 import { useState, useRef } from "preact/hooks"
 import { Link as RouterLink, useLocation } from "react-router-dom"
@@ -84,6 +89,12 @@ const NavDrawer = (): JSX.Element => {
 					to="/general-options"
 					primary={"General Options"}
 					icon={<SettingsRounded />}
+					currentPath={currentPath}
+				/>
+				<ListItemLink
+					to="/settings-lock"
+					primary={"Settings Lock"}
+					icon={<LockRounded />}
 					currentPath={currentPath}
 				/>
 				<ListItemLink
