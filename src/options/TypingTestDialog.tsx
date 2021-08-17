@@ -6,8 +6,10 @@ import {
 	DialogContentText,
 	DialogTitle,
 } from "@material-ui/core"
+import useEffectCleanUpPageUnload from "../shared/useEffectCleanupPageUnload"
 import { useState, useEffect } from "preact/hooks"
 import TypingTest from "./TypingTest"
+import { useBGScript } from "../shared/BGScriptProvider"
 
 interface TypingTestDialogProps {
 	open: boolean
@@ -21,9 +23,22 @@ interface TypingTestDialogProps {
 const TypingTestDialog = (props: TypingTestDialogProps): JSX.Element => {
 	const { open, onClose } = props
 
+	const bg = useBGScript()
+
+	const [wordCount, setWordCount] = useState(bg.generalOptions.data.typingTestWordCount)
+
+	useEffectCleanUpPageUnload(() => {
+		bg.generalOptions.subscribeChanged("typingTestWordCount", ({ newValue }) =>
+			setWordCount(newValue)
+		)
+	}, [])
+
+	const [generation, setGeneration] = useState(0)
+
 	const [success, setSuccess] = useState(false)
 	useEffect(() => {
 		if (open) {
+			setGeneration(g => g + 1)
 			setSuccess(false)
 		}
 	}, [open])
@@ -39,7 +54,11 @@ const TypingTestDialog = (props: TypingTestDialogProps): JSX.Element => {
 				<DialogContentText>
 					Type the words below with zero mistakes to unlock protected settings.
 				</DialogContentText>
-				<TypingTest open={open} onSuccess={() => setSuccess(true)} />
+				<TypingTest
+					wordCount={wordCount}
+					generation={generation}
+					onSuccess={() => setSuccess(true)}
+				/>
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={handleClose}>{success ? "Close" : "Cancel"}</Button>

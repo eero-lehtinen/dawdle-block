@@ -1,15 +1,15 @@
 import { TextField, Box, Typography } from "@material-ui/core"
-import { useBGScript } from "../shared/BGScriptProvider"
 import { useState, useEffect, useCallback, useRef } from "preact/hooks"
 import words1000 from "../shared/words1000"
-import useEffectCleanUpPageUnload from "../shared/useEffectCleanupPageUnload"
 import { sleep } from "../shared/utils"
 import useWindowSize from "../shared/useWindowSize"
 
 declare const __DEV__: boolean
 
 interface TypingTestProps {
-	open: boolean
+	// Change generation number to reset the test
+	generation: number
+	wordCount: number
 	onSuccess: () => void
 }
 
@@ -27,17 +27,7 @@ const randomWords = (count: number) =>
  * In development mode shift key can be pressed to autocomplete the test.
  */
 const TypingTest = (props: TypingTestProps): JSX.Element => {
-	const { open, onSuccess } = props
-
-	const bg = useBGScript()
-
-	const [wordCount, setWordCount] = useState(bg.generalOptions.data.typingTestWordCount)
-
-	useEffectCleanUpPageUnload(() => {
-		bg.generalOptions.subscribeChanged("typingTestWordCount", ({ newValue }) =>
-			setWordCount(newValue)
-		)
-	}, [])
+	const { generation, onSuccess, wordCount } = props
 
 	const [words, setWords] = useState<string[]>([])
 	const [currWordIndex, setCurrWordIndex] = useState(0)
@@ -54,10 +44,8 @@ const TypingTest = (props: TypingTestProps): JSX.Element => {
 	}, [wordCount])
 
 	useEffect(() => {
-		if (open) {
-			init()
-		}
-	}, [open, init])
+		init()
+	}, [generation, init])
 
 	const addChar = (char: string) => {
 		if (success) return
