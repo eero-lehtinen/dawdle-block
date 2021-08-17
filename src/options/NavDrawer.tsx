@@ -8,6 +8,7 @@ import {
 	ListItemIcon,
 	ListSubheader,
 	Button,
+	Box,
 } from "@material-ui/core"
 import {
 	SettingsRounded,
@@ -21,8 +22,6 @@ import { Link as RouterLink, useLocation } from "react-router-dom"
 
 const drawerWidth = 300
 
-const betweenButtonMargin = 0.5
-
 interface ListItemLinkProps {
 	icon?: JSX.Element
 	primary: string
@@ -34,16 +33,30 @@ interface ListItemLinkProps {
 const ListItemLink = ({ icon, primary, to, currentPath }: ListItemLinkProps) => {
 	return (
 		<li>
-			<ListItemButton
-				disableRipple
-				selected={currentPath === to}
-				sx={{ borderRadius: 1.5, mb: betweenButtonMargin }}
-				component={RouterLink}
-				to={to}
-			>
-				{icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
-				<ListItemText primary={primary} />
-			</ListItemButton>
+			<Box sx={{ px: 1, py: 1 / 2 }}>
+				<ListItemButton
+					selected={currentPath === to}
+					sx={{
+						height: 40,
+						px: 1,
+						borderRadius: 1,
+						// Use "before" to preserve larger click area
+						":before": {
+							content: "''",
+							position: "absolute",
+							left: "-8px",
+							width: `calc(100% + 16px)`,
+							top: "-4px",
+							height: `calc(100% + 8px)`,
+						},
+					}}
+					component={RouterLink}
+					to={to}
+				>
+					{icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
+					<ListItemText primary={primary} />
+				</ListItemButton>
+			</Box>
 		</li>
 	)
 }
@@ -83,8 +96,8 @@ const NavDrawer = (): JSX.Element => {
 			}}
 		>
 			<Toolbar />
-			<List sx={{ pr: 1, pl: 1 }}>
-				<Divider sx={{ mb: betweenButtonMargin }} />
+			<List>
+				<Divider sx={{ my: 1 }} />
 				<ListItemLink
 					to="/general-options"
 					primary={"General Options"}
@@ -104,7 +117,7 @@ const NavDrawer = (): JSX.Element => {
 					currentPath={currentPath}
 				/>
 
-				<Divider sx={{ mb: betweenButtonMargin }} />
+				<Divider sx={{ my: 1 }} />
 				<ListSubheader>BLOCK SETS</ListSubheader>
 
 				{blockSetsList.map((blockSet, index) => (
@@ -118,7 +131,7 @@ const NavDrawer = (): JSX.Element => {
 
 				<Button
 					size="large"
-					sx={{ float: "right" }}
+					sx={{ float: "right", mr: 1 }}
 					startIcon={<AddRounded />}
 					onClick={addNewBlockSet}
 				>
