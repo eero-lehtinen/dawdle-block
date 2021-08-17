@@ -1,4 +1,4 @@
-import { Typography } from "@material-ui/core"
+import TabHeader from "./TabHeader"
 
 /**
  * Import/Export options page for options menu.
@@ -6,9 +6,7 @@ import { Typography } from "@material-ui/core"
 const ImportExport = (): JSX.Element => {
 	return (
 		<>
-			<Typography variant="h1" sx={{ mb: 2 }}>
-				Import/Export
-			</Typography>
+			<TabHeader>Import/Export</TabHeader>
 		</>
 	)
 }

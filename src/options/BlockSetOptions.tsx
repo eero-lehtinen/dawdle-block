@@ -2,6 +2,7 @@ import { Typography, Stack, Box } from "@material-ui/core"
 import { useBGScript } from "@src/shared/BGScriptProvider"
 import { useParams } from "react-router-dom"
 import ValidatingTimerPicker from "./ValidatingTimePicker"
+import TabHeader from "./TabHeader"
 
 /** Message to show when use has typed an url with invalid number. */
 const InvalidLinkMessage = ({ ordinal }: { ordinal: string }) => (
@@ -25,9 +26,7 @@ const BlockSetOptions = (): JSX.Element => {
 
 	return (
 		<>
-			<Typography variant="h1" sx={{ mb: 2 }}>
-				{blockSet.data.name}
-			</Typography>
+			<TabHeader>{blockSet.data.name}</TabHeader>
 			<Stack spacing={3}>
 				<Box sx={{ p: 1 }}>
 					<Typography variant="h2" sx={{ mb: 1 }}>
