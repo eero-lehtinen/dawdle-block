@@ -31,13 +31,15 @@ const NumericTextField = (props: NumericTextFieldProps): JSX.Element => {
 		if (numericVal.length === 0) {
 			setValue({ v: "" })
 		} else {
-			setValue({ v: clamp(parseInt(numericVal, 10), min, max).toString() })
+			setValue({ v: numericVal })
 		}
 	}
 
 	const handleEditingFinished = () => {
 		if (value.v !== "") {
-			handleValueAccepted(parseInt(value.v, 10))
+			const clamped = clamp(parseInt(value.v, 10), min, max)
+			setValue({ v: clamped.toString() })
+			handleValueAccepted(clamped)
 		} else {
 			setValue({ v: defaultValue.toString() })
 			handleValueAccepted(defaultValue)
