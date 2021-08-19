@@ -76,7 +76,7 @@ const SettingsLock = (): JSX.Element => {
 				<NumericTextField
 					inputId="typing-test-word-count"
 					label="Test word count"
-					min={10}
+					min={1}
 					max={1000}
 					defaultValue={defaultTypingTestWordCount}
 					savedValue={typingTestWordCount}
@@ -86,8 +86,11 @@ const SettingsLock = (): JSX.Element => {
 			<Typography variant="h2" sx={{ mb: 1 }}>
 				Test It Out
 			</Typography>
-			<Typography>You must type the words below with zero mistakes to pass.</Typography>
-			<Stack alignItems="baseline" spacing={1}>
+			<Typography>
+				Try the challenge here to make sure you are able to pass it. Remember that zero typos
+				are allowed.
+			</Typography>
+			<Stack alignItems="baseline" spacing={1} sx={{ maxWidth: 500 }}>
 				<TypingTest
 					generation={typingTestGen}
 					wordCount={typingTestWordCount}
@@ -105,7 +108,7 @@ const SettingsLock = (): JSX.Element => {
 						setTypingTestSuccess(false)
 					}}
 				>
-					Reset Test
+					Reset Challenge
 				</Button>
 			</Stack>
 		</>
