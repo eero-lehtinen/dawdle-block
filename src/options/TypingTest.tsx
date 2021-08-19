@@ -74,7 +74,6 @@ const TypingTest = (props: TypingTestProps): JSX.Element => {
 	}, [])
 
 	useEffect(() => {
-		console.log("dimensions", dimensions)
 		if (currWordRef.current !== null) currWordRef.current.scrollIntoView(true)
 	}, [dimensions])
 
@@ -107,10 +106,8 @@ const TypingTest = (props: TypingTestProps): JSX.Element => {
 			<Typography
 				variant="body1"
 				sx={{
-					mb: 1,
-					mt: 1,
-					pl: 1,
-					pr: 1,
+					my: 1,
+					px: 1,
 					overflow: "hidden",
 					textJustify: "inter-word",
 					textAlign: "justify",
@@ -118,29 +115,24 @@ const TypingTest = (props: TypingTestProps): JSX.Element => {
 					height: theme =>
 						`calc(${(theme.typography.body1.lineHeight as number) * 1.2} * ` +
 						`${theme.typography.body1.fontSize} * 2)`,
+					"& > span > span": { pl: "1px", pr: "1px", color: "text.secondary" },
+					"& > span > span.done": { color: "success.main" },
+					"& > span > span.current": {
+						color: "text.primary",
+						bgcolor: "action.hover",
+						borderRadius: "2px",
+					},
 				}}
 			>
 				{words.map((word, index) => (
 					<span key={word + index} ref={index === currWordIndex ? setCurrWordRef : undefined}>
-						<Box
-							component="span"
-							sx={{
-								pl: "1px",
-								pr: "1px",
-								position: "relative",
-								bgcolor: theme =>
-									index === currWordIndex ? theme.palette.action.hover : "none",
-								color:
-									index < currWordIndex
-										? "success.main"
-										: index === currWordIndex
-										? "text.primary"
-										: "text.secondary",
-								borderRadius: "2px",
-							}}
+						<span
+							className={
+								index < currWordIndex ? "done" : index === currWordIndex ? "current" : undefined
+							}
 						>
 							{word}
-						</Box>{" "}
+						</span>{" "}
 					</span>
 				))}
 				<Box component="span" sx={{ display: "block" }}>

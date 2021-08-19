@@ -24,7 +24,7 @@ const drawerWidth = 300
 
 interface ListItemLinkProps {
 	icon?: JSX.Element
-	primary: string
+	primary: React.ReactNode
 	to: string
 	currentPath: string
 }
@@ -34,25 +34,7 @@ const ListItemLink = ({ icon, primary, to, currentPath }: ListItemLinkProps) => 
 	return (
 		<li>
 			<Box sx={{ px: 1, py: 1 / 2 }}>
-				<ListItemButton
-					selected={currentPath === to}
-					sx={{
-						height: 40,
-						px: 1,
-						borderRadius: 1,
-						// Use "before" to preserve larger click area
-						":before": {
-							content: "''",
-							position: "absolute",
-							left: "-8px",
-							width: `calc(100% + 16px)`,
-							top: "-4px",
-							height: `calc(100% + 8px)`,
-						},
-					}}
-					component={RouterLink}
-					to={to}
-				>
+				<ListItemButton selected={currentPath === to} component={RouterLink} to={to}>
 					{icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
 					<ListItemText primary={primary} />
 				</ListItemButton>
@@ -92,6 +74,22 @@ const NavDrawer = (): JSX.Element => {
 					width: drawerWidth,
 					boxSizing: "border-box",
 					left: "initial",
+				},
+				// Restyle buttons to be rounded and smaller with margins similiar to
+				// Material UI reference page visualizations.
+				"& .MuiListItemButton-root": {
+					height: 40,
+					px: 1,
+					borderRadius: 1,
+					// Use "before" to preserve larger click area
+					":before": {
+						content: "''",
+						position: "absolute",
+						left: "-8px",
+						width: "calc(100% + 16px)",
+						top: "-4px",
+						height: "calc(100% + 8px)",
+					},
 				},
 			}}
 		>
