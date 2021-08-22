@@ -75,7 +75,7 @@ const SettingsLock = (): JSX.Element => {
 				</ToggleButtonGroup>
 				<NumericTextField
 					inputId="typing-test-word-count"
-					label="Test word count"
+					label="Challenge word count"
 					min={1}
 					max={1000}
 					defaultValue={defaultTypingTestWordCount}

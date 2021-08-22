@@ -7,7 +7,7 @@ import useWindowSize from "../shared/useWindowSize"
 declare const __DEV__: boolean
 
 interface TypingTestProps {
-	// Change generation number to reset the test
+	/** Change generation number to reset the test */
 	generation: number
 	wordCount: number
 	onSuccess: () => void
