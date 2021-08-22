@@ -12,7 +12,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: bahmutov/npm-install@v1
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+          cache: yarn
       - name: Check formatting
         run: yarn checkformat
       - name: Lint
