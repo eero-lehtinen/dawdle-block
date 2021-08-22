@@ -21,7 +21,6 @@ jest.mock("@src/background/setBadge")
 import BGScriptProvider from "@src/shared/BGScriptProvider"
 import { render, screen } from "@testing-library/preact"
 import NavDrawer from "@src/options/NavDrawer"
-import "@testing-library/jest-dom"
 import { BrowserStorage } from "@src/background/browserStorage"
 import { Background } from "@src/background/background"
 import { TabObserver } from "@src/background/tabObserver"

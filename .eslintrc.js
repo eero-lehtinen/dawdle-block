@@ -1,3 +1,5 @@
+require("@rushstack/eslint-patch/modern-module-resolution")
+
 module.exports = {
 	plugins: [],
 	extends: ["eslint:recommended", "preact"],
@@ -5,7 +7,7 @@ module.exports = {
 		ecmaVersion: 12,
 		sourceType: "module",
 	},
-	ignorePatterns: ["legacy/**/*", "dist/**/*", "coverage/**/*", "static/**/*"],
+	ignorePatterns: ["legacy/**/*", "dist/**/*", "coverage/**/*", "static/**/*", ".yarn/**/*"],
 	env: {
 		webextensions: true,
 		browser: true,

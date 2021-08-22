@@ -2,3 +2,6 @@ legacy
 coverage
 dist
 node_modules
+.pnp.cjs
+.vscode
+.yarn
