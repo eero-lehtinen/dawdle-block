@@ -4567,6 +4567,11 @@ __metadata:
     webpack-webextension-plugin: ^0.3.0
     zip-webpack-plugin: ^4.0.1
     zod: ^3.2.0
+  dependenciesMeta:
+    core-js:
+      built: false
+    core-js-pure:
+      built: false
   languageName: unknown
   linkType: soft
 

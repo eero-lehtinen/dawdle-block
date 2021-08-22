@@ -97,6 +97,14 @@
 		"dev:firefox": "webpack --watch --env firefox --env dev",
 		"build": "yarn build:chromium && yarn build:firefox"
 	},
+	"dependenciesMeta": {
+		"core-js": {
+			"built": false
+		},
+		"core-js-pure": {
+			"built": false
+		}
+	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/birusq/dawdle-block.git"
