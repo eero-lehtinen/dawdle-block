@@ -1,5 +1,11 @@
 import { mocked } from "ts-jest/utils"
-import { BlockSet, BlockTestRes, ListType } from "@src/background/blockSet"
+import {
+	BlockSet,
+	BlockTestRes,
+	DuplicateAddError,
+	InvalidYTCategoryIdAddError,
+	ListType,
+} from "@src/background/blockSet"
 import { BlockSetData } from "@src/background/blockSetParseTypes"
 import { dateToTodayMS } from "@src/shared/utils"
 import ms from "ms.macro"
@@ -7,7 +13,7 @@ import ms from "ms.macro"
 // Mock needed for a single test
 import { EmptyResponseFetchError, fetchChannelTitle } from "@src/background/youtubeAPI"
 import { ChangedEvent } from "@src/background/observer"
-import { err, errAsync } from "neverthrow"
+import { err, errAsync, okAsync } from "neverthrow"
 import blockSetCmpObj from "../testHelpers/blockSetCmpObj"
 jest.mock("@src/background/youtubeAPI")
 const mockedFetchChannelTitle = mocked(fetchChannelTitle)
@@ -222,24 +228,33 @@ describe("test BlockSet rule matching", () => {
 
 	test("can't add duplicate rules", async () => {
 		blockSet.addPattern(ListType.Whitelist, "a")
-		expect(blockSet.addPattern(ListType.Whitelist, "a")).toEqual(err("CantAddDuplicate"))
+		expect(blockSet.addPattern(ListType.Whitelist, "a")._unsafeUnwrapErr()).toBeInstanceOf(
+			DuplicateAddError
+		)
 
 		blockSet.addRegExp(ListType.Whitelist, "a")
-		expect(blockSet.addRegExp(ListType.Whitelist, "a")).toEqual(err("CantAddDuplicate"))
+		expect(blockSet.addRegExp(ListType.Whitelist, "a")._unsafeUnwrapErr()).toBeInstanceOf(
+			DuplicateAddError
+		)
 
 		blockSet.addYTCategory(ListType.Whitelist, "10")
-		expect(blockSet.addYTCategory(ListType.Whitelist, "10")).toEqual(err("CantAddDuplicate"))
-
-		await blockSet.addYTChannel(ListType.Whitelist, "a", "title")
-		expect(await blockSet.addYTChannel(ListType.Whitelist, "a", "title2")).toEqual(
-			err("CantAddDuplicate")
+		expect(blockSet.addYTCategory(ListType.Whitelist, "10")._unsafeUnwrapErr()).toBeInstanceOf(
+			DuplicateAddError
 		)
+
+		mockedFetchChannelTitle.mockResolvedValue(okAsync("title"))
+		await blockSet.addYTChannel(ListType.Whitelist, "a")
+		expect(
+			(await blockSet.addYTChannel(ListType.Whitelist, "a"))._unsafeUnwrapErr()
+		).toBeInstanceOf(DuplicateAddError)
 	})
 
 	test("can't add invalid YouTube categories", () => {
-		expect(blockSet.addYTCategory(ListType.Whitelist, "a")).toEqual(err("InvalidYTCategoryId"))
-		expect(blockSet.addYTCategory(ListType.Whitelist, "100")).toEqual(
-			err("InvalidYTCategoryId")
+		expect(blockSet.addYTCategory(ListType.Whitelist, "a")._unsafeUnwrapErr()).toBeInstanceOf(
+			InvalidYTCategoryIdAddError
+		)
+		expect(blockSet.addYTCategory(ListType.Whitelist, "100")._unsafeUnwrapErr()).toBeInstanceOf(
+			InvalidYTCategoryIdAddError
 		)
 	})
 
@@ -307,8 +322,9 @@ describe("test BlockSet rule matching", () => {
 	})
 
 	test("can test YouTube channel rules", async () => {
-		await blockSet.addYTChannel(ListType.Blacklist, "ID1", "TITLE1")
-		await blockSet.addYTChannel(ListType.Whitelist, "ID2", "TITLE2")
+		mockedFetchChannelTitle.mockResolvedValue(okAsync("TEST_TITLE"))
+		await blockSet.addYTChannel(ListType.Blacklist, "ID1")
+		await blockSet.addYTChannel(ListType.Whitelist, "ID2")
 		expect(blockSet.test("", "ID1", null)).toStrictEqual(BlockTestRes.Blacklisted)
 		expect(blockSet.test("", "ID2", null)).toStrictEqual(BlockTestRes.Whitelisted)
 

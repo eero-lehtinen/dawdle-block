@@ -35,18 +35,17 @@ type ChangeObservers = {
 	any: Observer<ChangedEvent<BlockSet>>
 	timeElapsed: Observer<ChangedEvent<number>>
 }
+/* eslint-disable jsdoc/require-jsdoc */
+export class AddError extends Error {}
+export class DuplicateAddError extends AddError {}
+export class InvalidRegExpAddError extends AddError {}
+export class InvalidYTCategoryIdAddError extends AddError {}
+/* eslint-enable jsdoc/require-jsdoc */
 
-type CantAddDuplicateError = "CantAddDuplicate"
-type InvalidRegExpError = { type: "InvalidRegExp"; message: string }
-type InvalidYTCategoryIdError = "InvalidYTCategoryId"
-
-const safeMakeRegExp: (regExpStr: string) => Result<RegExp, InvalidRegExpError> =
+const safeMakeRegExp: (regExpStr: string) => Result<RegExp, InvalidRegExpAddError> =
 	Result.fromThrowable(
 		re => new RegExp(re),
-		err => ({
-			type: "InvalidRegExp",
-			message: (err as { message: string }).message,
-		})
+		err => new InvalidRegExpAddError((err as Error).message)
 	)
 
 /**
@@ -155,8 +154,9 @@ export class BlockSet {
 	 * @param listType whitelist or blacklist
 	 * @param pattern pattern to add
 	 */
-	addPattern(listType: ListType, pattern: string): Result<void, CantAddDuplicateError> {
-		if (this._data[listType].urlPatterns.includes(pattern)) return err("CantAddDuplicate")
+	addPattern(listType: ListType, pattern: string): Result<void, DuplicateAddError> {
+		if (this._data[listType].urlPatterns.includes(pattern))
+			return err(new DuplicateAddError(`Pattern "${pattern}" already exists`))
 		this._data[listType].urlPatterns.push(pattern)
 		this.compiledUrlRules[listType].push(BlockSet.patternToRegExp(pattern))
 		return ok(undefined)
@@ -185,8 +185,9 @@ export class BlockSet {
 	addRegExp(
 		listType: ListType,
 		regExpStr: string
-	): Result<void, CantAddDuplicateError | InvalidRegExpError> {
-		if (this._data[listType].urlRegExps.includes(regExpStr)) return err("CantAddDuplicate")
+	): Result<void, DuplicateAddError | InvalidRegExpAddError> {
+		if (this._data[listType].urlRegExps.includes(regExpStr))
+			return err(new DuplicateAddError(`Regular Expression "${regExpStr}" already exists`))
 
 		return safeMakeRegExp(regExpStr).andThen(regExp => {
 			this._data[listType].urlRegExps.push(regExpStr)
@@ -215,10 +216,11 @@ export class BlockSet {
 	addYTCategory(
 		listType: ListType,
 		categoryId: string
-	): Result<void, InvalidYTCategoryIdError | CantAddDuplicateError> {
-		if (!(categoryId in ytCategoryNamesById)) return err("InvalidYTCategoryId")
+	): Result<void, InvalidYTCategoryIdAddError | DuplicateAddError> {
+		if (this._data[listType].ytCategoryIds.includes(categoryId))
+			return err(new DuplicateAddError(`YouTube category id "${categoryId}" already exists`))
 
-		if (this._data[listType].ytCategoryIds.includes(categoryId)) return err("CantAddDuplicate")
+		if (!(categoryId in ytCategoryNamesById)) return err(new InvalidYTCategoryIdAddError())
 
 		this._data[listType].ytCategoryIds.push(categoryId)
 		return ok(undefined)
@@ -236,28 +238,22 @@ export class BlockSet {
 	}
 
 	/**
-	 * Add YouTube channel to block set. Validates channelId when channelTitle in unset.
-	 * Only set channelTitle when it comes from a trusted source.
+	 * Add YouTube channel to block set. Validates channelId and finds channel title based on it.
 	 * @param listType whitelist or blacklist
 	 * @param channelId channel id to add
-	 * @param channelTitle trusted channel title
 	 */
 	async addYTChannel(
 		listType: ListType,
-		channelId: string,
-		channelTitle?: string
-	): Promise<Result<void, CantAddDuplicateError | FetchError>> {
+		channelId: string
+	): Promise<Result<void, DuplicateAddError | FetchError>> {
 		if (this._data[listType].ytChannels.find(({ id }) => id === channelId)) {
-			return err("CantAddDuplicate")
+			return err(new DuplicateAddError(`YouTube channel id "${channelId}" already exists`))
 		}
 
-		if (channelTitle === undefined) {
-			const result = await fetchChannelTitle(channelId)
-			if (result.isErr()) return err(result.error)
-			channelTitle = result.value
-		}
+		const titleResult = await fetchChannelTitle(channelId)
+		if (titleResult.isErr()) return err(titleResult.error)
 
-		this._data[listType].ytChannels.push({ id: channelId, title: channelTitle })
+		this._data[listType].ytChannels.push({ id: channelId, title: titleResult.value })
 		return ok(undefined)
 	}
 
