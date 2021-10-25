@@ -1,4 +1,4 @@
-import { ok, ResultAsync } from "neverthrow"
+import { ResultAsync } from "neverthrow"
 import { BrowserStorage, StorageSetError, StorageSetSuccess } from "./browserStorage"
 import { createDefaultGeneralOptionsData } from "./generalOptionsParser"
 import { GeneralOptionsData } from "./generalOptionsParseTypes"
@@ -68,21 +68,15 @@ export class GeneralOptions {
 		return this.changeObservers[key].subscribe(listener as ListenerOf<ChangeObservers[K]>)
 	}
 
-	/**
-	 * Set any settable value with type safety.
-	 * Saves value to storage.
-	 */
-	set<K extends keyof SettableData>(
-		key: K,
-		newValue: GeneralOptionsData[K]
-	): ResultAsync<StorageSetSuccess, StorageSetError> {
-		return this.browserStorage
-			.saveGeneralOptionsData({ ...this._data, [key]: newValue })
-			.andThen(res => {
-				this.data[key] = newValue
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				this.changeObservers[key].publish({ newValue } as any)
-				return ok(res)
-			})
+	/** Set any settable value with type safety.*/
+	set<K extends keyof SettableData>(key: K, newValue: GeneralOptionsData[K]): void {
+		this.data[key] = newValue
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		this.changeObservers[key].publish({ newValue } as any)
+	}
+
+	/** Try to save this to browser storage. */
+	save(): ResultAsync<StorageSetSuccess, StorageSetError> {
+		return this.browserStorage.saveGeneralOptionsData({ ...this.data })
 	}
 }

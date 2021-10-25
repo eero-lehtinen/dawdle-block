@@ -22,8 +22,9 @@ const ThemeInput = (): JSX.Element => {
 				`ToggleButtonGroup configured incorrectly. Themes do not contain string: "${newTheme}"`
 			)
 		else {
-			const res = await bg.generalOptions.set("theme", newTheme)
-			if (res.isOk()) setTheme(newTheme)
+			bg.generalOptions.set("theme", newTheme)
+			setTheme(newTheme)
+			bg.generalOptions.save()
 		}
 	}
 

@@ -58,8 +58,19 @@ describe("test GeneralOptions setters", () => {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	])("test setter '%s'", async (key: any, value: any) => {
 		generalOptions.subscribeChanged(key, listener)
-		await generalOptions.set(key, value)
-		expect(browserStorage.saveGeneralOptionsData).toBeCalledWith(generalOptions.data)
+		generalOptions.set(key, value)
 		expect(listener).toBeCalledWith(changedEventOf(value))
+	})
+})
+
+describe("test GeneralOptions methods", () => {
+	let generalOptions: GeneralOptions
+	beforeEach(async () => {
+		generalOptions = await GeneralOptions.create(browserStorage)
+	})
+
+	test("save saves to browser storage", async () => {
+		await generalOptions.save()
+		expect(browserStorage.saveGeneralOptionsData).toBeCalledWith(generalOptions.data)
 	})
 })

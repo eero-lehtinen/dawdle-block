@@ -21,8 +21,9 @@ const TimeConventionInput = (): JSX.Element => {
 					`ClockTypes do not contain value: "${newValue}"`
 			)
 		else {
-			const res = await bg.generalOptions.set("clockType", newValue)
-			if (res.isOk()) setClockType(newValue)
+			bg.generalOptions.set("clockType", newValue)
+			setClockType(newValue)
+			bg.generalOptions.save()
 		}
 	}
 
