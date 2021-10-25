@@ -40,7 +40,7 @@ type SetItems = Record<
  * Object for saving and loading block sets from browser storage.
  * Can be configured to be local or cloud synced.
  * NOTE!!:
- * There is no way to detect if cloud sync has beed disabled by the browser.
+ * There is no way to detect if cloud sync has been disabled by the browser.
  * In that case storage will silently be local.
  */
 export class BrowserStorage {
@@ -51,8 +51,8 @@ export class BrowserStorage {
 	 * Instantiates block set storage.
 	 * @param opts Configuration options
 	 * @param opts.preferSync If true, try to use sync storage.
-	 * Sync may not be available, e.g. in Opera or if sync has beed disabled in browser settings.
-	 * There is no way to detect if sync has beed disabled by the browser.
+	 * Sync may not be available, e.g. in Opera or if sync has been disabled in browser settings.
+	 * There is no way to detect if sync has been disabled by the browser.
 	 * If false, always use local storage.
 	 */
 	constructor(opts: BrowserStorageOptions) {
