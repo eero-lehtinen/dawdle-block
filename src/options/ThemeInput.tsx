@@ -1,5 +1,5 @@
-import { ToggleButton, ToggleButtonGroup, Typography, Box } from "@material-ui/core"
-import { LightModeRounded, BrightnessMediumRounded, DarkModeRounded } from "@material-ui/icons"
+import { ToggleButton, ToggleButtonGroup, Typography, Box } from "@mui/material"
+import { LightModeRounded, BrightnessMediumRounded, DarkModeRounded } from "@mui/icons-material"
 import { Theme } from "@src/background/generalOptionsParseTypes"
 import { useBGScript } from "@src/shared/BGScriptProvider"
 import { useState } from "preact/hooks"

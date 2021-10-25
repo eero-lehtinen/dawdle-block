@@ -3,7 +3,7 @@ import { useEffect, useState, useContext } from "preact/hooks"
 import { Background } from "../background/background"
 import { browser } from "webextension-polyfill-ts"
 import { sleep } from "./utils"
-import { Box, Typography, CircularProgress, Fade } from "@material-ui/core"
+import { Box, Typography, CircularProgress, Fade } from "@mui/material"
 import ms from "ms.macro"
 
 const retryIntervalMS = ms("2s")

@@ -1,5 +1,5 @@
-import { ToggleButton, ToggleButtonGroup, Typography, Stack, Button } from "@material-ui/core"
-import { RestartAltRounded } from "@material-ui/icons"
+import { ToggleButton, ToggleButtonGroup, Typography, Stack, Button } from "@mui/material"
+import { RestartAltRounded } from "@mui/icons-material"
 import { useBGScript } from "@src/shared/BGScriptProvider"
 import { useState } from "preact/hooks"
 import { defaultTypingTestWordCount } from "../background/generalOptionsParseTypes"

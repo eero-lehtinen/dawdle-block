@@ -5,7 +5,7 @@ import {
 	DialogContent,
 	DialogContentText,
 	DialogTitle,
-} from "@material-ui/core"
+} from "@mui/material"
 import useEffectCleanUpPageUnload from "../shared/useEffectCleanupPageUnload"
 import { useState, useEffect } from "preact/hooks"
 import TypingTest from "./TypingTest"

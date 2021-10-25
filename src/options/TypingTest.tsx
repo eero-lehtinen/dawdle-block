@@ -1,4 +1,4 @@
-import { TextField, Box, Typography } from "@material-ui/core"
+import { TextField, Box, Typography } from "@mui/material"
 import { useState, useEffect, useCallback, useRef } from "preact/hooks"
 import words1000 from "../shared/words1000"
 import { sleep } from "../shared/utils"

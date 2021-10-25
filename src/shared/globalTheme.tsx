@@ -1,5 +1,5 @@
-import { createTheme, Theme } from "@material-ui/core/styles"
-import "@material-ui/lab/themeAugmentation"
+import { createTheme, Theme } from "@mui/material/styles"
+import "@mui/lab/themeAugmentation"
 
 /**
  * Creates a Material UI theme with customized defaults filled in.

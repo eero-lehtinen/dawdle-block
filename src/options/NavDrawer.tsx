@@ -9,13 +9,13 @@ import {
 	ListSubheader,
 	Button,
 	Box,
-} from "@material-ui/core"
+} from "@mui/material"
 import {
 	SettingsRounded,
 	AddRounded,
 	ImportExportRounded,
 	LockRounded,
-} from "@material-ui/icons"
+} from "@mui/icons-material"
 import { useBGScript } from "@src/shared/BGScriptProvider"
 import { useState, useRef } from "preact/hooks"
 import { Link as RouterLink, useLocation } from "react-router-dom"

@@ -1,4 +1,4 @@
-import { ToggleButton, ToggleButtonGroup, Typography, Box } from "@material-ui/core"
+import { ToggleButton, ToggleButtonGroup, Typography, Box } from "@mui/material"
 import { useBGScript } from "@src/shared/BGScriptProvider"
 import { useState } from "preact/hooks"
 

@@ -1,4 +1,4 @@
-import { Typography } from "@material-ui/core"
+import { Typography } from "@mui/material"
 import { FunctionComponent } from "preact"
 /**
  * Shared header for all tabs

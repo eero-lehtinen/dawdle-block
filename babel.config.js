@@ -23,7 +23,7 @@ module.exports = {
 		[
 			"babel-plugin-import",
 			{
-				libraryName: "@material-ui/core",
+				libraryName: "@mui/material",
 				libraryDirectory: "",
 				camel2DashComponentName: false,
 			},
@@ -32,7 +32,7 @@ module.exports = {
 		[
 			"babel-plugin-import",
 			{
-				libraryName: "@material-ui/icons",
+				libraryName: "@mui/icons-material",
 				libraryDirectory: "esm",
 				camel2DashComponentName: false,
 			},
@@ -41,7 +41,7 @@ module.exports = {
 		[
 			"babel-plugin-import",
 			{
-				libraryName: "@material-ui/lab",
+				libraryName: "@mui/lab",
 				libraryDirectory: "",
 				camel2DashComponentName: false,
 			},
@@ -58,7 +58,7 @@ module.exports = {
 				[
 					"babel-plugin-import",
 					{
-						libraryName: "@material-ui/icons",
+						libraryName: "@mui/icons-material",
 						libraryDirectory: "",
 						camel2DashComponentName: false,
 					},

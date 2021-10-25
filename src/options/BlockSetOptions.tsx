@@ -1,4 +1,4 @@
-import { Typography, Stack, Box } from "@material-ui/core"
+import { Typography, Stack, Box } from "@mui/material"
 import { useBGScript } from "@src/shared/BGScriptProvider"
 import { useParams } from "react-router-dom"
 import ValidatingTimerPicker from "./ValidatingTimePicker"

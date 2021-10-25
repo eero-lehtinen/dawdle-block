@@ -1,12 +1,12 @@
-import { Box, Container } from "@material-ui/core"
+import { Box, Container } from "@mui/material"
 import NavDrawer from "./NavDrawer"
 import { HashRouter, Switch, Route, Redirect } from "react-router-dom"
 import GeneralOptions from "./GeneralOptions"
 import { useBGScript } from "@src/shared/BGScriptProvider"
 import ImportExport from "./ImportExport"
 import BlockSetOptions from "./BlockSetOptions"
-import { LocalizationProvider } from "@material-ui/lab"
-import AdapterDayjs from "@material-ui/lab/AdapterDayjs"
+import { LocalizationProvider } from "@mui/lab"
+import AdapterDayjs from "@mui/lab/AdapterDayjs"
 import SettingsLock from "./SettingsLock"
 
 /**

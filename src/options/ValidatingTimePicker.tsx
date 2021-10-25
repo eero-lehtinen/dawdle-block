@@ -1,7 +1,7 @@
 import { ClockType } from "@src/background/generalOptionsParseTypes"
 import { useEffect, useState, useCallback } from "preact/hooks"
-import { TextField } from "@material-ui/core"
-import { DesktopTimePicker } from "@material-ui/lab"
+import { TextField } from "@mui/material"
+import { DesktopTimePicker } from "@mui/lab"
 import dayjs from "dayjs"
 import { clamp, dateToTodayMS } from "../shared/utils"
 
