@@ -3,6 +3,7 @@ import { useBGScript } from "@src/shared/BGScriptProvider"
 import { useParams } from "react-router-dom"
 import ValidatingTimerPicker from "./ValidatingTimePicker"
 import TabHeader from "./TabHeader"
+import ActiveDaysInput from "./ActiveDaysInput"
 
 /** Message to show when use has typed an url with invalid number. */
 const InvalidLinkMessage = ({ ordinal }: { ordinal: string }) => (
@@ -42,6 +43,7 @@ const BlockSetOptions = (): JSX.Element => {
 						}}
 					/>
 				</Box>
+				<ActiveDaysInput blockSet={blockSet} />
 			</Stack>
 		</>
 	)
