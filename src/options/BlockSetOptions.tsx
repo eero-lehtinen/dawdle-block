@@ -1,10 +1,10 @@
-import { Typography, Stack, Box } from "@mui/material"
+import { Typography, Stack } from "@mui/material"
 import { useBGScript } from "@src/shared/BGScriptProvider"
 import { useParams } from "react-router-dom"
-import ValidatingTimerPicker from "./ValidatingTimePicker"
 import TabHeader from "./TabHeader"
 import ActiveDaysInput from "./ActiveDaysInput"
 import ActiveTimeInput from "./ActiveTimeInput"
+import TimeAllowedInput from "./TimeAllowedInput"
 import { useState } from "preact/hooks"
 import useEffectCleanUpPageUnload from "@src/shared/useEffectCleanupPageUnload"
 
@@ -42,20 +42,11 @@ const BlockSetOptions = (): JSX.Element => {
 		<>
 			<TabHeader>{blockSet.data.name}</TabHeader>
 			<Stack spacing={3}>
-				<Box>
-					<Typography variant="h2" sx={{ mb: 1 }}>
-						Time Allowed
-					</Typography>
-					<ValidatingTimerPicker
-						label={"Time allowed"}
-						inputId={"time-allowed-input"}
-						clockType={clockType}
-						value={0 /*timeAllowed*/}
-						handleValueAccepted={_newValue => {
-							//blockSet.set("timeAllowed", newValue)
-						}}
-					/>
-				</Box>
+				<TimeAllowedInput
+					blockSet={blockSet}
+					clockType={clockType}
+					onChanged={onInputChanged}
+				/>
 				<ActiveDaysInput blockSet={blockSet} onChanged={onInputChanged} />
 				<ActiveTimeInput blockSet={blockSet} clockType={clockType} onChanged={onInputChanged} />
 			</Stack>
