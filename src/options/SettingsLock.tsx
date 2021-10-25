@@ -78,6 +78,7 @@ const SettingsLock = (): JSX.Element => {
 					label="Challenge word count"
 					min={1}
 					max={1000}
+					width={160}
 					defaultValue={defaultTypingTestWordCount}
 					savedValue={typingTestWordCount}
 					handleValueAccepted={handleTypingTestWordCountChange}
