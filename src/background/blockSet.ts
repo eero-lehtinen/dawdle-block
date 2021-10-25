@@ -369,13 +369,13 @@ export class BlockSet {
 	}
 
 	/**
-	 * Escape characters reserved for patterns. Currently only *.
+	 * Escape characters reserved for patterns. Currently only * and \.
 	 * Useful when converting raw urls (that may contain reserved characters) into patterns.
 	 * @param string string to escape
 	 * @returns escaped string safe to use as pattern
 	 */
 	static urlToPattern(string: string): string {
-		return string.replace(/\*/g, String.raw`\*`)
+		return string.replace(/[*\\]/g, "\\$&")
 	}
 
 	/**

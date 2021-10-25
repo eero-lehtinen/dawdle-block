@@ -216,7 +216,13 @@ describe("test wildcarded pattern escaping", () => {
 
 describe("test pattern escaping", () => {
 	test("escapes *-characters", () => {
-		expect(BlockSet.urlToPattern("**a*-.0/{")).toStrictEqual("\\*\\*a\\*-.0/{")
+		expect(BlockSet.urlToPattern("**a*-.0/{")).toStrictEqual(String.raw`\*\*a\*-.0/{`)
+	})
+
+	test(String.raw`escapes \-characters`, () => {
+		expect(BlockSet.urlToPattern(String.raw`\abc\\\ab\\`)).toStrictEqual(
+			String.raw`\\abc\\\\\\ab\\\\`
+		)
 	})
 })
 
