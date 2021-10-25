@@ -4,6 +4,9 @@ import { useParams } from "react-router-dom"
 import ValidatingTimerPicker from "./ValidatingTimePicker"
 import TabHeader from "./TabHeader"
 import ActiveDaysInput from "./ActiveDaysInput"
+import ActiveTimeInput from "./ActiveTimeInput"
+import { useState } from "preact/hooks"
+import useEffectCleanUpPageUnload from "@src/shared/useEffectCleanupPageUnload"
 
 /** Message to show when use has typed an url with invalid number. */
 const InvalidLinkMessage = ({ ordinal }: { ordinal: string }) => (
@@ -23,6 +26,12 @@ const BlockSetOptions = (): JSX.Element => {
 	const { ordinal } = useParams<{ ordinal: string }>()
 	const blockSet = bg.blockSets.list[parseInt(ordinal, 10) - 1]
 
+	const [clockType, setClockType] = useState(bg.generalOptions.data.clockType)
+
+	useEffectCleanUpPageUnload(() => {
+		bg.generalOptions.subscribeChanged("clockType", ({ newValue }) => setClockType(newValue))
+	}, [])
+
 	if (blockSet === undefined) return <InvalidLinkMessage ordinal={ordinal} />
 
 	const onInputChanged = () => {
@@ -40,14 +49,15 @@ const BlockSetOptions = (): JSX.Element => {
 					<ValidatingTimerPicker
 						label={"Time allowed"}
 						inputId={"time-allowed-input"}
-						clockType={24}
-						savedValue={0 /*timeAllowed*/}
+						clockType={clockType}
+						value={0 /*timeAllowed*/}
 						handleValueAccepted={_newValue => {
 							//blockSet.set("timeAllowed", newValue)
 						}}
 					/>
 				</Box>
 				<ActiveDaysInput blockSet={blockSet} onChanged={onInputChanged} />
+				<ActiveTimeInput blockSet={blockSet} clockType={clockType} onChanged={onInputChanged} />
 			</Stack>
 		</>
 	)

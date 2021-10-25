@@ -9,8 +9,8 @@ interface ValidatingTimerPickerProps {
 	label: string
 	inputId: string
 	clockType: ClockType
-	/** savedValue should change after `handleValueAccepted` is called */
-	savedValue: number
+	/** value should change after `handleValueAccepted` is called */
+	value: number
 	handleValueAccepted: (newValue: number) => void
 }
 
@@ -72,7 +72,7 @@ const autoCompleteInput = (input: string, clockType: ClockType) => {
  * TimePicker that allows sloppy inputs and autocompletes all inputs no matter how full of errors.
  */
 const ValidatingTimerPicker = (props: ValidatingTimerPickerProps): JSX.Element => {
-	const { label, inputId, clockType, savedValue, handleValueAccepted } = props
+	const { label, inputId, clockType, value: savedValue, handleValueAccepted } = props
 
 	const [inputTime, setInputTime] = useState<dayjs.Dayjs>(dayjs(savedValue))
 	const [inputStr, setInputStr] = useState(dayjs(savedValue).format("HH:mm"))
