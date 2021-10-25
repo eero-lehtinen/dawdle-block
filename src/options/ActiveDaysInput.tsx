@@ -39,7 +39,7 @@ const ActiveDaysInput = (props: ActiveDaysInputProps): JSX.Element => {
 	}
 
 	return (
-		<Box sx={{ p: 1 }}>
+		<Box>
 			<Typography variant="h2" sx={{ mb: 1 }}>
 				Active Days of the Week
 			</Typography>

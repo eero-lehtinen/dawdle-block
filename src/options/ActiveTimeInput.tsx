@@ -25,7 +25,7 @@ const ActiveTimeInput = (props: ActiveTimeInput): JSX.Element => {
 	}, [blockSet])
 
 	return (
-		<Box sx={{ p: 1 }}>
+		<Box>
 			<Typography variant="h2" sx={{ mb: 1 }}>
 				Active Time
 			</Typography>

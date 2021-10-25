@@ -42,7 +42,7 @@ const BlockSetOptions = (): JSX.Element => {
 		<>
 			<TabHeader>{blockSet.data.name}</TabHeader>
 			<Stack spacing={3}>
-				<Box sx={{ p: 1 }}>
+				<Box>
 					<Typography variant="h2" sx={{ mb: 1 }}>
 						Time Allowed
 					</Typography>
