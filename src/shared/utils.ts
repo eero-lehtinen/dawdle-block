@@ -1,7 +1,7 @@
 import ms from "ms.macro"
 
 /**
- * Returns milliseconds since last midnight. E.g. if it's 1 AM, returns 60*60*1000 milliseconds.
+ * Returns milliseconds since last midnight. E.g. if it's 1 AM, returns 60 * 60 * 1000 milliseconds.
  * @param date input date object to convert
  * @returns milliseconds
  */
