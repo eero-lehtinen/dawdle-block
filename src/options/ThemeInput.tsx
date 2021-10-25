@@ -24,7 +24,7 @@ const ThemeInput = (): JSX.Element => {
 		else {
 			bg.generalOptions.set("theme", newTheme)
 			setTheme(newTheme)
-			bg.generalOptions.save()
+			void bg.generalOptions.save()
 		}
 	}
 

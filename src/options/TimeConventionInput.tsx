@@ -23,7 +23,7 @@ const TimeConventionInput = (): JSX.Element => {
 		else {
 			bg.generalOptions.set("clockType", newValue)
 			setClockType(newValue)
-			bg.generalOptions.save()
+			void bg.generalOptions.save()
 		}
 	}
 

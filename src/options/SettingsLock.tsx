@@ -36,16 +36,17 @@ const SettingsLock = (): JSX.Element => {
 					`SettingsProtection doesn't contain value: "${newValue}"`
 			)
 		else {
-			const res = await bg.generalOptions.set("settingProtection", newValue)
-			if (res.isOk()) setSettingProtection(newValue)
+			bg.generalOptions.set("settingProtection", newValue)
+			setSettingProtection(newValue)
+			void bg.generalOptions.save()
 		}
 	}
 
 	const handleTypingTestWordCountChange = async (newValue: number) => {
-		const res = await bg.generalOptions.set("typingTestWordCount", newValue)
-		if (res.isErr()) return
+		bg.generalOptions.set("typingTestWordCount", newValue)
 		setTypingTestSuccess(false)
 		setTypingTestWordCount(newValue)
+		void bg.generalOptions.save()
 	}
 
 	return (
