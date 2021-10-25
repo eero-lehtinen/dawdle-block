@@ -17,9 +17,7 @@ interface ActiveTimeInput {
  */
 const ActiveTimeInput = (props: ActiveTimeInput): JSX.Element => {
 	const { blockSet, clockType, onChanged } = props
-	const [activeTime, setActiveTime] = useState<{ from: number; to: number }>(
-		blockSet.data.activeTime
-	)
+	const [activeTime, setActiveTime] = useState(blockSet.data.activeTime)
 
 	useEffect(() => {
 		setActiveTime(blockSet.data.activeTime)
