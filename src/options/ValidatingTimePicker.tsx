@@ -74,10 +74,10 @@ const autoCompleteInput = (input: string, clockType: ClockType) => {
 const ValidatingTimerPicker = (props: ValidatingTimerPickerProps): JSX.Element => {
 	const { label, inputId, clockType, value: savedValue, handleValueAccepted } = props
 
-	const [inputTime, setInputTime] = useState<dayjs.Dayjs>(dayjs(savedValue))
-	const [inputStr, setInputStr] = useState(dayjs(savedValue).format("HH:mm"))
-
 	const formatString = useCallback(() => (clockType === 24 ? "HH:mm" : "hh:mm A"), [clockType])
+	const [inputTime, setInputTime] = useState<dayjs.Dayjs>(dayjs(savedValue))
+	const [inputStr, setInputStr] = useState(dayjs(savedValue).format(formatString()))
+
 	const ignoreRegExp = () => (clockType === 24 ? /[^\d:]/g : /[^\d: apm]/gi)
 
 	useEffect(() => {
