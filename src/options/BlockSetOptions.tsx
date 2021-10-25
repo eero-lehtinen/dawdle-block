@@ -42,11 +42,7 @@ const BlockSetOptions = (): JSX.Element => {
 		<>
 			<TabHeader>{blockSet.data.name}</TabHeader>
 			<Stack spacing={3}>
-				<TimeAllowedInput
-					blockSet={blockSet}
-					clockType={clockType}
-					onChanged={onInputChanged}
-				/>
+				<TimeAllowedInput blockSet={blockSet} onChanged={onInputChanged} />
 				<ActiveDaysInput blockSet={blockSet} onChanged={onInputChanged} />
 				<ActiveTimeInput blockSet={blockSet} clockType={clockType} onChanged={onInputChanged} />
 			</Stack>
