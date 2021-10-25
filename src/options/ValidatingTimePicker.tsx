@@ -93,6 +93,7 @@ const ValidatingTimerPicker = (props: ValidatingTimerPickerProps): JSX.Element =
 	// Auto-complete user text input to fit time format
 	const handleEditingFinished = () => {
 		const autoCompleted = autoCompleteInput(inputStr, clockType)
+		setInputStr(autoCompleted)
 		const date = dayjs(autoCompleted, formatString()).toDate()
 		handleValueAccepted(dateToTodayMS(date))
 	}
@@ -104,11 +105,8 @@ const ValidatingTimerPicker = (props: ValidatingTimerPickerProps): JSX.Element =
 				value={inputTime}
 				ampm={clockType === 12}
 				// Gets called when popup is used or text field is changed
-				onChange={newValue => {
-					if (newValue !== null && newValue.isValid()) {
-						setInputTime(newValue)
-						setInputStr(newValue.format(formatString()))
-					}
+				onChange={_newValue => {
+					/* do nothing */
 				}}
 				// Gets called when popup is closed
 				onAccept={newValue => {
