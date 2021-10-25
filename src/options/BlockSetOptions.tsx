@@ -5,6 +5,7 @@ import TabHeader from "./TabHeader"
 import ActiveDaysInput from "./ActiveDaysInput"
 import ActiveTimeInput from "./ActiveTimeInput"
 import TimeAllowedInput from "./TimeAllowedInput"
+import ResetTimeInput from "./ResetTimeInput"
 import { useState } from "preact/hooks"
 import useEffectCleanUpPageUnload from "@src/shared/useEffectCleanupPageUnload"
 
@@ -43,6 +44,7 @@ const BlockSetOptions = (): JSX.Element => {
 			<TabHeader>{blockSet.data.name}</TabHeader>
 			<Stack spacing={3}>
 				<TimeAllowedInput blockSet={blockSet} onChanged={onInputChanged} />
+				<ResetTimeInput blockSet={blockSet} clockType={clockType} onChanged={onInputChanged} />
 				<ActiveDaysInput blockSet={blockSet} onChanged={onInputChanged} />
 				<ActiveTimeInput blockSet={blockSet} clockType={clockType} onChanged={onInputChanged} />
 			</Stack>
