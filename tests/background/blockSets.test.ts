@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { BlockSet, BlockTestRes } from "@src/background/blockSet"
-import { BlockSets } from "@src/background/blockSets"
+import { BlockSets, NonExistentBlockSetError } from "@src/background/blockSets"
 import { BrowserStorage } from "@src/background/browserStorage"
 import { dateToTodayMS } from "@src/shared/utils"
 import { ok } from "neverthrow"
@@ -13,6 +13,10 @@ jest.mock("@src/background/browserStorage")
 
 insertMockBrowserStorageDefaults(BrowserStorage.prototype)
 const mockBrowserStorage = mocked(BrowserStorage, true)
+
+afterEach(() => {
+	jest.clearAllMocks()
+})
 
 describe("test BlockSets construction", () => {
 	const testBlockSet = BlockSet.createDefault(42)
@@ -128,6 +132,20 @@ describe("test BlockSets methods", () => {
 		expect(blockSets.list).toStrictEqual([])
 		expect(blockSets.map.size).toStrictEqual(0)
 		expect(mockBrowserStorage.prototype.deleteBlockSet).toBeCalledWith(testBlockSet, [])
+	})
+
+	test("can save block sets", async () => {
+		const testBlockSet = blockSets.list[0]!
+		await blockSets.saveBlockSet(testBlockSet)
+		expect(mockBrowserStorage.prototype.saveBlockSet).toBeCalledWith(testBlockSet)
+	})
+
+	test("returns error when trying to save block set not included in the list", async () => {
+		const testBlockSet = BlockSet.createDefault(5)
+		expect((await blockSets.saveBlockSet(testBlockSet))._unsafeUnwrapErr()).toBeInstanceOf(
+			NonExistentBlockSetError
+		)
+		expect(mockBrowserStorage.prototype.saveBlockSet).toBeCalledTimes(0)
 	})
 })
 

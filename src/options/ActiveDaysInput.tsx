@@ -4,6 +4,7 @@ import { BlockSet } from "@src/background/blockSet"
 
 interface ActiveDaysInputProps {
 	blockSet: BlockSet
+	onChanged: () => void
 }
 
 const daysOfTheWeek = [
@@ -20,7 +21,7 @@ const daysOfTheWeek = [
  * Input for general options theme property.
  */
 const ActiveDaysInput = (props: ActiveDaysInputProps): JSX.Element => {
-	const { blockSet } = props
+	const { blockSet, onChanged } = props
 	const [activeDays, setActiveDays] = useState<boolean[]>(blockSet.data.activeDays)
 
 	const handleDaysChange = async (event: React.MouseEvent<HTMLElement>, newValue: number[]) => {
@@ -30,6 +31,7 @@ const ActiveDaysInput = (props: ActiveDaysInputProps): JSX.Element => {
 		}
 		blockSet.set("activeDays", newActiveDays)
 		setActiveDays(newActiveDays)
+		onChanged()
 	}
 
 	return (

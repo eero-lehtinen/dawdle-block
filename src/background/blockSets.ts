@@ -1,8 +1,12 @@
 import { BlockSet, BlockTestRes } from "./blockSet"
 import { dateToTodayMS } from "../shared/utils"
-import { BrowserStorage, StorageSetError } from "./browserStorage"
-import { ResultAsync } from "neverthrow"
+import { BrowserStorage, StorageSetError, StorageSetSuccess } from "./browserStorage"
+import { errAsync, ResultAsync } from "neverthrow"
 import { ParseError, ZodResAsync } from "./parserHelpers"
+
+/* eslint-disable jsdoc/require-jsdoc */
+export class NonExistentBlockSetError extends Error {}
+/* eslint-enable jsdoc/require-jsdoc */
 
 /**
  * Loads blocksets from storage, maintains synchronization when modified.
@@ -178,11 +182,23 @@ export class BlockSets {
 	 * Deletes block set referenced by blockSet
 	 * @param blockSet reference to value to be deleted
 	 */
-	deleteBlockSet(blockSet: BlockSet): ResultAsync<void, StorageSetError> {
+	deleteBlockSet(blockSet: BlockSet): ResultAsync<StorageSetSuccess, StorageSetError> {
 		const newList = this._list.filter(bs => bs !== blockSet)
-		return this.browserStorage.deleteBlockSet(blockSet, newList).map(() => {
+		return this.browserStorage.deleteBlockSet(blockSet, newList).map(succ => {
 			this._map.delete(blockSet.id)
 			this._list = newList
+			return succ
 		})
+	}
+
+	/**
+	 * Saves block set referenced by blockSet.
+	 * Does nothing if the blockSet is not contained in `this.map`.
+	 */
+	saveBlockSet(blockSet: BlockSet): ResultAsync<StorageSetSuccess, StorageSetError> {
+		if (this._map.get(blockSet.id) !== blockSet)
+			return errAsync(new NonExistentBlockSetError("This block set doesn't exist in this list"))
+
+		return this.browserStorage.saveBlockSet(blockSet)
 	}
 }

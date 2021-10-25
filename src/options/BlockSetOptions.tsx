@@ -25,6 +25,10 @@ const BlockSetOptions = (): JSX.Element => {
 
 	if (blockSet === undefined) return <InvalidLinkMessage ordinal={ordinal} />
 
+	const onInputChanged = () => {
+		void bg.blockSets.saveBlockSet(blockSet)
+	}
+
 	return (
 		<>
 			<TabHeader>{blockSet.data.name}</TabHeader>
@@ -43,7 +47,7 @@ const BlockSetOptions = (): JSX.Element => {
 						}}
 					/>
 				</Box>
-				<ActiveDaysInput blockSet={blockSet} />
+				<ActiveDaysInput blockSet={blockSet} onChanged={onInputChanged} />
 			</Stack>
 		</>
 	)
