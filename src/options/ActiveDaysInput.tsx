@@ -1,5 +1,5 @@
 import { ToggleButton, ToggleButtonGroup, Typography, Box } from "@mui/material"
-import { useState } from "preact/hooks"
+import { useEffect, useState } from "preact/hooks"
 import { BlockSet } from "@src/background/blockSet"
 
 interface ActiveDaysInputProps {
@@ -23,6 +23,10 @@ const daysOfTheWeek = [
 const ActiveDaysInput = (props: ActiveDaysInputProps): JSX.Element => {
 	const { blockSet, onChanged } = props
 	const [activeDays, setActiveDays] = useState<boolean[]>(blockSet.data.activeDays)
+
+	useEffect(() => {
+		setActiveDays(blockSet.data.activeDays)
+	}, [blockSet])
 
 	const handleDaysChange = async (event: React.MouseEvent<HTMLElement>, newValue: number[]) => {
 		const newActiveDays = new Array(7).fill(false)
