@@ -27,11 +27,13 @@ const TypingTestDialog = (props: TypingTestDialogProps): JSX.Element => {
 
 	const [wordCount, setWordCount] = useState(bg.generalOptions.data.typingTestWordCount)
 
-	useEffectCleanUpPageUnload(() => {
-		bg.generalOptions.subscribeChanged("typingTestWordCount", ({ newValue }) =>
-			setWordCount(newValue)
-		)
-	}, [])
+	useEffectCleanUpPageUnload(
+		() =>
+			bg.generalOptions.subscribeChanged("typingTestWordCount", ({ newValue }) =>
+				setWordCount(newValue)
+			),
+		[]
+	)
 
 	const [generation, setGeneration] = useState(0)
 

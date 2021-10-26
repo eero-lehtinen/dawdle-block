@@ -57,9 +57,10 @@ const InnerWrapper: FunctionComponent = ({ children }) => {
 	const mode = theme === "system" ? (prefersDark ? "dark" : "light") : theme
 	const matUITheme = useMemo(() => createGlobalTheme(mode), [mode])
 
-	useEffectCleanUpPageUnload(() => {
-		bg.generalOptions.subscribeChanged("theme", ({ newValue }) => setTheme(newValue))
-	}, [])
+	useEffectCleanUpPageUnload(
+		() => bg.generalOptions.subscribeChanged("theme", ({ newValue }) => setTheme(newValue)),
+		[]
+	)
 
 	return (
 		<>

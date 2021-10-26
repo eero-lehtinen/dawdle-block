@@ -1,6 +1,7 @@
 import { Typography, Stack } from "@mui/material"
 import { useBGScript } from "@src/shared/BGScriptProvider"
 import { useParams } from "react-router-dom"
+import useEffectCleanUpPageUnload from "@src/shared/useEffectCleanupPageUnload"
 import TabHeader from "./TabHeader"
 import ActiveDaysInput from "./ActiveDaysInput"
 import ActiveTimeInput from "./ActiveTimeInput"
@@ -29,9 +30,11 @@ const BlockSetOptions = (): JSX.Element => {
 
 	const [clockType, setClockType] = useState(bg.generalOptions.data.clockType)
 
-	useEffectCleanUpPageUnload(() => {
-		bg.generalOptions.subscribeChanged("clockType", ({ newValue }) => setClockType(newValue))
-	}, [])
+	useEffectCleanUpPageUnload(
+		() =>
+			bg.generalOptions.subscribeChanged("clockType", ({ newValue }) => setClockType(newValue)),
+		[]
+	)
 
 	if (blockSet === undefined) return <InvalidLinkMessage ordinal={ordinal} />
 
