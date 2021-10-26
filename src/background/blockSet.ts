@@ -35,6 +35,13 @@ type ChangeObservers = {
 	any: Observer<ChangedEvent<BlockSet>>
 	timeElapsed: Observer<ChangedEvent<number>>
 }
+
+type BlockListChangeObservers = {
+	[T in ListType]: {
+		[Property in keyof BlockList]: Observer<ChangedEvent<BlockList[Property]>>
+	}
+}
+
 /* eslint-disable jsdoc/require-jsdoc */
 export class AddError extends Error {}
 export class DuplicateAddError extends AddError {}
@@ -159,6 +166,10 @@ export class BlockSet {
 			return err(new DuplicateAddError(`Pattern "${pattern}" already exists`))
 		this._data[listType].urlPatterns.push(pattern)
 		this.compiledUrlRules[listType].push(BlockSet.patternToRegExp(pattern))
+
+		this.blockListChangeObservers[listType].urlPatterns.publish({
+			newValue: this._data[listType].urlPatterns,
+		})
 		return ok(undefined)
 	}
 
@@ -175,6 +186,10 @@ export class BlockSet {
 		this._data[listType].urlPatterns = this._data[listType].urlPatterns.filter(
 			p => p !== pattern
 		)
+
+		this.blockListChangeObservers[listType].urlPatterns.publish({
+			newValue: this._data[listType].urlPatterns,
+		})
 	}
 
 	/**
@@ -189,10 +204,14 @@ export class BlockSet {
 		if (this._data[listType].urlRegExps.includes(regExpStr))
 			return err(new DuplicateAddError(`Regular Expression "${regExpStr}" already exists`))
 
-		return safeMakeRegExp(regExpStr).andThen(regExp => {
+		return safeMakeRegExp(regExpStr).map(regExp => {
 			this._data[listType].urlRegExps.push(regExpStr)
 			this.compiledUrlRules[listType].push(regExp)
-			return ok(undefined)
+
+			this.blockListChangeObservers[listType].urlRegExps.publish({
+				newValue: this._data[listType].urlRegExps,
+			})
+			return undefined
 		})
 	}
 
@@ -206,6 +225,10 @@ export class BlockSet {
 			c => c.source !== regExp
 		)
 		this._data[listType].urlRegExps = this._data[listType].urlRegExps.filter(r => r !== regExp)
+
+		this.blockListChangeObservers[listType].urlRegExps.publish({
+			newValue: this._data[listType].urlRegExps,
+		})
 	}
 
 	/**
@@ -223,6 +246,11 @@ export class BlockSet {
 		if (!(categoryId in ytCategoryNamesById)) return err(new InvalidYTCategoryIdAddError())
 
 		this._data[listType].ytCategoryIds.push(categoryId)
+
+		this.blockListChangeObservers[listType].ytCategoryIds.publish({
+			newValue: this._data[listType].ytCategoryIds,
+		})
+
 		return ok(undefined)
 	}
 
@@ -235,6 +263,10 @@ export class BlockSet {
 		this._data[listType].ytCategoryIds = this._data[listType].ytCategoryIds.filter(
 			id => id !== categoryId
 		)
+
+		this.blockListChangeObservers[listType].ytCategoryIds.publish({
+			newValue: this._data[listType].ytCategoryIds,
+		})
 	}
 
 	/**
@@ -254,6 +286,11 @@ export class BlockSet {
 		if (titleResult.isErr()) return err(titleResult.error)
 
 		this._data[listType].ytChannels.push({ id: channelId, title: titleResult.value })
+
+		this.blockListChangeObservers[listType].ytChannels.publish({
+			newValue: this._data[listType].ytChannels,
+		})
+
 		return ok(undefined)
 	}
 
@@ -266,6 +303,10 @@ export class BlockSet {
 		this._data[listType].ytChannels = this._data[listType].ytChannels.filter(
 			({ id }) => id !== channelId
 		)
+
+		this.blockListChangeObservers[listType].ytChannels.publish({
+			newValue: this._data[listType].ytChannels,
+		})
 	}
 
 	/**
@@ -402,8 +443,6 @@ export class BlockSet {
 		return this._data.timeAllowed - this.timeElapsed
 	}
 
-	/* eslint-disable jsdoc/require-jsdoc*/
-
 	private readonly changeObservers: ChangeObservers = {
 		timeElapsed: new Observer(),
 		name: new Observer(),
@@ -426,6 +465,33 @@ export class BlockSet {
 		listener: ListenerOf<ChangeObservers[K]>
 	): () => void {
 		return this.changeObservers[key].subscribe(listener as ListenerOf<ChangeObservers[K]>)
+	}
+
+	private readonly blockListChangeObservers: BlockListChangeObservers = {
+		blacklist: {
+			urlPatterns: new Observer(),
+			urlRegExps: new Observer(),
+			ytChannels: new Observer(),
+			ytCategoryIds: new Observer(),
+		},
+		whitelist: {
+			urlPatterns: new Observer(),
+			urlRegExps: new Observer(),
+			ytChannels: new Observer(),
+			ytCategoryIds: new Observer(),
+		},
+	}
+
+	/**
+	 * Subscribe to changes of any allowed property in general options.
+	 * @returns unsubscribe function
+	 */
+	subscribeBlockListChanged<
+		LS extends keyof BlockListChangeObservers,
+		K extends keyof BlockList,
+		L extends ListenerOf<BlockListChangeObservers[LS][K]>
+	>(listType: LS, listKey: K, listener: L): () => void {
+		return this.blockListChangeObservers[listType][listKey].subscribe(listener as L)
 	}
 
 	/**

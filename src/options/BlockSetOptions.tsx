@@ -1,14 +1,15 @@
 import { Typography, Stack } from "@mui/material"
 import { useBGScript } from "@src/shared/BGScriptProvider"
 import { useParams } from "react-router-dom"
+import { useState } from "preact/hooks"
 import useEffectCleanUpPageUnload from "@src/shared/useEffectCleanupPageUnload"
 import TabHeader from "./TabHeader"
 import ActiveDaysInput from "./ActiveDaysInput"
 import ActiveTimeInput from "./ActiveTimeInput"
 import TimeAllowedInput from "./TimeAllowedInput"
 import ResetTimeInput from "./ResetTimeInput"
-import { useState } from "preact/hooks"
-import useEffectCleanUpPageUnload from "@src/shared/useEffectCleanupPageUnload"
+import BlockListInput from "./BlockListInput"
+import { ListType } from "@src/background/blockSet"
 
 /** Message to show when use has typed an url with invalid number. */
 const InvalidLinkMessage = ({ ordinal }: { ordinal: string }) => (
@@ -50,6 +51,16 @@ const BlockSetOptions = (): JSX.Element => {
 				<ResetTimeInput blockSet={blockSet} clockType={clockType} onChanged={onInputChanged} />
 				<ActiveDaysInput blockSet={blockSet} onChanged={onInputChanged} />
 				<ActiveTimeInput blockSet={blockSet} clockType={clockType} onChanged={onInputChanged} />
+				<BlockListInput
+					blockSet={blockSet}
+					listType={ListType.Blacklist}
+					onChanged={onInputChanged}
+				/>
+				<BlockListInput
+					blockSet={blockSet}
+					listType={ListType.Whitelist}
+					onChanged={onInputChanged}
+				/>
 			</Stack>
 		</>
 	)

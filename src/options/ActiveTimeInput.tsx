@@ -6,7 +6,7 @@ import { ClockType } from "@src/background/generalOptionsParseTypes"
 import { useEffect } from "react"
 import { HorizontalRuleRounded } from "@mui/icons-material"
 
-interface ActiveTimeInput {
+interface ActiveTimeInputProps {
 	blockSet: BlockSet
 	clockType: ClockType
 	onChanged: () => void
@@ -15,7 +15,7 @@ interface ActiveTimeInput {
 /**
  * Input for general options theme property.
  */
-const ActiveTimeInput = (props: ActiveTimeInput): JSX.Element => {
+const ActiveTimeInput = (props: ActiveTimeInputProps): JSX.Element => {
 	const { blockSet, clockType, onChanged } = props
 	const [activeTime, setActiveTime] = useState(blockSet.data.activeTime)
 
