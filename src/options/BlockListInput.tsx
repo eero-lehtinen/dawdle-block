@@ -87,13 +87,12 @@ const BlockListDraggable = (props: BlockListCollapseItemProps): JSX.Element => {
 	)
 
 	const onDragEnd = (result: DropResult) => {
-		const newList = [...list.val]
-		const [removed] = newList.splice(result.source.index, 1)
-		if (result.destination === undefined || removed === undefined) return
-		newList.splice(result.destination.index, 0, removed)
-
-		// TODO: use blockSet functions
-		setList({ val: newList as List })
+		blockSet.moveBlockListRule(
+			listType,
+			listKey,
+			result.source.index,
+			result.destination?.index ?? -1
+		)
 		onChanged()
 	}
 
