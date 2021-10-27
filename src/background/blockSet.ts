@@ -170,6 +170,7 @@ export class BlockSet {
 		this.blockListChangeObservers[listType].urlPatterns.publish({
 			newValue: this._data[listType].urlPatterns,
 		})
+		this.changeObservers.any.publish({ newValue: this })
 		return ok(undefined)
 	}
 
@@ -190,6 +191,7 @@ export class BlockSet {
 		this.blockListChangeObservers[listType].urlPatterns.publish({
 			newValue: this._data[listType].urlPatterns,
 		})
+		this.changeObservers.any.publish({ newValue: this })
 	}
 
 	/**
@@ -211,6 +213,7 @@ export class BlockSet {
 			this.blockListChangeObservers[listType].urlRegExps.publish({
 				newValue: this._data[listType].urlRegExps,
 			})
+			this.changeObservers.any.publish({ newValue: this })
 			return undefined
 		})
 	}
@@ -229,6 +232,7 @@ export class BlockSet {
 		this.blockListChangeObservers[listType].urlRegExps.publish({
 			newValue: this._data[listType].urlRegExps,
 		})
+		this.changeObservers.any.publish({ newValue: this })
 	}
 
 	/**
@@ -250,6 +254,7 @@ export class BlockSet {
 		this.blockListChangeObservers[listType].ytCategoryIds.publish({
 			newValue: this._data[listType].ytCategoryIds,
 		})
+		this.changeObservers.any.publish({ newValue: this })
 
 		return ok(undefined)
 	}
@@ -267,6 +272,7 @@ export class BlockSet {
 		this.blockListChangeObservers[listType].ytCategoryIds.publish({
 			newValue: this._data[listType].ytCategoryIds,
 		})
+		this.changeObservers.any.publish({ newValue: this })
 	}
 
 	/**
@@ -290,6 +296,7 @@ export class BlockSet {
 		this.blockListChangeObservers[listType].ytChannels.publish({
 			newValue: this._data[listType].ytChannels,
 		})
+		this.changeObservers.any.publish({ newValue: this })
 
 		return ok(undefined)
 	}
@@ -307,14 +314,7 @@ export class BlockSet {
 		this.blockListChangeObservers[listType].ytChannels.publish({
 			newValue: this._data[listType].ytChannels,
 		})
-	}
-
-	/**
-	 * Get all blockrules based on list type
-	 * @param listType whitelist or blacklist
-	 */
-	getBlockList(listType: ListType): BlockList {
-		return this._data[listType]
+		this.changeObservers.any.publish({ newValue: this })
 	}
 
 	/**
@@ -507,6 +507,6 @@ export class BlockSet {
 		}
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		this.changeObservers[key].publish({ newValue } as any)
-		this.changeObservers["any"].publish({ newValue: this })
+		this.changeObservers.any.publish({ newValue: this })
 	}
 }

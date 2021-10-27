@@ -74,7 +74,7 @@ const BlockListDraggable = (props: BlockListCollapseItemProps): JSX.Element => {
 
 	type List = typeof blockSet.data[typeof listType][typeof listKey]
 
-	const [list, setList] = useState({ val: blockSet.getBlockList(listType)[listKey] })
+	const [list, setList] = useState({ val: blockSet.data[listType][listKey] })
 
 	useEffectCleanUpPageUnload(
 		() =>

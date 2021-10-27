@@ -348,17 +348,7 @@ describe("test BlockSet rule matching", () => {
 	})
 })
 
-describe.each([
-	["timeElapsed", 1000],
-	["name", "TEST"],
-	["requireActive", true],
-	["annoyMode", true],
-	["timeAllowed", 1000],
-	["resetTime", 1000],
-	["lastReset", 1000],
-	["activeDays", [false, false, false, true, true, true, true]],
-	["activeTime", { from: 1, to: 2 }],
-])("test BlockSet change callback %s", (valueName, testValue) => {
+describe("test property change callbacks", () => {
 	const changedEventOf = <T>(value: T): ChangedEvent<T> => ({ newValue: value })
 
 	let blockSet: BlockSet
@@ -373,13 +363,83 @@ describe.each([
 	afterEach(() => jest.clearAllMocks())
 
 	/* eslint-disable @typescript-eslint/ban-ts-comment */
-	test("notifies on changes", () => {
-		// ts does not like using bracket notation on classes, but use here for brevity
+
+	test.each([
+		["timeElapsed", 1000],
+		["name", "TEST"],
+		["requireActive", true],
+		["annoyMode", true],
+		["timeAllowed", 1000],
+		["resetTime", 1000],
+		["lastReset", 1000],
+		["activeDays", [false, false, false, true, true, true, true]],
+		["activeTime", { from: 1, to: 2 }],
+	])("test BlockSet property change callback %s", (key, testValue) => {
+		// Types are not specific enough for typescript, se use ts-ignore to work around this.
 		//@ts-ignore
-		blockSet.subscribeChanged(valueName, listener)
+		blockSet.subscribeChanged(key, listener)
 		// @ts-ignore
-		blockSet.set(valueName, testValue)
+		blockSet.set(key, testValue)
 		expect(listener).toBeCalledWith(changedEventOf(testValue))
 		expect(anyChangesListener).toBeCalledWith(changedEventOf(blockSet))
 	})
+
+	test.each([
+		["whitelist", "urlPatterns", "urlPattern"],
+		["whitelist", "urlRegExps", "regexp"],
+		["whitelist", "ytChannels", { id: "channelId", title: "channelTitle" }],
+		["whitelist", "ytCategoryIds", "10"],
+		["blacklist", "urlPatterns", "urlPattern"],
+		["blacklist", "urlRegExps", "regexp"],
+		["blacklist", "ytChannels", { id: "channelId", title: "channelTitle" }],
+		["blacklist", "ytCategoryIds", "10"],
+	])("test BlockSet block list change callback %s", async (listType, listKey, testValue) => {
+		// Types are not specific enough for typescript, se use ts-ignore to work around this.
+		//@ts-ignore
+		blockSet.subscribeBlockListChanged(listType, listKey, listener)
+		switch (listKey) {
+			case "urlPatterns":
+				// @ts-ignore
+				blockSet.addPattern(listType, testValue)
+				break
+			case "urlRegExps":
+				// @ts-ignore
+				blockSet.addRegExp(listType, testValue)
+				break
+			case "ytChannels":
+				mockedFetchChannelTitle.mockResolvedValue(okAsync("channelTitle"))
+				// @ts-ignore
+				await blockSet.addYTChannel(listType, "channelId")
+				break
+			case "ytCategoryIds":
+				// @ts-ignore
+				blockSet.addYTCategory(listType, testValue)
+				break
+		}
+		expect(listener).toBeCalledWith(changedEventOf([testValue]))
+		expect(anyChangesListener).toBeCalledWith(changedEventOf(blockSet))
+
+		switch (listKey) {
+			case "urlPatterns":
+				// @ts-ignore
+				blockSet.removePattern(listType, testValue)
+				break
+			case "urlRegExps":
+				// @ts-ignore
+				blockSet.removeRegExp(listType, testValue)
+				break
+			case "ytChannels":
+				// @ts-ignore
+				blockSet.removeYTChannel(listType, "channelId")
+				break
+			case "ytCategoryIds":
+				// @ts-ignore
+				blockSet.removeYTCategory(listType, testValue)
+				break
+		}
+		expect(listener).toBeCalledWith(changedEventOf([]))
+		expect(anyChangesListener).toBeCalledWith(changedEventOf(blockSet))
+	})
+
+	/* eslint-enable @typescript-eslint/ban-ts-comment */
 })
