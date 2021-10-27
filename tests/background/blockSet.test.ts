@@ -227,11 +227,19 @@ describe("test pattern escaping", () => {
 	})
 })
 
-describe("test BlockSet rule matching", () => {
+describe("test BlockSet rule addition/deletion/manipulation", () => {
+	const changedEventOf = <T>(value: T): ChangedEvent<T> => ({ newValue: value })
+
 	let blockSet: BlockSet
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const listener = jest.fn()
+	const anyChangesListener = jest.fn()
 	beforeEach(() => {
 		blockSet = BlockSet.createDefault(0)
+		blockSet.subscribeChanged("any", anyChangesListener)
 	})
+
+	afterEach(() => jest.clearAllMocks())
 
 	test("can't add duplicate rules", async () => {
 		blockSet.addPattern(ListType.Whitelist, "a")
@@ -276,6 +284,85 @@ describe("test BlockSet rule matching", () => {
 		// Unmatched parenthesis
 		const res = blockSet.addRegExp(ListType.Blacklist, "(asd")
 		expect(res._unsafeUnwrapErr()).toBeInstanceOf(InvalidRegExpAddError)
+	})
+
+	test("can add URL patterns", () => {
+		blockSet.subscribeBlockListChanged(ListType.Blacklist, "urlPatterns", listener)
+		blockSet.addPattern(ListType.Blacklist, "test")
+		expect(blockSet.data[ListType.Blacklist].urlPatterns).toEqual(["test"])
+		expect(listener).toBeCalledWith(changedEventOf(["test"]))
+		expect(anyChangesListener).toBeCalledWith(changedEventOf(blockSet))
+	})
+
+	test("can remove URL patterns", () => {
+		blockSet.addPattern(ListType.Blacklist, "test")
+		blockSet.subscribeBlockListChanged(ListType.Blacklist, "urlPatterns", listener)
+		blockSet.removePattern(ListType.Blacklist, "test")
+		expect(blockSet.data[ListType.Blacklist].urlPatterns).toEqual([])
+		expect(listener).toBeCalledWith(changedEventOf([]))
+		expect(anyChangesListener).toBeCalledWith(changedEventOf(blockSet))
+	})
+
+	test("can add regular expressions", () => {
+		blockSet.subscribeBlockListChanged(ListType.Blacklist, "urlRegExps", listener)
+		blockSet.addRegExp(ListType.Blacklist, "test")
+		expect(blockSet.data[ListType.Blacklist].urlRegExps).toEqual(["test"])
+		expect(listener).toBeCalledWith(changedEventOf(["test"]))
+		expect(anyChangesListener).toBeCalledWith(changedEventOf(blockSet))
+	})
+
+	test("can remove regular expressions", () => {
+		blockSet.addRegExp(ListType.Blacklist, "test")
+		blockSet.subscribeBlockListChanged(ListType.Blacklist, "urlRegExps", listener)
+		blockSet.removeRegExp(ListType.Blacklist, "test")
+		expect(blockSet.data[ListType.Blacklist].urlRegExps).toEqual([])
+		expect(listener).toBeCalledWith(changedEventOf([]))
+		expect(anyChangesListener).toBeCalledWith(changedEventOf(blockSet))
+	})
+
+	test("can add YT channels", async () => {
+		mockedFetchChannelTitle.mockResolvedValue(okAsync("testTitle"))
+		blockSet.subscribeBlockListChanged(ListType.Blacklist, "ytChannels", listener)
+		await blockSet.addYTChannel(ListType.Blacklist, "testId")
+		expect(blockSet.data[ListType.Blacklist].ytChannels).toEqual([
+			{ id: "testId", title: "testTitle" },
+		])
+		expect(listener).toBeCalledWith(changedEventOf([{ id: "testId", title: "testTitle" }]))
+		expect(anyChangesListener).toBeCalledWith(changedEventOf(blockSet))
+	})
+
+	test("can remove YT channels", async () => {
+		mockedFetchChannelTitle.mockResolvedValue(okAsync("testTitle"))
+		await blockSet.addYTChannel(ListType.Blacklist, "testId")
+		blockSet.subscribeBlockListChanged(ListType.Blacklist, "ytChannels", listener)
+		blockSet.removeYTChannel(ListType.Blacklist, "testId")
+		expect(blockSet.data[ListType.Blacklist].ytChannels).toEqual([])
+		expect(listener).toBeCalledWith(changedEventOf([]))
+		expect(anyChangesListener).toBeCalledWith(changedEventOf(blockSet))
+	})
+
+	test("can add YT categories", async () => {
+		blockSet.subscribeBlockListChanged(ListType.Blacklist, "ytCategoryIds", listener)
+		blockSet.addYTCategory(ListType.Blacklist, "10")
+		expect(blockSet.data[ListType.Blacklist].ytCategoryIds).toEqual(["10"])
+		expect(listener).toBeCalledWith(changedEventOf(["10"]))
+		expect(anyChangesListener).toBeCalledWith(changedEventOf(blockSet))
+	})
+
+	test("can remove YT categories", () => {
+		blockSet.addYTCategory(ListType.Blacklist, "10")
+		blockSet.subscribeBlockListChanged(ListType.Blacklist, "ytCategoryIds", listener)
+		blockSet.removeYTCategory(ListType.Blacklist, "10")
+		expect(blockSet.data[ListType.Blacklist].ytCategoryIds).toEqual([])
+		expect(listener).toBeCalledWith(changedEventOf([]))
+		expect(anyChangesListener).toBeCalledWith(changedEventOf(blockSet))
+	})
+})
+
+describe("test BlockSet rule matching", () => {
+	let blockSet: BlockSet
+	beforeEach(() => {
+		blockSet = BlockSet.createDefault(0)
 	})
 
 	test("returns Blacklisted when url is contained in black list", () => {
@@ -346,100 +433,4 @@ describe("test BlockSet rule matching", () => {
 		expect(blockSet.test("", "ID1", null)).toStrictEqual(BlockTestRes.Ignored)
 		expect(blockSet.test("", "ID2", null)).toStrictEqual(BlockTestRes.Ignored)
 	})
-})
-
-describe("test property change callbacks", () => {
-	const changedEventOf = <T>(value: T): ChangedEvent<T> => ({ newValue: value })
-
-	let blockSet: BlockSet
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const listener = jest.fn()
-	const anyChangesListener = jest.fn()
-	beforeEach(() => {
-		blockSet = BlockSet.createDefault(0)
-		blockSet.subscribeChanged("any", anyChangesListener)
-	})
-
-	afterEach(() => jest.clearAllMocks())
-
-	/* eslint-disable @typescript-eslint/ban-ts-comment */
-
-	test.each([
-		["timeElapsed", 1000],
-		["name", "TEST"],
-		["requireActive", true],
-		["annoyMode", true],
-		["timeAllowed", 1000],
-		["resetTime", 1000],
-		["lastReset", 1000],
-		["activeDays", [false, false, false, true, true, true, true]],
-		["activeTime", { from: 1, to: 2 }],
-	])("test BlockSet property change callback %s", (key, testValue) => {
-		// Types are not specific enough for typescript, se use ts-ignore to work around this.
-		//@ts-ignore
-		blockSet.subscribeChanged(key, listener)
-		// @ts-ignore
-		blockSet.set(key, testValue)
-		expect(listener).toBeCalledWith(changedEventOf(testValue))
-		expect(anyChangesListener).toBeCalledWith(changedEventOf(blockSet))
-	})
-
-	test.each([
-		["whitelist", "urlPatterns", "urlPattern"],
-		["whitelist", "urlRegExps", "regexp"],
-		["whitelist", "ytChannels", { id: "channelId", title: "channelTitle" }],
-		["whitelist", "ytCategoryIds", "10"],
-		["blacklist", "urlPatterns", "urlPattern"],
-		["blacklist", "urlRegExps", "regexp"],
-		["blacklist", "ytChannels", { id: "channelId", title: "channelTitle" }],
-		["blacklist", "ytCategoryIds", "10"],
-	])("test BlockSet block list change callback %s", async (listType, listKey, testValue) => {
-		// Types are not specific enough for typescript, se use ts-ignore to work around this.
-		//@ts-ignore
-		blockSet.subscribeBlockListChanged(listType, listKey, listener)
-		switch (listKey) {
-			case "urlPatterns":
-				// @ts-ignore
-				blockSet.addPattern(listType, testValue)
-				break
-			case "urlRegExps":
-				// @ts-ignore
-				blockSet.addRegExp(listType, testValue)
-				break
-			case "ytChannels":
-				mockedFetchChannelTitle.mockResolvedValue(okAsync("channelTitle"))
-				// @ts-ignore
-				await blockSet.addYTChannel(listType, "channelId")
-				break
-			case "ytCategoryIds":
-				// @ts-ignore
-				blockSet.addYTCategory(listType, testValue)
-				break
-		}
-		expect(listener).toBeCalledWith(changedEventOf([testValue]))
-		expect(anyChangesListener).toBeCalledWith(changedEventOf(blockSet))
-
-		switch (listKey) {
-			case "urlPatterns":
-				// @ts-ignore
-				blockSet.removePattern(listType, testValue)
-				break
-			case "urlRegExps":
-				// @ts-ignore
-				blockSet.removeRegExp(listType, testValue)
-				break
-			case "ytChannels":
-				// @ts-ignore
-				blockSet.removeYTChannel(listType, "channelId")
-				break
-			case "ytCategoryIds":
-				// @ts-ignore
-				blockSet.removeYTCategory(listType, testValue)
-				break
-		}
-		expect(listener).toBeCalledWith(changedEventOf([]))
-		expect(anyChangesListener).toBeCalledWith(changedEventOf(blockSet))
-	})
-
-	/* eslint-enable @typescript-eslint/ban-ts-comment */
 })
