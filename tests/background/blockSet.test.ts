@@ -3,6 +3,7 @@ import {
 	BlockSet,
 	BlockTestRes,
 	DuplicateAddError,
+	InvalidRegExpAddError,
 	InvalidYTCategoryIdAddError,
 	ListType,
 } from "@src/background/blockSet"
@@ -269,6 +270,12 @@ describe("test BlockSet rule matching", () => {
 		mockedFetchChannelTitle.mockResolvedValueOnce(errAsync(error))
 
 		expect(await blockSet.addYTChannel(ListType.Whitelist, "asd")).toEqual(err(error))
+	})
+
+	test("can't add invalid regular expressions", () => {
+		// Unmatched parenthesis
+		const res = blockSet.addRegExp(ListType.Blacklist, "(asd")
+		expect(res._unsafeUnwrapErr()).toBeInstanceOf(InvalidRegExpAddError)
 	})
 
 	test("returns Blacklisted when url is contained in black list", () => {
