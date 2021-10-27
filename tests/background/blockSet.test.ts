@@ -357,6 +357,39 @@ describe("test BlockSet rule addition/deletion/manipulation", () => {
 		expect(listener).toBeCalledWith(changedEventOf([]))
 		expect(anyChangesListener).toBeCalledWith(changedEventOf(blockSet))
 	})
+
+	describe("test rule list reordering", () => {
+		beforeEach(() => {
+			blockSet.addPattern(ListType.Blacklist, "1")
+			blockSet.addPattern(ListType.Blacklist, "2")
+			blockSet.addPattern(ListType.Blacklist, "3")
+			anyChangesListener.mockClear()
+		})
+
+		test("base case", () => {
+			blockSet.subscribeBlockListChanged(ListType.Blacklist, "urlPatterns", listener)
+
+			blockSet.moveBlockListRule(ListType.Blacklist, "urlPatterns", 0, 1)
+
+			expect(blockSet.data[ListType.Blacklist].urlPatterns).toEqual(["2", "1", "3"])
+			expect(listener).toBeCalledWith(changedEventOf(["2", "1", "3"]))
+			expect(anyChangesListener).toBeCalledWith(changedEventOf(blockSet))
+		})
+
+		test("does nothing when any indices are out of bounds or equal", () => {
+			blockSet.subscribeBlockListChanged(ListType.Blacklist, "urlPatterns", listener)
+
+			blockSet.moveBlockListRule(ListType.Blacklist, "urlPatterns", -1, 1)
+			blockSet.moveBlockListRule(ListType.Blacklist, "urlPatterns", 10, 1)
+			blockSet.moveBlockListRule(ListType.Blacklist, "urlPatterns", 1, -1)
+			blockSet.moveBlockListRule(ListType.Blacklist, "urlPatterns", 1, 10)
+			blockSet.moveBlockListRule(ListType.Blacklist, "urlPatterns", 1, 1)
+
+			expect(blockSet.data[ListType.Blacklist].urlPatterns).toEqual(["1", "2", "3"])
+			expect(listener).toBeCalledTimes(0)
+			expect(anyChangesListener).toBeCalledTimes(0)
+		})
+	})
 })
 
 describe("test BlockSet rule matching", () => {

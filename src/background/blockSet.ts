@@ -318,6 +318,36 @@ export class BlockSet {
 	}
 
 	/**
+	 * Moves a block list rule from `fromIndex` to `toIndex`.
+	 * If any of the indices are less than zero or more than length of the array,
+	 * nothing happens.
+	 */
+	moveBlockListRule<K extends keyof BlockList>(
+		listType: ListType,
+		listKey: K,
+		fromIndex: number,
+		toIndex: number
+	): void {
+		const arr = this._data[listType][listKey]
+
+		if (toIndex < 0 || toIndex >= arr.length || fromIndex === toIndex) return
+
+		const element = arr[fromIndex]
+
+		if (element === undefined) return
+
+		arr.splice(fromIndex, 1)
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		arr.splice(toIndex, 0, element as any)
+
+		this.blockListChangeObservers[listType][listKey].publish({
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			newValue: this._data[listType][listKey] as any,
+		})
+		this.changeObservers.any.publish({ newValue: this })
+	}
+
+	/**
 	 * Test if url, channelId or categoryId matches with any whitelist or blacklist.
 	 * @param urlNoProtocol url to test (protocol not allowed)
 	 * @param channelId channel id to test against
