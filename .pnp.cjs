@@ -92,7 +92,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["ms", "npm:2.1.3"],
             ["ms.macro", "npm:2.0.0"],
             ["neverthrow", "npm:4.2.2"],
-            ["preact", "npm:10.5.14"],
+            ["preact", "npm:10.5.15"],
             ["prettier", "npm:2.3.2"],
             ["react-beautiful-dnd", "virtual:da9ab8e0f575e3ae6362451c6ae6336c60ba54d92290d44801c552b1b92e5e648d2e681c4e069bfd455f9a49ed259dda742eba72134c16c63d6fbcf95499ecb7#npm:13.1.0"],
             ["react-router-dom", "virtual:da9ab8e0f575e3ae6362451c6ae6336c60ba54d92290d44801c552b1b92e5e648d2e681c4e069bfd455f9a49ed259dda742eba72134c16c63d6fbcf95499ecb7#npm:5.2.0"],
@@ -3837,7 +3837,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@testing-library/preact", "virtual:da9ab8e0f575e3ae6362451c6ae6336c60ba54d92290d44801c552b1b92e5e648d2e681c4e069bfd455f9a49ed259dda742eba72134c16c63d6fbcf95499ecb7#npm:2.0.1"],
             ["@testing-library/dom", "npm:7.31.2"],
             ["@types/preact", null],
-            ["preact", "npm:10.5.14"]
+            ["preact", "npm:10.5.15"]
           ],
           "packagePeers": [
             "@types/preact",
@@ -6725,7 +6725,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["ms", "npm:2.1.3"],
             ["ms.macro", "npm:2.0.0"],
             ["neverthrow", "npm:4.2.2"],
-            ["preact", "npm:10.5.14"],
+            ["preact", "npm:10.5.15"],
             ["prettier", "npm:2.3.2"],
             ["react-beautiful-dnd", "virtual:da9ab8e0f575e3ae6362451c6ae6336c60ba54d92290d44801c552b1b92e5e648d2e681c4e069bfd455f9a49ed259dda742eba72134c16c63d6fbcf95499ecb7#npm:13.1.0"],
             ["react-router-dom", "virtual:da9ab8e0f575e3ae6362451c6ae6336c60ba54d92290d44801c552b1b92e5e648d2e681c4e069bfd455f9a49ed259dda742eba72134c16c63d6fbcf95499ecb7#npm:5.2.0"],
@@ -11522,10 +11522,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]
       ]],
       ["preact", [
-        ["npm:10.5.14", {
-          "packageLocation": "./.yarn/cache/preact-npm-10.5.14-8f6c592e21-d936f83a2a.zip/node_modules/preact/",
+        ["npm:10.5.15", {
+          "packageLocation": "./.yarn/cache/preact-npm-10.5.15-85160105e7-1c9f025ed6.zip/node_modules/preact/",
           "packageDependencies": [
-            ["preact", "npm:10.5.14"]
+            ["preact", "npm:10.5.15"]
           ],
           "linkType": "HARD",
         }]

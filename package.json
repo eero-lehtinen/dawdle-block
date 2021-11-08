@@ -22,7 +22,7 @@
 		"dayjs": "^1.10.6",
 		"fflate": "^0.7.1",
 		"js-base64": "^3.6.1",
-		"preact": "^10.5.14",
+		"preact": "^10.5.15",
 		"react-beautiful-dnd": "^13.1.0",
 		"react-router-dom": "^5.2.0",
 		"webextension-polyfill-ts": "^0.25.0"
