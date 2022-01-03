@@ -5875,7 +5875,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/browserslist-npm-4.16.6-a20cef1ca7-3dffc86892.zip/node_modules/browserslist/",
           "packageDependencies": [
             ["browserslist", "npm:4.16.6"],
-            ["caniuse-lite", "npm:1.0.30001240"],
+            ["caniuse-lite", "npm:1.0.30001295"],
             ["colorette", "npm:1.2.2"],
             ["electron-to-chromium", "npm:1.3.759"],
             ["escalade", "npm:3.1.1"],
@@ -6021,17 +6021,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]
       ]],
       ["caniuse-lite", [
-        ["npm:1.0.30001240", {
-          "packageLocation": "./.yarn/cache/caniuse-lite-npm-1.0.30001240-014e418755-94322e3e9f.zip/node_modules/caniuse-lite/",
+        ["npm:1.0.30001295", {
+          "packageLocation": "./.yarn/cache/caniuse-lite-npm-1.0.30001295-4540a7d4f8-42f77ce2b2.zip/node_modules/caniuse-lite/",
           "packageDependencies": [
-            ["caniuse-lite", "npm:1.0.30001240"]
-          ],
-          "linkType": "HARD",
-        }],
-        ["npm:1.0.30001241", {
-          "packageLocation": "./.yarn/cache/caniuse-lite-npm-1.0.30001241-ce2f821284-3478d31e0f.zip/node_modules/caniuse-lite/",
-          "packageDependencies": [
-            ["caniuse-lite", "npm:1.0.30001241"]
+            ["caniuse-lite", "npm:1.0.30001295"]
           ],
           "linkType": "HARD",
         }]
@@ -7444,7 +7437,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/eslint", null],
             ["ast-metadata-inferer", "npm:0.4.0"],
             ["browserslist", "npm:4.16.6"],
-            ["caniuse-lite", "npm:1.0.30001241"],
+            ["caniuse-lite", "npm:1.0.30001295"],
             ["core-js", "npm:3.15.2"],
             ["eslint", null],
             ["find-up", "npm:4.1.0"],
@@ -7465,7 +7458,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/eslint", null],
             ["ast-metadata-inferer", "npm:0.4.0"],
             ["browserslist", "npm:4.16.6"],
-            ["caniuse-lite", "npm:1.0.30001241"],
+            ["caniuse-lite", "npm:1.0.30001295"],
             ["core-js", "npm:3.15.2"],
             ["eslint", "npm:7.32.0"],
             ["find-up", "npm:4.1.0"],
