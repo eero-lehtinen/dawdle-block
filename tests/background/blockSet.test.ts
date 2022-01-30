@@ -297,7 +297,7 @@ describe("test BlockSet rule addition/deletion/manipulation", () => {
 	test("can remove URL patterns", () => {
 		blockSet.addPattern(ListType.Blacklist, "test")
 		blockSet.subscribeBlockListChanged(ListType.Blacklist, "urlPatterns", listener)
-		blockSet.removePattern(ListType.Blacklist, "test")
+		expect(blockSet.removePattern(ListType.Blacklist, "test")).toBeTrue()
 		expect(blockSet.data[ListType.Blacklist].urlPatterns).toEqual([])
 		expect(listener).toBeCalledWith(changedEventOf([]))
 		expect(anyChangesListener).toBeCalledWith(changedEventOf(blockSet))
@@ -314,7 +314,7 @@ describe("test BlockSet rule addition/deletion/manipulation", () => {
 	test("can remove regular expressions", () => {
 		blockSet.addRegExp(ListType.Blacklist, "test")
 		blockSet.subscribeBlockListChanged(ListType.Blacklist, "urlRegExps", listener)
-		blockSet.removeRegExp(ListType.Blacklist, "test")
+		expect(blockSet.removeRegExp(ListType.Blacklist, "test")).toBeTrue()
 		expect(blockSet.data[ListType.Blacklist].urlRegExps).toEqual([])
 		expect(listener).toBeCalledWith(changedEventOf([]))
 		expect(anyChangesListener).toBeCalledWith(changedEventOf(blockSet))
@@ -335,7 +335,7 @@ describe("test BlockSet rule addition/deletion/manipulation", () => {
 		mockedFetchChannelTitle.mockResolvedValue(okAsync("testTitle"))
 		await blockSet.addYTChannel(ListType.Blacklist, "testId")
 		blockSet.subscribeBlockListChanged(ListType.Blacklist, "ytChannels", listener)
-		blockSet.removeYTChannel(ListType.Blacklist, "testId")
+		expect(blockSet.removeYTChannel(ListType.Blacklist, "testId")).toBeTrue()
 		expect(blockSet.data[ListType.Blacklist].ytChannels).toEqual([])
 		expect(listener).toBeCalledWith(changedEventOf([]))
 		expect(anyChangesListener).toBeCalledWith(changedEventOf(blockSet))
@@ -352,10 +352,33 @@ describe("test BlockSet rule addition/deletion/manipulation", () => {
 	test("can remove YT categories", () => {
 		blockSet.addYTCategory(ListType.Blacklist, "10")
 		blockSet.subscribeBlockListChanged(ListType.Blacklist, "ytCategoryIds", listener)
-		blockSet.removeYTCategory(ListType.Blacklist, "10")
+		expect(blockSet.removeYTCategory(ListType.Blacklist, "10")).toBeTrue()
 		expect(blockSet.data[ListType.Blacklist].ytCategoryIds).toEqual([])
 		expect(listener).toBeCalledWith(changedEventOf([]))
 		expect(anyChangesListener).toBeCalledWith(changedEventOf(blockSet))
+	})
+
+	describe("removal returns false if nothing could be removed", () => {
+		beforeEach(() => {
+			blockSet.addPattern(ListType.Blacklist, "1")
+		})
+
+		test("URL patterns", () => {
+			expect(blockSet.removePattern(ListType.Blacklist, "doesn't exist")).toBeFalse()
+			expect(listener).toBeCalledTimes(0)
+		})
+		test("regular expressions", () => {
+			expect(blockSet.removeRegExp(ListType.Blacklist, "doesn't exist")).toBeFalse()
+			expect(listener).toBeCalledTimes(0)
+		})
+		test("YT channels", () => {
+			expect(blockSet.removeYTChannel(ListType.Blacklist, "doesn't exist")).toBeFalse()
+			expect(listener).toBeCalledTimes(0)
+		})
+		test("YT categories", () => {
+			expect(blockSet.removeYTCategory(ListType.Blacklist, "doesn't exist")).toBeFalse()
+			expect(listener).toBeCalledTimes(0)
+		})
 	})
 
 	describe("test rule list reordering", () => {

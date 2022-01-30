@@ -179,19 +179,22 @@ export class BlockSet {
 	 * @param listType whitelist or blacklist
 	 * @param pattern pattern to remove
 	 */
-	removePattern(listType: ListType, pattern: string): void {
+	removePattern(listType: ListType, pattern: string): boolean {
+		const idx = this._data[listType].urlPatterns.indexOf(pattern)
+		if (idx < 0) return false
+
+		this._data[listType].urlPatterns.splice(idx, 1)
+
 		const compiled = BlockSet.patternToRegExp(pattern as string)
 		this.compiledUrlRules[listType] = this.compiledUrlRules[listType].filter(
 			c => c.source !== compiled.source
-		)
-		this._data[listType].urlPatterns = this._data[listType].urlPatterns.filter(
-			p => p !== pattern
 		)
 
 		this.blockListChangeObservers[listType].urlPatterns.publish({
 			newValue: this._data[listType].urlPatterns,
 		})
 		this.changeObservers.any.publish({ newValue: this })
+		return true
 	}
 
 	/**
@@ -223,16 +226,21 @@ export class BlockSet {
 	 * @param listType whitelist or blacklist
 	 * @param regExp regular expression to remove
 	 */
-	removeRegExp(listType: ListType, regExp: string): void {
+	removeRegExp(listType: ListType, regExp: string): boolean {
+		const idx = this._data[listType].urlRegExps.indexOf(regExp)
+		if (idx < 0) return false
+
+		this._data[listType].urlRegExps.splice(idx, 1)
+
 		this.compiledUrlRules[listType] = this.compiledUrlRules[listType].filter(
 			c => c.source !== regExp
 		)
-		this._data[listType].urlRegExps = this._data[listType].urlRegExps.filter(r => r !== regExp)
 
 		this.blockListChangeObservers[listType].urlRegExps.publish({
 			newValue: this._data[listType].urlRegExps,
 		})
 		this.changeObservers.any.publish({ newValue: this })
+		return true
 	}
 
 	/**
@@ -264,15 +272,17 @@ export class BlockSet {
 	 * @param listType whitelist or blacklist
 	 * @param categoryId category id to remove
 	 */
-	removeYTCategory(listType: ListType, categoryId: string): void {
-		this._data[listType].ytCategoryIds = this._data[listType].ytCategoryIds.filter(
-			id => id !== categoryId
-		)
+	removeYTCategory(listType: ListType, categoryId: string): boolean {
+		const idx = this._data[listType].ytCategoryIds.indexOf(categoryId)
+		if (idx < 0) return false
+
+		this._data[listType].ytCategoryIds.splice(idx, 1)
 
 		this.blockListChangeObservers[listType].ytCategoryIds.publish({
 			newValue: this._data[listType].ytCategoryIds,
 		})
 		this.changeObservers.any.publish({ newValue: this })
+		return true
 	}
 
 	/**
@@ -306,15 +316,17 @@ export class BlockSet {
 	 * @param listType whitelist or blacklist
 	 * @param channelId channel id to remove
 	 */
-	removeYTChannel(listType: ListType, channelId: string): void {
-		this._data[listType].ytChannels = this._data[listType].ytChannels.filter(
-			({ id }) => id !== channelId
-		)
+	removeYTChannel(listType: ListType, channelId: string): boolean {
+		const idx = this._data[listType].ytChannels.findIndex(({ id }) => id === channelId)
+		if (idx < 0) return false
+
+		this._data[listType].ytChannels.splice(idx, 1)
 
 		this.blockListChangeObservers[listType].ytChannels.publish({
 			newValue: this._data[listType].ytChannels,
 		})
 		this.changeObservers.any.publish({ newValue: this })
+		return true
 	}
 
 	/**
