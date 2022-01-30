@@ -225,6 +225,10 @@ const RuleInput = (props: RuleInputProps) => {
 	const [ruleText, setRuleText] = useState("")
 
 	const addCurrentRule = async () => {
+		if (ruleText === "") {
+			return
+		}
+
 		let res
 		if (ruleType === "urlPatterns") {
 			res = blockSet.addPattern(listType, ruleText)
