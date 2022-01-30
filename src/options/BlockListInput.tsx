@@ -11,9 +11,8 @@ import {
 	List,
 	ListItem,
 	ListItemText,
-	Button,
-	Collapse,
 	ListItemButton,
+	Collapse,
 	Box,
 	Typography,
 	TextField,
@@ -22,7 +21,12 @@ import {
 	Stack,
 } from "@mui/material"
 import { BlockSet, ListType } from "@src/background/blockSet"
-import { ExpandLessRounded, ExpandMoreRounded, AddRounded } from "@mui/icons-material"
+import {
+	ExpandLessRounded,
+	ExpandMoreRounded,
+	AddRounded,
+	DeleteRounded,
+} from "@mui/icons-material"
 import { BlockList } from "@src/background/blockSetParseTypes"
 import useEffectCleanUpPageUnload from "@src/shared/useEffectCleanupPageUnload"
 import { ytCategoryNamesById } from "@src/background/constants"
@@ -31,14 +35,20 @@ interface DragListItemProps {
 	contentElem: JSX.Element
 	provided: DraggableProvided
 	snapshot: DraggableStateSnapshot
+	removeMe: () => void
 }
 
 /** Draggable block rule list item */
 const BlockRuleItem = (props: DragListItemProps) => {
-	const { contentElem, provided, snapshot } = props
+	const { contentElem, provided, snapshot, removeMe } = props
+
 	return (
 		<ListItem
-			secondaryAction={<Button size="small">Button</Button>}
+			secondaryAction={
+				<IconButton size="small" aria-label="remove rule">
+					<DeleteRounded fontSize="small" onClick={() => removeMe()} />
+				</IconButton>
+			}
 			ref={provided.innerRef}
 			{...provided.draggableProps}
 			{...provided.dragHandleProps}
@@ -47,6 +57,14 @@ const BlockRuleItem = (props: DragListItemProps) => {
 				backgroundColor: "background.default",
 				boxShadow: snapshot.isDragging ? 3 : 0,
 				transition: "box-shadow 0.5s",
+				"& .MuiListItemSecondaryAction-root": {
+					opacity: 0,
+				},
+				"&:hover, &:focus, &:active": {
+					"& .MuiListItemSecondaryAction-root": {
+						opacity: 1,
+					},
+				},
 			}}
 		>
 			<ListItemText primary={contentElem} secondary={null} />
@@ -135,6 +153,24 @@ const BlockListDraggable = (props: BlockListCollapseItemProps): JSX.Element => {
 		return <span />
 	}
 
+	const removeRule = (value: string) => {
+		let success
+		if (listKey === "urlPatterns") {
+			success = blockSet.removePattern(listType, value)
+		} else if (listKey === "urlRegExps") {
+			success = blockSet.removeRegExp(listType, value)
+		} else if (listKey === "ytChannels") {
+			success = blockSet.removeYTChannel(listType, value)
+		} else if (listKey === "ytCategoryIds") {
+			success = blockSet.removeYTCategory(listType, value)
+		}
+
+		if (!success) {
+			// TODO: show error message
+			console.error(`could not delete rule ${listType}, ${listKey}, ${value}`)
+		}
+	}
+
 	return (
 		<List dense={true} disablePadding>
 			<ListItemButton onClick={handleClick}>
@@ -160,6 +196,7 @@ const BlockListDraggable = (props: BlockListCollapseItemProps): JSX.Element => {
 													provided={provided}
 													snapshot={snapshot}
 													contentElem={toElem(item)}
+													removeMe={() => removeRule(key)}
 												/>
 											)}
 										</Draggable>
