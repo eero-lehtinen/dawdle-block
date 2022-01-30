@@ -67,7 +67,17 @@ const BlockRuleItem = (props: DragListItemProps) => {
 				},
 			}}
 		>
-			<ListItemText primary={contentElem} secondary={null} />
+			<ListItemText
+				sx={{
+					"& span": {
+						whiteSpace: "nowrap",
+						overflow: "hidden",
+						textOverflow: "ellipsis",
+					},
+				}}
+				primary={contentElem}
+				secondary={null}
+			/>
 		</ListItem>
 	)
 }

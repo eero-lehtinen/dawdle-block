@@ -19,7 +19,7 @@ export const Options = (): JSX.Element => {
 			<Container maxWidth="lg" sx={{ display: "flex" }}>
 				<HashRouter>
 					<NavDrawer />
-					<Box component="main" sx={{ flexGrow: 1, p: 3, bgcolor: "darkread" }}>
+					<Box component="main" sx={{ flexGrow: 1, p: 3, minWidth: 480 }}>
 						<Switch>
 							<Route exact path="/">
 								<Redirect to="/general-options" />
