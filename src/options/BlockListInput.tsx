@@ -164,7 +164,7 @@ const BlockListDraggable = (props: BlockListCollapseItemProps): JSX.Element => {
 	}
 
 	const removeRule = (value: string) => {
-		let success
+		let success = false
 		if (listKey === "urlPatterns") {
 			success = blockSet.removePattern(listType, value)
 		} else if (listKey === "urlRegExps") {
@@ -227,6 +227,8 @@ interface RuleInputProps {
 	blockSet: BlockSet
 }
 
+/** Used for adding new rules.
+ * Allows selection of the type of the rule and the rule itself in a text box */
 const RuleInput = (props: RuleInputProps) => {
 	const { listType, blockSet } = props
 
@@ -292,11 +294,11 @@ const RuleInput = (props: RuleInputProps) => {
 					value={ruleText}
 					onChange={event => setRuleText(event.target.value)}
 					onKeyDown={e => {
-						if (e.key === "Enter") addCurrentRule()
+						if (e.key === "Enter") void addCurrentRule()
 					}}
 				/>
 				<IconButton aria-label="add rule">
-					<AddRounded onClick={() => addCurrentRule()} />
+					<AddRounded onClick={() => void addCurrentRule()} />
 				</IconButton>
 			</Stack>
 		</Box>
