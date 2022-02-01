@@ -45,7 +45,10 @@ $ git clone https://github.com/birusq/dawdle-block.git
 # Go into the repository
 $ cd dawdle-block
 
-# Start a process that rebuilds a development version of the extension every time a file changes. Ctrl + C stops the process. Type "dev:firefox" instead for Firefox.
+# Start a process that rebuilds a development version
+# of the extension every time a file changes.
+# Ctrl + C stops the process.
+# Type "dev:firefox" instead for Firefox.
 $ yarn dev:chromium
 ```
 
