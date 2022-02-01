@@ -19,7 +19,7 @@
 
 ## Rewrite Underway!
 
-This project is currently being rewritten to be more extendable, maintainable, and reliable. The old project is contained in this repository in the folder "legacy". That is the version currently being distributed in the web stores. It was written in [jQuery](https://jquery.com/) using singular mega-files, while the rewrite uses proper [Webpack](https://webpack.js.org/) packaging with bells and whistles like [TypeScript](https://www.typescriptlang.org/), [Preact](https://preactjs.com/), and [Material-UI](https://mui.com/).
+This project is currently being rewritten to be more extendable, maintainable, and reliable. The old project is contained in this repository in the folder "legacy". That is the version currently being distributed in the web stores. It was written in [jQuery](https://jquery.com/) using singular mega-files, while the rewrite uses proper [Webpack](https://webpack.js.org/) packaging and [Jest](https://jestjs.io/) automated testing with bells and whistles like [TypeScript](https://www.typescriptlang.org/), [Preact](https://preactjs.com/), and [Material-UI](https://mui.com/).
 
 ## Download
 
