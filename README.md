@@ -54,8 +54,8 @@ $ yarn dev:chromium
 
 Next you need to figure out how to load unpacked extensions for your browser.
 
-- In Chrome, go to [chrome://extensions](chrome://extensions) and tick "Developer mode" on and click "Load unpacked". Choose the folder "dist/chromium".
-- In Firefox, go to [about:debugging#/runtime/this-firefox](about:debugging#/runtime/this-firefox) and click "Load Temporary Add-on". Choose the file "dist/firefox/manifest.json"
+- In Chrome, go to <a href="chrome://extensions">chrome://extensions</a> and tick "Developer mode" on and click "Load unpacked". Choose the folder "dist/chromium".
+- In Firefox, go to <a href="about:debugging#/runtime/this-firefox">about:debugging#/runtime/this-firefox</a> and click "Load Temporary Add-on". Choose the file "dist/firefox/manifest.json"
 - Other browsers have their own ways of achieving this.
 
 A non-development version without debugging information can be built with the command `yarn build`. It works fine on Chrome, but on Firefox settings won't load because when the distribution manifest is incompatible with local unpacked loading.
