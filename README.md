@@ -1,3 +1,7 @@
+# Notice!! - Development Halted Thanks to [Manifest v3](https://developer.chrome.com/docs/extensions/mv3/intro/)
+
+Google won't allow manifest v2 extensions to run after January 2023. This extensions uses manifest v2 only features like background pages and alarms extensively. Migrating to manifest v3 isn't really possible. This project won't be developed further for the forseeable future. The FireFox version will probably keep working for a long time. It can be found in the [Download](#Download) section.
+
 <h1 align="center">
 	<br>
 	<img src="static/images/icon.png" alt="Dawdle Block"></a>
